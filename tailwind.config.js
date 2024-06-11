@@ -7,7 +7,11 @@ module.exports = {
     './resources/**/*.jsx',
 ],
   theme: {
-    extend: {},
+    extend: {
+        colors: {
+            'logo-color': '#0c2840',
+          }
+    },
   },
   plugins: [],
 }
