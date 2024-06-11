@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -13,6 +14,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('app');
-});
+Route::get('/', 'WelcomeController@show');
+
+Route::get('/posts/{id}', 'PostController@show');
+
+Route::get('/about-us', 'AboutUsController@index');
+
+Route::get('/contact', 'ContactController@index');
+
+
