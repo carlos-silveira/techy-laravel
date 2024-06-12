@@ -28,11 +28,13 @@ export default function Welcome() {
           {posts.map((post) => (
             <div key={post.id} className="group">
               <div className="aspect-w-3 aspect-h-4 bg-gray-200 rounded-lg overflow-hidden">
-                <img
-                  src={post.image}
-                  alt={post.title}
-                  className="object-cover transform group-hover:scale-110 transition duration-500 ease-in-out"
-                />
+                <a href={`/posts/${post.id}`}>
+                  <img
+                    src={post.image}
+                    alt={post.title}
+                    className="object-cover transform group-hover:scale-110 transition duration-500 ease-in-out"
+                  />
+                </a>
               </div>
               <div className="mt-4 flex justify-between">
                 <div>

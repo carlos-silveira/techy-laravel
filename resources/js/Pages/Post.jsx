@@ -22,7 +22,7 @@ export default function Post() {
         <div className="mt-6 prose prose-indigo prose-lg text-gray-500">
           <div dangerouslySetInnerHTML={{ __html: post.content }} />
         </div>
-        {/* Blog post metadata */}}
+        {/* Blog post metadata */}
         <div className="mt-4 flex items-center">
           <div className="flex-shrink-0">
             {/* Blog post author avatar */}

@@ -11,8 +11,8 @@ export default function Post() {
       <main>
         <section id="contact">
           <div className="container mx-auto py-8">
-            <h2 className="text-3xl font-bold mb-4">Contáctame</h2>
-            <p className="text-gray-800">
+            <h2 className="text-3xl font-bold mb-4 px-2">Contáctame</h2>
+            <p className="text-gray-800 px-2">
               Si tienes alguna pregunta o te gustaría trabajar conmigo, no dudes en contactarme utilizando el formulario a continuación.
             </p>
             <div className="mt-6">
