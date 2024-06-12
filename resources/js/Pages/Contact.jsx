@@ -10,18 +10,17 @@ export default function Post() {
     <Layout>
       <main>
         <section id="contact">
-          <div class="container mx-auto py-8">
-            <h2 class="text-3xl font-bold mb-4">Contact Me</h2>
-            <p class="text-gray-800">
-              If you have any questions or would like to work with me, please feel free to contact me using the form below.
+          <div className="container mx-auto py-8">
+            <h2 className="text-3xl font-bold mb-4">Contáctame</h2>
+            <p className="text-gray-800">
+              Si tienes alguna pregunta o te gustaría trabajar conmigo, no dudes en contactarme utilizando el formulario a continuación.
             </p>
-            <div class="mt-6">
-              <iframe src="https://forms.gle/d9gdnhhiaLCYsj4J8?embedded=true" width="100%" height="600px"></iframe>
+            <div className="mt-6">
+              <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfbcFyLtqiu13ohGUd-2OF2SG4vG3C5S8FtrPr4wfpsy1VWZA/viewform?embedded=true" width="100%" height="600px" frameborder="0" marginheight="0" marginwidth="0">Cargando…</iframe>
             </div>
           </div>
         </section>
       </main>
     </Layout>
-
   );
 }
