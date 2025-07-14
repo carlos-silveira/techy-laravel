@@ -23,3 +23,7 @@ tests.log
 /.nyc_output
 /coverage
 /cypress/downloads/
+
+# SSH Configuration (personal keys and config)
+~/.ssh/
+.ssh/
