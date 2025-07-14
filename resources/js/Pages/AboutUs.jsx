@@ -39,7 +39,7 @@ export default function AboutUs() {
         degree: 'Licenciatura en Ingeniería de Sistemas Computacionales',
         institution: 'Instituto Tecnológico Superior de Nuevo Casas Grandes (ITSNCG)',
         average: 'Con un promedio de calificaciones de 93.04.',
-        logo: 'http://www.itsncg.edu.mx/images/logo.png',
+        logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSsdtTtWJ7fB6R-HlvW0wkck85s_b8Tq5pT3A&s',
       },
       certifications: [
         'Curso de testing para PHP y Laravel - Experto en 100 días - Udemy',
@@ -133,7 +133,7 @@ export default function AboutUs() {
               <div className="border p-6 rounded-md shadow-md">
                 <h3 className="text-xl font-semibold mb-2">{language === 'es' ? 'Educación' : 'Education'}</h3>
                 <p className="text-gray-800 mb-4">{content[language].education.degree}</p>
-                <img src={content[language].education.logo} alt="Logo de ITSNCG"/>
+                <img src={content[language].education.logo} alt="Logo de ITSNCG" className="w-8 h-8 mb-4"/>
                 <p className="mt-4 text-gray-800">{content[language].education.institution}</p>
                 <p className="mt-2 text-gray-800">{content[language].education.average}</p>
               </div>
