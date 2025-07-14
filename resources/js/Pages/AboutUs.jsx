@@ -58,7 +58,7 @@ export default function AboutUs() {
           role: 'Senior Backend Developer',
           period: 'September 2024 - Present',
           description: "At Tendencys Innovations, I work as a Senior Backend Developer developing robust and scalable solutions using modern technologies. I focus on creating efficient backend architectures and maintaining high code quality standards.",
-          logo: 'https://media.licdn.com/dms/image/C4E0BAQHnXqXqXqXqXq/company-logo_200_200/0/1234567890?e=1234567890&v=beta&t=1234567890',
+          logo: 'https://media.licdn.com/dms/image/v2/D4D0BAQFrADg7sK1dcw/company-logo_100_100/company-logo_100_100/0/1729637158000/tendencys_innovations_logo?e=1755129600&v=beta&t=iBEL8wyjWkRbusxcRYtOxUD9fbAzzz3cVGX9eGm0kRg',
         },
         {
           company: 'Justia',
