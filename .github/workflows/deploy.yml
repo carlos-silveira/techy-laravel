@@ -3,7 +3,8 @@ name: Deploy Laravel to cPanel via FTP
 on:
   push:
     branches:
-      - main # Change this to the branch you want to deploy from (e.g., master)
+      - main
+  workflow_dispatch:
 
 jobs:
   web-deploy:
@@ -16,7 +17,7 @@ jobs:
       - name: 🐘 Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2' # Update this to match your Laravel version
+          php-version: '8.2'
           extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, libxml, json, phar
           coverage: none
 
@@ -26,12 +27,12 @@ jobs:
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Update to match your requirements
+          node-version: '20'
 
       - name: 🏗️ Install NPM Dependencies & Build
         run: |
           npm install
-          npm run build
+          npm run prod
 
       - name: 📂 Sync files
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -39,7 +40,7 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /techynews.lat/ # Assuming you will deploy exactly to this folder
+          server-dir: /techynews.lat/
           exclude: |
             **/.git*
             **/.git*/**
