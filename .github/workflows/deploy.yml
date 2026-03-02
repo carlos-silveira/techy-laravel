@@ -32,7 +32,7 @@ jobs:
       - name: 🏗️ Install NPM Dependencies & Build
         run: |
           npm install
-          npm run build
+          npm run prod
 
       - name: 📂 Sync files
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
