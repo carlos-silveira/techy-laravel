@@ -1,3 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer utilities {
+    .glass-morphism {
+        background: rgba(0, 26, 44, 0.7);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(0, 180, 255, 0.1);
+    }
+    
+    .hero-gradient {
+        background: radial-gradient(circle at 50% 50%, rgba(0, 180, 255, 0.1) 0%, rgba(0, 26, 44, 1) 100%);
+    }
+    
+    .text-glow {
+        text-shadow: 0 0 30px rgba(0, 180, 255, 0.3);
+    }
+}
