@@ -10,62 +10,199 @@
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ Post)
+/* harmony export */   "default": () => (/* binding */ AboutUs)
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _Layout__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Layout */ "./resources/js/Pages/Layout.jsx");
+/* harmony import */ var react_icons_fa__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react-icons/fa */ "./node_modules/react-icons/fa/index.esm.js");
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
+function _iterableToArrayLimit(arr, i) { var _i = null == arr ? null : "undefined" != typeof Symbol && arr[Symbol.iterator] || arr["@@iterator"]; if (null != _i) { var _s, _e, _x, _r, _arr = [], _n = !0, _d = !1; try { if (_x = (_i = _i.call(arr)).next, 0 === i) { if (Object(_i) !== _i) return; _n = !1; } else for (; !(_n = (_s = _x.call(_i)).done) && (_arr.push(_s.value), _arr.length !== i); _n = !0); } catch (err) { _d = !0, _e = err; } finally { try { if (!_n && null != _i["return"] && (_r = _i["return"](), Object(_r) !== _r)) return; } finally { if (_d) throw _e; } } return _arr; } }
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 
 
 
-function Post() {
+
+function AboutUs() {
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('es'),
+    _useState2 = _slicedToArray(_useState, 2),
+    language = _useState2[0],
+    setLanguage = _useState2[1];
+  var handleLanguageChange = function handleLanguageChange() {
+    setLanguage(language === 'es' ? 'en' : 'es');
+  };
+
+  // Define content in English and Spanish
+  var content = {
+    es: {
+      intro: "Acerca de mi: Mi nombre es Carlos Silveira y soy un apasionado desarrollador de software con enfoque en Laravel y React. Con m\xE1s de ".concat(new Date().getFullYear() - 2019, " a\xF1os de experiencia profesional, he tenido la oportunidad de trabajar en diversos proyectos y perfeccionar mis habilidades en desarrollo web."),
+      experience: [{
+        company: 'Tendencys Innovations',
+        role: 'Senior Backend Developer',
+        period: 'Septiembre 2024 - Presente',
+        description: 'En Tendencys Innovations, trabajo como Senior Backend Developer desarrollando soluciones robustas y escalables utilizando tecnologías modernas. Me enfoco en crear arquitecturas de backend eficientes y mantener altos estándares de calidad en el código para envios internacionales.',
+        logo: 'https://media.licdn.com/dms/image/v2/D4D0BAQFrADg7sK1dcw/company-logo_100_100/company-logo_100_100/0/1729637158000/tendencys_innovations_logo?e=1755129600&v=beta&t=iBEL8wyjWkRbusxcRYtOxUD9fbAzzz3cVGX9eGm0kRg'
+      }, {
+        company: 'Buscabot',
+        role: 'Gerente de Producto, Líder Técnico, Ingeniero de Software Senior',
+        description: 'En Buscabot, lideré un equipo responsable de construir características e flujos de trabajo innovadores utilizando Laravel, React, Tailwind CSS y MySQL dentro del entorno de Google Cloud Platform. Traduje los requisitos del cliente en especificaciones técnicas, resolví problemas de la plataforma e implementé mejoras continuas utilizando metodologías de Desarrollo Guiado por Pruebas (TDD) y SCRUM.',
+        logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTz0S9JtMDgBdRbp-AEOX2jfa-lb3bzBDWIiA&s'
+      }, {
+        company: 'Justia',
+        role: 'Ingeniero de Software',
+        period: '2022 - 2023',
+        description: 'En Justia, desarrollé analizadores de Laravel para sitios web legales del gobierno de los Estados Unidos y gestioné campañas de marketing por correo electrónico utilizando plataformas como Mailchimp y Active Campaign. Realicé revisiones de código y depuración, asegurando el buen funcionamiento de los sitios de directorio de experiencia legal.',
+        logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJrXMqC03DZxETeCErx5q4dWad1xI5nZ2WLQ&s'
+      }],
+      education: {
+        degree: 'Licenciatura en Ingeniería de Sistemas Computacionales',
+        institution: 'Instituto Tecnológico Superior de Nuevo Casas Grandes (ITSNCG)',
+        average: 'Con un promedio de calificaciones de 93.04.',
+        logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSsdtTtWJ7fB6R-HlvW0wkck85s_b8Tq5pT3A&s'
+      },
+      certifications: ['Curso de testing para PHP y Laravel - Experto en 100 días - Udemy', 'Certificado de Inglés EF SET C1 Avanzado', 'Master en JavaScript: Aprender JS, jQuery, Angular, NodeJS', 'Certificación Laravel OpenBootcamp', 'React - The Complete Guide (incl Hooks, React Router, Redux) - Udemy'],
+      linkedin: 'Conéctate conmigo en LinkedIn'
+    },
+    en: {
+      intro: "About me: My name is Carlos Silveira, and I'm a passionate software developer with a focus on Laravel and React. With over five years of professional experience, I've had the opportunity to work on various projects and hone my skills in web development.",
+      experience: [{
+        company: 'Tendencys Innovations',
+        role: 'Senior Backend Developer',
+        period: 'September 2024 - Present',
+        description: "At Tendencys Innovations, I work as a Senior Backend Developer developing robust and scalable solutions using modern technologies. I focus on creating efficient backend architectures and maintaining high code quality standards.",
+        logo: 'https://media.licdn.com/dms/image/v2/D4D0BAQFrADg7sK1dcw/company-logo_100_100/company-logo_100_100/0/1729637158000/tendencys_innovations_logo?e=1755129600&v=beta&t=iBEL8wyjWkRbusxcRYtOxUD9fbAzzz3cVGX9eGm0kRg'
+      }, {
+        company: 'Justia',
+        role: 'Software Engineer',
+        period: '2022 - 2023',
+        description: "At Justia, I developed Laravel parsers for US government legal websites and managed email marketing campaigns using platforms like Mailchimp and Active Campaign. I conducted code reviews and debugging, ensuring the smooth functioning of legal expertise directory sites.",
+        logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJrXMqC03DZxETeCErx5q4dWad1xI5nZ2WLQ&s'
+      }],
+      education: {
+        degree: 'Bachelor\'s Degree in Computer Systems Engineering',
+        institution: 'Instituto Tecnológico Superior de Nuevo Casas Grandes (ITSNCG)',
+        average: 'With an average GPA of 93.04.',
+        logo: 'https://static.docsity.com/media/avatar/universities/114830.png'
+      },
+      certifications: ['PHP and Laravel Testing Course - Expert in 100 Days - Udemy', 'EF SET English Certificate C1 Advanced', 'Master en JavaScript', 'Laravel OpenBootcamp Certification', 'React - The Complete Guide (incl Hooks, React Router, Redux) - Udemy'],
+      linkedin: 'Connect with me on LinkedIn'
+    }
+  };
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_Layout__WEBPACK_IMPORTED_MODULE_1__["default"], {
     children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("main", {
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("section", {
-        id: "about",
+        id: "intro",
+        className: "bg-gray-100 py-16",
         children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
-          "class": "container mx-auto py-8",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("h2", {
-            "class": "text-3xl font-bold mb-4",
-            children: "About Me"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("p", {
-            "class": "text-gray-800",
-            children: "I'm Carlos Silveira, a Laravel developer with 5 years of experience. I'm passionate about building high-quality, scalable web applications. I'm also a big fan of playing videogames, watching tv shows with my wife, and spending time with my family."
+          className: "container mx-auto px-4",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
+            className: "flex justify-end mb-4",
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("button", {
+              className: "bg-blue-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300",
+              onClick: handleLanguageChange,
+              children: language === 'es' ? 'English' : 'Español'
+            })
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("h2", {
+            className: "text-3xl font-bold mb-4",
+            children: content[language].intro
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
+            className: "flex items-center mt-8",
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("a", {
+              href: "https://www.linkedin.com/in/carlos-silveira-hinojos/",
+              target: "_blank",
+              rel: "noopener noreferrer",
+              className: "bg-blue-500 text-white font-semibold py-2 px-4 rounded-md flex items-center hover:bg-blue-600 transition duration-300",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_icons_fa__WEBPACK_IMPORTED_MODULE_3__.FaLinkedin, {
+                className: "mr-2"
+              }), content[language].linkedin]
+            })
           })]
         })
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("section", {
-        id: "skills",
+        id: "experience",
+        className: "py-16",
         children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
-          "class": "container mx-auto py-8",
+          className: "container mx-auto px-4",
           children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("h2", {
-            "class": "text-3xl font-bold mb-4",
-            children: "My Skills"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("ul", {
-            "class": "list-disc mb-4",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("li", {
-              children: "Laravel"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("li", {
-              children: "PHP"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("li", {
-              children: "MySQL"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("li", {
-              children: "JavaScript"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("li", {
-              children: "React"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("li", {
-              children: "Tailwind CSS"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("li", {
-              children: "Unit testing"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("li", {
-              children: "Continuous integration"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("li", {
-              children: "Deployment"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("li", {
-              children: "Google Cloud"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("li", {
-              children: "AWS"
+            className: "text-3xl font-bold mb-4",
+            children: language === 'es' ? 'Experiencia' : 'Experience'
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
+            className: "grid grid-cols-1 md:grid-cols-2 gap-8",
+            children: content[language].experience.map(function (exp, index) {
+              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
+                className: "border p-6 rounded-md shadow-md",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
+                  className: "flex items-center justify-between mb-4",
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("img", {
+                    src: exp.logo,
+                    alt: "Logo de ".concat(exp.company),
+                    className: "w-8 h-8"
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("span", {
+                    className: "text-sm text-gray-600 font-medium",
+                    children: exp.period
+                  })]
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("h3", {
+                  className: "text-xl font-semibold mb-2",
+                  children: exp.company
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("p", {
+                  className: "text-gray-800 mb-4 font-medium",
+                  children: exp.role
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("p", {
+                  className: "text-gray-800",
+                  children: exp.description
+                })]
+              }, index);
+            })
+          })]
+        })
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("section", {
+        id: "education-certifications",
+        className: "bg-gray-100 py-16",
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
+          className: "container mx-auto px-4",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("h2", {
+            className: "text-3xl font-bold mb-4",
+            children: language === 'es' ? 'Educación y Certificaciones' : 'Education & Certifications'
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
+            className: "grid grid-cols-1 md:grid-cols-2 gap-8",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
+              className: "border p-6 rounded-md shadow-md",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("h3", {
+                className: "text-xl font-semibold mb-2",
+                children: language === 'es' ? 'Educación' : 'Education'
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("p", {
+                className: "text-gray-800 mb-4",
+                children: content[language].education.degree
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("img", {
+                src: content[language].education.logo,
+                alt: "Logo de ITSNCG",
+                className: "w-8 h-8 mb-4"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("p", {
+                className: "mt-4 text-gray-800",
+                children: content[language].education.institution
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("p", {
+                className: "mt-2 text-gray-800",
+                children: content[language].education.average
+              })]
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
+              className: "border p-6 rounded-md shadow-md",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("h3", {
+                className: "text-xl font-semibold mb-2",
+                children: language === 'es' ? 'Certificaciones' : 'Certifications'
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("ul", {
+                className: "list-disc text-gray-800 pl-6",
+                children: content[language].certifications.map(function (cert, index) {
+                  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("li", {
+                    className: "mb-2",
+                    children: cert
+                  }, index);
+                })
+              })]
             })]
           })]
         })
@@ -108,19 +245,23 @@ function Post() {
       children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("section", {
         id: "contact",
         children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-          "class": "container mx-auto py-8",
+          className: "container mx-auto py-8",
           children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("h2", {
-            "class": "text-3xl font-bold mb-4",
-            children: "Contact Me"
+            className: "text-3xl font-bold mb-4 px-2",
+            children: "Cont\xE1ctame"
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("p", {
-            "class": "text-gray-800",
-            children: "If you have any questions or would like to work with me, please feel free to contact me using the form below."
+            className: "text-gray-800 px-2",
+            children: "Si tienes alguna pregunta o te gustar\xEDa trabajar conmigo, no dudes en contactarme utilizando el formulario a continuaci\xF3n."
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-            "class": "mt-6",
+            className: "mt-6",
             children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("iframe", {
-              src: "https://forms.gle/d9gdnhhiaLCYsj4J8?embedded=true",
+              src: "https://docs.google.com/forms/d/e/1FAIpQLSfbcFyLtqiu13ohGUd-2OF2SG4vG3C5S8FtrPr4wfpsy1VWZA/viewform?embedded=true",
               width: "100%",
-              height: "600px"
+              height: "600px",
+              frameborder: "0",
+              marginheight: "0",
+              marginwidth: "0",
+              children: "Cargando\u2026"
             })
           })]
         })
@@ -278,7 +419,7 @@ function Post() {
             __html: post.content
           }
         })
-      }), "}", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
         className: "mt-4 flex items-center",
         children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
           className: "flex-shrink-0",
@@ -318,14 +459,27 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
+function _iterableToArrayLimit(arr, i) { var _i = null == arr ? null : "undefined" != typeof Symbol && arr[Symbol.iterator] || arr["@@iterator"]; if (null != _i) { var _s, _e, _x, _r, _arr = [], _n = !0, _d = !1; try { if (_x = (_i = _i.call(arr)).next, 0 === i) { if (Object(_i) !== _i) return; _n = !1; } else for (; !(_n = (_s = _x.call(_i)).done) && (_arr.push(_s.value), _arr.length !== i); _n = !0); } catch (err) { _d = !0, _e = err; } finally { try { if (!_n && null != _i["return"] && (_r = _i["return"](), Object(_r) !== _r)) return; } finally { if (_d) throw _e; } } return _arr; } }
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 
 
 function TopNav() {
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("nav", {
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState2 = _slicedToArray(_useState, 2),
+    isMobileMenuOpen = _useState2[0],
+    setIsMobileMenuOpen = _useState2[1];
+  var toggleMobileMenu = function toggleMobileMenu() {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("nav", {
     className: "bg-logo-color shadow",
-    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
-      className: "max-w-7xl mx-auto px-2 sm:px-4 lg:px-8",
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+      className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
       children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
         className: "flex justify-between h-16",
         children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
@@ -343,9 +497,25 @@ function TopNav() {
               alt: "Logo"
             })]
           })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
           className: "flex items-center",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+            className: "md:hidden",
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("button", {
+              type: "button",
+              className: "block text-gray-500 hover:text-white focus:text-white focus:outline-none",
+              onClick: toggleMobileMenu,
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("svg", {
+                className: "h-6 w-6 fill-current",
+                viewBox: "0 0 24 24",
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
+                  fillRule: "evenodd",
+                  clipRule: "evenodd",
+                  d: "M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h16v2H4v-2z"
+                })
+              })
+            })
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
             className: "hidden md:block",
             children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
               className: "ml-10 flex items-baseline space-x-4",
@@ -363,10 +533,28 @@ function TopNav() {
                 children: "Contacto"
               })]
             })
-          })
+          })]
         })]
       })
-    })
+    }), isMobileMenuOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
+      className: "md:hidden",
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("div", {
+        className: "px-2 pt-2 pb-3 space-y-1 sm:px-3",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
+          href: "/",
+          className: "block px-3 py-2 rounded-md text-base font-medium text-white hover:text-gray-900 hover:bg-gray-50",
+          children: "Inicio"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
+          href: "/about-us",
+          className: "block px-3 py-2 rounded-md text-base font-medium text-white hover:text-gray-900 hover:bg-gray-50",
+          children: "Acerca de"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("a", {
+          href: "/contact",
+          className: "block px-3 py-2 rounded-md text-base font-medium text-white hover:text-gray-900 hover:bg-gray-50",
+          children: "Contacto"
+        })]
+      })
+    })]
   });
 }
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (TopNav);
@@ -425,10 +613,13 @@ function Welcome() {
             className: "group",
             children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
               className: "aspect-w-3 aspect-h-4 bg-gray-200 rounded-lg overflow-hidden",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("img", {
-                src: post.image,
-                alt: post.title,
-                className: "object-cover transform group-hover:scale-110 transition duration-500 ease-in-out"
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("a", {
+                href: "/posts/".concat(post.id),
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("img", {
+                  src: post.image,
+                  alt: post.title,
+                  className: "object-cover transform group-hover:scale-110 transition duration-500 ease-in-out"
+                })
               })
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
               className: "mt-4 flex justify-between",

@@ -1,132 +1,337 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Laravel</title>
+<html class="dark" lang="en">
 
-        <!-- Fonts -->
-        <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
+    <link href="{{ mix('css/app.css') }}" rel="stylesheet">
+    <script src="{{ mix('js/app.js') }}" defer></script>
+    <script src="{{ mix('js/app.js') }}" defer></script>
+    <style>
+        .glass-morphism {
+            background: rgba(0, 26, 44, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 180, 255, 0.1);
+        }
 
-        <!-- Styles -->
-        <style>
-            /*! normalize.css v8.0.1 | MIT License | github.com/necolas/normalize.css */html{line-height:1.15;-webkit-text-size-adjust:100%}body{margin:0}a{background-color:transparent}[hidden]{display:none}html{font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;line-height:1.5}*,:after,:before{box-sizing:border-box;border:0 solid #e2e8f0}a{color:inherit;text-decoration:inherit}svg,video{display:block;vertical-align:middle}video{max-width:100%;height:auto}.bg-white{--bg-opacity:1;background-color:#fff;background-color:rgba(255,255,255,var(--bg-opacity))}.bg-gray-100{--bg-opacity:1;background-color:#f7fafc;background-color:rgba(247,250,252,var(--bg-opacity))}.border-gray-200{--border-opacity:1;border-color:#edf2f7;border-color:rgba(237,242,247,var(--border-opacity))}.border-t{border-top-width:1px}.flex{display:flex}.grid{display:grid}.hidden{display:none}.items-center{align-items:center}.justify-center{justify-content:center}.font-semibold{font-weight:600}.h-5{height:1.25rem}.h-8{height:2rem}.h-16{height:4rem}.text-sm{font-size:.875rem}.text-lg{font-size:1.125rem}.leading-7{line-height:1.75rem}.mx-auto{margin-left:auto;margin-right:auto}.ml-1{margin-left:.25rem}.mt-2{margin-top:.5rem}.mr-2{margin-right:.5rem}.ml-2{margin-left:.5rem}.mt-4{margin-top:1rem}.ml-4{margin-left:1rem}.mt-8{margin-top:2rem}.ml-12{margin-left:3rem}.-mt-px{margin-top:-1px}.max-w-6xl{max-width:72rem}.min-h-screen{min-height:100vh}.overflow-hidden{overflow:hidden}.p-6{padding:1.5rem}.py-4{padding-top:1rem;padding-bottom:1rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.pt-8{padding-top:2rem}.fixed{position:fixed}.relative{position:relative}.top-0{top:0}.right-0{right:0}.shadow{box-shadow:0 1px 3px 0 rgba(0,0,0,.1),0 1px 2px 0 rgba(0,0,0,.06)}.text-center{text-align:center}.text-gray-200{--text-opacity:1;color:#edf2f7;color:rgba(237,242,247,var(--text-opacity))}.text-gray-300{--text-opacity:1;color:#e2e8f0;color:rgba(226,232,240,var(--text-opacity))}.text-gray-400{--text-opacity:1;color:#cbd5e0;color:rgba(203,213,224,var(--text-opacity))}.text-gray-500{--text-opacity:1;color:#a0aec0;color:rgba(160,174,192,var(--text-opacity))}.text-gray-600{--text-opacity:1;color:#718096;color:rgba(113,128,150,var(--text-opacity))}.text-gray-700{--text-opacity:1;color:#4a5568;color:rgba(74,85,104,var(--text-opacity))}.text-gray-900{--text-opacity:1;color:#1a202c;color:rgba(26,32,44,var(--text-opacity))}.underline{text-decoration:underline}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.w-5{width:1.25rem}.w-8{width:2rem}.w-auto{width:auto}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}@media (min-width:640px){.sm\:rounded-lg{border-radius:.5rem}.sm\:block{display:block}.sm\:items-center{align-items:center}.sm\:justify-start{justify-content:flex-start}.sm\:justify-between{justify-content:space-between}.sm\:h-20{height:5rem}.sm\:ml-0{margin-left:0}.sm\:px-6{padding-left:1.5rem;padding-right:1.5rem}.sm\:pt-0{padding-top:0}.sm\:text-left{text-align:left}.sm\:text-right{text-align:right}}@media (min-width:768px){.md\:border-t-0{border-top-width:0}.md\:border-l{border-left-width:1px}.md\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (min-width:1024px){.lg\:px-8{padding-left:2rem;padding-right:2rem}}@media (prefers-color-scheme:dark){.dark\:bg-gray-800{--bg-opacity:1;background-color:#2d3748;background-color:rgba(45,55,72,var(--bg-opacity))}.dark\:bg-gray-900{--bg-opacity:1;background-color:#1a202c;background-color:rgba(26,32,44,var(--bg-opacity))}.dark\:border-gray-700{--border-opacity:1;border-color:#4a5568;border-color:rgba(74,85,104,var(--border-opacity))}.dark\:text-white{--text-opacity:1;color:#fff;color:rgba(255,255,255,var(--text-opacity))}.dark\:text-gray-400{--text-opacity:1;color:#cbd5e0;color:rgba(203,213,224,var(--text-opacity))}.dark\:text-gray-500{--tw-text-opacity:1;color:#6b7280;color:rgba(107,114,128,var(--tw-text-opacity))}}
-        </style>
+        .hero-gradient {
+            background: radial-gradient(circle at 50% 50%, rgba(0, 180, 255, 0.1) 0%, rgba(0, 26, 44, 1) 100%);
+        }
 
-        <style>
-            body {
-                font-family: 'Nunito', sans-serif;
-            }
-        </style>
-    </head>
-    <body class="antialiased">
-        <div class="relative flex items-top justify-center min-h-screen bg-gray-100 dark:bg-gray-900 sm:items-center py-4 sm:pt-0">
-            @if (Route::has('login'))
-                <div class="hidden fixed top-0 right-0 px-6 py-4 sm:block">
-                    @auth
-                        <a href="{{ url('/dashboard') }}" class="text-sm text-gray-700 dark:text-gray-500 underline">Dashboard</a>
-                    @else
-                        <a href="{{ route('login') }}" class="text-sm text-gray-700 dark:text-gray-500 underline">Log in</a>
+        .text-glow {
+            text-shadow: 0 0 30px rgba(0, 180, 255, 0.3);
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+</head>
 
-                        @if (Route::has('register'))
-                            <a href="{{ route('register') }}" class="ml-4 text-sm text-gray-700 dark:text-gray-500 underline">Register</a>
-                        @endif
-                    @endauth
-                </div>
-            @endif
-
-            <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
-                <div class="flex justify-center pt-8 sm:justify-start sm:pt-0">
-                    <svg viewBox="0 0 651 192" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-16 w-auto text-gray-700 sm:h-20">
-                        <g clip-path="url(#clip0)" fill="#EF3B2D">
-                            <path d="M248.032 44.676h-16.466v100.23h47.394v-14.748h-30.928V44.676zM337.091 87.202c-2.101-3.341-5.083-5.965-8.949-7.875-3.865-1.909-7.756-2.864-11.669-2.864-5.062 0-9.69.931-13.89 2.792-4.201 1.861-7.804 4.417-10.811 7.661-3.007 3.246-5.347 6.993-7.016 11.239-1.672 4.249-2.506 8.713-2.506 13.389 0 4.774.834 9.26 2.506 13.459 1.669 4.202 4.009 7.925 7.016 11.169 3.007 3.246 6.609 5.799 10.811 7.66 4.199 1.861 8.828 2.792 13.89 2.792 3.913 0 7.804-.955 11.669-2.863 3.866-1.908 6.849-4.533 8.949-7.875v9.021h15.607V78.182h-15.607v9.02zm-1.431 32.503c-.955 2.578-2.291 4.821-4.009 6.73-1.719 1.91-3.795 3.437-6.229 4.582-2.435 1.146-5.133 1.718-8.091 1.718-2.96 0-5.633-.572-8.019-1.718-2.387-1.146-4.438-2.672-6.156-4.582-1.719-1.909-3.032-4.152-3.938-6.73-.909-2.577-1.36-5.298-1.36-8.161 0-2.864.451-5.585 1.36-8.162.905-2.577 2.219-4.819 3.938-6.729 1.718-1.908 3.77-3.437 6.156-4.582 2.386-1.146 5.059-1.718 8.019-1.718 2.958 0 5.656.572 8.091 1.718 2.434 1.146 4.51 2.674 6.229 4.582 1.718 1.91 3.054 4.152 4.009 6.729.953 2.577 1.432 5.298 1.432 8.162-.001 2.863-.479 5.584-1.432 8.161zM463.954 87.202c-2.101-3.341-5.083-5.965-8.949-7.875-3.865-1.909-7.756-2.864-11.669-2.864-5.062 0-9.69.931-13.89 2.792-4.201 1.861-7.804 4.417-10.811 7.661-3.007 3.246-5.347 6.993-7.016 11.239-1.672 4.249-2.506 8.713-2.506 13.389 0 4.774.834 9.26 2.506 13.459 1.669 4.202 4.009 7.925 7.016 11.169 3.007 3.246 6.609 5.799 10.811 7.66 4.199 1.861 8.828 2.792 13.89 2.792 3.913 0 7.804-.955 11.669-2.863 3.866-1.908 6.849-4.533 8.949-7.875v9.021h15.607V78.182h-15.607v9.02zm-1.432 32.503c-.955 2.578-2.291 4.821-4.009 6.73-1.719 1.91-3.795 3.437-6.229 4.582-2.435 1.146-5.133 1.718-8.091 1.718-2.96 0-5.633-.572-8.019-1.718-2.387-1.146-4.438-2.672-6.156-4.582-1.719-1.909-3.032-4.152-3.938-6.73-.909-2.577-1.36-5.298-1.36-8.161 0-2.864.451-5.585 1.36-8.162.905-2.577 2.219-4.819 3.938-6.729 1.718-1.908 3.77-3.437 6.156-4.582 2.386-1.146 5.059-1.718 8.019-1.718 2.958 0 5.656.572 8.091 1.718 2.434 1.146 4.51 2.674 6.229 4.582 1.718 1.91 3.054 4.152 4.009 6.729.953 2.577 1.432 5.298 1.432 8.162 0 2.863-.479 5.584-1.432 8.161zM650.772 44.676h-15.606v100.23h15.606V44.676zM365.013 144.906h15.607V93.538h26.776V78.182h-42.383v66.724zM542.133 78.182l-19.616 51.096-19.616-51.096h-15.808l25.617 66.724h19.614l25.617-66.724h-15.808zM591.98 76.466c-19.112 0-34.239 15.706-34.239 35.079 0 21.416 14.641 35.079 36.239 35.079 12.088 0 19.806-4.622 29.234-14.688l-10.544-8.158c-.006.008-7.958 10.449-19.832 10.449-13.802 0-19.612-11.127-19.612-16.884h51.777c2.72-22.043-11.772-40.877-33.023-40.877zm-18.713 29.28c.12-1.284 1.917-16.884 18.589-16.884 16.671 0 18.697 15.598 18.813 16.884h-37.402zM184.068 43.892c-.024-.088-.073-.165-.104-.25-.058-.157-.108-.316-.191-.46-.056-.097-.137-.176-.203-.265-.087-.117-.161-.242-.265-.345-.085-.086-.194-.148-.29-.223-.109-.085-.206-.182-.327-.252l-.002-.001-.002-.002-35.648-20.524a2.971 2.971 0 00-2.964 0l-35.647 20.522-.002.002-.002.001c-.121.07-.219.167-.327.252-.096.075-.205.138-.29.223-.103.103-.178.228-.265.345-.066.089-.147.169-.203.265-.083.144-.133.304-.191.46-.031.085-.08.162-.104.25-.067.249-.103.51-.103.776v38.979l-29.706 17.103V24.493a3 3 0 00-.103-.776c-.024-.088-.073-.165-.104-.25-.058-.157-.108-.316-.191-.46-.056-.097-.137-.176-.203-.265-.087-.117-.161-.242-.265-.345-.085-.086-.194-.148-.29-.223-.109-.085-.206-.182-.327-.252l-.002-.001-.002-.002L40.098 1.396a2.971 2.971 0 00-2.964 0L1.487 21.919l-.002.002-.002.001c-.121.07-.219.167-.327.252-.096.075-.205.138-.29.223-.103.103-.178.228-.265.345-.066.089-.147.169-.203.265-.083.144-.133.304-.191.46-.031.085-.08.162-.104.25-.067.249-.103.51-.103.776v122.09c0 1.063.568 2.044 1.489 2.575l71.293 41.045c.156.089.324.143.49.202.078.028.15.074.23.095a2.98 2.98 0 001.524 0c.069-.018.132-.059.2-.083.176-.061.354-.119.519-.214l71.293-41.045a2.971 2.971 0 001.489-2.575v-38.979l34.158-19.666a2.971 2.971 0 001.489-2.575V44.666a3.075 3.075 0 00-.106-.774zM74.255 143.167l-29.648-16.779 31.136-17.926.001-.001 34.164-19.669 29.674 17.084-21.772 12.428-43.555 24.863zm68.329-76.259v33.841l-12.475-7.182-17.231-9.92V49.806l12.475 7.182 17.231 9.92zm2.97-39.335l29.693 17.095-29.693 17.095-29.693-17.095 29.693-17.095zM54.06 114.089l-12.475 7.182V46.733l17.231-9.92 12.475-7.182v74.537l-17.231 9.921zM38.614 7.398l29.693 17.095-29.693 17.095L8.921 24.493 38.614 7.398zM5.938 29.632l12.475 7.182 17.231 9.92v79.676l.001.005-.001.006c0 .114.032.221.045.333.017.146.021.294.059.434l.002.007c.032.117.094.222.14.334.051.124.088.255.156.371a.036.036 0 00.004.009c.061.105.149.191.222.288.081.105.149.22.244.314l.008.01c.084.083.19.142.284.215.106.083.202.178.32.247l.013.005.011.008 34.139 19.321v34.175L5.939 144.867V29.632h-.001zm136.646 115.235l-65.352 37.625V148.31l48.399-27.628 16.953-9.677v33.862zm35.646-61.22l-29.706 17.102V66.908l17.231-9.92 12.475-7.182v33.841z"/>
-                        </g>
-                    </svg>
-                </div>
-
-                <div class="mt-8 bg-white dark:bg-gray-800 overflow-hidden shadow sm:rounded-lg">
-                    <div class="grid grid-cols-1 md:grid-cols-2">
-                        <div class="p-6">
-                            <div class="flex items-center">
-                                <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" class="w-8 h-8 text-gray-500"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-                                <div class="ml-4 text-lg leading-7 font-semibold"><a href="https://laravel.com/docs" class="underline text-gray-900 dark:text-white">Documentation</a></div>
-                            </div>
-
-                            <div class="ml-12">
-                                <div class="mt-2 text-gray-600 dark:text-gray-400 text-sm">
-                                    Laravel has wonderful, thorough documentation covering every aspect of the framework. Whether you are new to the framework or have previous experience with Laravel, we recommend reading all of the documentation from beginning to end.
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="p-6 border-t border-gray-200 dark:border-gray-700 md:border-t-0 md:border-l">
-                            <div class="flex items-center">
-                                <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" class="w-8 h-8 text-gray-500"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                                <div class="ml-4 text-lg leading-7 font-semibold"><a href="https://laracasts.com" class="underline text-gray-900 dark:text-white">Laracasts</a></div>
-                            </div>
-
-                            <div class="ml-12">
-                                <div class="mt-2 text-gray-600 dark:text-gray-400 text-sm">
-                                    Laracasts offers thousands of video tutorials on Laravel, PHP, and JavaScript development. Check them out, see for yourself, and massively level up your development skills in the process.
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="p-6 border-t border-gray-200 dark:border-gray-700">
-                            <div class="flex items-center">
-                                <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" class="w-8 h-8 text-gray-500"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path></svg>
-                                <div class="ml-4 text-lg leading-7 font-semibold"><a href="https://laravel-news.com/" class="underline text-gray-900 dark:text-white">Laravel News</a></div>
-                            </div>
-
-                            <div class="ml-12">
-                                <div class="mt-2 text-gray-600 dark:text-gray-400 text-sm">
-                                    Laravel News is a community driven portal and newsletter aggregating all of the latest and most important news in the Laravel ecosystem, including new package releases and tutorials.
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="p-6 border-t border-gray-200 dark:border-gray-700 md:border-l">
-                            <div class="flex items-center">
-                                <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" class="w-8 h-8 text-gray-500"><path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                <div class="ml-4 text-lg leading-7 font-semibold text-gray-900 dark:text-white">Vibrant Ecosystem</div>
-                            </div>
-
-                            <div class="ml-12">
-                                <div class="mt-2 text-gray-600 dark:text-gray-400 text-sm">
-                                    Laravel's robust library of first-party tools and libraries, such as <a href="https://forge.laravel.com" class="underline">Forge</a>, <a href="https://vapor.laravel.com" class="underline">Vapor</a>, <a href="https://nova.laravel.com" class="underline">Nova</a>, and <a href="https://envoyer.io" class="underline">Envoyer</a> help you take your projects to the next level. Pair them with powerful open source libraries like <a href="https://laravel.com/docs/billing" class="underline">Cashier</a>, <a href="https://laravel.com/docs/dusk" class="underline">Dusk</a>, <a href="https://laravel.com/docs/broadcasting" class="underline">Echo</a>, <a href="https://laravel.com/docs/horizon" class="underline">Horizon</a>, <a href="https://laravel.com/docs/sanctum" class="underline">Sanctum</a>, <a href="https://laravel.com/docs/telescope" class="underline">Telescope</a>, and more.
-                                </div>
-                            </div>
-                        </div>
+<body class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 selection:bg-primary selection:text-white">
+    <!-- Top Navigation Bar -->
+    <nav class="sticky top-0 z-50 w-full border-b border-primary/10 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-12">
+                <a class="flex items-center gap-2 group" href="#">
+                    <div class="text-primary">
+                        <svg class="w-8 h-8" fill="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M2 10h3v4H2v-4zm5-4h3v12H7V6zm5 2h3v8h-3V8zm5-4h3v16h-3V4z"></path>
+                        </svg>
                     </div>
+                    <span class="text-2xl font-black tracking-tighter uppercase italic group-hover:text-primary transition-colors text-white">techy</span>
+                </a>
+                <div class="hidden lg:flex items-center gap-8">
+                    <a class="text-sm font-semibold uppercase tracking-widest hover:text-primary transition-colors" href="#">Reports</a>
+                    <a class="text-sm font-semibold uppercase tracking-widest hover:text-primary transition-colors" href="#">Engineers</a>
+                    <a class="text-sm font-semibold uppercase tracking-widest hover:text-primary transition-colors" href="#">Narratives</a>
+                    <a class="text-sm font-semibold uppercase tracking-widest hover:text-primary transition-colors" href="#">Archive</a>
                 </div>
-
-                <div class="flex justify-center mt-4 sm:items-center sm:justify-between">
-                    <div class="text-center text-sm text-gray-500 sm:text-left">
-                        <div class="flex items-center">
-                            <svg fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor" class="-mt-px w-5 h-5 text-gray-400">
-                                <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                            </svg>
-
-                            <a href="https://laravel.bigcartel.com" class="ml-1 underline">
-                                Shop
-                            </a>
-
-                            <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" class="ml-4 -mt-px w-5 h-5 text-gray-400">
-                                <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                            </svg>
-
-                            <a href="https://github.com/sponsors/taylorotwell" class="ml-1 underline">
-                                Sponsor
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="ml-4 text-center text-sm text-gray-500 sm:text-right sm:ml-0">
-                        Laravel v{{ Illuminate\Foundation\Application::VERSION }} (PHP v{{ PHP_VERSION }})
-                    </div>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="relative hidden md:block">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
+                    <input class="bg-slate-200/50 dark:bg-primary/5 border-none rounded-full py-2 pl-10 pr-6 text-sm w-64 focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-slate-500" placeholder="Explore the future..." type="text" />
+                </div>
+                <button class="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-full text-sm font-bold tracking-tight transition-transform active:scale-95">
+                    SUBSCRIBE
+                </button>
+                <div class="w-10 h-10 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center overflow-hidden">
+                    <img class="w-full h-full object-cover" data-alt="User profile minimalist avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDBXiW1o3cpM9C2Ryu2R8393cFe1hjDUooObwBKGq6b3Gcw9K_J5GCzzV2ZTe6jKEKmqlW_pD62z6QXL53riQ1llgsXBoyTiGg6FX5HM2maAfaIxR-4CvQFncfAnmb8V7EYmCYLVGw6FqXT7hdExvKMsHHdQpDBOdPu7ZjsNBbmOQrhy7ZGOWxemS0Z-wLyulecZsVaMWyWWnOWnTgZLWAf28JeWqoUASZKv5u3OBRXO_CISP1JW6fVvbGXMqR8ncaxOUeJo3BVwGi8" />
                 </div>
             </div>
         </div>
-    </body>
+    </nav>
+    <main class="relative overflow-x-hidden">
+        <!-- Hero Section -->
+        <section class="relative min-h-[85vh] flex items-center justify-center overflow-hidden py-20 px-6">
+            <div class="parallax-element absolute top-20 right-[10%] w-64 h-64 border border-primary/20 rounded-full blur-sm -z-10" data-speed="0.2"></div>
+            <div class="parallax-element absolute bottom-40 left-[5%] w-96 h-96 border-2 border-primary/10 rounded-3xl rotate-45 -z-10" data-speed="0.5"></div>
+            <div class="parallax-element absolute top-1/2 left-1/4 w-32 h-32 bg-primary/5 rounded-full blur-xl -z-10" data-speed="0.8"></div>
+            <div class="absolute inset-0 hero-gradient -z-10"></div>
+            <!-- Decorative background elements -->
+            <div class="absolute top-1/4 -left-20 w-96 h-96 bg-primary/10 rounded-full blur-[120px]"></div>
+            <div class="absolute bottom-1/4 -right-20 w-96 h-96 bg-primary/10 rounded-full blur-[120px]"></div>
+            <div class="max-w-5xl w-full text-center space-y-12 hero-content-animate">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold tracking-[0.2em] uppercase">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                    </span>
+                    New Issue: Quantum Supremacy
+                </div>
+                <h1 class="text-6xl md:text-8xl font-black tracking-tight leading-[0.9] dark:text-white uppercase italic text-glow">
+                    Engineering<br />the Next<br /><span class="text-primary not-italic">Narrative</span>
+                </h1>
+                <p class="max-w-2xl mx-auto text-lg md:text-xl text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
+                    Exploring the intersection of deep tech, software architecture, and the future of digital society through high-fidelity journalism.
+                </p>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-6 pt-4">
+                    <button class="w-full sm:w-auto px-10 py-5 bg-primary text-white font-black rounded-xl hover:scale-105 transition-all shadow-xl shadow-primary/20">
+                        READ THE MANIFESTO
+                    </button>
+                    <button class="w-full sm:w-auto px-10 py-5 border-2 border-primary/30 text-primary font-black rounded-xl hover:bg-primary/5 transition-all">
+                        BROWSE THE ARCHIVE
+                    </button>
+                </div>
+            </div>
+        </section>
+        <!-- Featured Stories Grid -->
+        <section class="max-w-7xl mx-auto px-6 py-24">
+            <div class="flex items-end justify-between mb-12">
+                <div>
+                    <h2 class="text-xs font-bold tracking-[0.4em] text-primary uppercase mb-2">Editor's Choice</h2>
+                    <h3 class="text-4xl font-black italic dark:text-white">The Lead Stories</h3>
+                </div>
+                <div class="flex gap-4">
+                    <button class="p-3 border border-primary/20 rounded-full hover:bg-primary/10 transition-colors">
+                        <span class="material-symbols-outlined">west</span>
+                    </button>
+                    <button class="p-3 border border-primary/20 rounded-full hover:bg-primary/10 transition-colors text-primary">
+                        <span class="material-symbols-outlined">east</span>
+                    </button>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Card 1 -->
+                <div class="group relative aspect-[4/5] rounded-2xl overflow-hidden cursor-pointer">
+                    <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="Abstract quantum computing visualization with glowing particles" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuABAUWlUJxE7wd79zJoK1xFI7prA12QxfLdAiqaRN-ofcD59yFiNMQlmXR2jQyFeiLIHPp2gFF0UFcpFlqrPxQFdVxcRC9xYIFSsJAGFe2jg9RuzutnuDTOB6bhvcPpNT0TwvL1z_bv6F1ZO0FJ3FKiBKq0zkiWgBdp1waD6gMU0SvpsjdGW4_hCob0CwXKgLr9yXbFM8T1G5_5W1UYvVnVK5TN5Z__3I65xBKiBOc435L3uAHTBLP3NUmZkcUZfJGhYaegYvl00ZQ4')"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/20 to-transparent"></div>
+                    <div class="absolute bottom-0 left-0 p-8 space-y-4">
+                        <span class="text-xs font-bold uppercase tracking-widest text-primary">Deep Tech</span>
+                        <h4 class="text-2xl font-bold text-white group-hover:text-primary transition-colors">The Quantum Supremacy Fallacy</h4>
+                        <p class="text-slate-300 text-sm line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500">How the current benchmark tests miss the reality of industrial-scale quantum computing needs.</p>
+                    </div>
+                </div>
+                <!-- Card 2 -->
+                <div class="group relative aspect-[4/5] rounded-2xl overflow-hidden cursor-pointer">
+                    <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="Cyberpunk network architecture nodes connected by neon orange lines" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDoLJVsT_l98ySpNcFCxIX2vDf12BFzZXSmKyotnVsXoJ-rBGQnDJA_nWQ692aFqKh1PJN1o6RJTJqH8ejddO1D_3-AzVxBF_vYpYPw4PLkNBO_KOKh-GPDG69cJTCeH1W6-rkevkKMEQhdclb9pmQiaXDuBl443zKbJsrUao0W27tYu_h8z8uruQt0TqYUCM_3YRDp682hNEw2Nu5eFksHu7BApD_U2cnmnvT2sGIhtY0RkP0Whl-jZsMg4JCvUtG9LyKVFqlw0jLs')"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/20 to-transparent"></div>
+                    <div class="absolute bottom-0 left-0 p-8 space-y-4">
+                        <span class="text-xs font-bold uppercase tracking-widest text-primary">Architecture</span>
+                        <h4 class="text-2xl font-bold text-white group-hover:text-primary transition-colors">Decentralized Compute at Scale</h4>
+                        <p class="text-slate-300 text-sm line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500">Scaling the unscalable: How Web3 infrastructure is finally meeting enterprise demand.</p>
+                    </div>
+                </div>
+                <!-- Card 3 -->
+                <div class="group relative aspect-[4/5] rounded-2xl overflow-hidden cursor-pointer">
+                    <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="Rust programming language logo on dark metallic texture" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAfQwXQI0Ar1pK0DncnkX2_xAejMVUM1pr09BGgXkvWg6QIoMn6r20iDXqY2mmXj5ZP01TjeZYSTCADO4wjHCyA2VPgWnz9f1vdR2JnHhvbuSRyucnZt_7dhDGVs-d42uvHtZ7LZao9nLkd3dKXK4xCCk98kOI54pCAEz2ssd5zqFmGMzCAJ9xyFVtxESjLFNpJp197eDN9X42wwY8ERAY-Kd_DoOAeg2iXGecRGe1aPDOmcvfSXL_yzIVCtTWywh6cOMd-_Lk1S0UX')"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/20 to-transparent"></div>
+                    <div class="absolute bottom-0 left-0 p-8 space-y-4">
+                        <span class="text-xs font-bold uppercase tracking-widest text-primary">Development</span>
+                        <h4 class="text-2xl font-bold text-white group-hover:text-primary transition-colors">Rust: The New Standard</h4>
+                        <p class="text-slate-300 text-sm line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500">Why system-level safety is no longer optional for modern cloud-native organizations.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Category Tabs -->
+        <section class="max-w-7xl mx-auto px-6 pb-24">
+            <div class="border-b border-primary/20 flex flex-wrap gap-10">
+                <a class="relative py-4 text-primary font-black uppercase tracking-widest text-sm after:content-[''] after:absolute after:bottom-[-1px] after:left-0 after:w-full after:h-[3px] after:bg-primary" href="#">Latest</a>
+                <a class="py-4 text-slate-500 hover:text-primary font-bold uppercase tracking-widest text-sm transition-colors" href="#">Trending</a>
+                <a class="py-4 text-slate-500 hover:text-primary font-bold uppercase tracking-widest text-sm transition-colors" href="#">Opinion</a>
+                <a class="py-4 text-slate-500 hover:text-primary font-bold uppercase tracking-widest text-sm transition-colors" href="#">Deep Dives</a>
+                <a class="py-4 text-slate-500 hover:text-primary font-bold uppercase tracking-widest text-sm transition-colors" href="#">Open Source</a>
+            </div>
+            <!-- List of Articles -->
+            <div class="mt-12 space-y-12">
+                <article class="flex flex-col md:flex-row gap-8 items-center group">
+                    <div class="w-full md:w-1/3 aspect-video rounded-xl overflow-hidden bg-primary/10">
+                        <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Futuristic data center cooling system with orange light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9JFDFvzdSRtE1vtQUG8k7ZiAZ9Q0_2ivVSRf7LIpUaaqXT3wrv59WNvWxotyC-9WUNk1p4xRzUG7t7bbPBDIbqWOwS8rZVuaehOCuzVxlAORRGfbti8SKLchxasWh7amqZyVxSkTA9G7gAnlzGTj-Ymew0Y7o5Mevjsd-6m1t6DKsy9CEvSw3bqdKGVw-uRpPGPSx6JfneqoC84sbXvugeDUG54ujYiMSxrVz6r_dqtft6Klx6JFxulEg2f6b0_jYU4fMbjrluVIo" />
+                    </div>
+                    <div class="flex-1 space-y-4">
+                        <div class="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-primary">
+                            <span>April 24, 2024</span>
+                            <span class="w-1 h-1 rounded-full bg-primary/40"></span>
+                            <span>12 Min Read</span>
+                        </div>
+                        <h3 class="text-3xl font-black group-hover:text-primary transition-colors cursor-pointer">The Silent Shift in Edge Computing Infrastructure</h3>
+                        <p class="text-slate-500 dark:text-slate-400 leading-relaxed text-lg">As latency becomes the primary bottleneck for AI real-time reasoning, a new breed of edge-first infrastructure providers are quietly rebuilding the internet backbone.</p>
+                        <div class="flex items-center gap-3 pt-2">
+                            <div class="w-8 h-8 rounded-full bg-primary/20" data-alt="Author headshot circular thumbnail" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCIq9IRCCYx5rwhUPqZUbSbs9QT1jP3rWEIBy2PWW3GnfGI4-5_oNgXuHpFR_m-O6RiPhsfukvZwWXvH1clM1na3OYh4AjAySqSOrBOM-K_InsAzzVVH6q8U-hCxdBaQaDjuH1AmfgYzEavh9gSZ9obH334gVWgyx6eh5wqIW9yAnAhVzQt3_2H-0hxcn6dBhOGQGJKr96Ue1jciMofeNquJ2Cyb3ACZCxvhSHBSca9fQyDX2K2MfWlYXGzt27cSTyUuaBiSvWDiA1z')"></div>
+                            <span class="text-sm font-bold">Sarah Chen</span>
+                        </div>
+                    </div>
+                </article>
+                <article class="flex flex-col md:flex-row gap-8 items-center group">
+                    <div class="w-full md:w-1/3 aspect-video rounded-xl overflow-hidden bg-primary/10">
+                        <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Neural network visualization with bright orange synapses" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDV8f7NTz04qJ-CUDhM9St-6Z4RRdf4JuX9qdPghPjCyrKEKMrmoJSsU54FTvNA1L1tl7gp0A2qed_Nmj4VGg4iJ3Og75_GBT4s_vpRnti8xbSSpGBpT8L7Em0jpcqpBq7ZKhIqZ575PN1G5q4l6TWYZ3o_0tbIyvHagwea1JgMBrjdLELrG1pBWwS1EXBWeRqx5lUwzNGVkINiYTPIoPafemzQhyK136JOGzGnl0vz4Tne3hjfpFq-m63JBDbPOqC39wkulkOO_itp" />
+                    </div>
+                    <div class="flex-1 space-y-4">
+                        <div class="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-primary">
+                            <span>April 22, 2024</span>
+                            <span class="w-1 h-1 rounded-full bg-primary/40"></span>
+                            <span>8 Min Read</span>
+                        </div>
+                        <h3 class="text-3xl font-black group-hover:text-primary transition-colors cursor-pointer">Post-LLM Architecture: What Comes After Transformers?</h3>
+                        <p class="text-slate-500 dark:text-slate-400 leading-relaxed text-lg">While the world is obsessed with GPT, researchers are already moving toward State Space Models and more efficient recursive architectures.</p>
+                        <div class="flex items-center gap-3 pt-2">
+                            <div class="w-8 h-8 rounded-full bg-primary/20" data-alt="Author headshot circular thumbnail" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAon-Yedk2MBDpH5y_yBFK7RtsA71VzsRd5D6QaSSYwyLpxx3uOypzjhJVRZQlfuDDA1fx8TkYLxLIHtG_DKayde1LaOudLCM27YqT0mz_WVNXGJNsEPCJXwE2Wp_HFwKSK8KuufaP9fixdTK0mP1p8eTU9eYb2i4DxD4yeylAwjjnAPbgvU_IFdlEswy_IMJkdNXKWHtPzQa3OMynzD8uqKb6a8At1JDkjD547ZZdiuWV1KS_1VZVu6QTN56VDiefFcyhOduM5sWh-')"></div>
+                            <span class="text-sm font-bold">Dr. Marcus Thorne</span>
+                        </div>
+                    </div>
+                </article>
+            </div>
+            <div class="mt-20 flex justify-center">
+                <button class="px-12 py-4 border-2 border-primary text-primary font-black rounded-xl hover:bg-primary hover:text-white transition-all tracking-widest uppercase">
+                    Load More Stories
+                </button>
+            </div>
+        </section>
+        <!-- Newsletter Section -->
+        <section class="max-w-7xl mx-auto px-6 py-20">
+            <div class="glass-morphism rounded-[2rem] p-12 md:p-20 relative overflow-hidden flex flex-col items-center text-center">
+                <div class="absolute -top-24 -right-24 w-64 h-64 bg-primary/20 rounded-full blur-[80px]"></div>
+                <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-primary/20 rounded-full blur-[80px]"></div>
+                <h2 class="text-4xl md:text-5xl font-black italic mb-6">Stay ahead of the curve</h2>
+                <p class="text-slate-400 max-w-xl text-lg mb-10 leading-relaxed">Join 45,000+ senior engineers and tech leaders who receive our weekly deep-dive into the future of computing.</p>
+                <form class="w-full max-w-lg flex flex-col md:flex-row gap-4">
+                    <input class="flex-1 bg-white/5 border border-primary/20 rounded-xl px-6 py-4 focus:ring-2 focus:ring-primary outline-none text-white" placeholder="Enter your email" type="email" />
+                    <button class="bg-primary text-white font-black px-10 py-4 rounded-xl hover:scale-105 transition-all uppercase tracking-widest">
+                        Join
+                    </button>
+                </form>
+                <p class="mt-6 text-xs text-slate-500 font-medium">No spam. Only high-fidelity engineering narratives. Unsubscribe anytime.</p>
+            </div>
+        </section>
+    </main>
+    <footer class="border-t border-primary/10 py-20 bg-background-light dark:bg-background-dark/50">
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12">
+            <div class="space-y-6">
+                <div class="flex items-center gap-2">
+                    <div class="text-primary">
+                        <svg class="w-6 h-6" fill="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M2 10h3v4H2v-4zm5-4h3v12H7V6zm5 2h3v8h-3V8zm5-4h3v16h-3V4z"></path>
+                        </svg>
+                    </div>
+                    <span class="text-xl font-black tracking-tighter uppercase italic text-white">techy</span>
+                </div>
+                <p class="text-slate-500 text-sm leading-relaxed">The premier destination for deep technical reporting and architecture analysis. Built for the modern engineering leader.</p>
+            </div>
+            <div class="space-y-6">
+                <h4 class="font-black uppercase tracking-widest text-xs text-primary">Sections</h4>
+                <ul class="space-y-4 text-sm font-bold text-slate-600 dark:text-slate-400">
+                    <li><a class="hover:text-primary transition-colors" href="#">Hardware Architecture</a></li>
+                    <li><a class="hover:text-primary transition-colors" href="#">Distributed Systems</a></li>
+                    <li><a class="hover:text-primary transition-colors" href="#">AI &amp; ML Research</a></li>
+                    <li><a class="hover:text-primary transition-colors" href="#">Security Vectors</a></li>
+                </ul>
+            </div>
+            <div class="space-y-6">
+                <h4 class="font-black uppercase tracking-widest text-xs text-primary">Network</h4>
+                <ul class="space-y-4 text-sm font-bold text-slate-600 dark:text-slate-400">
+                    <li><a class="hover:text-primary transition-colors" href="#">Podcast</a></li>
+                    <li><a class="hover:text-primary transition-colors" href="#">Job Board</a></li>
+                    <li><a class="hover:text-primary transition-colors" href="#">Engineering Events</a></li>
+                    <li><a class="hover:text-primary transition-colors" href="#">Member Community</a></li>
+                </ul>
+            </div>
+            <div class="space-y-6">
+                <h4 class="font-black uppercase tracking-widest text-xs text-primary">Follow</h4>
+                <div class="flex gap-4">
+                    <a class="w-10 h-10 rounded-full border border-primary/20 flex items-center justify-center hover:bg-primary/10 transition-colors" href="#">
+                        <span class="material-symbols-outlined text-xl">share</span>
+                    </a>
+                    <a class="w-10 h-10 rounded-full border border-primary/20 flex items-center justify-center hover:bg-primary/10 transition-colors" href="#">
+                        <span class="material-symbols-outlined text-xl">public</span>
+                    </a>
+                    <a class="w-10 h-10 rounded-full border border-primary/20 flex items-center justify-center hover:bg-primary/10 transition-colors" href="#">
+                        <span class="material-symbols-outlined text-xl">rss_feed</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto px-6 mt-20 pt-10 border-t border-primary/5 flex flex-col md:flex-row justify-between items-center gap-6 text-xs font-bold text-slate-500 uppercase tracking-widest">
+            <p>© 2024 techy.news / Engineered for the future.</p>
+            <div class="flex gap-8">
+                <a class="hover:text-primary" href="#">Privacy Policy</a>
+                <a class="hover:text-primary" href="#">Terms of Service</a>
+                <a class="hover:text-primary" href="#">Cookie Settings</a>
+            </div>
+        </div>
+    </footer>
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Hero Headline Animation
+        gsap.to(".hero-content-animate", {
+            scrollTrigger: {
+                trigger: "section.relative.min-h-\[85vh\]",
+                start: "top top",
+                end: "bottom top",
+                scrub: true
+            },
+            scale: 0.9,
+            opacity: 0,
+            y: 100
+        });
+
+        // Parallax Background Elements
+        gsap.utils.toArray(".parallax-element").forEach(el => {
+            const speed = el.getAttribute('data-speed');
+            gsap.to(el, {
+                scrollTrigger: {
+                    trigger: "body",
+                    start: "top top",
+                    end: "bottom bottom",
+                    scrub: true
+                },
+                y: (i, target) => -ScrollTrigger.maxScroll(window) * speed * 0.2
+            });
+        });
+
+        // Reveal Lead Stories
+        gsap.from(".grid-cols-1.md\\:grid-cols-3 > div", {
+            scrollTrigger: {
+                trigger: ".grid-cols-1.md\\:grid-cols-3",
+                start: "top 85%",
+                toggleActions: "play none none reverse"
+            },
+            y: 60,
+            opacity: 0,
+            duration: 1,
+            stagger: 0.2,
+            ease: "power4.out"
+        });
+
+        // Smooth Reveal for Articles
+        gsap.utils.toArray("article").forEach(article => {
+            gsap.from(article, {
+                scrollTrigger: {
+                    trigger: article,
+                    start: "top 90%",
+                    toggleActions: "play none none reverse"
+                },
+                x: -30,
+                opacity: 0,
+                duration: 0.8,
+                ease: "power2.out"
+            });
+        });
+    </script>
+</body>
+
 </html>
