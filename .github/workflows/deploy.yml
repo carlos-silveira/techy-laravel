@@ -34,18 +34,14 @@ jobs:
           npm install
           npm run prod
 
-      - name: 📂 Sync files
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /techynews.lat/
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/node_modules/**
-            .env.example
-            tests/
-            phpunit.xml
-            README.md
+      - name: 🚀 Deploy via rsync
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          ARGS: "-avzr --delete"
+          EXCLUDE: "/.git/, /node_modules/, /.env, /storage/, /bootstrap/cache/, /tests/, phpunit.xml, README.md, .github/"
+          SOURCE: "./"
+          REMOTE_HOST: "66.29.148.140"
+          REMOTE_USER: "baifywfnnq"
+          REMOTE_PORT: "21098"
+          TARGET: "/home/baifywfnnq/techynews.lat/"
