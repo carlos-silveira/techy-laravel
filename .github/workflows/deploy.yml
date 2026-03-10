@@ -34,6 +34,18 @@ jobs:
           npm ci
           npm run build
 
+      - name: 🧪 Validate Migrations on Test DB First
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: "66.29.148.140"
+          username: "baifywfnnq"
+          port: "21098"
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/baifywfnnq/techynews.lat
+            DB_DATABASE=baifywfnnq_laravel_test php artisan migrate --force
+            echo "✅ Test DB migrations passed — safe to deploy to production"
+
       - name: 🚀 Deploy via rsync
         uses: easingthemes/ssh-deploy@main
         env:
@@ -60,4 +72,4 @@ jobs:
             php artisan cache:clear
             php artisan view:clear
             php artisan route:cache
-            echo "✅ Post-deploy tasks complete"
+            echo "✅ Production migrations & cache clear complete"

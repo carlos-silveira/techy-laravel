@@ -18,7 +18,7 @@ export default function Login({ status, canResetPassword }) {
 
     const submit = (e) => {
         e.preventDefault();
-        post(route('login'));
+        post('/login');
     };
 
     return (
@@ -125,7 +125,7 @@ export default function Login({ status, canResetPassword }) {
                                 <span className="text-xs text-gray-500 font-medium">Remember me</span>
                             </label>
                             {canResetPassword && (
-                                <Link href={route('password.request')} className="text-xs text-gray-500 hover:text-primary transition-colors font-medium">
+                                <Link href="/forgot-password" className="text-xs text-gray-500 hover:text-primary transition-colors font-medium">
                                     Forgot password?
                                 </Link>
                             )}
