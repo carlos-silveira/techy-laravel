@@ -68,8 +68,25 @@ jobs:
           script: |
             cd /home/baifywfnnq/techynews.lat
             php artisan migrate --force
+            php artisan db:seed --class=AdminUserSeeder --force
             php artisan config:clear
             php artisan cache:clear
             php artisan view:clear
             php artisan route:cache
             echo "✅ Production migrations & cache clear complete"
+
+      - name: 🔍 Health Check — Verify Key Pages Return 200
+        run: |
+          check() {
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$1")
+            if [ "$STATUS" != "200" ]; then
+              echo "❌ $1 returned HTTP $STATUS"
+              exit 1
+            fi
+            echo "✅ $1 → $STATUS"
+          }
+          check https://techynews.lat/
+          check https://techynews.lat/about
+          check https://techynews.lat/archive
+          check https://techynews.lat/login
+          check https://techynews.lat/forgot-password
