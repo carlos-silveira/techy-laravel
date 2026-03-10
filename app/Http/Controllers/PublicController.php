@@ -17,7 +17,7 @@ class PublicController extends Controller
     public function index()
     {
         $editorsChoice = Cache::remember('homepage_editors_choice', 3600, function () {
-            return Article::where('is_published', true)
+            return Article::where('status', 'published')
                 ->where('is_editors_choice', true)
                 ->orderBy('created_at', 'desc')
                 ->take(3)
@@ -25,7 +25,7 @@ class PublicController extends Controller
         });
 
         $articles = Cache::remember('homepage_articles', 3600, function () {
-            return Article::where('is_published', true)
+            return Article::where('status', 'published')
                 ->where('is_editors_choice', false)
                 ->orderBy('created_at', 'desc')
                 ->get();
