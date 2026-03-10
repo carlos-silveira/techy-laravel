@@ -45,3 +45,11 @@ jobs:
           REMOTE_USER: "baifywfnnq"
           REMOTE_PORT: "21098"
           TARGET: "/home/baifywfnnq/techynews.lat/"
+          SCRIPT_AFTER: |
+            cd /home/baifywfnnq/techynews.lat
+            php artisan migrate --force
+            php artisan config:clear
+            php artisan cache:clear
+            php artisan view:clear
+            php artisan route:cache
+            echo "✅ Post-deploy tasks complete"
