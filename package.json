@@ -1,13 +1,15 @@
 {
     "private": true,
     "scripts": {
-        "dev": "npm run development",
+        "dev": "vite",
         "development": "mix",
         "watch": "mix watch",
         "watch-poll": "mix watch -- --watch-options-poll=1000",
         "hot": "mix watch --hot",
         "prod": "npm run production",
-        "production": "mix --production"
+        "production": "mix --production",
+        "build": "vite build",
+        "preview": "vite preview"
     },
     "devDependencies": {
         "@babel/preset-env": "^7.29.0",
