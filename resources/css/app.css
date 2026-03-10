@@ -2,18 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer utilities {
-    .glass-morphism {
-        background: rgba(0, 26, 44, 0.7);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(0, 180, 255, 0.1);
-    }
-    
-    .hero-gradient {
-        background: radial-gradient(circle at 50% 50%, rgba(0, 180, 255, 0.1) 0%, rgba(0, 26, 44, 1) 100%);
-    }
-    
-    .text-glow {
-        text-shadow: 0 0 30px rgba(0, 180, 255, 0.3);
-    }
+@layer base {
+  ::selection {
+    background: rgba(43, 124, 238, 0.3);
+    color: white;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #02040a;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #1a1a1a;
+    border-radius: 10px;
+    border: 2px solid #02040a;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #2b7cee;
+  }
 }
