@@ -2,6 +2,10 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AiController;
+use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\NewsletterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,4 +20,23 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+// Public AI API for Editor
+Route::post('/generate-brief', [AiController::class, 'generateBrief']);
+Route::post('/generate-seo', [AiController::class, 'generateSeoTags']);
+Route::post('/generate-image-prompt', [AiController::class, 'generateImagePrompt']);
+
+// Public Analytics & Engagement
+Route::get('/analytics/dashboard', [AnalyticsController::class, 'dashboardStats']);
+Route::post('/subscribe', [NewsletterController::class, 'store']);
+Route::post('/articles/{id}/like', [ArticleController::class, 'like']);
+Route::get('/articles/{id}/stats', [AnalyticsController::class, 'articleStats']);
+
+// Global Discovery
+Route::get('/search', [\App\Http\Controllers\PublicController::class, 'search']);
+
+// Protected API Routes (if any) using Sanctum
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/ask-llama', [AiController::class, 'askLlama']);
 });

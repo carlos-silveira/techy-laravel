@@ -1,13 +1,12 @@
 import React from 'react';
 import { FaFacebook, FaTwitter, FaYoutube } from 'react-icons/fa';
-import logo from '/img/logo_wbc.png';
 
 export default function Footer() {
   return (
     <footer className="bg-logo-color text-gray-400 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
         <div>
-          <img src={logo} alt="Logo" className="h-10" />
+          <img src="/img/logo_wbc.png" alt="Logo" className="h-10" />
         </div>
         <div>
           <ul className="flex space-x-4">
