@@ -31,8 +31,8 @@ jobs:
 
       - name: 🏗️ Install NPM Dependencies & Build
         run: |
-          npm install
-          npm run prod
+          npm ci
+          npm run build
 
       - name: 🚀 Deploy via rsync
         uses: easingthemes/ssh-deploy@main
