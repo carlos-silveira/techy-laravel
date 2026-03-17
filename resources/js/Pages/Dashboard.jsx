@@ -1,14 +1,23 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import { Loader2, Plus, LogOut, CheckCircle2, Home, BarChart2, Star, Image as ImageIcon, UploadCloud, X, Layout, Zap, Search, ArrowRight } from 'lucide-react';
+import { 
+    Loader2, Plus, LogOut, CheckCircle2, Home, BarChart2, Star, 
+    Image as ImageIcon, UploadCloud, X, Layout, Zap, Search, 
+    ArrowRight, Info, Edit3, Trash2, FileText, Clock, Eye,
+    ChevronLeft, Sparkles, Globe, FileEdit, Save, ShieldCheck,
+    Lightbulb, RefreshCw, MessageSquare, Send, Copy, ChevronRight,
+    Cpu
+} from 'lucide-react';
 import AnalyticsChart from '@/Components/AnalyticsChart';
+import RichEditor from '@/Components/RichEditor';
 
-export default function Dashboard({ auth }) {
+export default function Dashboard({ auth, articles: initialArticles }) {
+    const [articles, setArticles] = useState(initialArticles || []);
     const [title, setTitle] = useState('');
-    const [content, setContent] = useState('');
+    const [richContent, setRichContent] = useState(null);
     const [isGenerating, setIsGenerating] = useState(false);
     const [currentArticleId, setCurrentArticleId] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
@@ -16,314 +25,430 @@ export default function Dashboard({ auth }) {
     const [isEditorsChoice, setIsEditorsChoice] = useState(false);
     const [coverImage, setCoverImage] = useState('');
     const [imagePrompt, setImagePrompt] = useState('');
+    const [metaDescription, setMetaDescription] = useState('');
+    const [seoKeywords, setSeoKeywords] = useState('');
     const [tags, setTags] = useState([]);
     const [tagInput, setTagInput] = useState('');
     const [isUploading, setIsUploading] = useState(false);
     const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false);
+    const [view, setView] = useState('list'); // 'list' or 'editor'
+    
+    // Trigger for Editor Reset
+    const [editorResetKey, setEditorResetKey] = useState(0);
+
+    // Chat State
+    const [chatMessages, setChatMessages] = useState([
+        { role: 'assistant', content: "Hello! I'm your Studio Assistant. How can I help you shape your narrative today? I can research trends, draft sections, or refine your copy." }
+    ]);
+    const [chatInput, setChatInput] = useState('');
+    const [isChatLoading, setIsChatLoading] = useState(false);
+    const chatEndRef = useRef(null);
+
+    // Idea Generator State
+    const [ideas, setIdeas] = useState([]);
+    const [isFetchingIdeas, setIsFetchingIdeas] = useState(false);
 
     // Auto-save mechanism
     useEffect(() => {
-        if (!title && !content) return;
+        if (!title && !richContent) return;
         const delayBounceFn = setTimeout(() => {
             handleSave(true);
-        }, 3000);
+        }, 5000);
         return () => clearTimeout(delayBounceFn);
-    }, [title, content, isPublished, isEditorsChoice, coverImage, imagePrompt, tags]);
+    }, [title, richContent, isPublished, isEditorsChoice, coverImage, imagePrompt, tags, metaDescription, seoKeywords]);
 
-    const handleSave = async (silent = false) => {
-        if (!title && !content) {
-            if (!silent) toast.error('Empty narratives cannot be preserved.');
-            return;
-        }
+    useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [chatMessages]);
 
+    const handleSave = async (silent = false, overridePublished = null) => {
+        if (!title && !richContent) return;
         setIsSaving(true);
         try {
             const payload = {
-                title,
-                content,
-                is_published: isPublished,
+                title: title || 'Untitled Story',
+                content: typeof richContent === 'string' ? richContent : JSON.stringify(richContent),
+                is_published: overridePublished !== null ? overridePublished : isPublished,
                 is_editors_choice: isEditorsChoice,
                 cover_image_path: coverImage,
                 image_prompt: imagePrompt,
+                meta_description: metaDescription,
+                seo_keywords: seoKeywords,
                 tags: tags
             };
+            let res;
             if (currentArticleId) {
-                await axios.put(`/articles/${currentArticleId}`, payload);
+                res = await axios.put(`/articles/${currentArticleId}`, payload);
+                setArticles(prev => prev.map(a => a.id === currentArticleId ? res.data.article : a));
             } else {
-                const res = await axios.post('/articles', payload);
-                setCurrentArticleId(res.data.article.id);
+                res = await axios.post('/articles', payload);
+                if (res.data.article && res.data.article.id) {
+                    setCurrentArticleId(res.data.article.id);
+                    setArticles(prev => [res.data.article, ...prev]);
+                }
             }
-            if (!silent) toast.success('Narrative synced with cloud.');
+            if (!silent) toast.success('Narrative synced.');
         } catch (error) {
-            if (!silent) toast.error('Cloud synchronization failed.');
+            if (!silent) toast.error('Sync failed.');
         } finally {
             setIsSaving(false);
         }
     };
 
-    const handleGenerateBrief = async () => {
-        if (!content) return toast.error('Context required for synthesis.');
-        setIsGenerating(true);
-        try {
-            const res = await axios.post('/api/generate-brief', { content });
-            setContent(content + '\n\n### AI Synthesis\n' + res.data.brief);
-            toast.success('Intelligence synthesized.');
+    const handleSendMessage = async (e) => {
+        e.preventDefault();
+        if (!chatInput.trim() || isChatLoading) return;
+
+        const userMessage = chatInput;
+        setChatInput('');
+        setChatMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+        setIsChatLoading(true);
+try {
+    const history = chatMessages.map(m => ({ role: m.role, content: m.content }));
+    const res = await axios.post('/api/studio-chat', { 
+        message: userMessage,
+        history: history,
+        editor_context: {
+            title: title,
+            content: typeof richContent === 'string' ? richContent : JSON.stringify(richContent)
+        }
+    });
+                current_title: title,
+                current_content: typeof richContent === 'string' ? richContent : JSON.stringify(richContent)
+            });
+            
+            const rawResponse = res.data.response;
+            
+            // Try to detect command JSON
+            let cleanMessage = rawResponse;
+            try {
+                const start = rawResponse.indexOf('{');
+                const end = rawResponse.lastIndexOf('}');
+                if (start !== -1 && end !== -1) {
+                    const jsonStr = rawResponse.substring(start, end + 1);
+                    const cmd = JSON.parse(jsonStr);
+                    if (cmd.update_editor) {
+                        applyEditorUpdate(cmd.update_editor);
+                        cleanMessage = cmd.message || "I've updated the editor for you.";
+                    }
+                }
+            } catch (e) {
+                // Not a command or malformed, just use raw
+            }
+
+            setChatMessages(prev => [...prev, { role: 'assistant', content: cleanMessage }]);
         } catch (error) {
-            toast.error('Synthesis engine offline.');
+            toast.error('Assistant is currently unavailable.');
         } finally {
-            setIsGenerating(false);
+            setIsChatLoading(false);
+        }
+    };
+
+    const applyEditorUpdate = (update) => {
+        if (update.title) setTitle(update.title);
+        if (update.content) {
+            setRichContent(update.content);
+            setEditorResetKey(prev => prev + 1);
+        }
+        if (update.seo_description) setMetaDescription(update.seo_description);
+        if (update.seo_keywords) setSeoKeywords(update.seo_keywords);
+        toast.info('AI updated your draft.');
+    };
+
+    const pushToEditor = (content) => {
+        if (confirm('Inject this into the editor?')) {
+            setRichContent(content);
+            setEditorResetKey(prev => prev + 1);
+            toast.success('Injected.');
+        }
+    };
+
+    const handleEdit = (article) => {
+        setCurrentArticleId(article.id);
+        setTitle(article.title);
+        let contentToSet;
+        try { contentToSet = JSON.parse(article.content); } catch (e) { contentToSet = article.content; }
+        setRichContent(contentToSet);
+        setIsPublished(article.status === 'published');
+        setIsEditorsChoice(!!article.is_editors_choice);
+        setCoverImage(article.cover_image_path || '');
+        setImagePrompt(article.image_prompt || '');
+        setMetaDescription(article.meta_description || '');
+        setSeoKeywords(article.seo_keywords || '');
+        setTags(article.tags || []);
+        setEditorResetKey(prev => prev + 1);
+        setView('editor');
+    };
+
+    const handleDelete = async (id) => {
+        if (!confirm('Purge this narrative?')) return;
+        try {
+            await axios.delete(`/articles/${id}`);
+            setArticles(prev => prev.filter(a => a.id !== id));
+            if (currentArticleId === id) resetEditor();
+            toast.success('Purged.');
+        } catch (error) {
+            toast.error('Purge failed.');
+        }
+    };
+
+    const resetEditor = () => {
+        setCurrentArticleId(null);
+        setTitle('');
+        setRichContent(null);
+        setCoverImage('');
+        setImagePrompt('');
+        setTags([]);
+        setIsPublished(false);
+        setIsEditorsChoice(false);
+        setMetaDescription('');
+        setSeoKeywords('');
+        setEditorResetKey(prev => prev + 1);
+    };
+
+    const fetchIdeas = async () => {
+        setIsFetchingIdeas(true);
+        try {
+            const res = await axios.get('/api/generate-ideas');
+            setIdeas(res.data.ideas);
+            toast.success('Gathered latest trends.');
+        } catch (error) {
+            toast.error('Failed to fetch ideas.');
+        } finally {
+            setIsFetchingIdeas(false);
+        }
+    };
+
+    const useIdea = async (idea) => {
+        resetEditor();
+        setTitle(idea.title);
+        setView('editor');
+        setRichContent('Researching and drafting based on real-time news...');
+        setEditorResetKey(prev => prev + 1);
+        try {
+            const res = await axios.post('/api/generate-draft', { title: idea.title, prompt: idea.prompt });
+            setRichContent(res.data.draft);
+            setEditorResetKey(prev => prev + 1);
+            toast.success('Draft ready.');
+        } catch (error) {
+            setRichContent(idea.prompt);
+            setEditorResetKey(prev => prev + 1);
         }
     };
 
     const handleGenerateSEO = async () => {
-        if (!content) return toast.error('Content required for metadata extraction.');
+        if (!richContent) return toast.error('No content.');
         setIsGenerating(true);
         try {
-            await axios.post('/api/generate-seo', { content });
-            toast.success('Metadata optimized.');
-            handleSave(true);
+            const res = await axios.post('/api/generate-seo', { content: JSON.stringify(richContent) });
+            setMetaDescription(res.data.description);
+            setSeoKeywords(res.data.keywords);
+            toast.success('SEO Optimized.');
         } catch (error) {
-            toast.error('Optimization failed.');
+            toast.error('Failed.');
         } finally {
             setIsGenerating(false);
         }
     };
 
     const handleImageUpload = async (e) => {
-        const file = e.target.files?.[0] || e.dataTransfer?.files?.[0];
+        const file = e.target.files?.[0];
         if (!file) return;
         setIsUploading(true);
         const formData = new FormData();
         formData.append('image', file);
         try {
-            const res = await axios.post('/upload-image', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            const res = await axios.post('/upload-image', formData);
             setCoverImage(res.data.url);
-            toast.success('Visual asset integrated.');
+            toast.success('Visual added.');
         } catch (error) {
-            toast.error('Asset upload rejected.');
+            toast.error('Upload failed.');
         } finally {
             setIsUploading(false);
         }
     };
 
     const handleGenerateImagePrompt = async () => {
-        if (!content || content.length < 50) return toast.error('Provide more context for visual prompting.');
+        if (!richContent) return toast.error('No content.');
         setIsGeneratingPrompt(true);
         try {
-            const res = await axios.post('/api/generate-image-prompt', { content });
+            const res = await axios.post('/api/generate-image-prompt', { content: JSON.stringify(richContent) });
             setImagePrompt(res.data.prompt);
-            toast.success('Visual prompt architected.');
+            toast.success('Visual prompt ready.');
         } catch (error) {
-            toast.error('Prompt generation failed.');
+            toast.error('Failed.');
         } finally {
             setIsGeneratingPrompt(false);
         }
     };
 
-    const handleTagKeyDown = (e) => {
-        if (e.key === 'Enter' || e.key === ',') {
-            e.preventDefault();
-            const newTag = tagInput.trim().toLowerCase();
-            if (newTag && !tags.includes(newTag)) {
-                setTags([...tags, newTag]);
-            }
-            setTagInput('');
-        }
-    };
-
     return (
         <div className="min-h-screen bg-[#02040a] text-white flex overflow-hidden font-sans selection:bg-primary/30">
-            <Head title="AI Studio - Techy News" />
+            <Head title="AI Studio" />
 
-            {/* Premium Sidebar */}
-            <aside className="w-20 md:w-72 border-r border-white/5 bg-[#02040a] flex flex-col items-center md:items-start py-10 px-6 justify-between sticky top-0 h-screen transition-all z-50">
-                <div className="w-full">
+            {/* Main Sidebar (Slim) */}
+            <aside className="w-20 md:w-64 border-r border-white/5 bg-[#02040a] flex flex-col py-10 px-4 justify-between sticky top-0 h-screen z-50">
+                <div className="w-full flex-1 overflow-y-auto no-scrollbar">
                     <div className="flex items-center gap-3 mb-12 px-2">
-                        <img src="/img/logo_wbc.png" alt="Studio" className="h-7 w-auto hidden md:block" />
-                        <span className="hidden md:hidden text-2xl font-black tracking-tighter">S.</span>
-                        <div className="md:hidden w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center flex-shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center flex-shrink-0 shadow-2xl">
                             <Zap className="w-6 h-6 text-white" />
                         </div>
+                        <span className="hidden md:block font-black text-lg tracking-tighter text-white">STUDIO</span>
                     </div>
 
-                    <nav className="space-y-2 w-full">
+                    <nav className="space-y-2 w-full mb-10">
                         <Link href="/" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:text-white hover:bg-white/5 transition-all group">
-                            <Home className="w-5 h-5 group-hover:text-primary transition-colors" />
-                            <span className="hidden md:block font-bold text-sm uppercase tracking-widest">Live View</span>
+                            <Home className="w-5 h-5 group-hover:text-primary" />
+                            <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Live View</span>
                         </Link>
-                        <button onClick={() => { setCurrentArticleId(null); setTitle(''); setContent(''); setCoverImage(''); setImagePrompt(''); setTags([]); setIsPublished(false); setIsEditorsChoice(false); }} className="flex items-center gap-3 px-4 py-3 rounded-xl text-white bg-white/5 border border-white/10 hover:border-primary/50 hover:bg-white/10 transition-all w-full group">
-                            <Plus className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
-                            <span className="hidden md:block font-bold text-sm uppercase tracking-widest">New Story</span>
+                        <button onClick={() => setView('list')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'list' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-gray-500 hover:text-white'}`}>
+                            <Layout className="w-5 h-5" />
+                            <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Archives</span>
+                        </button>
+                        <button onClick={() => { resetEditor(); setView('editor'); }} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'editor' && !currentArticleId ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-white/5 text-white'}`}>
+                            <Plus className="w-5 h-5 text-primary" />
+                            <span className="hidden md:block font-bold text-xs uppercase tracking-widest">New Story</span>
                         </button>
                     </nav>
-                </div>
 
-                <div className="w-full pt-8 border-t border-white/5 px-2">
-                    <div className="hidden md:flex items-center gap-3 mb-8">
-                        <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-black text-sm">
-                            {auth.user.name.charAt(0)}
+                    <div className="hidden md:block space-y-6 px-2">
+                        <div className="flex items-center justify-between text-primary">
+                            <div className="flex items-center gap-2"><Lightbulb className="w-4 h-4" /><span className="text-[10px] font-black uppercase tracking-widest">Trends</span></div>
+                            <button onClick={fetchIdeas} disabled={isFetchingIdeas} className="hover:rotate-180 transition-all duration-500"><RefreshCw className={`w-3 h-3 ${isFetchingIdeas ? 'animate-spin' : ''}`} /></button>
                         </div>
-                        <div className="flex flex-col">
-                            <span className="text-xs font-black uppercase tracking-widest text-white">{auth.user.name}</span>
-                            <span className="text-[10px] text-gray-500 font-bold uppercase tracking-tight truncate w-32">{auth.user.email}</span>
-                        </div>
-                    </div>
-
-                    <div className="flex flex-col gap-4">
-                        <label className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] px-2">Classification Tags</label>
-                        <div className="flex flex-wrap gap-2 mb-2 px-2">
-                            {tags.map(tag => (
-                                <span key={tag} className="flex items-center gap-2 bg-white/5 border border-white/5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tighter text-gray-400 group-hover:text-white transition-colors">
-                                    #{tag}
-                                    <button onClick={() => setTags(tags.filter(t => t !== tag))} className="hover:text-red-500 transition-colors"><X className="w-3 h-3" /></button>
-                                </span>
+                        <div className="space-y-3">
+                            {ideas.map((idea, idx) => (
+                                <button key={idx} onClick={() => useIdea(idea)} className="w-full text-left p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-primary/30 transition-all group">
+                                    <h4 className="text-[10px] font-black text-white group-hover:text-primary transition-colors leading-tight mb-1">{idea.title}</h4>
+                                    <p className="text-[8px] text-gray-600 font-bold uppercase">Generate Draft →</p>
+                                </button>
                             ))}
                         </div>
-                        <div className="relative group">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 group-focus-within:text-primary transition-colors" />
-                            <input
-                                type="text"
-                                placeholder="Add identifiers..."
-                                className="w-full bg-white/[0.03] border border-white/5 rounded-2xl pl-12 pr-4 py-3 text-xs font-bold text-gray-300 placeholder-gray-700 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 outline-none transition-all"
-                                value={tagInput}
-                                onChange={(e) => setTagInput(e.target.value)}
-                                onKeyDown={handleTagKeyDown}
-                            />
-                        </div>
+                    </div>
+                </div>
+
+                {/* Model Info */}
+                <div className="px-4 py-6 border-t border-white/5">
+                    <div className="flex items-center gap-3 text-gray-600">
+                        <Cpu className="w-4 h-4" />
+                        <span className="text-[9px] font-black uppercase tracking-[0.2em]">Ollama Engine Ready</span>
                     </div>
                 </div>
             </aside>
 
-            {/* Studio Workspace */}
-            <main className="flex-1 flex flex-col overflow-y-auto w-full relative bg-[#02040a]">
-
-                {/* Unified Studio Header */}
-                <header className="sticky top-0 z-[60] bg-[#02040a]/80 backdrop-blur-2xl border-b border-white/5 px-10 h-20 flex items-center justify-between">
-                    <div className="flex items-center gap-6">
-                        <div className="flex items-center gap-3">
-                            {isSaving ? (
-                                <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                            ) : (
-                                <CheckCircle2 className="w-4 h-4 text-green-500 shadow-[0_0_10px_rgba(34,197,94,0.3)]" />
-                            )}
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
-                                {isSaving ? 'Synchronizing' : 'Cloud Preserved'}
-                            </span>
+            {/* Primary Workspace */}
+            <main className="flex-1 flex flex-row overflow-hidden relative">
+                
+                {view === 'list' ? (
+                    <div className="flex-1 overflow-y-auto p-10 md:p-24 max-w-6xl mx-auto w-full">
+                        <div className="mb-20">
+                            <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-4">Central Archives</h3>
+                            <h2 className="text-5xl font-black tracking-tighter text-white">Narrative Repository.</h2>
                         </div>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                        <button
-                            onClick={() => setIsEditorsChoice(!isEditorsChoice)}
-                            className={`p-2.5 rounded-xl transition-all border ${isEditorsChoice ? 'bg-primary/20 text-primary border-primary/50 shadow-[0_0_20px_rgba(43,124,238,0.2)]' : 'bg-transparent text-gray-600 border-white/5 hover:text-white hover:border-white/10'}`}
-                            title="Editor's Choice"
-                        >
-                            <Star className={`w-5 h-5 ${isEditorsChoice ? 'fill-current' : ''}`} />
-                        </button>
-
-                        <button
-                            onClick={handleGenerateSEO}
-                            disabled={isGenerating}
-                            className="text-[10px] font-black uppercase tracking-widest bg-white/5 hover:bg-white/10 border border-white/5 px-5 py-2.5 rounded-xl transition-all flex items-center gap-2 text-gray-400 hover:text-white disabled:opacity-50"
-                        >
-                            {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Optimize Metadata'}
-                        </button>
-
-                        <button
-                            onClick={() => { setIsPublished(!isPublished); handleSave(false); }}
-                            className={`text-[10px] font-black uppercase tracking-widest px-6 py-2.5 rounded-xl transition-all shadow-xl ${isPublished ? 'bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/30' : 'bg-white text-black hover:scale-105 active:scale-95'}`}
-                        >
-                            {isPublished ? 'Retract' : 'Broadcast'}
-                        </button>
-                    </div>
-                </header>
-
-                <div className="flex-1 p-10 md:p-20 max-w-6xl mx-auto w-full flex flex-col gap-12">
-
-                    {/* Visual Asset Integration */}
-                    <div
-                        onDragOver={(e) => e.preventDefault()}
-                        onDrop={(e) => { e.preventDefault(); handleImageUpload(e); }}
-                        className={`relative w-full rounded-[2.5rem] border-2 border-dashed transition-all overflow-hidden group ${coverImage ? 'border-transparent aspect-video' : 'border-white/5 hover:border-primary/30 bg-white/[0.02] h-48 flex items-center justify-center cursor-pointer'}`}
-                        onClick={() => !coverImage && document.getElementById('cover-image-upload').click()}
-                    >
-                        {coverImage ? (
-                            <>
-                                <img src={coverImage} alt="Cover" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2000ms]" />
-                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm flex items-center justify-center gap-6">
-                                    <button onClick={(e) => { e.stopPropagation(); setCoverImage(''); }} className="bg-red-500/20 text-red-400 border border-red-500/50 px-6 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">Remove Visual</button>
-                                    <button onClick={(e) => { e.stopPropagation(); document.getElementById('cover-image-upload').click(); }} className="bg-white/10 text-white border border-white/20 px-6 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-white/20 transition-all">Replace Asset</button>
+                        <div className="grid grid-cols-1 gap-4">
+                            {articles.map((article, i) => (
+                                <div key={article.id} onClick={() => handleEdit(article)} className="p-6 bg-white/[0.02] border border-white/5 rounded-3xl hover:border-primary/30 transition-all flex items-center justify-between group cursor-pointer">
+                                    <div className="flex items-center gap-6">
+                                        <div className="w-20 h-20 rounded-2xl bg-black overflow-hidden flex-shrink-0 border border-white/10">
+                                            {article.cover_image_path && <img src={article.cover_image_path} className="w-full h-full object-cover" alt="" />}
+                                        </div>
+                                        <div>
+                                            <h3 className="font-black text-xl text-white group-hover:text-primary transition-colors">{article.title}</h3>
+                                            <div className="flex items-center gap-5 text-[10px] font-black text-gray-600 uppercase mt-1.5">
+                                                <span className={`px-2 py-0.5 rounded border ${article.status === 'published' ? 'text-primary border-primary/20 bg-primary/5' : 'text-gray-500 border-white/5'}`}>{article.status}</span>
+                                                <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {new Date(article.created_at).toLocaleDateString()}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button onClick={(e) => { e.stopPropagation(); handleDelete(article.id); }} className="opacity-0 group-hover:opacity-100 p-4 text-red-500 hover:bg-red-500 hover:text-white rounded-2xl transition-all"><Trash2 className="w-5 h-5" /></button>
                                 </div>
-                            </>
-                        ) : (
-                            <div className="flex flex-col items-center text-gray-700 group-hover:text-primary transition-colors">
-                                <UploadCloud className="w-10 h-10 mb-3" />
-                                <span className="font-black text-[10px] uppercase tracking-[0.2em]">{isUploading ? 'Integrating...' : 'Drop Visual Asset'}</span>
+                            ))}
+                        </div>
+                    </div>
+                ) : (
+                    <>
+                        {/* Editor Column */}
+                        <div className="flex-1 flex flex-col border-r border-white/5 overflow-y-auto no-scrollbar">
+                            <header className="sticky top-0 z-40 bg-[#02040a]/80 backdrop-blur-2xl border-b border-white/5 px-10 h-20 flex items-center justify-between">
+                                <div className="flex items-center gap-6">
+                                    <button onClick={() => setView('list')} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl transition-all"><ChevronLeft className="w-5 h-5" /></button>
+                                    <div className="flex flex-col">
+                                        <h4 className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Editor</h4>
+                                        <h2 className="text-sm font-black text-white truncate max-w-[200px]">{title || 'Untitled'}</h2>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <button onClick={handleGenerateSEO} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl transition-all" title="Optimize SEO"><Sparkles className="w-4 h-4 text-purple-400" /></button>
+                                    <button onClick={() => { const next = !isPublished; setIsPublished(next); handleSave(false, next); }} className={`px-6 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${isPublished ? 'bg-red-500/10 text-red-500' : 'bg-primary text-white shadow-xl shadow-primary/20'}`}>{isPublished ? 'Retract' : 'Broadcast'}</button>
+                                </div>
+                            </header>
+
+                            <div className="p-10 md:p-16 max-w-4xl mx-auto w-full flex flex-col gap-10">
+                                <div className="space-y-6">
+                                    <input type="text" placeholder="Narrative Title." className="w-full bg-transparent border-none text-5xl md:text-7xl font-black tracking-tighter text-white placeholder-white/[0.03] focus:ring-0 p-0" value={title} onChange={(e) => setTitle(e.target.value)} />
+                                    <div className={`relative w-full rounded-3xl border-2 border-dashed overflow-hidden group ${coverImage ? 'border-transparent aspect-video' : 'border-white/5 bg-white/[0.01] h-48 flex items-center justify-center cursor-pointer'}`} onClick={() => !coverImage && document.getElementById('cover-image-upload').click()}>
+                                        {coverImage ? <img src={coverImage} className="w-full h-full object-cover" /> : <div className="flex flex-col items-center gap-2"><ImageIcon className="w-8 h-8 text-gray-800" /><span className="text-[10px] font-black text-gray-700 uppercase">Cover Asset</span></div>}
+                                        <input type="file" id="cover-image-upload" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                                    </div>
+                                    <RichEditor initialContent={richContent} onChange={(val) => setRichContent(val)} keyTrigger={editorResetKey} />
+                                </div>
                             </div>
-                        )}
-                        <input type="file" id="cover-image-upload" className="hidden" accept="image/*" onChange={handleImageUpload} />
-                    </div>
-
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between mb-2">
-                            <label className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] flex items-center gap-2 px-2">
-                                <ImageIcon className="w-3 h-3" /> Neural Visual Prompt
-                            </label>
-                            <button onClick={handleGenerateImagePrompt} disabled={isGeneratingPrompt || !content} className="text-[10px] font-black text-primary hover:text-white transition-colors uppercase tracking-widest px-2 group">
-                                {isGeneratingPrompt ? 'Synthesizing...' : 'Architect Prompt'}
-                                <ArrowRight className="w-3 h-3 inline-block ml-2 group-hover:translate-x-1 transition-transform" />
-                            </button>
                         </div>
-                        <input
-                            type="text"
-                            placeholder="Construct the visual identity of this narrative..."
-                            className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-4 text-xs font-bold text-gray-400 placeholder-gray-800 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 outline-none transition-all"
-                            value={imagePrompt}
-                            onChange={(e) => setImagePrompt(e.target.value)}
-                        />
-                    </div>
 
-                    <div className="space-y-8">
-                        <input
-                            type="text"
-                            placeholder="Define the Title."
-                            className="w-full bg-transparent border-none text-6xl md:text-8xl font-black tracking-tighter text-white placeholder-white/5 outline-none focus:ring-0 p-0 leading-[0.9]"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                        />
+                        {/* Chat Assistant Column */}
+                        <div className="w-[450px] flex flex-col bg-white/[0.01] relative">
+                            <div className="p-6 border-b border-white/5 flex items-center justify-between bg-[#02040a]/50">
+                                <div className="flex items-center gap-3">
+                                    <MessageSquare className="w-5 h-5 text-primary" />
+                                    <h3 className="font-black text-xs uppercase tracking-widest">Studio Assistant</h3>
+                                </div>
+                                <Cpu className="w-4 h-4 text-gray-700" title="Stateful Llama Session" />
+                            </div>
 
-                        <div className="relative flex flex-col min-h-[400px]">
-                            <textarea
-                                placeholder="Commence the synthesis... Use Markdown for structural clarity."
-                                className="w-full flex-1 bg-transparent border-none text-xl leading-relaxed text-gray-400 placeholder-white/5 outline-none focus:ring-0 resize-none font-light p-0 custom-scrollbar"
-                                value={content}
-                                onChange={(e) => setContent(e.target.value)}
-                            />
-
-                            <AnimatePresence>
-                                {content.length > 50 && (
-                                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="absolute bottom-6 right-0">
-                                        <button onClick={handleGenerateBrief} disabled={isGenerating} className="bg-primary/10 text-primary border border-primary/30 backdrop-blur-xl px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-primary/20 transition-all flex items-center gap-3 shadow-2xl disabled:opacity-50">
-                                            {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
-                                            AI Synthesis
-                                        </button>
-                                    </motion.div>
+                            <div className="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar">
+                                {chatMessages.map((msg, idx) => (
+                                    <div key={idx} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+                                        <div className={`max-w-[95%] p-4 rounded-2xl text-xs leading-relaxed ${msg.role === 'user' ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-white/5 text-gray-300 border border-white/5'}`}>
+                                            {msg.role === 'assistant' ? (
+                                                <div dangerouslySetInnerHTML={{ __html: msg.content.replace(/\n/g, '<br/>') }} />
+                                            ) : (
+                                                <p>{msg.content}</p>
+                                            )}
+                                        </div>
+                                        {msg.role === 'assistant' && msg.content.length > 100 && (
+                                            <button onClick={() => pushToEditor(msg.content)} className="mt-2 flex items-center gap-2 text-[9px] font-black uppercase text-gray-500 hover:text-white transition-colors px-2">
+                                                <Copy className="w-3 h-3" /> Push result to editor
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                                {isChatLoading && (
+                                    <div className="flex items-center gap-3 text-gray-600 animate-pulse">
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        <span className="text-[10px] font-black uppercase tracking-widest">Analyzing context...</span>
+                                    </div>
                                 )}
-                            </AnimatePresence>
-                        </div>
-                    </div>
+                                <div ref={chatEndRef} />
+                            </div>
 
-                    <div className="mt-20 pt-20 border-t border-white/5">
-                        <h2 className="text-3xl font-black tracking-tighter mb-10 flex items-center gap-4">
-                            <BarChart2 className="w-8 h-8 text-primary" /> Metrics & Engagement.
-                        </h2>
-                        <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-10 shadow-2xl">
-                            <AnalyticsChart />
+                            <form onSubmit={handleSendMessage} className="p-6 bg-[#02040a] border-t border-white/5">
+                                <div className="relative group">
+                                    <input 
+                                        type="text" 
+                                        value={chatInput} 
+                                        onChange={(e) => setChatInput(e.target.value)}
+                                        placeholder="Command your assistant..." 
+                                        className="w-full bg-white/5 border border-white/10 rounded-2xl pl-6 pr-14 py-4 text-xs font-bold focus:border-primary/50 outline-none transition-all placeholder-gray-700"
+                                    />
+                                    <button type="submit" disabled={isChatLoading} className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-primary text-white rounded-xl shadow-lg hover:scale-105 transition-transform disabled:opacity-50">
+                                        <Send className="w-4 h-4" />
+                                    </button>
+                                </div>
+                                <p className="text-[8px] text-gray-700 font-bold uppercase mt-3 text-center tracking-widest">Multi-turn journalistic session active</p>
+                            </form>
                         </div>
-                    </div>
-                </div>
+                    </>
+                )}
             </main>
         </div>
     );

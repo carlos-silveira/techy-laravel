@@ -1,0 +1,429 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Head, Link } from '@inertiajs/react';
+import axios from 'axios';
+import { toast } from 'sonner';
+import {
+  motion, useScroll, useTransform, useMotionTemplate,
+  useMotionValue, useSpring, AnimatePresence
+} from 'framer-motion';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import CommandPalette from '@/Components/CommandPalette';
+import { ArrowRight, Zap, BookOpen, Clock } from 'lucide-react';
+
+dayjs.extend(relativeTime);
+
+export default function Welcome({ articles, editorsChoice, dailyBrief }) {
+  const { scrollYProgress } = useScroll();
+
+  // Dynamic Mouse Spotlight
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const smoothX = useSpring(mouseX, { damping: 50, stiffness: 400 });
+  const smoothY = useSpring(mouseY, { damping: 50, stiffness: 400 });
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [mouseX, mouseY]);
+
+  const backgroundGlow = useMotionTemplate`radial-gradient(900px circle at ${smoothX}px ${smoothY}px, rgba(43, 124, 238, 0.06), transparent 80%)`;
+
+  const [email, setEmail] = useState('');
+  const [isSubscribing, setIsSubscribing] = useState(false);
+
+  const handleSubscribe = async (e) => {
+    e.preventDefault();
+    if (!email) return;
+    setIsSubscribing(true);
+    try {
+      await axios.post('/api/subscribe', { email });
+      toast.success('You\'re on the list!');
+      setEmail('');
+    } catch (error) {
+      toast.error('Subscription failed. Please try again.');
+    } finally {
+      setIsSubscribing(false);
+    }
+  };
+
+  // Featured article is the first one
+  const featured = articles?.[0];
+  const gridArticles = articles?.slice(1, 7) || [];
+  const tickerItems = articles?.slice(0, 8) || [];
+
+  return (
+    <div className="min-h-screen bg-[#02040a] text-white font-sans selection:bg-primary/30 overflow-x-hidden">
+      <Head title="Techy News — AI-Powered Tech Intelligence" />
+      <CommandPalette />
+
+      {/* Interactive Cursor Spotlight */}
+      <motion.div
+        className="pointer-events-none fixed inset-0 z-0 transition-opacity duration-300"
+        style={{ background: backgroundGlow }}
+      />
+
+      {/* Ambient Glows */}
+      <div className="fixed top-[-20%] right-[-10%] w-[60vw] h-[60vw] bg-primary/8 rounded-full blur-[200px] pointer-events-none mix-blend-screen z-0"></div>
+      <div className="fixed bottom-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-purple-600/8 rounded-full blur-[150px] pointer-events-none mix-blend-screen z-0"></div>
+
+      {/* ===== NAVBAR ===== */}
+      <nav className="fixed w-full border-b border-white/5 bg-[#02040a]/80 backdrop-blur-xl z-50">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center"
+          >
+            <Link href="/">
+              <img src="/img/logo_wbc.png" alt="Techy News" className="h-8 w-auto" />
+            </Link>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center space-x-8"
+          >
+            <Link href="/archive" className="text-sm font-black uppercase tracking-widest text-gray-400 hover:text-white transition-colors">Archive</Link>
+            <Link href="/about" className="text-sm font-black uppercase tracking-widest text-gray-400 hover:text-white transition-colors">About</Link>
+            <Link href="/dashboard" className="text-sm font-bold bg-white text-black hover:bg-gray-200 px-5 py-2.5 rounded-lg transition-all hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.12)]">
+              Studio
+            </Link>
+          </motion.div>
+        </div>
+      </nav>
+
+      <main className="relative z-10 pt-20">
+
+        {/* ===== HERO: FEATURED ARTICLE ===== */}
+        {featured && (
+          <section className="relative min-h-[92vh] flex flex-col justify-end overflow-hidden">
+            {/* Background image with parallax */}
+            <motion.div
+              className="absolute inset-0"
+              style={{ scale: useTransform(scrollYProgress, [0, 0.3], [1.05, 1]) }}
+            >
+              {featured.cover_image_path ? (
+                <div
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{ backgroundImage: `url(${featured.cover_image_path})` }}
+                />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-[#02040a] to-purple-900/20" />
+              )}
+              {/* Multi-layer gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#02040a] via-[#02040a]/70 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#02040a]/60 to-transparent" />
+            </motion.div>
+
+            {/* Hero content */}
+            <div className="relative z-10 max-w-7xl mx-auto px-6 pb-20 w-full">
+              <motion.div
+                initial={{ opacity: 0, y: 60 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+                className="max-w-3xl"
+              >
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8, delay: 0.1 }}
+                  className="inline-flex items-center gap-3 bg-primary/10 border border-primary/20 rounded-full px-5 py-2 mb-8 backdrop-blur-md"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Featured Story</span>
+                </motion.div>
+
+                <Link href={`/article/${featured.slug}`}>
+                  <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[0.9] mb-6 hover:text-primary transition-colors duration-500 cursor-pointer">
+                    {featured.title}
+                  </h1>
+                </Link>
+
+                <p className="text-xl text-gray-400 font-light leading-relaxed mb-10 max-w-2xl">
+                  {featured.ai_summary}
+                </p>
+
+                <div className="flex items-center gap-8">
+                  <Link
+                    href={`/article/${featured.slug}`}
+                    className="inline-flex items-center gap-3 bg-white text-black font-black px-8 py-4 rounded-xl hover:scale-105 transition-transform shadow-[0_0_40px_rgba(255,255,255,0.15)] uppercase tracking-wider text-sm group"
+                  >
+                    Read Story
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                  <div className="flex items-center gap-2 text-gray-500 text-xs font-black uppercase tracking-widest">
+                    <Clock className="w-4 h-4" />
+                    {featured.reading_time_minutes || '5'} min read
+                    <span className="mx-2">·</span>
+                    {dayjs(featured.updated_at).fromNow()}
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Scroll indicator */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.5, duration: 0.8 }}
+              className="absolute bottom-8 right-8 text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 flex flex-col items-center gap-2"
+            >
+              <div className="w-px h-12 bg-gradient-to-b from-transparent to-gray-700"></div>
+              Scroll
+            </motion.div>
+          </section>
+        )}
+
+        {/* ===== AI TICKER / BRIEF RIBBON ===== */}
+        {dailyBrief && (
+          <div className="border-y border-white/5 bg-white/[0.02] backdrop-blur-xl py-4 overflow-hidden">
+            <div className="flex items-center">
+              <div className="flex-shrink-0 flex items-center gap-3 bg-primary px-5 py-2 z-10 mr-8">
+                <Zap className="w-3.5 h-3.5 text-white" />
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white whitespace-nowrap">AI Brief</span>
+              </div>
+              {/* Scrolling Ticker */}
+              <div className="overflow-hidden flex-1">
+                <motion.div
+                  className="flex whitespace-nowrap"
+                  animate={{ x: [0, -1200] }}
+                  transition={{ duration: 25, ease: 'linear', repeat: Infinity }}
+                >
+                  {[dailyBrief, dailyBrief].map((brief, i) => (
+                    <span key={i} className="text-sm text-gray-400 font-light mr-24 inline-block">{brief}</span>
+                  ))}
+                </motion.div>
+              </div>
+              <div className="flex-shrink-0 ml-8 text-[10px] font-black uppercase tracking-widest text-gray-700 pr-6">
+                {dayjs().format('MMM D, YYYY')}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ===== EDITOR'S CHOICE ===== */}
+        {editorsChoice && editorsChoice.length > 0 && (
+          <section className="py-20 px-6 max-w-7xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7 }}
+            >
+              <div className="flex items-center justify-between mb-12">
+                <div className="flex items-center gap-4">
+                  <div className="w-1 h-8 bg-amber-400 rounded-full"></div>
+                  <h2 className="text-4xl font-black tracking-tighter">Editor's Choice</h2>
+                </div>
+                <Link href="/archive" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-white transition-colors flex items-center gap-2 group">
+                  View All <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </div>
+
+              {/* Horizontal scroll strip on mobile, 3-col on desktop */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {editorsChoice.map((article, index) => (
+                  <motion.div
+                    key={article.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    <Link href={`/article/${article.slug}`} className="group block">
+                      <div className="relative rounded-[2rem] overflow-hidden bg-white/[0.03] border border-white/5 group-hover:border-amber-400/30 transition-all duration-500">
+                        <div
+                          className="h-52 bg-gradient-to-br from-white/10 to-black/50 bg-cover bg-center relative overflow-hidden"
+                          style={article.cover_image_path ? { backgroundImage: `url(${article.cover_image_path})` } : {}}
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#02040a] to-transparent opacity-60" />
+                          <div className="absolute inset-0 group-hover:bg-amber-400/5 transition-colors duration-500" />
+                          <span className="absolute top-4 right-4 text-[10px] font-black uppercase tracking-widest bg-amber-400/20 text-amber-300 border border-amber-400/30 px-3 py-1.5 rounded-full backdrop-blur-md">
+                            ★ Editor's Pick
+                          </span>
+                        </div>
+                        <div className="p-7">
+                          <div className="text-[10px] font-black text-amber-400/60 uppercase tracking-[0.2em] mb-3">
+                            {dayjs(article.updated_at).format('MMM D, YYYY')}
+                          </div>
+                          <h3 className="text-xl font-black tracking-tight text-white group-hover:text-amber-200 transition-colors duration-300 line-clamp-2 leading-tight mb-3">
+                            {article.title}
+                          </h3>
+                          <p className="text-sm text-gray-600 font-light line-clamp-2 leading-relaxed">
+                            {article.ai_summary}
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </section>
+        )}
+
+        {/* ===== BENTO ARTICLE GRID ===== */}
+        <section className="py-20 px-6 max-w-7xl mx-auto border-t border-white/5">
+          <div className="flex items-center justify-between mb-12">
+            <div className="flex items-center gap-4">
+              <div className="w-1 h-8 bg-primary rounded-full"></div>
+              <div>
+                <span className="text-[10px] font-black text-primary uppercase tracking-[0.25em] block mb-1">Latest Discoveries</span>
+                <h2 className="text-4xl font-black tracking-tighter">Now Reading</h2>
+              </div>
+            </div>
+            <Link href="/archive" className="hidden md:flex text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-white transition-colors items-center gap-2 group">
+              Full Archive <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+
+          {gridArticles.length === 0 ? (
+            <div className="py-32 text-center text-gray-700 font-light text-xl border border-white/5 rounded-[2rem]">
+              The intelligence pipeline is warming up. Check back shortly.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {gridArticles.map((article, index) => {
+                const isLarge = index === 0;
+                return (
+                  <motion.div
+                    key={article.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: '-60px' }}
+                    transition={{ duration: 0.7, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
+                    className={isLarge ? 'lg:col-span-2 lg:row-span-2' : ''}
+                  >
+                    <Link href={`/article/${article.slug}`} className="group block h-full">
+                      <div className={`h-full bg-white/[0.02] border border-white/5 group-hover:border-primary/30 rounded-[2rem] overflow-hidden transition-all duration-500 flex flex-col ${isLarge ? 'min-h-[500px]' : 'min-h-[280px]'}`}>
+                        {article.cover_image_path && (
+                          <div
+                            className={`w-full bg-cover bg-center flex-shrink-0 relative overflow-hidden ${isLarge ? 'h-72' : 'h-40'}`}
+                            style={{ backgroundImage: `url(${article.cover_image_path})` }}
+                          >
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#02040a] via-transparent to-transparent" />
+                            <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-colors duration-700 mix-blend-overlay" />
+                          </div>
+                        )}
+                        {!article.cover_image_path && (
+                          <div className={`w-full flex-shrink-0 relative overflow-hidden bg-gradient-to-br from-white/5 to-transparent flex items-center justify-center ${isLarge ? 'h-72' : 'h-40'}`}>
+                            <span className="text-[80px] font-black text-white/[0.03] absolute bottom-2 right-4 leading-none select-none">
+                              {String(index + 2).padStart(2, '0')}
+                            </span>
+                            <BookOpen className="w-10 h-10 text-white/10" />
+                          </div>
+                        )}
+                        <div className="p-7 flex flex-col flex-1 justify-between">
+                          <div>
+                            <div className="flex items-center justify-between mb-4">
+                              <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">
+                                {dayjs(article.updated_at).fromNow()}
+                              </span>
+                              {article.tags?.[0] && (
+                                <span className="text-[10px] font-black bg-white/5 text-gray-500 px-2.5 py-1 rounded-full">
+                                  #{article.tags[0]}
+                                </span>
+                              )}
+                            </div>
+                            <h3 className={`font-black tracking-tight text-white group-hover:text-primary transition-colors duration-300 leading-tight line-clamp-3 ${isLarge ? 'text-3xl md:text-4xl' : 'text-xl'}`}>
+                              {article.title}
+                            </h3>
+                          </div>
+                          {(isLarge || !article.cover_image_path) && (
+                            <p className="text-sm text-gray-600 font-light line-clamp-2 leading-relaxed mt-4">
+                              {article.ai_summary}
+                            </p>
+                          )}
+                          <div className="mt-5 flex items-center gap-2 text-gray-700 text-[10px] font-black uppercase tracking-widest">
+                            <Clock className="w-3 h-3" />
+                            {article.reading_time_minutes || '5'} min
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
+
+          <div className="mt-10 text-center">
+            <Link
+              href="/archive"
+              className="inline-flex items-center gap-3 border border-white/10 text-gray-400 hover:text-white hover:border-white/20 px-8 py-4 rounded-xl font-black text-xs uppercase tracking-widest transition-all hover:bg-white/5 group"
+            >
+              Load All Articles
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+        </section>
+
+        {/* ===== NEWSLETTER ===== */}
+        <section className="py-24 px-6 border-t border-white/5">
+          <div className="max-w-4xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+              className="bg-white/[0.03] border border-white/10 rounded-[3rem] p-14 md:p-20 relative overflow-hidden group"
+            >
+              <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/10 rounded-full blur-[100px] pointer-events-none transition-transform duration-700 group-hover:scale-125"></div>
+              <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-purple-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+              <div className="relative z-10 text-center">
+                <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em] block mb-6">AI Weekly Digest</span>
+                <h2 className="text-5xl md:text-6xl font-black mb-6 tracking-tighter leading-[0.9]">
+                  Intelligence,<br />delivered weekly.
+                </h2>
+                <p className="text-gray-500 mb-12 font-light text-lg max-w-lg mx-auto leading-relaxed">
+                  Every Friday: AI research breakthroughs, engineering insights, and curated tools — synthesized by machine, filtered by humans.
+                </p>
+                <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-xl mx-auto">
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    className="flex-1 w-full px-6 py-4 rounded-xl bg-black/60 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all text-sm"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isSubscribing}
+                    className="w-full sm:w-auto px-8 py-4 rounded-xl bg-white text-black font-black tracking-wider uppercase text-sm hover:scale-105 hover:bg-gray-200 transition-all disabled:opacity-70 flex items-center justify-center gap-2"
+                  >
+                    {isSubscribing ? 'Joining...' : 'Subscribe'}
+                  </button>
+                </form>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ===== FOOTER ===== */}
+        <footer className="border-t border-white/5 py-12">
+          <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-2.5">
+              <img src="/img/logo_wbc.png" alt="Techy News" className="h-7 w-auto opacity-50 hover:opacity-100 transition-opacity" />
+            </div>
+            <p className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-700">
+              © 2026 · AI-Powered by Carlos Silveira
+            </p>
+            <div className="flex items-center space-x-8">
+              <Link href="/archive" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-white transition-colors">Archive</Link>
+              <Link href="/about" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-white transition-colors">About</Link>
+              <a href="https://github.com/carlos-silveira" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-white transition-colors">GitHub</a>
+            </div>
+          </div>
+        </footer>
+
+      </main>
+    </div>
+  );
+}
