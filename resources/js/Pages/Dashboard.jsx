@@ -9,11 +9,425 @@ import {
     ArrowRight, Info, Edit3, Trash2, FileText, Clock, Eye,
     ChevronLeft, Sparkles, Globe, FileEdit, Save, ShieldCheck,
     Lightbulb, RefreshCw, MessageSquare, Send, Copy, ChevronRight,
-    Cpu
+    Cpu, Wand2, RotateCcw, ThumbsUp, ThumbsDown, Rocket, 
+    ArrowLeft, Check, ChevronDown, Newspaper
 } from 'lucide-react';
 import AnalyticsChart from '@/Components/AnalyticsChart';
 import RichEditor from '@/Components/RichEditor';
 
+/* ──────────────────────────────────────────────
+   WIZARD STEPS COMPONENT — No-code guided flow
+   ────────────────────────────────────────────── */
+const WIZARD_STEPS = ['Discover', 'Generate', 'Review', 'Publish'];
+
+function WizardView({ onComplete, onSwitchToEditor }) {
+    const [step, setStep] = useState(0);
+    const [ideas, setIdeas] = useState([]);
+    const [selectedIdea, setSelectedIdea] = useState(null);
+    const [customTitle, setCustomTitle] = useState('');
+    const [draft, setDraft] = useState('');
+    const [meta, setMeta] = useState({ summary: '', meta_description: '', seo_keywords: '', tags: [] });
+    const [isLoading, setIsLoading] = useState(false);
+    const [feedback, setFeedback] = useState('');
+    const [showFeedback, setShowFeedback] = useState(false);
+
+    // Step 1: Discover
+    const fetchIdeas = async () => {
+        setIsLoading(true);
+        try {
+            const res = await axios.get('/api/generate-ideas');
+            setIdeas(res.data.ideas || []);
+            toast.success('Found trending stories!');
+        } catch {
+            toast.error('Could not fetch trending stories.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const pickIdea = (idea) => {
+        setSelectedIdea(idea);
+        setStep(1);
+        generateDraft(idea.title, idea.prompt);
+    };
+
+    const useCustomTitle = () => {
+        if (!customTitle.trim()) return toast.error('Please type a topic first.');
+        const idea = { title: customTitle, prompt: `Write an in-depth article about: ${customTitle}` };
+        setSelectedIdea(idea);
+        setStep(1);
+        generateDraft(idea.title, idea.prompt);
+    };
+
+    // Step 2: Generate
+    const generateDraft = async (title, prompt) => {
+        setIsLoading(true);
+        setDraft('');
+        try {
+            const res = await axios.post('/api/generate-draft', { title, prompt });
+            setDraft(res.data.draft || '');
+            setStep(2);
+            toast.success('Article ready for review!');
+        } catch {
+            toast.error('Generation failed. Try again.');
+            setStep(0);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Step 3: Regenerate
+    const regenerate = async () => {
+        setIsLoading(true);
+        setShowFeedback(false);
+        try {
+            const res = await axios.post('/api/regenerate-draft', { 
+                title: selectedIdea.title, 
+                prompt: selectedIdea.prompt,
+                feedback: feedback || 'Make it better, more engaging.',
+                previous_draft: draft
+            });
+            setDraft(res.data.draft || '');
+            setFeedback('');
+            toast.success('Regenerated!');
+        } catch {
+            toast.error('Regeneration failed.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const approve = async () => {
+        setIsLoading(true);
+        try {
+            // Generate metadata
+            const res = await axios.post('/api/generate-article-meta', { 
+                title: selectedIdea.title, 
+                content: draft 
+            });
+            setMeta(res.data.meta || {});
+            setStep(3);
+        } catch {
+            // Fallback meta
+            setMeta({ 
+                summary: draft.replace(/<[^>]*>/g, '').substring(0, 200),
+                meta_description: draft.replace(/<[^>]*>/g, '').substring(0, 155),
+                seo_keywords: '',
+                tags: []
+            });
+            setStep(3);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Step 4: Publish
+    const publish = async () => {
+        setIsLoading(true);
+        try {
+            const res = await axios.post('/articles', {
+                title: selectedIdea.title,
+                content: draft,
+                is_published: true,
+                is_editors_choice: true,
+                meta_description: meta.meta_description,
+                seo_keywords: meta.seo_keywords,
+                tags: meta.tags || [],
+            });
+            toast.success('🚀 Published! Your article is now live.');
+            onComplete(res.data.article);
+        } catch {
+            toast.error('Publishing failed.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Clean HTML for preview
+    const sanitizeForPreview = (html) => {
+        if (!html) return '';
+        let content = html;
+        try { const parsed = JSON.parse(content); if (typeof parsed === 'string') content = parsed; } catch {}
+        content = content.replace(/\\\//g, '/').replace(/^"|"$/g, '');
+        return content;
+    };
+
+    return (
+        <div className="flex-1 overflow-y-auto">
+            {/* Step Progress Bar */}
+            <div className="sticky top-0 z-40 bg-[#02040a]/90 backdrop-blur-2xl border-b border-white/5 px-10 py-6">
+                <div className="max-w-3xl mx-auto flex items-center gap-3">
+                    {WIZARD_STEPS.map((name, i) => (
+                        <React.Fragment key={name}>
+                            <div className={`flex items-center gap-2 transition-all ${
+                                i < step ? 'text-emerald-400' : i === step ? 'text-primary' : 'text-gray-700'
+                            }`}>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all ${
+                                    i < step ? 'bg-emerald-500/20 border border-emerald-500/30' : 
+                                    i === step ? 'bg-primary/20 border border-primary/30 shadow-lg shadow-primary/10' : 
+                                    'bg-white/5 border border-white/10'
+                                }`}>
+                                    {i < step ? <Check className="w-4 h-4" /> : i + 1}
+                                </div>
+                                <span className="text-[10px] font-black uppercase tracking-widest hidden sm:block">{name}</span>
+                            </div>
+                            {i < WIZARD_STEPS.length - 1 && (
+                                <div className={`flex-1 h-[2px] rounded-full transition-all ${i < step ? 'bg-emerald-500/30' : 'bg-white/5'}`} />
+                            )}
+                        </React.Fragment>
+                    ))}
+                </div>
+            </div>
+
+            <div className="max-w-3xl mx-auto px-10 py-16">
+                <AnimatePresence mode="wait">
+                    {/* ─── STEP 1: DISCOVER ─── */}
+                    {step === 0 && (
+                        <motion.div key="discover" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-10">
+                            <div>
+                                <div className="flex items-center gap-3 text-primary mb-4">
+                                    <Newspaper className="w-5 h-5" />
+                                    <span className="text-[10px] font-black uppercase tracking-[0.3em]">Step 1 of 4</span>
+                                </div>
+                                <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white mb-3">What's the story?</h1>
+                                <p className="text-gray-500 text-lg">Pick a trending topic or type your own idea.</p>
+                            </div>
+
+                            {/* Custom topic input */}
+                            <div className="flex gap-3">
+                                <input
+                                    type="text"
+                                    value={customTitle}
+                                    onChange={(e) => setCustomTitle(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && useCustomTitle()}
+                                    placeholder="Type your own topic..."
+                                    className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold focus:border-primary/50 outline-none transition-all placeholder-gray-700"
+                                />
+                                <button onClick={useCustomTitle} className="px-6 py-4 bg-primary text-white font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-primary/80 transition-all shadow-lg shadow-primary/20">
+                                    Use This
+                                </button>
+                            </div>
+
+                            <div className="flex items-center gap-4 text-gray-600">
+                                <div className="flex-1 h-px bg-white/5" />
+                                <span className="text-[10px] font-black uppercase tracking-widest">or pick a trending story</span>
+                                <div className="flex-1 h-px bg-white/5" />
+                            </div>
+
+                            {ideas.length === 0 ? (
+                                <button 
+                                    onClick={fetchIdeas} 
+                                    disabled={isLoading}
+                                    className="w-full py-8 rounded-3xl border-2 border-dashed border-white/10 hover:border-primary/30 transition-all flex flex-col items-center gap-4 group"
+                                >
+                                    {isLoading ? (
+                                        <>
+                                            <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                                            <span className="text-sm font-bold text-gray-500">Scanning TechCrunch, The Verge, Ars Technica, Hacker News...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                <Search className="w-8 h-8 text-primary" />
+                                            </div>
+                                            <span className="text-sm font-bold text-gray-400 group-hover:text-white transition-colors">🔍 Find Trending Stories</span>
+                                            <span className="text-[10px] text-gray-700 font-bold uppercase tracking-widest">Click to scan 4 news sources</span>
+                                        </>
+                                    )}
+                                </button>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">{ideas.length} angles found</span>
+                                        <button onClick={fetchIdeas} disabled={isLoading} className="text-[10px] font-black text-primary uppercase tracking-widest flex items-center gap-2 hover:text-white transition-colors">
+                                            <RefreshCw className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} /> Refresh
+                                        </button>
+                                    </div>
+                                    {ideas.map((idea, idx) => (
+                                        <button 
+                                            key={idx} 
+                                            onClick={() => pickIdea(idea)} 
+                                            className="w-full text-left p-6 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-primary/30 hover:bg-white/[0.05] transition-all group"
+                                        >
+                                            <h3 className="text-lg font-black text-white group-hover:text-primary transition-colors mb-2">{idea.title}</h3>
+                                            <p className="text-sm text-gray-500 leading-relaxed">{idea.prompt}</p>
+                                            <div className="mt-4 flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Wand2 className="w-3 h-3" /> Click to generate article <ArrowRight className="w-3 h-3" />
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </motion.div>
+                    )}
+
+                    {/* ─── STEP 2: GENERATING ─── */}
+                    {step === 1 && (
+                        <motion.div key="generating" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="flex flex-col items-center justify-center py-32 space-y-8">
+                            <div className="relative">
+                                <div className="w-24 h-24 rounded-3xl bg-primary/10 flex items-center justify-center animate-pulse">
+                                    <Wand2 className="w-12 h-12 text-primary" />
+                                </div>
+                                <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center animate-bounce">
+                                    <Sparkles className="w-3 h-3 text-white" />
+                                </div>
+                            </div>
+                            <div className="text-center">
+                                <h2 className="text-3xl font-black text-white mb-3">Techy AI is writing...</h2>
+                                <p className="text-gray-500 text-sm">Crafting a daily.dev-quality article on</p>
+                                <p className="text-primary font-bold mt-1">"{selectedIdea?.title}"</p>
+                            </div>
+                            <div className="flex gap-2">
+                                {[0, 1, 2].map(i => (
+                                    <div key={i} className="w-3 h-3 rounded-full bg-primary/30 animate-bounce" style={{ animationDelay: `${i * 150}ms` }} />
+                                ))}
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {/* ─── STEP 3: REVIEW ─── */}
+                    {step === 2 && (
+                        <motion.div key="review" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
+                            <div>
+                                <div className="flex items-center gap-3 text-primary mb-4">
+                                    <Eye className="w-5 h-5" />
+                                    <span className="text-[10px] font-black uppercase tracking-[0.3em]">Step 3 of 4</span>
+                                </div>
+                                <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white mb-3">Review your article</h1>
+                                <p className="text-gray-500 text-lg">Read through it. Approve to publish, or regenerate with feedback.</p>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex gap-4">
+                                <button 
+                                    onClick={approve} 
+                                    disabled={isLoading}
+                                    className="flex-1 py-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-black text-sm uppercase tracking-widest hover:bg-emerald-500/20 transition-all flex items-center justify-center gap-3"
+                                >
+                                    {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ThumbsUp className="w-5 h-5" />}
+                                    Approve & Continue
+                                </button>
+                                <button 
+                                    onClick={() => setShowFeedback(!showFeedback)}
+                                    className="flex-1 py-5 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 font-black text-sm uppercase tracking-widest hover:bg-orange-500/20 transition-all flex items-center justify-center gap-3"
+                                >
+                                    <RotateCcw className="w-5 h-5" /> Regenerate
+                                </button>
+                            </div>
+
+                            {/* Feedback Input (for regeneration) */}
+                            <AnimatePresence>
+                                {showFeedback && (
+                                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                                        <div className="p-6 rounded-2xl bg-orange-500/5 border border-orange-500/10 space-y-4">
+                                            <h4 className="text-sm font-black text-orange-400 uppercase tracking-widest">What should change?</h4>
+                                            <textarea
+                                                value={feedback}
+                                                onChange={(e) => setFeedback(e.target.value)}
+                                                placeholder="e.g. 'Make it shorter', 'Focus more on React', 'Use a funnier tone'..."
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-700 focus:border-orange-500/30 outline-none transition-all resize-none h-24"
+                                            />
+                                            <button
+                                                onClick={regenerate}
+                                                disabled={isLoading}
+                                                className="w-full py-3 rounded-xl bg-orange-500 text-white font-black text-xs uppercase tracking-widest hover:bg-orange-600 transition-all flex items-center justify-center gap-2"
+                                            >
+                                                {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+                                                Regenerate Now
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
+                            {/* Article Preview */}
+                            <div className="rounded-3xl border border-white/10 overflow-hidden bg-white/[0.02]">
+                                <div className="px-8 py-6 border-b border-white/5 bg-white/[0.02]">
+                                    <h2 className="text-2xl font-black text-white tracking-tight">{selectedIdea?.title}</h2>
+                                    <div className="flex items-center gap-4 mt-2 text-[10px] font-black text-gray-600 uppercase tracking-widest">
+                                        <span>Preview</span>
+                                        <span className="w-1 h-1 bg-gray-800 rounded-full" />
+                                        <span>{Math.ceil((draft || '').split(' ').length / 200)} min read</span>
+                                    </div>
+                                </div>
+                                <div className="px-8 py-8 prose prose-invert prose-primary max-w-none prose-p:text-gray-400 prose-p:font-light prose-p:leading-relaxed prose-headings:font-black prose-headings:text-white prose-strong:text-white prose-code:text-emerald-400 prose-pre:bg-white/[0.03] prose-pre:border prose-pre:border-white/10 prose-pre:rounded-2xl">
+                                    <div dangerouslySetInnerHTML={{ __html: sanitizeForPreview(draft) }} />
+                                </div>
+                            </div>
+
+                            {/* Open in Advanced Editor */}
+                            <button 
+                                onClick={() => onSwitchToEditor(selectedIdea?.title || '', draft)}
+                                className="w-full py-3 rounded-xl text-gray-600 hover:text-white transition-colors text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2"
+                            >
+                                <Edit3 className="w-3 h-3" /> Open in Advanced Editor instead
+                            </button>
+                        </motion.div>
+                    )}
+
+                    {/* ─── STEP 4: PUBLISH ─── */}
+                    {step === 3 && (
+                        <motion.div key="publish" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
+                            <div>
+                                <div className="flex items-center gap-3 text-emerald-400 mb-4">
+                                    <Rocket className="w-5 h-5" />
+                                    <span className="text-[10px] font-black uppercase tracking-[0.3em]">Step 4 of 4</span>
+                                </div>
+                                <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white mb-3">Ready to publish!</h1>
+                                <p className="text-gray-500 text-lg">Review the details below and hit publish to go live.</p>
+                            </div>
+
+                            {/* Metadata Card */}
+                            <div className="space-y-6 p-8 rounded-3xl bg-white/[0.03] border border-white/10">
+                                <div>
+                                    <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest block mb-2">Title</label>
+                                    <h2 className="text-2xl font-black text-white">{selectedIdea?.title}</h2>
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest block mb-2">Summary</label>
+                                    <p className="text-sm text-gray-400 leading-relaxed">{meta.summary || 'Auto-generated summary'}</p>
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest block mb-2">SEO Description</label>
+                                    <p className="text-xs text-gray-500">{meta.meta_description || 'Auto-generated'}</p>
+                                </div>
+                                {meta.tags && meta.tags.length > 0 && (
+                                    <div>
+                                        <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest block mb-3">Tags</label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {meta.tags.map((tag, i) => (
+                                                <span key={i} className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold">{tag}</span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Publish Button */}
+                            <button
+                                onClick={publish}
+                                disabled={isLoading}
+                                className="w-full py-6 rounded-2xl bg-gradient-to-r from-primary to-purple-600 text-white font-black text-lg uppercase tracking-widest hover:opacity-90 transition-all shadow-2xl shadow-primary/20 flex items-center justify-center gap-3"
+                            >
+                                {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Rocket className="w-6 h-6" />}
+                                Publish to techynews.lat
+                            </button>
+
+                            {/* Go Back */}
+                            <button onClick={() => setStep(2)} className="w-full py-3 rounded-xl text-gray-600 hover:text-white transition-colors text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2">
+                                <ArrowLeft className="w-3 h-3" /> Back to review
+                            </button>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+        </div>
+    );
+}
+
+/* ──────────────────────────────────────────────
+   MAIN DASHBOARD COMPONENT
+   ────────────────────────────────────────────── */
 export default function Dashboard({ auth, articles: initialArticles }) {
     const [articles, setArticles] = useState(initialArticles || []);
     const [title, setTitle] = useState('');
@@ -31,7 +445,7 @@ export default function Dashboard({ auth, articles: initialArticles }) {
     const [tagInput, setTagInput] = useState('');
     const [isUploading, setIsUploading] = useState(false);
     const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false);
-    const [view, setView] = useState('list'); // 'list' or 'editor'
+    const [view, setView] = useState('wizard'); // 'wizard', 'list', or 'editor'
     
     // Trigger for Editor Reset
     const [editorResetKey, setEditorResetKey] = useState(0);
@@ -43,10 +457,6 @@ export default function Dashboard({ auth, articles: initialArticles }) {
     const [chatInput, setChatInput] = useState('');
     const [isChatLoading, setIsChatLoading] = useState(false);
     const chatEndRef = useRef(null);
-
-    // Idea Generator State
-    const [ideas, setIdeas] = useState([]);
-    const [isFetchingIdeas, setIsFetchingIdeas] = useState(false);
 
     // Auto-save mechanism
     useEffect(() => {
@@ -103,20 +513,19 @@ export default function Dashboard({ auth, articles: initialArticles }) {
         setChatInput('');
         setChatMessages(prev => [...prev, { role: 'user', content: userMessage }]);
         setIsChatLoading(true);
-try {
-    const history = chatMessages.map(m => ({ role: m.role, content: m.content }));
-    const res = await axios.post('/api/studio-chat', { 
-        message: userMessage,
-        history: history,
-        editor_context: {
-            title: title,
-            content: typeof richContent === 'string' ? richContent : JSON.stringify(richContent)
-        }
+        try {
+            const history = chatMessages.map(m => ({ role: m.role, content: m.content }));
+            const res = await axios.post('/api/studio-chat', { 
+                message: userMessage,
+                history: history,
+                editor_context: {
+                    title: title,
+                    content: typeof richContent === 'string' ? richContent : JSON.stringify(richContent)
+                }
             });
             
             const rawResponse = res.data.response;
             
-            // Try to detect command JSON
             let cleanMessage = rawResponse;
             try {
                 const start = rawResponse.indexOf('{');
@@ -129,9 +538,7 @@ try {
                         cleanMessage = cmd.message || "I've updated the editor for you.";
                     }
                 }
-            } catch (e) {
-                // Not a command or malformed, just use raw
-            }
+            } catch (e) {}
 
             setChatMessages(prev => [...prev, { role: 'assistant', content: cleanMessage }]);
         } catch (error) {
@@ -203,36 +610,6 @@ try {
         setEditorResetKey(prev => prev + 1);
     };
 
-    const fetchIdeas = async () => {
-        setIsFetchingIdeas(true);
-        try {
-            const res = await axios.get('/api/generate-ideas');
-            setIdeas(res.data.ideas);
-            toast.success('Gathered latest trends.');
-        } catch (error) {
-            toast.error('Failed to fetch ideas.');
-        } finally {
-            setIsFetchingIdeas(false);
-        }
-    };
-
-    const useIdea = async (idea) => {
-        resetEditor();
-        setTitle(idea.title);
-        setView('editor');
-        setRichContent('Researching and drafting based on real-time news...');
-        setEditorResetKey(prev => prev + 1);
-        try {
-            const res = await axios.post('/api/generate-draft', { title: idea.title, prompt: idea.prompt });
-            setRichContent(res.data.draft);
-            setEditorResetKey(prev => prev + 1);
-            toast.success('Draft ready.');
-        } catch (error) {
-            setRichContent(idea.prompt);
-            setEditorResetKey(prev => prev + 1);
-        }
-    };
-
     const handleGenerateSEO = async () => {
         if (!richContent) return toast.error('No content.');
         setIsGenerating(true);
@@ -279,11 +656,24 @@ try {
         }
     };
 
+    const handleWizardComplete = (article) => {
+        if (article) setArticles(prev => [article, ...prev]);
+        setView('list');
+    };
+
+    const handleWizardToEditor = (wizardTitle, wizardDraft) => {
+        resetEditor();
+        setTitle(wizardTitle);
+        setRichContent(wizardDraft);
+        setEditorResetKey(prev => prev + 1);
+        setView('editor');
+    };
+
     return (
         <div className="min-h-screen bg-[#02040a] text-white flex overflow-hidden font-sans selection:bg-primary/30">
             <Head title="AI Studio" />
 
-            {/* Main Sidebar (Slim) */}
+            {/* Main Sidebar */}
             <aside className="w-20 md:w-64 border-r border-white/5 bg-[#02040a] flex flex-col py-10 px-4 justify-between sticky top-0 h-screen z-50">
                 <div className="w-full flex-1 overflow-y-auto no-scrollbar">
                     <div className="flex items-center gap-3 mb-12 px-2">
@@ -298,37 +688,25 @@ try {
                             <Home className="w-5 h-5 group-hover:text-primary" />
                             <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Live View</span>
                         </Link>
+                        <button onClick={() => setView('wizard')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'wizard' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-gray-500 hover:text-white'}`}>
+                            <Wand2 className="w-5 h-5" />
+                            <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Quick Create</span>
+                        </button>
                         <button onClick={() => setView('list')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'list' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-gray-500 hover:text-white'}`}>
                             <Layout className="w-5 h-5" />
                             <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Archives</span>
                         </button>
                         <button onClick={() => { resetEditor(); setView('editor'); }} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'editor' && !currentArticleId ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-white/5 text-white'}`}>
-                            <Plus className="w-5 h-5 text-primary" />
-                            <span className="hidden md:block font-bold text-xs uppercase tracking-widest">New Story</span>
+                            <Edit3 className="w-5 h-5 text-primary" />
+                            <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Advanced Editor</span>
                         </button>
                     </nav>
-
-                    <div className="hidden md:block space-y-6 px-2">
-                        <div className="flex items-center justify-between text-primary">
-                            <div className="flex items-center gap-2"><Lightbulb className="w-4 h-4" /><span className="text-[10px] font-black uppercase tracking-widest">Trends</span></div>
-                            <button onClick={fetchIdeas} disabled={isFetchingIdeas} className="hover:rotate-180 transition-all duration-500"><RefreshCw className={`w-3 h-3 ${isFetchingIdeas ? 'animate-spin' : ''}`} /></button>
-                        </div>
-                        <div className="space-y-3">
-                            {ideas.map((idea, idx) => (
-                                <button key={idx} onClick={() => useIdea(idea)} className="w-full text-left p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-primary/30 transition-all group">
-                                    <h4 className="text-[10px] font-black text-white group-hover:text-primary transition-colors leading-tight mb-1">{idea.title}</h4>
-                                    <p className="text-[8px] text-gray-600 font-bold uppercase">Generate Draft →</p>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
                 </div>
 
-                {/* Model Info */}
                 <div className="px-4 py-6 border-t border-white/5">
                     <div className="flex items-center gap-3 text-gray-600">
                         <Cpu className="w-4 h-4" />
-                        <span className="text-[9px] font-black uppercase tracking-[0.2em]">Ollama Engine Ready</span>
+                        <span className="text-[9px] font-black uppercase tracking-[0.2em]">Gemini 2.0 Flash</span>
                     </div>
                 </div>
             </aside>
@@ -336,7 +714,14 @@ try {
             {/* Primary Workspace */}
             <main className="flex-1 flex flex-row overflow-hidden relative">
                 
-                {view === 'list' ? (
+                {view === 'wizard' && (
+                    <WizardView 
+                        onComplete={handleWizardComplete} 
+                        onSwitchToEditor={handleWizardToEditor}
+                    />
+                )}
+
+                {view === 'list' && (
                     <div className="flex-1 overflow-y-auto p-10 md:p-24 max-w-6xl mx-auto w-full">
                         <div className="mb-20">
                             <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-4">Central Archives</h3>
@@ -362,7 +747,9 @@ try {
                             ))}
                         </div>
                     </div>
-                ) : (
+                )}
+
+                {view === 'editor' && (
                     <>
                         {/* Editor Column */}
                         <div className="flex-1 flex flex-col border-r border-white/5 overflow-y-auto no-scrollbar">
@@ -370,7 +757,7 @@ try {
                                 <div className="flex items-center gap-6">
                                     <button onClick={() => setView('list')} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl transition-all"><ChevronLeft className="w-5 h-5" /></button>
                                     <div className="flex flex-col">
-                                        <h4 className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Editor</h4>
+                                        <h4 className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Advanced Editor</h4>
                                         <h2 className="text-sm font-black text-white truncate max-w-[200px]">{title || 'Untitled'}</h2>
                                     </div>
                                 </div>
@@ -399,7 +786,7 @@ try {
                                     <MessageSquare className="w-5 h-5 text-primary" />
                                     <h3 className="font-black text-xs uppercase tracking-widest">Studio Assistant</h3>
                                 </div>
-                                <Cpu className="w-4 h-4 text-gray-700" title="Stateful Llama Session" />
+                                <Cpu className="w-4 h-4 text-gray-700" title="Gemini Session" />
                             </div>
 
                             <div className="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar">

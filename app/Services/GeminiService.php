@@ -171,6 +171,32 @@ Make the summary intriguing — it will be shown as a preview. Tags should be de
             'tags' => $result['tags'] ?? [],
         ];
     }
+    /**
+     * Regenerate an article draft incorporating user feedback.
+     */
+    public function regenerateDraft(string $title, string $ideaPrompt, string $feedback, string $previousDraft): string
+    {
+        $excerpt = substr(strip_tags($previousDraft), 0, 500);
+
+        $prompt = "You are rewriting a tech article that the editor wasn't satisfied with.
+
+ARTICLE TITLE: {$title}
+EDITORIAL BRIEF: {$ideaPrompt}
+EDITOR FEEDBACK: {$feedback}
+
+THE PREVIOUS DRAFT (excerpt):
+{$excerpt}
+
+Rewrite the article incorporating the editor's feedback. Follow the same HTML formatting rules:
+- Use <h2> for section headers, <p> for paragraphs, <strong> for emphasis
+- Keep it 800-1200 words, punchy and opinionated like daily.dev
+- Address the editor's feedback directly in your rewrite
+- Output ONLY raw HTML, no markdown fences
+
+Output ONLY the HTML content.";
+
+        return $this->callGeminiOrFallback($prompt, false);
+    }
 
     public function editorAction(string $action, string $text): string
     {

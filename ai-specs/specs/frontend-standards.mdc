@@ -1,0 +1,50 @@
+---
+description: React/Inertia frontend development standards for TechyNews
+globs: "resources/js/**/*.{jsx,js,css}"
+---
+
+# Frontend Standards — TechyNews (React + Inertia.js)
+
+## Stack
+- React 18 + Inertia.js (server-driven routing, no SPA client router)
+- Vite for bundling
+- Framer Motion for animations
+- Lucide React for icons
+- Sonner for toast notifications
+- dayjs for date formatting
+
+## Page Components (`resources/js/Pages/`)
+- `Welcome.jsx` — Public homepage (Editor's Choice + article grid)  
+- `ArticleShow.jsx` — Single article view with sanitizeContent()  
+- `Dashboard.jsx` — Studio with 3 views: **wizard** (default), **list**, **editor**  
+- `Archive.jsx`, `AboutUs.jsx`, `Contact.jsx` — Static pages
+
+## Content Rendering
+Article content is stored as raw HTML. The frontend handles edge cases:
+
+```javascript
+const sanitizeContent = (raw) => {
+    // Recursively JSON.parse to unwrap double-encoding
+    // Fix escaped slashes: <\/h2> → </h2>
+    // Strip wrapping quotes
+    return cleanHtml;
+};
+```
+
+Always use `dangerouslySetInnerHTML={{ __html: cleanHtml }}` for article body.
+
+## Design System
+- Dark theme: `bg-[#02040a]`, `text-white`
+- Primary color: `text-primary` (blue, defined in CSS)
+- Glass cards: `bg-white/[0.03] border border-white/10 rounded-[2.5rem]`
+- Font: system sans-serif, `font-black` for headings
+- Prose styling: Tailwind `prose prose-invert` for article content
+
+## Studio Wizard (Dashboard.jsx)
+The wizard is the default view for non-technical users:
+1. **Discover** — Pick trending topic or type custom
+2. **Generate** — AI writes the article (loading animation)
+3. **Review** — Preview with Approve/Regenerate buttons
+4. **Publish** — Review metadata → one-click publish
+
+Power users can switch to "Advanced Editor" for full rich-text editing + chat assistant.

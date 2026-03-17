@@ -1,0 +1,45 @@
+---
+description: Core development standards for TechyNews (Laravel + React/Inertia)
+globs: "**/*.{php,jsx,js,css}"
+---
+
+# Base Development Standards — TechyNews
+
+## Architecture Overview
+- **Backend**: Laravel 13 (PHP 8.2+), Eloquent ORM, MySQL  
+- **Frontend**: React 18 + Inertia.js, Vite, Framer Motion  
+- **AI Layer**: Gemini 2.0 Flash API (with LlamaService fallback)  
+- **Deployment**: GitHub Actions CI/CD → cPanel (rsync + SSH)
+
+## Key Principles
+1. **Content is raw HTML** — Never `json_encode()` HTML strings before saving to DB
+2. **Incremental changes** — Small PRs, test before deploy
+3. **English only** — All code, comments, documentation in English
+4. **Descriptive naming** — `generateDraft()` not `gd()`
+5. **Service layer** — Business logic lives in `app/Services/`, not controllers
+
+## Content Pipeline
+```
+RSS Feeds → NewsService → GeminiService.generateIdeas() → generateDraft() → Article::create(['content' => $rawHtml])
+```
+
+- `content` column: stores raw HTML string (`<h2>Title</h2><p>Text</p>`)
+- Frontend: `sanitizeContent()` in `ArticleShow.jsx` handles any edge cases
+- Fix tool: `php artisan article:fix-encoding` for double-encoded content
+
+## Database
+- Primary model: `Article` — title, slug, content (HTML), status, ai_summary, tags (JSON), etc.
+- Caching: `Cache::remember()` on public routes, `Cache::flush()` on writes
+- No soft deletes — articles are hard-deleted
+
+## Error Handling
+- Log errors via `Log::error()` / `Log::warning()`
+- Gemini API failures fall back to LlamaService
+- Frontend uses `toast.error()` / `toast.success()` for user feedback
+
+## API Naming
+- `POST /api/generate-draft` — Generate article content
+- `POST /api/regenerate-draft` — Regenerate with feedback
+- `POST /api/generate-article-meta` — Generate summary + SEO + tags
+- `POST /api/studio-chat` — Conversational AI assistant
+- `GET /api/generate-ideas` — Fetch trending editorial angles

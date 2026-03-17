@@ -64,6 +64,46 @@ class AiController extends Controller
     }
 
     /**
+     * Regenerate a draft with user feedback.
+     */
+    public function regenerateDraft(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string',
+            'prompt' => 'required|string',
+            'feedback' => 'nullable|string',
+            'previous_draft' => 'nullable|string',
+        ]);
+
+        $draft = $this->geminiService->regenerateDraft(
+            $request->input('title'),
+            $request->input('prompt'),
+            $request->input('feedback', ''),
+            $request->input('previous_draft', '')
+        );
+
+        return response()->json(['draft' => $draft]);
+    }
+
+    /**
+     * Generate article metadata (summary, SEO, tags).
+     */
+    public function generateArticleMeta(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string',
+            'content' => 'required|string',
+        ]);
+
+        $meta = $this->geminiService->generateArticleMeta(
+            $request->input('title'),
+            $request->input('content')
+        );
+
+        return response()->json(['meta' => $meta]);
+    }
+
+    /**
      * Perform specific context-aware actions in the editor.
      */
     public function editorAction(Request $request)
