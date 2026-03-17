@@ -3,64 +3,80 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use App\Models\Article;
 
 class FixArticleEncoding extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'article:fix-encoding {slug?}';
+    protected $description = 'Fix double-encoded / escaped HTML content in articles';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Fix double-encoded JSON content in articles';
-
-    /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
-     * Execute the console command.
-     *
-     * @return int
-     */
     public function handle()
     {
         $slug = $this->argument('slug');
-        
-        $query = \App\Models\Article::query();
+
+        $query = Article::query();
         if ($slug) {
             $query->where('slug', $slug);
         }
 
         $articles = $query->get();
+        $fixed = 0;
 
         foreach ($articles as $article) {
-            $rawContent = $article->getRawOriginal('content');
-            
-            // Try to decode. If it decodes to a string, it means it was double encoded.
-            $decoded = json_decode($rawContent, true);
-            if ($decoded && is_string($decoded)) {
-                $this->info("Fixing article: {$article->title}");
-                $article->content = json_decode($decoded, true) ?? $decoded;
+            $raw = $article->getRawOriginal('content');
+            $cleaned = $this->deepClean($raw);
+
+            if ($cleaned !== $raw) {
+                $article->content = $cleaned;
                 $article->save();
+                $this->info("✅ Fixed: {$article->title}");
+                $fixed++;
             } else {
-                $this->line("Article '{$article->title}' seems properly formatted.");
+                $this->line("  OK: '{$article->title}' — already clean.");
             }
         }
-        
-        $this->info('Done.');
+
+        $this->info("Done. Fixed {$fixed} article(s).");
         return 0;
+    }
+
+    /**
+     * Recursively decode until we reach raw HTML.
+     * Handles: json_encode(html), json_encode(json_encode(html)), escaped slashes, etc.
+     */
+    private function deepClean(string $raw): string
+    {
+        $content = $raw;
+        $maxPasses = 5;
+
+        for ($i = 0; $i < $maxPasses; $i++) {
+            // Try JSON decode — catches double-encoded strings
+            $decoded = json_decode($content, true);
+
+            if (is_string($decoded)) {
+                $content = $decoded;
+                continue;
+            }
+
+            // If it decoded to an array/object it might be TipTap JSON — leave it
+            if (is_array($decoded)) {
+                break;
+            }
+
+            // No more JSON layers — stop
+            break;
+        }
+
+        // Strip any remaining escaped forward slashes: <\/h2> → </h2>
+        $content = str_replace('\\/', '/', $content);
+
+        // Strip leading/trailing quotes that shouldn't be there
+        $content = trim($content, '"');
+
+        // Remove markdown code fences
+        $content = preg_replace('/^```(?:html)?\s*/i', '', $content);
+        $content = preg_replace('/\s*```\s*$/', '', $content);
+
+        return trim($content);
     }
 }

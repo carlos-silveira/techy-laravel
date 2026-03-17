@@ -58,6 +58,37 @@ export default function ArticleShow({ article, relatedArticles }) {
         }
     };
 
+    /**
+     * Recursively decode JSON-encoded strings and unescape slashes.
+     * Handles: json_encode(html), double-encoded, escaped slashes, etc.
+     */
+    const sanitizeContent = (raw) => {
+        if (!raw || typeof raw !== 'string') return '';
+        let content = raw;
+
+        // Recursively try to JSON.parse strings (handles double/triple encoding)
+        for (let i = 0; i < 5; i++) {
+            try {
+                const parsed = JSON.parse(content);
+                if (typeof parsed === 'string') {
+                    content = parsed;
+                    continue;
+                }
+                // If it parsed to an object, it's TipTap JSON — render via TipTapRenderer
+                break;
+            } catch {
+                break; // Not JSON — it's raw HTML, which is what we want
+            }
+        }
+
+        // Fix escaped forward slashes: <\/h2> → </h2>
+        content = content.replace(/\\\//g, '/');
+        // Strip leading/trailing quotes
+        content = content.replace(/^"|"$/g, '');
+        return content;
+    };
+
+    const cleanHtml = typeof article.content === 'string' ? sanitizeContent(article.content) : null;
     const parsedContent = article.content || { type: 'doc', content: [] };
     const contentString = typeof parsedContent === 'string' ? parsedContent : JSON.stringify(parsedContent);
     const estimatedReadTime = article.reading_time_minutes || Math.max(1, Math.ceil(contentString.split(' ').length / 200));
@@ -170,12 +201,9 @@ export default function ArticleShow({ article, relatedArticles }) {
                         </div>
                     )}
 
-                    <div className="prose prose-invert prose-primary max-w-none prose-xl prose-headings:font-black prose-headings:tracking-tighter prose-headings:text-white prose-p:text-gray-400 prose-p:font-light prose-p:leading-relaxed prose-strong:text-white prose-a:text-primary hover:prose-a:text-white transition-colors">
-                        {typeof article.content === 'string' ? (
-                            <div 
-                                className="whitespace-pre-wrap"
-                                dangerouslySetInnerHTML={{ __html: article.content }}
-                            />
+                    <div className="prose prose-invert prose-primary max-w-none prose-xl prose-headings:font-black prose-headings:tracking-tighter prose-headings:text-white prose-p:text-gray-400 prose-p:font-light prose-p:leading-relaxed prose-strong:text-white prose-a:text-primary hover:prose-a:text-white prose-code:text-emerald-400 prose-pre:bg-white/[0.03] prose-pre:border prose-pre:border-white/10 prose-pre:rounded-2xl transition-colors">
+                        {cleanHtml ? (
+                            <div dangerouslySetInnerHTML={{ __html: cleanHtml }} />
                         ) : (
                             <TipTapRenderer content={article.content} />
                         )}
