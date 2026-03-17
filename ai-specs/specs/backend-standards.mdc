@@ -1,0 +1,37 @@
+---
+description: Laravel/PHP backend development standards for TechyNews
+globs: "app/**/*.php"
+---
+
+# Backend Standards — TechyNews (Laravel 13)
+
+## Service Layer Pattern
+All business logic lives in `app/Services/`:
+- `GeminiService` — AI text generation (Gemini API calls)
+- `NewsService` — RSS feed aggregation (TechCrunch, The Verge, Ars Technica, HN)
+- `LlamaService` — Local Ollama fallback for AI calls
+
+## Controllers
+- `PublicController` — Homepage, article show, search (cached, public)
+- `DashboardController` — Studio page (auth required)
+- `ArticleController` — CRUD + publish + like
+- `AiController` — AI generation endpoints (generate-ideas, generate-draft, studio-chat, etc.)
+
+## Eloquent Conventions
+- Use `$fillable` arrays, never `$guarded = []`
+- Cast JSON columns: `'tags' => 'array'`
+- Store content as raw HTML string — never `json_encode()` HTML
+
+## Artisan Commands
+- `news:generate-daily` — Daily automated article generation (scheduled 06:00)
+- `article:fix-encoding` — Fix double-encoded HTML in DB
+- `news:fetch-daily` — Legacy RSS fetch (deprecated)
+
+## Environment Variables
+- `GEMINI_API_KEY` — Required for AI generation
+- `GEMINI_MODEL` — Model name (default: `gemini-2.0-flash`)
+- `DB_*` — MySQL production credentials
+
+## Rate Limiting
+- 10-second `sleep()` between consecutive Gemini API calls
+- HTTP timeout: 60 seconds per request

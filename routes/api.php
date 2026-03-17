@@ -30,6 +30,8 @@ Route::get('/generate-ideas', [AiController::class, 'generateIdeas']);
 Route::post('/generate-draft', [AiController::class, 'generateDraft']);
 Route::post('/editor-action', [AiController::class, 'editorAction']);
 Route::post('/studio-chat', [AiController::class, 'studioChat']);
+Route::post('/regenerate-draft', [AiController::class, 'regenerateDraft']);
+Route::post('/generate-article-meta', [AiController::class, 'generateArticleMeta']);
 
 // Public Analytics & Engagement
 Route::get('/analytics/dashboard', [AnalyticsController::class, 'dashboardStats']);
