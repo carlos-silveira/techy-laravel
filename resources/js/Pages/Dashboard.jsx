@@ -112,9 +112,6 @@ try {
             title: title,
             content: typeof richContent === 'string' ? richContent : JSON.stringify(richContent)
         }
-    });
-                current_title: title,
-                current_content: typeof richContent === 'string' ? richContent : JSON.stringify(richContent)
             });
             
             const rawResponse = res.data.response;
