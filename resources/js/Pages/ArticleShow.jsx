@@ -172,9 +172,10 @@ export default function ArticleShow({ article, relatedArticles }) {
 
                     <div className="prose prose-invert prose-primary max-w-none prose-xl prose-headings:font-black prose-headings:tracking-tighter prose-headings:text-white prose-p:text-gray-400 prose-p:font-light prose-p:leading-relaxed prose-strong:text-white prose-a:text-primary hover:prose-a:text-white transition-colors">
                         {typeof article.content === 'string' ? (
-                            <div className="whitespace-pre-wrap">
-                                {article.content}
-                            </div>
+                            <div 
+                                className="whitespace-pre-wrap"
+                                dangerouslySetInnerHTML={{ __html: article.content }}
+                            />
                         ) : (
                             <TipTapRenderer content={article.content} />
                         )}
