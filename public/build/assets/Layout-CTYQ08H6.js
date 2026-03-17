@@ -1,1 +1,0 @@
-import{j as r,a}from"./app-CNlI2GgQ.js";import s from"./TopNav-BuF2VmlC.js";import{a as e}from"./Footer-PHE0p37I.js";const f=({children:o})=>r("div",{className:"flex flex-col min-h-screen",children:[a(s,{}),a("main",{className:"flex-grow",children:o}),a(e,{})]});export{f as default};

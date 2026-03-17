@@ -16,8 +16,7 @@ class GeminiService
     public function __construct(LlamaService $llamaFallback)
     {
         $this->apiKey = env('GEMINI_API_KEY', '');
-        // Default to 2.0 Flash for superior performance/speed ratio
-        $this->model = env('GEMINI_MODEL', 'gemini-2.0-flash'); 
+        $this->model = env('GEMINI_MODEL', 'gemini-2.0-flash');
         $this->llamaFallback = $llamaFallback;
     }
 
@@ -67,32 +66,110 @@ class GeminiService
         return $this->callGeminiOrFallbackConversational($messages);
     }
 
+    /**
+     * Generate editorial angles from trending news — daily.dev style hot takes.
+     */
     public function generateIdeas(array $newsItems): array
     {
-        if (empty($newsItems)) return [['title' => 'Tech Trends', 'prompt' => 'Analyze the impact of AI on web dev.']];
+        if (empty($newsItems)) return [['title' => 'The State of Developer Tools in 2026', 'prompt' => 'Analyze emerging developer tooling trends.']];
 
         $newsContext = "";
         foreach ($newsItems as $item) {
-            $newsContext .= "- {$item['title']}: {$item['description']}\n";
+            $source = $item['source'] ?? 'Unknown';
+            $newsContext .= "- [{$source}] {$item['title']}: {$item['description']}\n";
         }
 
-        $prompt = "As a lead editor, analyze these headlines and propose 5 unique, 'hot-take' article ideas. 
-        Format as JSON array: [{\"title\": \"...\", \"prompt\": \"...\"}]. 
-        Headlines:\n{$newsContext}";
+        $prompt = "You are a senior editor at daily.dev — the developer-first news platform. 
+You have these trending headlines from today's tech news cycle:
+
+{$newsContext}
+
+Generate exactly 3 article ideas. Each MUST:
+1. Have a provocative, opinion-driven title (like 'Why X Changes Everything' or 'The Hidden Cost of Y')
+2. Target developers specifically — not general tech audiences
+3. Connect multiple headlines into a single narrative when possible
+4. Include a developer-action angle: what should devs learn, build, or stop doing
+
+Return ONLY a JSON array, no markdown fences:
+[{\"title\": \"...\", \"prompt\": \"A detailed 2-sentence editorial brief describing the angle, tone, and key arguments\"}]";
 
         return $this->callGeminiOrFallback($prompt, true);
     }
 
+    /**
+     * Generate a long-form, daily.dev-quality investigative article.
+     */
     public function generateDraft(string $title, string $ideaPrompt, array $newsItems): string
     {
-        $context = implode("\n", array_map(fn($n) => $n['title'], $newsItems));
-        $prompt = "Write a professional 5-paragraph tech article. 
-        Title: {$title}
-        Focus: {$ideaPrompt}
-        News Context: {$context}
-        Use clean HTML. Use <h2> for subheaders. No markdown blocks.";
+        $context = implode("\n", array_map(function ($n) {
+            $source = $n['source'] ?? 'News';
+            return "- [{$source}] {$n['title']}";
+        }, $newsItems));
+
+        $prompt = "You are a senior tech journalist writing for daily.dev — the #1 developer news platform.
+
+ARTICLE TITLE: {$title}
+EDITORIAL BRIEF: {$ideaPrompt}
+TODAY'S NEWS CONTEXT:
+{$context}
+
+Write a compelling 800-1200 word article in clean HTML. Follow these rules STRICTLY:
+
+STRUCTURE:
+- Open with a punchy 1-2 sentence hook that grabs developers. NO generic openings like 'In today's rapidly evolving landscape...'
+- Use <h2> for 3-4 section headers. Make them opinionated, not descriptive ('The Framework Tax' not 'Framework Considerations')
+- Use <p> for paragraphs. Keep paragraphs to 3-4 sentences max
+- Use <strong> for emphasis on key terms
+- Use <blockquote> for impactful quotes or key takeaways
+- Use <pre><code> for any code snippets (if relevant to the topic)
+- Use <ul><li> for lists when comparing tools/frameworks
+
+TONE:
+- Write like The Verge meets Hacker News: technically accurate but opinionated
+- Take a clear stance. Fence-sitting is boring
+- Include real numbers, benchmarks, or technical details when possible
+- Address developers directly using 'you' and 'your'
+- End with a forward-looking prediction or call to action
+
+DO NOT:
+- Use markdown — only HTML tags
+- Wrap your response in code fences
+- Include a title tag (it's handled separately)
+- Use self-promotional language about AI
+
+Output ONLY the HTML content.";
 
         return $this->callGeminiOrFallback($prompt, false);
+    }
+
+    /**
+     * Generate article metadata: summary, seo description, tags.
+     */
+    public function generateArticleMeta(string $title, string $content): array
+    {
+        $excerpt = substr(strip_tags($content), 0, 500);
+
+        $prompt = "Given this article titled \"{$title}\" with content starting: \"{$excerpt}...\"
+
+Generate metadata as a JSON object (no markdown fences):
+{
+  \"summary\": \"A compelling 2-sentence executive summary for the article\",
+  \"meta_description\": \"A 155-character max SEO meta description\",
+  \"seo_keywords\": \"comma, separated, seo, keywords\",
+  \"tags\": [\"tag1\", \"tag2\", \"tag3\", \"tag4\"]
+}
+
+Make the summary intriguing — it will be shown as a preview. Tags should be developer-relevant topics.";
+
+        $result = $this->callGeminiOrFallback($prompt, true);
+
+        // Normalize the result
+        return [
+            'summary' => $result['summary'] ?? '',
+            'meta_description' => $result['meta_description'] ?? '',
+            'seo_keywords' => $result['seo_keywords'] ?? '',
+            'tags' => $result['tags'] ?? [],
+        ];
     }
 
     public function editorAction(string $action, string $text): string
@@ -140,6 +217,10 @@ class GeminiService
 
     private function extractJson(string $text): array
     {
+        // Strip markdown code fences if present
+        $text = preg_replace('/^```(?:json)?\s*/i', '', $text);
+        $text = preg_replace('/\s*```\s*$/', '', $text);
+
         $start = strpos($text, '{');
         $end = strrpos($text, '}');
         if ($start === false) { $start = strpos($text, '['); $end = strrpos($text, ']'); }
