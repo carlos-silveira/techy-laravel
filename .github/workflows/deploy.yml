@@ -69,6 +69,7 @@ jobs:
             cd /home/baifywfnnq/techynews.lat
             php artisan migrate --force
             php artisan db:seed --class=AdminUserSeeder --force
+            php artisan article:fix-encoding
             php artisan config:clear
             php artisan cache:clear
             php artisan view:clear
