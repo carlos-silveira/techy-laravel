@@ -69,25 +69,28 @@ export default function ArticleShow({ article, relatedArticles }) {
         if (!raw || typeof raw !== 'string') return '';
         let content = raw;
 
-        // Recursively try to JSON.parse strings (handles double/triple encoding)
-        for (let i = 0; i < 5; i++) {
-            try {
-                const parsed = JSON.parse(content);
-                if (typeof parsed === 'string') {
-                    content = parsed;
-                    continue;
+        // Only attempt to parse if it looks like a JSON string (starts with " or { or [)
+        if (content.trim().startsWith('"') || content.trim().startsWith('{') || content.trim().startsWith('[')) {
+            for (let i = 0; i < 5; i++) {
+                try {
+                    const parsed = JSON.parse(content);
+                    if (typeof parsed === 'string') {
+                        content = parsed;
+                        continue;
+                    }
+                    break;
+                } catch {
+                    break;
                 }
-                // If it parsed to an object, it's TipTap JSON — render via TipTapRenderer
-                break;
-            } catch {
-                break; // Not JSON — it's raw HTML, which is what we want
             }
         }
 
         // Fix escaped forward slashes: <\/h2> → </h2>
-        content = content.replace(/\\\//g, '/');
-        // Strip leading/trailing quotes
-        content = content.replace(/^"|"$/g, '');
+        content = content.replace(/\\\\\//g, '/');
+        // Strip leading/trailing quotes if they were added by double encoding
+        if (content.startsWith('"') && content.endsWith('"')) {
+            content = content.substring(1, content.length - 1);
+        }
         return content;
     };
 
