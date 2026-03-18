@@ -6,8 +6,11 @@ import { Heart, Twitter, Linkedin, Link as LinkIcon, ArrowRight, BookOpen } from
 import axios from 'axios';
 import { toast } from 'sonner';
 import CommandPalette from '@/Components/CommandPalette';
+import Navbar from '@/Components/Navbar';
+import useLanguage from '@/Hooks/useLanguage';
 
 export default function ArticleShow({ article, relatedArticles }) {
+    const { __ } = useLanguage();
     const [scrollProgress, setScrollProgress] = useState(0);
     const [likes, setLikes] = useState(article.likes_count || 0);
     const [isLiking, setIsLiking] = useState(false);
@@ -37,9 +40,9 @@ export default function ArticleShow({ article, relatedArticles }) {
         try {
             const res = await axios.post(`/api/articles/${article.id}/like`);
             setLikes(res.data.likes_count);
-            toast.success('Thanks for the applause!');
+            toast.success(__('Thanks for the applause!'));
         } catch {
-            toast.error('Failed to register like.');
+            toast.error(__('Failed to register like.'));
         } finally {
             setIsLiking(false);
         }
@@ -47,14 +50,14 @@ export default function ArticleShow({ article, relatedArticles }) {
 
     const handleShare = (platform) => {
         const url = window.location.href;
-        const text = `Read this incredible piece: ${article.title}`;
+        const text = `${__('Read this incredible piece')}: ${article.title}`;
         if (platform === 'twitter') {
             window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`);
         } else if (platform === 'linkedin') {
             window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`);
         } else {
             navigator.clipboard.writeText(url);
-            toast.success('Link copied to clipboard!');
+            toast.success(__('Link copied to clipboard!'));
         }
     };
 
@@ -96,7 +99,7 @@ export default function ArticleShow({ article, relatedArticles }) {
     return (
         <div onMouseMove={handleMouseMove} className="min-h-screen bg-[#02040a] text-white font-sans selection:bg-primary/30 relative overflow-hidden">
             <Head title={`${article.title} - Techy News`}>
-                <meta name="description" content={article.meta_description || article.ai_summary || `Read ${article.title} on Techy News.`} />
+                <meta name="description" content={article.meta_description || article.ai_summary || `${__('Read')} ${article.title} ${__('on Techy News')}.`} />
                 <meta property="og:title" content={article.title} />
                 <meta property="og:type" content="article" />
             </Head>
@@ -116,6 +119,9 @@ export default function ArticleShow({ article, relatedArticles }) {
             {/* Reading Progress Bar */}
             <div className="fixed top-0 left-0 h-1 bg-gradient-to-r from-primary to-purple-600 z-[100] transition-all duration-150 ease-out" style={{ width: `${scrollProgress}%` }}></div>
 
+            {/* ===== NAVBAR ===== */}
+            <Navbar />
+
             {/* Parallax Hero Background */}
             {article.cover_image_path ? (
                 <div
@@ -130,22 +136,6 @@ export default function ArticleShow({ article, relatedArticles }) {
             ) : (
                 <div className="absolute top-0 w-full h-96 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none"></div>
             )}
-
-            {/* Unified Navbar */}
-            <nav className="border-b border-white/5 bg-[#02040a]/80 backdrop-blur-md sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-                    <Link href="/" className="flex items-center">
-                        <img src="/img/logo_wbc.png" alt="Techy News" className="h-8 w-auto" />
-                    </Link>
-                    <div className="space-x-8 flex items-center">
-                        <Link href="/archive" className="text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-colors">Archive</Link>
-                        <Link href="/about" className="text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-colors">About</Link>
-                        <Link href="/dashboard" className="px-5 py-2 bg-white text-black font-bold rounded-lg hover:bg-gray-200 transition-all shadow-lg">
-                            Studio
-                        </Link>
-                    </div>
-                </div>
-            </nav>
 
             <main className="max-w-4xl mx-auto px-6 py-20 relative z-10">
                 <motion.article

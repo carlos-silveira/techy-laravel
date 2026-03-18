@@ -37,6 +37,12 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'locale' => app()->getLocale(),
+            'translations' => function () {
+                $locale = app()->getLocale();
+                $file = resource_path("lang/{$locale}.json");
+                return file_exists($file) ? json_decode(file_get_contents($file), true) : [];
+            },
             'ziggy' => function () use ($request) {
                 return array_merge((new \Tightenco\Ziggy\Ziggy)->toArray(), [
                     'location' => $request->url(),

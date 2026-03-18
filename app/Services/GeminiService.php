@@ -252,6 +252,47 @@ Output ONLY the HTML content.";
     }
 
     /**
+     * Translate an article to a target language.
+     */
+    public function translateArticle(string $title, string $summary, string $content, string $targetLocale): array
+    {
+        $languages = [
+            'en' => 'English',
+            'es' => 'Spanish',
+            'pt' => 'Portuguese',
+        ];
+
+        $targetLanguage = $languages[$targetLocale] ?? 'English';
+
+        $prompt = "You are a professional translator and tech journalist.
+Translate the following tech article details into {$targetLanguage}.
+MANDATORY:
+- Maintain the SAME HTML structure and tags for the 'content'.
+- Keep the technical tone bold and opinionated.
+- Translate only the text content, never the HTML tags themselves.
+
+ARTICLE TITLE: {$title}
+EXECUTIVE SUMMARY: {$summary}
+HTML CONTENT:
+{$content}
+
+Return exactly a JSON object (no markdown fences):
+{
+  \"title\": \"translated title\",
+  \"summary\": \"translated summary\",
+  \"content\": \"translated html content\"
+}";
+
+        $result = $this->callGemini($prompt, true);
+
+        return [
+            'title' => $result['title'] ?? $title,
+            'summary' => $result['summary'] ?? $summary,
+            'content' => $result['content'] ?? $content,
+        ];
+    }
+
+    /**
      * Call Gemini API for conversational messages.
      * Returns the text response or a user-friendly error.
      */
