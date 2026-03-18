@@ -5,24 +5,28 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Models\Article;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class StudioFeatureTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected User $user;
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->user = User::factory()->create();
+        config(['services.gemini.api_key' => 'test-key']);
     }
 
     /** @test */
-    public function it_can_save_and_broadcast_an_article()
+    public function it_can_save_and_publish_an_article()
     {
         $response = $this->actingAs($this->user)->postJson('/articles', [
             'title' => 'Test Article',
-            'content' => 'This is the test content of the article.',
+            'content' => '<h2>Test</h2><p>This is the test content of the article.</p>',
             'is_published' => true,
             'is_editors_choice' => true,
             'tags' => ['tech', 'ai']
@@ -44,7 +48,7 @@ class StudioFeatureTest extends TestCase
     {
         $article = Article::create([
             'title' => 'To Be Deleted',
-            'content' => 'Content',
+            'content' => '<p>Content</p>',
             'slug' => 'to-be-deleted'
         ]);
 
@@ -55,10 +59,20 @@ class StudioFeatureTest extends TestCase
     }
 
     /** @test */
-    public function it_can_optimize_metadata_via_ai()
+    public function it_can_generate_seo_tags_via_gemini()
     {
+        Http::fake([
+            'generativelanguage.googleapis.com/*' => Http::response([
+                'candidates' => [[
+                    'content' => ['parts' => [[
+                        'text' => '{"summary":"A test","meta_description":"SEO desc","seo_keywords":"ai,tech","tags":["ai"]}'
+                    ]]]
+                ]]
+            ], 200),
+        ]);
+
         $response = $this->actingAs($this->user)->postJson('/api/generate-seo', [
-            'content' => 'Artificial intelligence is transforming the software industry by automating repetitive tasks and providing intelligent insights for developers.'
+            'content' => 'Artificial intelligence is transforming the software industry.'
         ]);
 
         $response->assertStatus(200);
@@ -66,8 +80,18 @@ class StudioFeatureTest extends TestCase
     }
 
     /** @test */
-    public function it_can_architect_visual_prompt_via_ai()
+    public function it_can_generate_image_prompt_via_gemini()
     {
+        Http::fake([
+            'generativelanguage.googleapis.com/*' => Http::response([
+                'candidates' => [[
+                    'content' => ['parts' => [[
+                        'text' => 'A futuristic cityscape'
+                    ]]]
+                ]]
+            ], 200),
+        ]);
+
         $response = $this->actingAs($this->user)->postJson('/api/generate-image-prompt', [
             'content' => 'A futuristic cityscape with flying vehicles and neon-lit skyscrapers.'
         ]);

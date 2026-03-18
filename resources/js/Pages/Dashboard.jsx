@@ -38,8 +38,9 @@ function WizardView({ onComplete, onSwitchToEditor }) {
             const res = await axios.get('/api/generate-ideas');
             setIdeas(res.data.ideas || []);
             toast.success('Found trending stories!');
-        } catch {
-            toast.error('Could not fetch trending stories.');
+        } catch (err) {
+            const msg = err?.response?.data?.error || 'Could not fetch trending stories.';
+            toast.error(msg);
         } finally {
             setIsLoading(false);
         }
@@ -68,8 +69,9 @@ function WizardView({ onComplete, onSwitchToEditor }) {
             setDraft(res.data.draft || '');
             setStep(2);
             toast.success('Article ready for review!');
-        } catch {
-            toast.error('Generation failed. Try again.');
+        } catch (err) {
+            const msg = err?.response?.data?.error || 'Generation failed. Try again.';
+            toast.error(msg);
             setStep(0);
         } finally {
             setIsLoading(false);
@@ -90,8 +92,9 @@ function WizardView({ onComplete, onSwitchToEditor }) {
             setDraft(res.data.draft || '');
             setFeedback('');
             toast.success('Regenerated!');
-        } catch {
-            toast.error('Regeneration failed.');
+        } catch (err) {
+            const msg = err?.response?.data?.error || 'Regeneration failed.';
+            toast.error(msg);
         } finally {
             setIsLoading(false);
         }

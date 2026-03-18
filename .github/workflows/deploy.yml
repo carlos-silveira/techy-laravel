@@ -34,6 +34,13 @@ jobs:
           npm ci
           npm run build
 
+      - name: 🧪 Run PHPUnit Tests
+        run: |
+          cp .env.example .env 2>/dev/null || true
+          php artisan key:generate --force 2>/dev/null || true
+          php -d memory_limit=512M vendor/bin/phpunit --testsuite=Unit --no-coverage
+          echo "✅ Unit tests passed"
+
       - name: 🧪 Validate Migrations on Test DB First
         uses: appleboy/ssh-action@v1.0.3
         with:

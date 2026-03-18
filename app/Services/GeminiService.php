@@ -11,13 +11,11 @@ class GeminiService
 {
     private string $apiKey;
     private string $model;
-    private LlamaService $llamaFallback;
 
-    public function __construct(LlamaService $llamaFallback)
+    public function __construct()
     {
-        $this->apiKey = env('GEMINI_API_KEY', '');
-        $this->model = env('GEMINI_MODEL', 'gemini-2.0-flash');
-        $this->llamaFallback = $llamaFallback;
+        $this->apiKey = config('services.gemini.api_key', env('GEMINI_API_KEY', ''));
+        $this->model = config('services.gemini.model', env('GEMINI_MODEL', 'gemini-2.0-flash'));
     }
 
     /**
@@ -51,7 +49,10 @@ class GeminiService
         - Use HTML tags correctly (h2 for subheaders, strong for emphasis).
         - Be proactive. Suggest better titles or trending tags without being asked.";
 
-        $messages = [['role' => 'user', 'parts' => [['text' => $systemContext]]], ['role' => 'model', 'parts' => [['text' => "Acknowledged. Techy AI is online and ready to architect high-impact narratives."]]]];
+        $messages = [
+            ['role' => 'user', 'parts' => [['text' => $systemContext]]],
+            ['role' => 'model', 'parts' => [['text' => "Acknowledged. Techy AI is online and ready to architect high-impact narratives."]]]
+        ];
         
         foreach (array_slice($history, -12) as $msg) {
             $role = isset($msg['role']) ? ($msg['role'] === 'user' ? 'user' : 'model') : 'model';
@@ -63,7 +64,7 @@ class GeminiService
         
         $messages[] = ['role' => 'user', 'parts' => [['text' => $message]]];
 
-        return $this->callGeminiOrFallbackConversational($messages);
+        return $this->callGeminiConversational($messages);
     }
 
     /**
@@ -71,7 +72,9 @@ class GeminiService
      */
     public function generateIdeas(array $newsItems): array
     {
-        if (empty($newsItems)) return [['title' => 'The State of Developer Tools in 2026', 'prompt' => 'Analyze emerging developer tooling trends.']];
+        if (empty($newsItems)) {
+            return [['title' => 'The State of Developer Tools in 2026', 'prompt' => 'Analyze emerging developer tooling trends.']];
+        }
 
         $newsContext = "";
         foreach ($newsItems as $item) {
@@ -93,7 +96,10 @@ Generate exactly 3 article ideas. Each MUST:
 Return ONLY a JSON array, no markdown fences:
 [{\"title\": \"...\", \"prompt\": \"A detailed 2-sentence editorial brief describing the angle, tone, and key arguments\"}]";
 
-        return $this->callGeminiOrFallback($prompt, true);
+        $result = $this->callGemini($prompt, true);
+        return is_array($result) && !empty($result) ? $result : [
+            ['title' => 'The State of Developer Tools in 2026', 'prompt' => 'Analyze emerging developer tooling trends.']
+        ];
     }
 
     /**
@@ -139,7 +145,7 @@ DO NOT:
 
 Output ONLY the HTML content.";
 
-        return $this->callGeminiOrFallback($prompt, false);
+        return $this->callGemini($prompt, false);
     }
 
     /**
@@ -161,9 +167,8 @@ Generate metadata as a JSON object (no markdown fences):
 
 Make the summary intriguing — it will be shown as a preview. Tags should be developer-relevant topics.";
 
-        $result = $this->callGeminiOrFallback($prompt, true);
+        $result = $this->callGemini($prompt, true);
 
-        // Normalize the result
         return [
             'summary' => $result['summary'] ?? '',
             'meta_description' => $result['meta_description'] ?? '',
@@ -171,6 +176,7 @@ Make the summary intriguing — it will be shown as a preview. Tags should be de
             'tags' => $result['tags'] ?? [],
         ];
     }
+
     /**
      * Regenerate an article draft incorporating user feedback.
      */
@@ -195,9 +201,12 @@ Rewrite the article incorporating the editor's feedback. Follow the same HTML fo
 
 Output ONLY the HTML content.";
 
-        return $this->callGeminiOrFallback($prompt, false);
+        return $this->callGemini($prompt, false);
     }
 
+    /**
+     * Perform a specific editor action (continue, summarize, etc.)
+     */
     public function editorAction(string $action, string $text): string
     {
         $prompts = [
@@ -206,51 +215,109 @@ Output ONLY the HTML content.";
             'professional' => "Rewrite this to sound like a senior editor at Wired: {$text}",
             'fix_grammar' => "Fix grammar and flow while maintaining the bold tone: {$text}"
         ];
-        return $this->callGeminiOrFallback($prompts[$action] ?? $prompts['continue'], false);
+        return $this->callGemini($prompts[$action] ?? $prompts['continue'], false);
     }
 
-    private function callGeminiOrFallbackConversational(array $messages)
+    /**
+     * Call Gemini API for conversational messages.
+     * Returns the text response or a user-friendly error.
+     */
+    private function callGeminiConversational(array $messages): string
     {
-        if (!empty($this->apiKey)) {
-            try {
-                $response = Http::timeout(60)->post("https://generativelanguage.googleapis.com/v1beta/models/{$this->model}:generateContent?key={$this->apiKey}", [
-                    'contents' => $messages
-                ]);
-                if ($response->successful()) return $response->json()['candidates'][0]['content']['parts'][0]['text'] ?? '';
-            } catch (\Exception $e) { Log::error('Gemini API Error: ' . $e->getMessage()); }
-        }
+        $this->ensureApiKey();
 
-        $llamaMessages = array_map(fn($m) => ['role' => ($m['role'] === 'model' ? 'assistant' : 'user'), 'content' => $m['parts'][0]['text']], $messages);
-        return $this->llamaFallback->chat($llamaMessages);
+        try {
+            $response = Http::timeout(60)->post(
+                "https://generativelanguage.googleapis.com/v1beta/models/{$this->model}:generateContent?key={$this->apiKey}",
+                ['contents' => $messages]
+            );
+
+            if ($response->successful()) {
+                return $response->json()['candidates'][0]['content']['parts'][0]['text'] ?? '';
+            }
+
+            Log::error('Gemini API Error', [
+                'status' => $response->status(),
+                'body' => substr($response->body(), 0, 500),
+            ]);
+            return 'Gemini API returned an error. Please check your API key configuration.';
+        } catch (\Exception $e) {
+            Log::error('Gemini API Connection Error: ' . $e->getMessage());
+            return 'Unable to connect to Gemini API. Please verify GEMINI_API_KEY is set in your .env file.';
+        }
     }
 
-    private function callGeminiOrFallback(string $prompt, bool $expectJson = false)
+    /**
+     * Call Gemini API for single-prompt requests.
+     * Returns parsed JSON array or trimmed string depending on $expectJson.
+     * Throws GeminiApiException if the API is unreachable.
+     */
+    private function callGemini(string $prompt, bool $expectJson = false)
     {
-        if (!empty($this->apiKey)) {
-            try {
-                $response = Http::timeout(60)->post("https://generativelanguage.googleapis.com/v1beta/models/{$this->model}:generateContent?key={$this->apiKey}", [
-                    'contents' => [['parts' => [['text' => $prompt]]]]
-                ]);
-                if ($response->successful()) {
-                    $text = $response->json()['candidates'][0]['content']['parts'][0]['text'] ?? '';
-                    return $expectJson ? $this->extractJson($text) : trim($text);
-                }
-            } catch (\Exception $e) { Log::error('Gemini Error: ' . $e->getMessage()); }
+        $this->ensureApiKey();
+
+        try {
+            $response = Http::timeout(60)->post(
+                "https://generativelanguage.googleapis.com/v1beta/models/{$this->model}:generateContent?key={$this->apiKey}",
+                ['contents' => [['parts' => [['text' => $prompt]]]]]
+            );
+
+            if ($response->successful()) {
+                $text = $response->json()['candidates'][0]['content']['parts'][0]['text'] ?? '';
+                return $expectJson ? $this->extractJson($text) : trim($text);
+            }
+
+            $errorBody = substr($response->body(), 0, 500);
+            Log::error('Gemini API Error', ['status' => $response->status(), 'body' => $errorBody]);
+
+            if ($expectJson) {
+                return [];
+            }
+            throw new \RuntimeException("Gemini API error ({$response->status()}): {$errorBody}");
+        } catch (\RuntimeException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            Log::error('Gemini Connection Error: ' . $e->getMessage());
+            throw new \RuntimeException('Unable to connect to Gemini API: ' . $e->getMessage());
         }
-        $res = $this->llamaFallback->askLlamaDirect($prompt);
-        return $expectJson ? $this->extractJson($res) : trim($res);
     }
 
+    /**
+     * Validate that an API key is configured.
+     */
+    private function ensureApiKey(): void
+    {
+        if (empty($this->apiKey)) {
+            throw new \RuntimeException(
+                'GEMINI_API_KEY is not configured. Please set it in your .env file.'
+            );
+        }
+    }
+
+    /**
+     * Extract a JSON object or array from a text response.
+     */
     private function extractJson(string $text): array
     {
         // Strip markdown code fences if present
         $text = preg_replace('/^```(?:json)?\s*/i', '', $text);
         $text = preg_replace('/\s*```\s*$/', '', $text);
+        $text = trim($text);
 
-        $start = strpos($text, '{');
-        $end = strrpos($text, '}');
-        if ($start === false) { $start = strpos($text, '['); $end = strrpos($text, ']'); }
-        if ($start !== false && $end !== false) {
+        // Detect outermost JSON structure — prefer [] for arrays over {} for objects
+        $arrayStart = strpos($text, '[');
+        $objectStart = strpos($text, '{');
+
+        // Use whichever appears first ([ for arrays, { for objects)
+        if ($arrayStart !== false && ($objectStart === false || $arrayStart < $objectStart)) {
+            $start = $arrayStart;
+            $end = strrpos($text, ']');
+        } else {
+            $start = $objectStart;
+            $end = strrpos($text, '}');
+        }
+
+        if ($start !== false && $end !== false && $end > $start) {
             $json = substr($text, $start, $end - $start + 1);
             $decoded = json_decode($json, true);
             if (is_array($decoded)) return $decoded;
