@@ -9,6 +9,8 @@ use App\Services\GeminiService;
 use App\Services\NewsService;
 use App\Models\Article;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class GenerateDailyNews extends Command
 {
@@ -60,6 +62,9 @@ class GenerateDailyNews extends Command
         $this->info('📝 Generating summary and tags...');
         $meta = $geminiService->generateArticleMeta($idea['title'], $content);
 
+        // Fetch a cover image from Unsplash
+        $coverImageUrl = $this->fetchCoverImage($idea['title'], $meta['tags'] ?? []);
+
         $slug = Str::slug($idea['title']) . '-' . Str::random(6);
         $wordCount = str_word_count(strip_tags($content));
 
@@ -76,10 +81,72 @@ class GenerateDailyNews extends Command
             'meta_description' => $meta['meta_description'] ?? Str::limit(strip_tags($content), 160),
             'seo_keywords' => $meta['seo_keywords'] ?? '',
             'tags' => $meta['tags'] ?? [],
+            'cover_image_path' => $coverImageUrl,
         ]);
 
         $this->info('✅ Article published: "' . $idea['title'] . '"');
+        if ($coverImageUrl) {
+            $this->info("🖼️  Cover image: {$coverImageUrl}");
+        }
         return 0;
+    }
+
+    /**
+     * Fetch a copyright-free cover image from Unsplash API.
+     */
+    private function fetchCoverImage(string $title, array $tags): ?string
+    {
+        $accessKey = config('services.unsplash.access_key');
+
+        if (empty($accessKey)) {
+            $this->warn('⚠️  UNSPLASH_ACCESS_KEY not set — skipping cover image.');
+            return null;
+        }
+
+        // Build search query from title + first tag
+        $query = $tags[0] ?? '';
+        if (empty($query)) {
+            // Extract main keyword from title
+            $words = explode(' ', $title);
+            $stopWords = ['the', 'a', 'an', 'of', 'in', 'for', 'to', 'and', 'is', 'are', 'what', 'how', 'why', 'when', 'your', 'you', 'need', 'know'];
+            $keywords = array_filter($words, function ($w) use ($stopWords) {
+                return strlen($w) > 2 && !in_array(strtolower($w), $stopWords);
+            });
+            $query = implode(' ', array_slice(array_values($keywords), 0, 3));
+        }
+
+        // Always add 'technology' to bias results toward tech imagery
+        $query = trim($query . ' technology');
+
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => "Client-ID {$accessKey}",
+            ])->get('https://api.unsplash.com/search/photos', [
+                'query' => $query,
+                'per_page' => 1,
+                'orientation' => 'landscape',
+                'content_filter' => 'high',
+            ]);
+
+            if ($response->successful()) {
+                $results = $response->json()['results'] ?? [];
+                if (!empty($results)) {
+                    // Use Unsplash CDN URL (hotlinking required by TOS)
+                    $photo = $results[0];
+                    $imageUrl = $photo['urls']['regular'] ?? $photo['urls']['small'] ?? null;
+                    $photographer = $photo['user']['name'] ?? 'Unknown';
+                    $this->info("📸 Photo by {$photographer} on Unsplash");
+                    return $imageUrl;
+                }
+            }
+
+            $this->warn('⚠️  No Unsplash images found for: ' . $query);
+            return null;
+        } catch (\Exception $e) {
+            Log::warning('Unsplash API error: ' . $e->getMessage());
+            $this->warn('⚠️  Unsplash API error — skipping cover image.');
+            return null;
+        }
     }
 
     /**

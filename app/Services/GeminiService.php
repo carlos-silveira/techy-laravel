@@ -15,7 +15,7 @@ class GeminiService
     public function __construct()
     {
         $this->apiKey = config('services.gemini.api_key', env('GEMINI_API_KEY', ''));
-        $this->model = config('services.gemini.model', env('GEMINI_MODEL', 'gemini-2.0-flash'));
+        $this->model = config('services.gemini.model', env('GEMINI_MODEL', 'gemini-2.5-flash'));
     }
 
     /**
@@ -112,38 +112,71 @@ Return ONLY a JSON array, no markdown fences:
             return "- [{$source}] {$n['title']}";
         }, $newsItems));
 
-        $prompt = "You are a senior tech journalist writing for daily.dev — the #1 developer news platform.
+        $prompt = "You are a senior investigative tech journalist writing for daily.dev — the #1 developer news platform with 1M+ daily readers.
 
 ARTICLE TITLE: {$title}
 EDITORIAL BRIEF: {$ideaPrompt}
 TODAY'S NEWS CONTEXT:
 {$context}
 
-Write a compelling 800-1200 word article in clean HTML. Follow these rules STRICTLY:
+Write a LONG-FORM, deeply researched article of **1500-2000 words** in clean HTML.
 
-STRUCTURE:
-- Open with a punchy 1-2 sentence hook that grabs developers. NO generic openings like 'In today's rapidly evolving landscape...'
-- Use <h2> for 3-4 section headers. Make them opinionated, not descriptive ('The Framework Tax' not 'Framework Considerations')
-- Use <p> for paragraphs. Keep paragraphs to 3-4 sentences max
-- Use <strong> for emphasis on key terms
-- Use <blockquote> for impactful quotes or key takeaways
-- Use <pre><code> for any code snippets (if relevant to the topic)
-- Use <ul><li> for lists when comparing tools/frameworks
+MANDATORY STRUCTURE (follow this exact blueprint):
+
+1. **THE HOOK** (2-3 sentences max):
+   - Start with a surprising stat, a bold claim, or a concrete scenario. Examples:
+     'Last Tuesday, a 23-line pull request broke 4,000 CI pipelines across GitHub.'
+     'The average React app now ships 2.1MB of JavaScript. Five years ago, it was 400KB.'
+   - NEVER open with 'In today's rapidly evolving...' or any variation. That's lazy journalism.
+
+2. **THE CONTEXT** (2-3 paragraphs):
+   - What happened? Why now? Connect today's news items into a narrative.
+   - Include at least ONE specific number, benchmark, or data point.
+   - Name real companies, tools, or people when relevant.
+
+3. **THE DEEP DIVE** — Use 3-5 <h2> sections. Each section header MUST be opinionated:
+   - ✅ 'The Hidden Cost of Microservices Nobody Talks About'
+   - ✅ 'Why Your Bundle Size Is Lying to You'
+   - ❌ 'Overview of Current Trends' (boring, rejected)
+   
+   In at least ONE section, include a practical code example:
+   <pre><code class=\"language-javascript\">// Wrap code in pre+code tags
+const example = 'like this';
+</code></pre>
+
+4. **THE COUNTERARGUMENT** (1-2 paragraphs):
+   - Steel-man the opposing view. Show intellectual honesty.
+   - 'To be fair, proponents of X argue that...'
+
+5. **THE PREDICTION** (final section):
+   - End with a bold, specific, time-bound prediction developers can hold you to.
+   - 'By Q4 2026, I predict X will Y. Here's what you should do NOW to prepare.'
+
+HTML RULES:
+- <h2> for section headers (never h1, never h3)
+- <p> for paragraphs (3-4 sentences max per paragraph)
+- <strong> for emphasis on key technical terms
+- <blockquote> for impactful quotes or key takeaways (use at least once)
+- <pre><code> for code snippets (use at least once)
+- <ul><li> for comparison lists
+- <em> for secondary emphasis
 
 TONE:
-- Write like The Verge meets Hacker News: technically accurate but opinionated
-- Take a clear stance. Fence-sitting is boring
-- Include real numbers, benchmarks, or technical details when possible
-- Address developers directly using 'you' and 'your'
-- End with a forward-looking prediction or call to action
+- Write like Wired meets Hacker News: technically precise but never boring
+- Take a CLEAR editorial stance — fence-sitting is lazy journalism
+- Use 'you' and 'your' to speak directly to developers
+- Include specific numbers: GitHub stars, npm downloads, benchmark results, funding amounts
+- Reference real tools, libraries, and frameworks by name
 
-DO NOT:
-- Use markdown — only HTML tags
-- Wrap your response in code fences
-- Include a title tag (it's handled separately)
-- Use self-promotional language about AI
+ABSOLUTE PROHIBITIONS:
+- NO markdown syntax of any kind — HTML only
+- NO code fences wrapping your entire response  
+- NO <h1> or <title> tags (title is handled separately)
+- NO self-promotional language about AI or 'as an AI'
+- NO generic filler paragraphs — every sentence must carry information
+- Article MUST be at least 1500 words. Short articles are REJECTED.
 
-Output ONLY the HTML content.";
+Output ONLY the raw HTML content. Nothing else.";
 
         return $this->callGemini($prompt, false);
     }
@@ -256,30 +289,47 @@ Output ONLY the HTML content.";
     {
         $this->ensureApiKey();
 
-        try {
-            $response = Http::timeout(60)->post(
-                "https://generativelanguage.googleapis.com/v1beta/models/{$this->model}:generateContent?key={$this->apiKey}",
-                ['contents' => [['parts' => [['text' => $prompt]]]]]
-            );
+        $maxRetries = 2;
+        $lastError = null;
 
-            if ($response->successful()) {
-                $text = $response->json()['candidates'][0]['content']['parts'][0]['text'] ?? '';
-                return $expectJson ? $this->extractJson($text) : trim($text);
+        for ($attempt = 0; $attempt <= $maxRetries; $attempt++) {
+            try {
+                $response = Http::timeout(60)->post(
+                    "https://generativelanguage.googleapis.com/v1beta/models/{$this->model}:generateContent?key={$this->apiKey}",
+                    ['contents' => [['parts' => [['text' => $prompt]]]]]
+                );
+
+                if ($response->successful()) {
+                    $text = $response->json()['candidates'][0]['content']['parts'][0]['text'] ?? '';
+                    return $expectJson ? $this->extractJson($text) : trim($text);
+                }
+
+                // Retry on 429 rate limit
+                if ($response->status() === 429 && $attempt < $maxRetries) {
+                    $wait = ($attempt + 1) * 15;
+                    Log::warning("Gemini 429 rate limit — retrying in {$wait}s (attempt " . ($attempt + 1) . ")");
+                    sleep($wait);
+                    continue;
+                }
+
+                $errorBody = substr($response->body(), 0, 500);
+                Log::error('Gemini API Error', ['status' => $response->status(), 'body' => $errorBody]);
+                $lastError = "Gemini API error ({$response->status()}): {$errorBody}";
+
+                if ($expectJson) {
+                    return [];
+                }
+                throw new \RuntimeException($lastError);
+            } catch (\RuntimeException $e) {
+                throw $e;
+            } catch (\Exception $e) {
+                Log::error('Gemini Connection Error: ' . $e->getMessage());
+                throw new \RuntimeException('Unable to connect to Gemini API: ' . $e->getMessage());
             }
-
-            $errorBody = substr($response->body(), 0, 500);
-            Log::error('Gemini API Error', ['status' => $response->status(), 'body' => $errorBody]);
-
-            if ($expectJson) {
-                return [];
-            }
-            throw new \RuntimeException("Gemini API error ({$response->status()}): {$errorBody}");
-        } catch (\RuntimeException $e) {
-            throw $e;
-        } catch (\Exception $e) {
-            Log::error('Gemini Connection Error: ' . $e->getMessage());
-            throw new \RuntimeException('Unable to connect to Gemini API: ' . $e->getMessage());
         }
+
+        if ($expectJson) return [];
+        throw new \RuntimeException($lastError ?? 'Gemini API failed after retries');
     }
 
     /**
