@@ -26,6 +26,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('/generate-brief', [AiController::class, 'generateBrief']);
 Route::post('/generate-seo', [AiController::class, 'generateSeoTags']);
 Route::post('/generate-image-prompt', [AiController::class, 'generateImagePrompt']);
+use App\Http\Controllers\LanguageController;
+
+Route::post('/set-locale', [LanguageController::class, 'setLocale']);
+
 Route::get('/generate-ideas', [AiController::class, 'generateIdeas']);
 Route::post('/generate-draft', [AiController::class, 'generateDraft']);
 Route::post('/editor-action', [AiController::class, 'editorAction']);

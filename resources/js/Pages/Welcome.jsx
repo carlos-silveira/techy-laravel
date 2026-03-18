@@ -9,11 +9,14 @@ import {
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import CommandPalette from '@/Components/CommandPalette';
+import Navbar from '@/Components/Navbar';
 import { ArrowRight, Zap, BookOpen, Clock } from 'lucide-react';
+import useLanguage from '@/Hooks/useLanguage';
 
 dayjs.extend(relativeTime);
 
 export default function Welcome({ articles, editorsChoice, dailyBrief }) {
+  const { __ } = useLanguage();
   const { scrollYProgress } = useScroll();
 
   // Dynamic Mouse Spotlight
@@ -58,7 +61,7 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
 
   return (
     <div className="min-h-screen bg-[#02040a] text-white font-sans selection:bg-primary/30 overflow-x-hidden">
-      <Head title="Techy News — AI-Powered Tech Intelligence" />
+      <Head title={`${__('Home')} — Techy News — AI-Powered Tech Intelligence`} />
       <CommandPalette />
 
       {/* Interactive Cursor Spotlight */}
@@ -72,31 +75,7 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
       <div className="fixed bottom-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-purple-600/8 rounded-full blur-[150px] pointer-events-none mix-blend-screen z-0"></div>
 
       {/* ===== NAVBAR ===== */}
-      <nav className="fixed w-full border-b border-white/5 bg-[#02040a]/80 backdrop-blur-xl z-50">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center"
-          >
-            <Link href="/">
-              <img src="/img/logo_wbc.png" alt="Techy News" className="h-8 w-auto" />
-            </Link>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center space-x-8"
-          >
-            <Link href="/archive" className="text-sm font-black uppercase tracking-widest text-gray-400 hover:text-white transition-colors">Archive</Link>
-            <Link href="/about" className="text-sm font-black uppercase tracking-widest text-gray-400 hover:text-white transition-colors">About</Link>
-            <Link href="/dashboard" className="text-sm font-bold bg-white text-black hover:bg-gray-200 px-5 py-2.5 rounded-lg transition-all hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.12)]">
-              Studio
-            </Link>
-          </motion.div>
-        </div>
-      </nav>
+      <Navbar />
 
       <main className="relative z-10 pt-20">
 
@@ -136,7 +115,7 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
                   className="inline-flex items-center gap-3 bg-primary/10 border border-primary/20 rounded-full px-5 py-2 mb-8 backdrop-blur-md"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Featured Story</span>
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">{__('Featured Story')}</span>
                 </motion.div>
 
                 <Link href={`/article/${featured.slug}`}>
@@ -175,7 +154,7 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
               className="absolute bottom-8 right-8 text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 flex flex-col items-center gap-2"
             >
               <div className="w-px h-12 bg-gradient-to-b from-transparent to-gray-700"></div>
-              Scroll
+              {__('Scroll')}
             </motion.div>
           </section>
         )}
@@ -186,7 +165,7 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
             <div className="flex items-center">
               <div className="flex-shrink-0 flex items-center gap-3 bg-primary px-5 py-2 z-10 mr-8">
                 <Zap className="w-3.5 h-3.5 text-white" />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white whitespace-nowrap">AI Brief</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white whitespace-nowrap">{__('AI Brief')}</span>
               </div>
               {/* Scrolling Ticker */}
               <div className="overflow-hidden flex-1">
@@ -219,10 +198,10 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
               <div className="flex items-center justify-between mb-12">
                 <div className="flex items-center gap-4">
                   <div className="w-1 h-8 bg-amber-400 rounded-full"></div>
-                  <h2 className="text-4xl font-black tracking-tighter">Editor's Choice</h2>
+                  <h2 className="text-4xl font-black tracking-tighter">{__('Editors Choice')}</h2>
                 </div>
                 <Link href="/archive" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-white transition-colors flex items-center gap-2 group">
-                  View All <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                  {__('View All')} <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>
 
@@ -245,7 +224,7 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
                           <div className="absolute inset-0 bg-gradient-to-t from-[#02040a] to-transparent opacity-60" />
                           <div className="absolute inset-0 group-hover:bg-amber-400/5 transition-colors duration-500" />
                           <span className="absolute top-4 right-4 text-[10px] font-black uppercase tracking-widest bg-amber-400/20 text-amber-300 border border-amber-400/30 px-3 py-1.5 rounded-full backdrop-blur-md">
-                            ★ Editor's Pick
+                            ★ {__('Editors Pick')}
                           </span>
                         </div>
                         <div className="p-7">
@@ -274,12 +253,12 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
             <div className="flex items-center gap-4">
               <div className="w-1 h-8 bg-primary rounded-full"></div>
               <div>
-                <span className="text-[10px] font-black text-primary uppercase tracking-[0.25em] block mb-1">Latest Discoveries</span>
-                <h2 className="text-4xl font-black tracking-tighter">Now Reading</h2>
+                <span className="text-[10px] font-black text-primary uppercase tracking-[0.25em] block mb-1">{__('Latest Discoveries')}</span>
+                <h2 className="text-4xl font-black tracking-tighter">{__('Now Reading')}</h2>
               </div>
             </div>
             <Link href="/archive" className="hidden md:flex text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-white transition-colors items-center gap-2 group">
-              Full Archive <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+              {__('Full Archive')} <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
 

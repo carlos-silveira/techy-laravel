@@ -628,9 +628,26 @@ export default function Dashboard({ auth, articles: initialArticles }) {
         }
     };
 
+    const [isDragging, setIsDragging] = useState(false);
+
     const handleImageUpload = async (e) => {
-        const file = e.target.files?.[0];
+        let file;
+        if (e.type === 'drop') {
+            e.preventDefault();
+            setIsDragging(false);
+            file = e.dataTransfer.files?.[0];
+        } else {
+            file = e.target.files?.[0];
+        }
+
         if (!file) return;
+        
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            toast.error('Please upload an image file.');
+            return;
+        }
+
         setIsUploading(true);
         const formData = new FormData();
         formData.append('image', file);
@@ -643,6 +660,15 @@ export default function Dashboard({ auth, articles: initialArticles }) {
         } finally {
             setIsUploading(false);
         }
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = () => {
+        setIsDragging(false);
     };
 
     const handleGenerateImagePrompt = async () => {
@@ -773,8 +799,41 @@ export default function Dashboard({ auth, articles: initialArticles }) {
                             <div className="p-10 md:p-16 max-w-4xl mx-auto w-full flex flex-col gap-10">
                                 <div className="space-y-6">
                                     <input type="text" placeholder="Narrative Title." className="w-full bg-transparent border-none text-5xl md:text-7xl font-black tracking-tighter text-white placeholder-white/[0.03] focus:ring-0 p-0" value={title} onChange={(e) => setTitle(e.target.value)} />
-                                    <div className={`relative w-full rounded-3xl border-2 border-dashed overflow-hidden group ${coverImage ? 'border-transparent aspect-video' : 'border-white/5 bg-white/[0.01] h-48 flex items-center justify-center cursor-pointer'}`} onClick={() => !coverImage && document.getElementById('cover-image-upload').click()}>
-                                        {coverImage ? <img src={coverImage} className="w-full h-full object-cover" /> : <div className="flex flex-col items-center gap-2"><ImageIcon className="w-8 h-8 text-gray-800" /><span className="text-[10px] font-black text-gray-700 uppercase">Cover Asset</span></div>}
+                                    <div 
+                                        className={`relative w-full rounded-3xl border-2 border-dashed overflow-hidden group transition-all duration-300 ${
+                                            coverImage ? 'border-transparent aspect-video' : 
+                                            isDragging ? 'border-primary bg-primary/5 scale-[1.01]' : 
+                                            'border-white/5 bg-white/[0.01] h-48 flex items-center justify-center cursor-pointer hover:border-white/20'
+                                        }`} 
+                                        onClick={() => !coverImage && document.getElementById('cover-image-upload').click()}
+                                        onDragOver={handleDragOver}
+                                        onDragLeave={handleDragLeave}
+                                        onDrop={handleImageUpload}
+                                    >
+                                        {coverImage ? (
+                                            <>
+                                                <img src={coverImage} className="w-full h-full object-cover" />
+                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                    <button 
+                                                        onClick={(e) => { e.stopPropagation(); setCoverImage(''); }}
+                                                        className="p-3 bg-red-500 text-white rounded-full hover:scale-110 transition-transform"
+                                                    >
+                                                        <Trash2 className="w-5 h-5" />
+                                                    </button>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div className="flex flex-col items-center gap-2 pointer-events-none">
+                                                {isUploading ? (
+                                                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                                                ) : (
+                                                    <ImageIcon className={`w-8 h-8 ${isDragging ? 'text-primary' : 'text-gray-800'}`} />
+                                                )}
+                                                <span className={`text-[10px] font-black uppercase ${isDragging ? 'text-primary' : 'text-gray-700'}`}>
+                                                    {isDragging ? 'Drop to Upload' : 'Cover Asset'}
+                                                </span>
+                                            </div>
+                                        )}
                                         <input type="file" id="cover-image-upload" className="hidden" accept="image/*" onChange={handleImageUpload} />
                                     </div>
                                     <RichEditor initialContent={richContent} onChange={(val) => setRichContent(val)} keyTrigger={editorResetKey} />
