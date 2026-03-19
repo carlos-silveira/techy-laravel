@@ -167,22 +167,22 @@ export default function ArticleShow({ article, relatedArticles }) {
                     </header>
 
                     {/* Floating Interaction Bar */}
-                    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-12 md:top-1/2 md:-translate-y-1/2 md:bottom-auto z-50 flex md:flex-col items-center gap-6 bg-white/[0.03] backdrop-blur-2xl border border-white/10 py-4 px-6 md:py-8 md:px-4 rounded-full shadow-2xl">
+                    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-12 md:top-1/2 md:-translate-y-1/2 md:bottom-auto z-50 flex md:flex-col items-center gap-6 bg-white/80 dark:bg-white/[0.03] backdrop-blur-2xl border border-black/5 dark:border-white/10 py-4 px-6 md:py-8 md:px-4 rounded-full shadow-2xl transition-colors duration-500">
                         <button
                             onClick={handleLike}
                             className="group flex flex-col items-center gap-1 transition-transform active:scale-95"
                         >
-                            <Heart className={`w-6 h-6 transition-colors ${likes > 0 ? 'fill-red-500 text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.3)]' : 'text-gray-500 group-hover:text-white'}`} />
-                            {likes > 0 && <span className="text-[10px] font-black text-gray-400">{likes}</span>}
+                            <Heart className={`w-6 h-6 transition-colors ${likes > 0 ? 'fill-red-500 text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.3)]' : 'text-gray-500 group-hover:text-black dark:group-hover:text-white'}`} />
+                            {likes > 0 && <span className="text-[10px] font-black text-gray-500 dark:text-gray-400">{likes}</span>}
                         </button>
-                        <div className="w-[1px] h-6 md:w-6 md:h-[1px] bg-white/10"></div>
+                        <div className="w-[1px] h-6 md:w-6 md:h-[1px] bg-black/5 dark:bg-white/10"></div>
                         <button onClick={() => handleShare('twitter')} className="text-gray-500 hover:text-primary transition-colors">
                             <Twitter className="w-5 h-5" />
                         </button>
                         <button onClick={() => handleShare('linkedin')} className="text-gray-500 hover:text-primary transition-colors">
                             <Linkedin className="w-5 h-5" />
                         </button>
-                        <button onClick={() => handleShare('copy')} className="text-gray-500 hover:text-white transition-colors">
+                        <button onClick={() => handleShare('copy')} className="text-gray-500 hover:text-black dark:hover:text-white transition-colors">
                             <LinkIcon className="w-5 h-5" />
                         </button>
                     </div>
@@ -194,7 +194,7 @@ export default function ArticleShow({ article, relatedArticles }) {
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                                 Executive Summary
                             </h3>
-                            <p className="text-xl text-gray-300 font-light leading-relaxed relative z-10 italic">"{article.ai_summary}"</p>
+                            <p className="text-xl text-gray-700 dark:text-gray-300 font-light leading-relaxed relative z-10 italic">"{article.ai_summary}"</p>
                         </div>
                     )}
 
@@ -211,32 +211,32 @@ export default function ArticleShow({ article, relatedArticles }) {
 
                 {/* Read Next Section */}
                 {relatedArticles && relatedArticles.length > 0 && (
-                    <section className="mt-40 pt-20 border-t border-white/5">
+                    <section className="mt-40 pt-20 border-t border-black/5 dark:border-white/5">
                         <div className="flex items-center justify-between mb-12">
-                            <h2 className="text-4xl font-black tracking-tighter">Read Next.</h2>
-                            <Link href="/archive" className="text-xs font-black uppercase tracking-widest text-primary hover:text-white transition-colors flex items-center gap-2">
+                            <h2 className="text-4xl font-black tracking-tighter text-gray-900 dark:text-white">Read Next.</h2>
+                            <Link href="/archive" className="text-xs font-black uppercase tracking-widest text-primary hover:text-black dark:hover:text-white transition-colors flex items-center gap-2">
                                 Explorer Library <ArrowRight className="w-4 h-4" />
                             </Link>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {relatedArticles.map(related => (
                                 <Link key={related.id} href={`/article/${related.slug}`} className="group block h-full">
-                                    <div className="bg-white/[0.03] rounded-[2rem] overflow-hidden border border-white/10 group-hover:border-primary/30 transition-all p-6 h-full flex flex-col">
+                                    <div className="bg-white dark:bg-white/[0.03] rounded-[2rem] overflow-hidden border border-black/5 dark:border-white/10 group-hover:border-primary/30 transition-all p-6 h-full flex flex-col shadow-sm dark:shadow-none">
                                         {related.cover_image_path ? (
                                             <div className="h-40 rounded-2xl bg-cover bg-center mb-6 shadow-xl" style={{ backgroundImage: `url(${related.cover_image_path})` }} />
                                         ) : (
-                                            <div className="h-40 rounded-2xl bg-gradient-to-br from-white/10 to-transparent flex items-center justify-center mb-6 border border-white/5">
-                                                <BookOpen className="w-8 h-8 text-gray-800" />
+                                            <div className="h-40 rounded-2xl bg-gradient-to-br from-black/5 to-transparent dark:from-white/10 dark:to-transparent flex items-center justify-center mb-6 border border-black/5 dark:border-white/5">
+                                                <BookOpen className="w-8 h-8 text-gray-400 dark:text-gray-800" />
                                             </div>
                                         )}
                                         <div className="flex flex-col flex-1">
                                             <div className="text-[10px] font-black text-primary uppercase tracking-widest mb-3">
                                                 {dayjs(related.updated_at).format('MMM D, YYYY')}
                                             </div>
-                                            <h3 className="text-xl font-black text-white group-hover:text-primary transition-colors line-clamp-2 mb-3 leading-tight tracking-tight">
+                                            <h3 className="text-xl font-black text-gray-900 dark:text-white group-hover:text-primary transition-colors line-clamp-2 mb-3 leading-tight tracking-tight">
                                                 {related.title}
                                             </h3>
-                                            <p className="text-sm text-gray-500 font-light line-clamp-2 leading-relaxed">
+                                            <p className="text-sm text-gray-600 dark:text-gray-500 font-light line-clamp-2 leading-relaxed">
                                                 {related.ai_summary}
                                             </p>
                                         </div>
@@ -248,13 +248,13 @@ export default function ArticleShow({ article, relatedArticles }) {
                 )}
             </main>
 
-            <footer className="border-t border-white/5 py-12 mt-20 relative z-10">
-                <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between text-[10px] text-gray-600 font-black uppercase tracking-widest">
+            <footer className="border-t border-black/5 dark:border-white/5 py-12 mt-20 relative z-10 transition-colors duration-500">
+                <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between text-[10px] text-gray-500 dark:text-gray-600 font-black uppercase tracking-widest">
                     <p>© 2026 Carlos Silveira. All rights reserved.</p>
                     <div className="flex space-x-8 mt-4 md:mt-0">
-                        <Link href="/" className="hover:text-white transition-colors">Home</Link>
-                        <Link href="/archive" className="hover:text-white transition-colors">Archive</Link>
-                        <a href="https://github.com/carlos-silveira" className="hover:text-white transition-colors capitalize">GitHub</a>
+                        <Link href="/" className="hover:text-black dark:hover:text-white transition-colors">Home</Link>
+                        <Link href="/archive" className="hover:text-black dark:hover:text-white transition-colors">Archive</Link>
+                        <a href="https://github.com/carlos-silveira" className="hover:text-black dark:hover:text-white transition-colors capitalize">GitHub</a>
                     </div>
                 </div>
             </footer>
@@ -303,14 +303,15 @@ const TipTapRenderer = ({ content }) => {
                 if (node.attrs?.language === 'mermaid') {
                     return <div key={index} className="mermaid bg-white dark:bg-[#0d1117] p-6 rounded-2xl border border-black/5 dark:border-white/10 mb-8 my-10 overflow-auto">{node.content?.[0]?.text}</div>;
                 }
+                const codeContent = node.content?.map(n => n.text).join('') || '';
                 return (
                     <div key={index} className="group relative my-10">
                         <div className="absolute -top-3 left-6 px-3 py-1 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-lg z-10 shadow-lg shadow-primary/20">
                             {node.attrs?.language || 'code'}
                         </div>
                         <pre className="bg-black/5 dark:bg-white/[0.03] p-8 pt-10 rounded-[1.5rem] border border-black/5 dark:border-white/10 mb-8 overflow-auto group-hover:border-primary/30 transition-all duration-500 scrollbar-thin scrollbar-thumb-primary/20">
-                            <code className={`language-${node.attrs?.language} text-sm leading-relaxed block`}>
-                                {node.content?.[0]?.text}
+                            <code className={`language-${node.attrs?.language} text-sm leading-relaxed block whitespace-pre`}>
+                                {codeContent}
                             </code>
                         </pre>
                     </div>

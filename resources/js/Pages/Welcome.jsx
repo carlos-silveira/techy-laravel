@@ -369,8 +369,8 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="your@email.com"
-                    className="flex-1 w-full px-6 py-4 rounded-xl bg-black/60 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all text-sm"
+                    placeholder={__('your@email.com')}
+                    className="flex-1 w-full px-6 py-4 rounded-xl bg-gray-100 dark:bg-black/60 border border-black/5 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all text-sm"
                   />
                   <button
                     type="submit"

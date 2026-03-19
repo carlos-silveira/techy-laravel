@@ -156,9 +156,9 @@ export default function About() {
                     <motion.div
                         {...fadeIn}
                         transition={{ delay: 0.1 }}
-                        className="md:col-span-1 bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 flex flex-col justify-between"
+                        className="md:col-span-1 bg-white dark:bg-white/[0.03] border border-black/5 dark:border-white/10 rounded-[2.5rem] p-8 flex flex-col justify-between shadow-sm dark:shadow-none transition-all duration-500"
                     >
-                        <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.25em] mb-6">Connect</h3>
+                        <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.25em] mb-6">Connect</h3>
                         <div className="grid grid-cols-1 gap-3">
                             {[
                                 { icon: <Github className="w-5 h-5" />, label: 'GitHub', href: 'https://github.com/carlos-silveira' },
@@ -177,7 +177,7 @@ export default function About() {
                     <motion.div
                         {...fadeIn}
                         transition={{ delay: 0.2 }}
-                        className="md:col-span-2 bg-white/[0.02] border border-white/10 rounded-[2.5rem] p-10 relative overflow-hidden group"
+                        className="md:col-span-2 bg-white dark:bg-white/[0.02] border border-black/5 dark:border-white/10 rounded-[2.5rem] p-10 relative overflow-hidden group shadow-sm dark:shadow-none transition-all duration-500"
                     >
                         <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-primary/5 to-transparent pointer-events-none"></div>
                         <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.25em] mb-8 flex items-center gap-2 relative z-10">
@@ -194,11 +194,11 @@ export default function About() {
                     <motion.div
                         {...fadeIn}
                         transition={{ delay: 0.25 }}
-                        className="md:col-span-2 bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-10 relative overflow-hidden group flex flex-col justify-center"
+                        className="md:col-span-2 bg-white dark:bg-white/[0.03] border border-black/5 dark:border-white/10 rounded-[2.5rem] p-10 relative overflow-hidden group flex flex-col justify-center shadow-sm dark:shadow-none transition-all duration-500"
                     >
                         <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-colors"></div>
                         <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.25em] mb-6">The Concept</h3>
-                        <h2 className="text-3xl font-black mb-4 tracking-tight text-white">What is Techy?</h2>
+                        <h2 className="text-3xl font-black mb-4 tracking-tight text-gray-900 dark:text-white">What is Techy?</h2>
                         <p className="text-gray-400 text-sm leading-relaxed font-light">
                             Techy is an <span className="text-white font-bold">AI-powered news ecosystem</span> designed to redefine information consumption. It merges high-performance web architecture with advanced language models to deliver a personalized, lightning-fast, and deeply immersive experience for the next generation of tech enthusiasts.
                         </p>
@@ -219,7 +219,7 @@ export default function About() {
                                     className="w-full text-left flex items-center justify-between p-5 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-primary/30 hover:bg-white/[0.04] transition-all group/exp"
                                 >
                                     <div>
-                                        <div className="font-black text-white text-sm tracking-tight group-hover/exp:text-primary transition-colors">{exp.role}</div>
+                                        <div className="font-black text-gray-900 dark:text-white text-sm tracking-tight group-hover/exp:text-primary transition-colors">{exp.role}</div>
                                         <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1 flex items-center gap-2">
                                             <Briefcase className="w-3 h-3" />{exp.company}
                                         </div>
@@ -251,7 +251,7 @@ export default function About() {
                             <p className="text-gray-400 text-sm leading-relaxed">
                                 A fully functional AI-powered journalism platform prototype. Features on-device summarization, command palette search, and infinite scroll discovery.
                             </p>
-                            <Link href="/archive" className="inline-flex items-center mt-4 text-primary text-[10px] font-black uppercase tracking-widest hover:text-white transition-colors gap-2">
+                            <Link href="/archive" className="inline-flex items-center mt-4 text-primary text-[10px] font-black uppercase tracking-widest hover:text-black dark:hover:text-white transition-colors gap-2">
                                 Explore the Platform <ExternalLink className="w-3 h-3" />
                             </Link>
                         </div>
@@ -278,9 +278,9 @@ export default function About() {
                     <img src="/img/logo_wbc.png" alt="Techy News" className="h-7 w-auto opacity-50 hover:opacity-100 transition-opacity" />
                     <p className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-700">© 2026 Carlos Silveira</p>
                     <div className="flex space-x-8">
-                        <Link href="/" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-white transition-colors">Home</Link>
-                        <Link href="/archive" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-white transition-colors">Archive</Link>
-                        <a href="https://github.com/carlos-silveira" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-white transition-colors">GitHub</a>
+                        <Link href="/" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors">Home</Link>
+                        <Link href="/archive" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors">Archive</Link>
+                        <a href="https://github.com/carlos-silveira" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors">GitHub</a>
                     </div>
                 </div>
             </footer>
@@ -307,7 +307,7 @@ export default function About() {
                             <div className="flex items-start justify-between p-8 border-b border-white/5">
                                 <div>
                                     <div className="text-[10px] font-black text-primary uppercase tracking-[0.25em] mb-2">Experience</div>
-                                    <h2 className="text-2xl font-black tracking-tight text-white">{selectedExp.role}</h2>
+                                    <h2 className="text-2xl font-black tracking-tight text-gray-900 dark:text-white">{selectedExp.role}</h2>
                                     <div className="flex flex-wrap items-center gap-3 mt-2">
                                         <a href={selectedExp.companyUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-gray-400 font-bold flex items-center gap-1.5 hover:text-primary transition-colors group">
                                             <Briefcase className="w-4 h-4" />
@@ -350,7 +350,7 @@ export default function About() {
                                     <div className="text-[10px] font-black text-gray-600 uppercase tracking-[0.25em] mb-3">Tech Stack</div>
                                     <div className="flex flex-wrap gap-2">
                                         {selectedExp.tech.map((t, i) => (
-                                            <span key={i} className="text-[10px] font-black uppercase tracking-widest bg-white/5 border border-white/5 text-gray-400 px-3 py-1.5 rounded-lg">
+                                            <span key={i} className="text-[10px] font-black uppercase tracking-widest bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 text-gray-600 dark:text-gray-400 px-3 py-1.5 rounded-lg">
                                                 {t}
                                             </span>
                                         ))}
@@ -386,7 +386,7 @@ function InteractiveCard({ tech }) {
             style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
             onMouseMove={handleMouseMove}
             onMouseLeave={() => { x.set(0); y.set(0); }}
-            className="flex items-center gap-3 p-4 bg-white/[0.03] border border-white/5 rounded-2xl hover:border-white/15 transition-colors cursor-default"
+            className="flex items-center gap-3 p-4 bg-black/[0.01] dark:bg-white/[0.03] border border-black/5 dark:border-white/5 rounded-2xl hover:border-black/10 dark:hover:border-white/15 transition-all cursor-default shadow-sm dark:shadow-none"
         >
             <div
                 style={{ transform: "translateZ(30px)" }}
@@ -396,7 +396,7 @@ function InteractiveCard({ tech }) {
             </div>
             <span
                 style={{ transform: "translateZ(20px)" }}
-                className="font-black text-sm text-gray-400 hover:text-white transition-colors tracking-tight"
+                className="font-black text-sm text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors tracking-tight"
             >
                 {tech.name}
             </span>

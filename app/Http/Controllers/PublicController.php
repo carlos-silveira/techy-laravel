@@ -47,11 +47,17 @@ class PublicController extends Controller
             return $articles->map(fn($a) => $this->translateIfNecessary($a, $locale));
         });
 
-        $dailyBrief = Cache::remember("homepage_daily_brief_{$locale}", 3600, function () {
+        $dailyBrief = Cache::remember("homepage_daily_brief_{$locale}", 3600, function () use ($locale) {
             $latestArticle = Article::where('status', 'published')
                 ->orderBy('created_at', 'desc')
                 ->first();
-            return $latestArticle?->ai_summary ?? "The rapid evolution of artificial intelligence frameworks...";
+            
+            if ($latestArticle) {
+                $latestArticle = $this->translateIfNecessary($latestArticle, $locale);
+                return $latestArticle->ai_summary;
+            }
+
+            return "The intelligence pipeline is warming up. Check back shortly.";
         });
 
         return Inertia::render('Welcome', [
@@ -178,7 +184,7 @@ class PublicController extends Controller
             $article->ai_summary = $result['summary'];
             $article->content = $result['content'];
         } catch (\Exception $e) {
-            \Log::error("Translation failed for article {$article->id} to {$locale}: " . $e->getMessage());
+            Log::error("Translation failed for article {$article->id} to {$locale}: " . $e->getMessage());
         }
 
         return $article;
