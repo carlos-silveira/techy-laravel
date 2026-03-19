@@ -284,29 +284,40 @@ const TipTapRenderer = ({ content }) => {
 
     // Prism Syntax Highlighting
     React.useEffect(() => {
-        if (!window.Prism) {
-            const script = document.createElement('script');
-            script.src = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js";
-            script.async = true;
-            document.body.appendChild(script);
+        const loadPrism = async () => {
+            if (!window.Prism) {
+                // Load base Prism
+                await new Promise((resolve) => {
+                    const script = document.createElement('script');
+                    script.src = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js";
+                    script.async = true;
+                    script.onload = resolve;
+                    document.body.appendChild(script);
+                });
 
-            const languages = ['javascript', 'php', 'css', 'markup', 'bash', 'python', 'json'];
-            languages.forEach(lang => {
-                const langScript = document.createElement('script');
-                langScript.src = `https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-${lang}.min.js`;
-                langScript.async = true;
-                document.body.appendChild(langScript);
-            });
+                // Load languages
+                const languages = ['javascript', 'php', 'css', 'markup', 'bash', 'python', 'json'];
+                for (const lang of languages) {
+                    await new Promise((resolve) => {
+                        const langScript = document.createElement('script');
+                        langScript.src = `https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-${lang}.min.js`;
+                        langScript.async = true;
+                        langScript.onload = resolve;
+                        langScript.onerror = resolve; // Continue even if one fails
+                        document.body.appendChild(langScript);
+                    });
+                }
 
-            const style = document.createElement('link');
-            style.rel = 'stylesheet';
-            style.href = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css";
-            document.head.appendChild(style);
-
-            script.onload = () => window.Prism?.highlightAll();
-        } else {
+                // Load theme
+                const style = document.createElement('link');
+                style.rel = 'stylesheet';
+                style.href = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css";
+                document.head.appendChild(style);
+            }
             window.Prism?.highlightAll();
-        }
+        };
+
+        loadPrism();
     }, [content]);
 
     if (!content) return null;

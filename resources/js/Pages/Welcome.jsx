@@ -91,10 +91,10 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
               className="absolute inset-0"
               style={{ scale: useTransform(scrollYProgress, [0, 0.3], [1.05, 1]) }}
             >
-              {featured.cover_image_path ? (
+              {(featured.cover_image_path || featured.cover_image) ? (
                 <div
                   className="absolute inset-0 bg-cover bg-center"
-                  style={{ backgroundImage: `url(${featured.cover_image_path})` }}
+                  style={{ backgroundImage: `url(${featured.cover_image_path || featured.cover_image})` }}
                 />
               ) : (
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-[#02040a] to-purple-900/20" />
@@ -223,7 +223,7 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
                       <div className="relative rounded-[2rem] overflow-hidden bg-white/[0.6] dark:bg-white/[0.03] border border-black/5 dark:border-white/5 group-hover:border-amber-400/30 transition-all duration-500 shadow-sm dark:shadow-none">
                         <div
                           className="h-52 bg-gradient-to-br from-white/10 to-black/50 bg-cover bg-center relative overflow-hidden"
-                          style={article.cover_image_path ? { backgroundImage: `url(${article.cover_image_path})` } : {}}
+                          style={(article.cover_image_path || article.cover_image) ? { backgroundImage: `url(${article.cover_image_path || article.cover_image})` } : {}}
                         >
                           <div className="absolute inset-0 bg-gradient-to-t from-[#02040a] to-transparent opacity-60" />
                           <div className="absolute inset-0 group-hover:bg-amber-400/5 transition-colors duration-500" />
@@ -281,16 +281,16 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
                   >
                     <Link href={`/article/${article.slug}`} className="group block h-full">
                       <div className={`h-full bg-white/[0.6] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 group-hover:border-primary/30 rounded-[2rem] overflow-hidden transition-all duration-500 flex flex-col shadow-sm dark:shadow-none ${isLarge ? 'min-h-[500px]' : 'min-h-[280px]'}`}>
-                        {article.cover_image_path && (
+                        {(article.cover_image_path || article.cover_image) && (
                           <div
                             className={`w-full bg-cover bg-center flex-shrink-0 relative overflow-hidden ${isLarge ? 'h-72' : 'h-40'}`}
-                            style={{ backgroundImage: `url(${article.cover_image_path})` }}
+                            style={{ backgroundImage: `url(${article.cover_image_path || article.cover_image})` }}
                           >
                             <div className="absolute inset-0 bg-gradient-to-t from-[#02040a] via-transparent to-transparent" />
                             <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-colors duration-700 mix-blend-overlay" />
                           </div>
                         )}
-                        {!article.cover_image_path && (
+                        {!(article.cover_image_path || article.cover_image) && (
                           <div className={`w-full flex-shrink-0 relative overflow-hidden bg-gradient-to-br from-white/5 to-transparent flex items-center justify-center ${isLarge ? 'h-72' : 'h-40'}`}>
                             <span className="text-[80px] font-black text-white/[0.03] absolute bottom-2 right-4 leading-none select-none">
                               {String(index + 2).padStart(2, '0')}

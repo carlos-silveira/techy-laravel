@@ -24,7 +24,7 @@ export default function LanguageSwitcher() {
             toast.success(`Language changed to ${languages.find(l => l.code === langCode).name}`);
             
             // Reload the page to apply changes and fetch translated content
-            router.reload();
+            window.location.reload();
         } catch (error) {
             toast.error('Failed to change language.');
         }
