@@ -20,7 +20,7 @@ export default function LanguageSwitcher() {
     const changeLanguage = async (langCode) => {
         setIsOpen(false);
         try {
-            await axios.post('/api/set-locale', { locale: langCode });
+            await axios.post('/set-locale', { locale: langCode });
             toast.success(`Language changed to ${languages.find(l => l.code === langCode).name}`);
             
             // Reload the page to apply changes and fetch translated content

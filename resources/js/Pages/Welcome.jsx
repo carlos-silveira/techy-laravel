@@ -54,9 +54,13 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
     }
   };
 
-  // Featured article is the first one
+  // Featured article is the latest one
   const featured = articles?.[0];
-  const gridArticles = articles?.slice(1, 7) || [];
+
+  // Grid articles: skip the featured one and any that are in Editors Choice
+  const gridArticles = articles?.slice(1).filter(a => 
+    !editorsChoice?.some(ec => ec.id === a.id)
+  ).slice(0, 6) || [];
   const tickerItems = articles?.slice(0, 8) || [];
 
   return (
@@ -248,25 +252,21 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
         )}
 
         {/* ===== BENTO ARTICLE GRID ===== */}
-        <section className="py-20 px-6 max-w-7xl mx-auto border-t border-black/5 dark:border-white/5">
-          <div className="flex items-center justify-between mb-12">
-            <div className="flex items-center gap-4">
-              <div className="w-1 h-8 bg-primary rounded-full"></div>
-              <div>
-                <span className="text-[10px] font-black text-primary uppercase tracking-[0.25em] block mb-1">{__('Latest Discoveries')}</span>
-                <h2 className="text-4xl font-black tracking-tighter text-black dark:text-white">{__('Now Reading')}</h2>
+        {(articles?.length > 0 && gridArticles.length > 0) ? (
+          <section className="py-20 px-6 max-w-7xl mx-auto border-t border-black/5 dark:border-white/5">
+            <div className="flex items-center justify-between mb-12">
+              <div className="flex items-center gap-4">
+                <div className="w-1 h-8 bg-primary rounded-full"></div>
+                <div>
+                  <span className="text-[10px] font-black text-primary uppercase tracking-[0.25em] block mb-1">{__('Latest Discoveries')}</span>
+                  <h2 className="text-4xl font-black tracking-tighter text-black dark:text-white">{__('Now Reading')}</h2>
+                </div>
               </div>
+              <Link href="/archive" className="hidden md:flex text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-white transition-colors items-center gap-2 group">
+                {__('Full Archive')} <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+              </Link>
             </div>
-            <Link href="/archive" className="hidden md:flex text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-white transition-colors items-center gap-2 group">
-              {__('Full Archive')} <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
 
-          {articles?.length === 0 ? (
-            <div className="py-32 text-center text-gray-500 dark:text-gray-700 font-light text-xl border border-black/5 dark:border-white/5 rounded-[2rem] transition-colors duration-500">
-              {__('The intelligence pipeline is warming up. Check back shortly.')}
-            </div>
-          ) : gridArticles.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {gridArticles.map((article, index) => {
                 const isLarge = index === 0;
@@ -330,19 +330,24 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
                 );
               })}
             </div>
-          )}
 
-          <div className="mt-10 text-center">
-            <Link
-              href="/archive"
-              className="inline-flex items-center gap-3 border border-white/10 text-gray-400 hover:text-white hover:border-white/20 px-8 py-4 rounded-xl font-black text-xs uppercase tracking-widest transition-all hover:bg-white/5 group"
-            >
-              Load All Articles
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
-        </section>
-
+            <div className="mt-10 text-center">
+              <Link
+                href="/archive"
+                className="inline-flex items-center gap-3 border border-black/10 dark:border-white/10 text-gray-400 hover:text-black dark:hover:text-white px-8 py-4 rounded-xl font-black text-xs uppercase tracking-widest transition-all hover:bg-black/5 dark:hover:bg-white/5 group"
+              >
+                Load All Articles
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+          </section>
+        ) : articles?.length === 0 && (
+          <section className="py-20 px-6 max-w-7xl mx-auto border-t border-black/5 dark:border-white/5">
+            <div className="py-32 text-center text-gray-500 dark:text-gray-700 font-light text-xl border border-black/5 dark:border-white/5 rounded-[2rem] transition-colors duration-500">
+              {__('The intelligence pipeline is warming up. Check back shortly.')}
+            </div>
+          </section>
+        )}
         {/* ===== NEWSLETTER ===== */}
         <section className="py-24 px-6 border-t border-black/5 dark:border-white/5">
           <div className="max-w-4xl mx-auto">
@@ -389,7 +394,7 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
         <footer className="border-t border-black/5 dark:border-white/5 py-12">
           <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2.5">
-              <img src="/img/logo_wbc.png" alt="Techy News" className="h-7 w-auto opacity-50 hover:opacity-100 transition-opacity" />
+              <img src="/img/logo_wbc.png" alt="Techy News" className="h-7 w-auto opacity-50 hover:opacity-100 transition-opacity dark:brightness-100 brightness-0" />
             </div>
             <p className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-700">
               © 2026 · AI-Powered by Carlos Silveira
