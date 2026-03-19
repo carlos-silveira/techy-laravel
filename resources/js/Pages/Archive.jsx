@@ -3,11 +3,42 @@ import { Head, Link } from '@inertiajs/react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 import dayjs from 'dayjs';
 import axios from 'axios';
-import { Loader2, Archive as ArchiveIcon } from 'lucide-react';
+import { Loader2, Archive as ArchiveIcon, BookOpen } from 'lucide-react';
 import CommandPalette from '@/Components/CommandPalette';
-
 import Navbar from '@/Components/Navbar';
 import useLanguage from '@/Hooks/useLanguage';
+
+/**
+ * Helper to find the first image in the content (HTML string or JSON object).
+ */
+const findFirstImage = (content) => {
+  if (!content) return null;
+  if (typeof content === 'string') {
+    const match = content.match(/<img[^>]+src="([^">]+)"/);
+    if (match) return match[1];
+    try {
+      const parsed = JSON.parse(content);
+      return findFirstImage(parsed);
+    } catch { return null; }
+  }
+  if (typeof content === 'object') {
+    if (content.type === 'image' && content.attrs?.src) return content.attrs.src;
+    if (content.content && Array.isArray(content.content)) {
+      for (const node of content.content) {
+        const found = findFirstImage(node);
+        if (found) return found;
+      }
+    }
+  }
+  return null;
+};
+
+const getFinalImage = (article) => {
+  if (article.cover_image_path) return article.cover_image_path;
+  const contentImage = findFirstImage(article.content);
+  if (contentImage) return contentImage;
+  return 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=2072';
+};
 
 export default function Archive({ articles: originalArticles, currentTag, popularTags }) {
     const { __ } = useLanguage();
@@ -80,7 +111,6 @@ export default function Archive({ articles: originalArticles, currentTag, popula
             <div className="fixed top-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-primary/5 rounded-full blur-[120px] pointer-events-none mix-blend-screen"></div>
             <div className="fixed bottom-[-10%] left-[-10%] w-[40vw] h-[40vw] bg-purple-600/5 rounded-full blur-[100px] pointer-events-none mix-blend-screen"></div>
 
-            {/* Unified Navbar */}
             <Navbar />
 
             <main className="max-w-6xl mx-auto px-6 py-32 relative z-10">
@@ -143,13 +173,10 @@ export default function Archive({ articles: originalArticles, currentTag, popula
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[40px] -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
 
                                     <div className="flex flex-col gap-6 relative z-10">
-                                        {article.cover_image_path ? (
-                                            <div className="w-full h-48 rounded-2xl bg-cover bg-center border border-black/5 dark:border-white/10 shadow-2xl group-hover:scale-[1.02] transition-transform duration-700" style={{ backgroundImage: `url(${article.cover_image_path})` }}></div>
-                                        ) : (
-                                            <div className="w-full h-48 rounded-2xl bg-gradient-to-br from-black/[0.02] dark:from-white/10 to-transparent border border-black/5 dark:border-white/10 flex items-center justify-center">
-                                                <ArchiveIcon className="w-12 h-12 text-gray-300 dark:text-gray-700 group-hover:text-primary/50 transition-colors" />
-                                            </div>
-                                        )}
+                                        <div 
+                                            className="w-full h-48 rounded-2xl bg-cover bg-center border border-black/5 dark:border-white/10 shadow-2xl group-hover:scale-[1.02] transition-transform duration-700" 
+                                            style={{ backgroundImage: `url(${getFinalImage(article)})` }}
+                                        />
 
                                         <div>
                                             <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-2 flex items-center gap-2">
@@ -166,7 +193,7 @@ export default function Archive({ articles: originalArticles, currentTag, popula
 
                                             <div className="mt-6 flex flex-wrap gap-2">
                                                 {article.tags && article.tags.slice(0, 3).map(tag => (
-                                                    <span key={tag} className="text-[10px] font-black uppercase tracking-tighter bg-black/[0.03] dark:bg-white/5 text-gray-500 px-3 py-1 rounded-full border border-black/5 dark:border-white/5">#{tag}</span>
+                                                    <span key={tag} className={`text-[10px] font-black uppercase tracking-tighter bg-black/[0.03] dark:bg-white/5 text-gray-500 px-3 py-1 rounded-full border border-black/5 dark:border-white/5`}>#{tag}</span>
                                                 ))}
                                             </div>
                                         </div>

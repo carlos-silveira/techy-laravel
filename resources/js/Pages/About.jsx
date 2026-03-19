@@ -290,10 +290,10 @@ export default function About() {
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 30 }}
                             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] max-w-2xl bg-white dark:bg-[#02040a] border border-black/10 dark:border-white/10 rounded-3xl shadow-[0_30px_80px_rgba(0,0,0,0.8)] z-[10000] overflow-y-auto max-h-[90vh]"
+                            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] max-w-2xl bg-white dark:bg-[#02040a] border border-black/10 dark:border-white/10 rounded-3xl shadow-[0_30px_80px_rgba(0,0,0,0.8)] z-[10000] overflow-hidden flex flex-col max-h-[90vh]"
                         >
                             {/* Modal Header */}
-                            <div className="flex items-start justify-between p-8 border-b border-black/5 dark:border-white/5">
+                            <div className="flex items-start justify-between p-8 border-b border-black/5 dark:border-white/5 flex-shrink-0">
                                 <div>
                                     <div className="text-[10px] font-black text-primary uppercase tracking-[0.25em] mb-2">{__('Experience')}</div>
                                     <h2 className="text-2xl font-black tracking-tight text-gray-900 dark:text-white">{selectedExp.role}</h2>
@@ -320,7 +320,7 @@ export default function About() {
                             </div>
 
                             {/* Modal Body */}
-                            <div className="p-8 space-y-6">
+                            <div className="p-8 space-y-6 overflow-y-auto">
                                 <p className="text-gray-600 dark:text-gray-400 font-light leading-relaxed">{selectedExp.description}</p>
 
                                 <div>

@@ -15,6 +15,49 @@ import useLanguage from '@/Hooks/useLanguage';
 
 dayjs.extend(relativeTime);
 
+/**
+ * Helper to find the first image in the content (HTML string or JSON object).
+ */
+const findFirstImage = (content) => {
+  if (!content) return null;
+  
+  if (typeof content === 'string') {
+    // Basic regex to find <img> tags in raw HTML
+    const match = content.match(/<img[^>]+src="([^">]+)"/);
+    if (match) return match[1];
+    
+    // Check if it's JSON encoded string
+    try {
+      const parsed = JSON.parse(content);
+      return findFirstImage(parsed);
+    } catch {
+      return null;
+    }
+  }
+  
+  if (typeof content === 'object') {
+    if (content.type === 'image' && content.attrs?.src) return content.attrs.src;
+    if (content.content && Array.isArray(content.content)) {
+      for (const node of content.content) {
+        const found = findFirstImage(node);
+        if (found) return found;
+      }
+    }
+  }
+  
+  return null;
+};
+
+const getFinalImage = (article) => {
+  if (article.cover_image_path) return article.cover_image_path;
+  const contentImage = findFirstImage(article.content);
+  if (contentImage) return contentImage;
+  
+  // Generic tech fallbacks based on keywords or slug
+  if (article.slug.includes('not-paid-to-write-code')) return 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=2072';
+  return 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=2072';
+};
+
 export default function Welcome({ articles, editorsChoice, dailyBrief }) {
   const { __ } = useLanguage();
   const { scrollYProgress } = useScroll();
@@ -45,10 +88,10 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
     setIsSubscribing(true);
     try {
       await axios.post('/api/subscribe', { email });
-      toast.success('You\'re on the list!');
+      toast.success(__('You\'re on the list!'));
       setEmail('');
     } catch (error) {
-      toast.error('Subscription failed. Please try again.');
+      toast.error(__('Subscription failed. Please try again.'));
     } finally {
       setIsSubscribing(false);
     }
@@ -91,14 +134,10 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
               className="absolute inset-0"
               style={{ scale: useTransform(scrollYProgress, [0, 0.3], [1.05, 1]) }}
             >
-              {featured.cover_image_path ? (
-                <div
-                  className="absolute inset-0 bg-cover bg-center"
-                  style={{ backgroundImage: `url(${featured.cover_image_path})` }}
-                />
-              ) : (
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-[#02040a] to-purple-900/20" />
-              )}
+              <div
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ backgroundImage: `url(${getFinalImage(featured)})` }}
+              />
               {/* Multi-layer gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-[#f8f6f6] dark:from-[#02040a] via-[#f8f6f6]/70 dark:via-[#02040a]/70 to-transparent" />
               <div className="absolute inset-0 bg-gradient-to-r from-[#f8f6f6]/60 dark:from-[#02040a]/60 to-transparent" />
@@ -142,111 +181,57 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
                   </Link>
                   <div className="flex items-center gap-2 text-gray-500 text-xs font-black uppercase tracking-widest">
                     <Clock className="w-4 h-4" />
-                    {featured.reading_time_minutes || '5'} min read
+                    {featured.reading_time_minutes || '5'} {__('min read')}
                     <span className="mx-2">·</span>
                     {dayjs(featured.updated_at).fromNow()}
                   </div>
                 </div>
               </motion.div>
             </div>
-
-            {/* Scroll indicator */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.5, duration: 0.8 }}
-              className="absolute bottom-8 right-8 text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 flex flex-col items-center gap-2"
-            >
-              <div className="w-px h-12 bg-gradient-to-b from-transparent to-gray-700"></div>
-              {__('Scroll')}
-            </motion.div>
           </section>
         )}
 
-        {/* ===== AI TICKER / BRIEF RIBBON ===== */}
-        {dailyBrief && (
-          <div className="border-y border-black/5 dark:border-white/5 bg-black/[0.01] dark:bg-white/[0.02] backdrop-blur-xl py-4 overflow-hidden">
-            <div className="flex items-center">
-              <div className="flex-shrink-0 flex items-center gap-3 bg-primary px-5 py-2 z-10 mr-8">
-                <Zap className="w-3.5 h-3.5 text-white" />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white whitespace-nowrap">{__('AI Brief')}</span>
-              </div>
-              {/* Scrolling Ticker */}
-              <div className="overflow-hidden flex-1">
-                <motion.div
-                  className="flex whitespace-nowrap"
-                  animate={{ x: [0, -1200] }}
-                  transition={{ duration: 25, ease: 'linear', repeat: Infinity }}
-                >
-                  {[dailyBrief, dailyBrief].map((brief, i) => (
-                    <span key={i} className="text-sm text-gray-400 font-light mr-24 inline-block">{brief}</span>
-                  ))}
-                </motion.div>
-              </div>
-              <div className="flex-shrink-0 ml-8 text-[10px] font-black uppercase tracking-widest text-gray-700 pr-6">
-                {dayjs().format('MMM D, YYYY')}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ===== EDITOR'S CHOICE ===== */}
+        {/* ===== EDITORS CHOICE ===== */}
         {editorsChoice && editorsChoice.length > 0 && (
-          <section className="py-20 px-6 max-w-7xl mx-auto">
+          <section className="py-24 px-6 max-w-7xl mx-auto">
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.7 }}
+              className="grid grid-cols-1 md:grid-cols-3 gap-8"
             >
-              <div className="flex items-center justify-between mb-12">
-                <div className="flex items-center gap-4">
-                  <div className="w-1 h-8 bg-amber-400 rounded-full"></div>
-                  <h2 className="text-4xl font-black tracking-tighter text-black dark:text-white">{__('Editors Choice')}</h2>
-                </div>
-                <Link href="/archive" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-white transition-colors flex items-center gap-2 group">
-                  {__('View All')} <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </div>
-
-              {/* Horizontal scroll strip on mobile, 3-col on desktop */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {editorsChoice.map((article, index) => (
-                  <motion.div
-                    key={article.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                  >
-                    <Link href={`/article/${article.slug}`} className="group block">
-                      <div className="relative rounded-[2rem] overflow-hidden bg-white/[0.6] dark:bg-white/[0.03] border border-black/5 dark:border-white/5 group-hover:border-amber-400/30 transition-all duration-500 shadow-sm dark:shadow-none">
-                        <div
-                          className="h-52 bg-gradient-to-br from-white/10 to-black/50 bg-cover bg-center relative overflow-hidden"
-                          style={article.cover_image_path ? { backgroundImage: `url(${article.cover_image_path})` } : {}}
-                        >
-                          <div className="absolute inset-0 bg-gradient-to-t from-[#02040a] to-transparent opacity-60" />
-                          <div className="absolute inset-0 group-hover:bg-amber-400/5 transition-colors duration-500" />
-                          <span className="absolute top-4 right-4 text-[10px] font-black uppercase tracking-widest bg-amber-400/20 text-amber-300 border border-amber-400/30 px-3 py-1.5 rounded-full backdrop-blur-md">
-                            ★ {__('Editors Pick')}
-                          </span>
-                        </div>
-                        <div className="p-7">
-                          <div className="text-[10px] font-black text-amber-400/60 uppercase tracking-[0.2em] mb-3">
-                            {dayjs(article.updated_at).format('MMM D, YYYY')}
-                          </div>
-                          <h3 className="text-xl font-black tracking-tight text-black dark:text-white group-hover:text-amber-500 dark:group-hover:text-amber-200 transition-colors duration-300 line-clamp-2 leading-tight mb-3">
-                            {article.title}
-                          </h3>
-                          <p className="text-sm text-gray-600 font-light line-clamp-2 leading-relaxed">
-                            {article.ai_summary}
-                          </p>
-                        </div>
+              {editorsChoice.map((article, index) => (
+                <motion.div
+                  key={article.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Link href={`/article/${article.slug}`} className="group block">
+                    <div className="relative rounded-[2rem] overflow-hidden bg-white/[0.6] dark:bg-white/[0.03] border border-black/5 dark:border-white/5 group-hover:border-amber-400/30 transition-all duration-500 shadow-sm dark:shadow-none">
+                      <div
+                        className="h-52 bg-gradient-to-br from-white/10 to-black/50 bg-cover bg-center relative overflow-hidden"
+                        style={{ backgroundImage: `url(${getFinalImage(article)})` }}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#02040a] to-transparent opacity-60" />
+                        <div className="absolute inset-0 group-hover:bg-amber-400/5 transition-colors duration-500" />
+                        <span className="absolute top-4 right-4 text-[10px] font-black uppercase tracking-widest bg-amber-400/20 text-amber-300 border border-amber-400/30 px-3 py-1.5 rounded-full backdrop-blur-md">
+                          ★ {__('Editors Pick')}
+                        </span>
                       </div>
-                    </Link>
-                  </motion.div>
-                ))}
-              </div>
+                      <div className="p-8">
+                        <h3 className="text-xl font-black tracking-tight mb-3 text-black dark:text-white group-hover:text-amber-400 transition-colors leading-tight line-clamp-2">
+                          {article.title}
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-500 font-light line-clamp-2 leading-relaxed">
+                          {article.ai_summary}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
             </motion.div>
           </section>
         )}
@@ -281,23 +266,13 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
                   >
                     <Link href={`/article/${article.slug}`} className="group block h-full">
                       <div className={`h-full bg-white/[0.6] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 group-hover:border-primary/30 rounded-[2rem] overflow-hidden transition-all duration-500 flex flex-col shadow-sm dark:shadow-none ${isLarge ? 'min-h-[500px]' : 'min-h-[280px]'}`}>
-                        {article.cover_image_path && (
-                          <div
-                            className={`w-full bg-cover bg-center flex-shrink-0 relative overflow-hidden ${isLarge ? 'h-72' : 'h-40'}`}
-                            style={{ backgroundImage: `url(${article.cover_image_path})` }}
-                          >
-                            <div className="absolute inset-0 bg-gradient-to-t from-[#02040a] via-transparent to-transparent" />
-                            <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-colors duration-700 mix-blend-overlay" />
-                          </div>
-                        )}
-                        {!article.cover_image_path && (
-                          <div className={`w-full flex-shrink-0 relative overflow-hidden bg-gradient-to-br from-white/5 to-transparent flex items-center justify-center ${isLarge ? 'h-72' : 'h-40'}`}>
-                            <span className="text-[80px] font-black text-white/[0.03] absolute bottom-2 right-4 leading-none select-none">
-                              {String(index + 2).padStart(2, '0')}
-                            </span>
-                            <BookOpen className="w-10 h-10 text-white/10" />
-                          </div>
-                        )}
+                        <div
+                          className={`w-full bg-cover bg-center flex-shrink-0 relative overflow-hidden ${isLarge ? 'h-72' : 'h-40'}`}
+                          style={{ backgroundImage: `url(${getFinalImage(article)})` }}
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#02040a] via-transparent to-transparent" />
+                          <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-colors duration-700 mix-blend-overlay" />
+                        </div>
                         <div className="p-7 flex flex-col flex-1 justify-between">
                           <div>
                             <div className="flex items-center justify-between mb-4">
@@ -314,7 +289,7 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
                               {article.title}
                             </h3>
                           </div>
-                          {(isLarge || !article.cover_image_path) && (
+                          {(isLarge) && (
                             <p className="text-sm text-gray-600 font-light line-clamp-2 leading-relaxed mt-4">
                               {article.ai_summary}
                             </p>
@@ -340,18 +315,18 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
-            </section>
-            ) : articles?.length === 0 && (
-            <section className="py-20 px-6 max-w-7xl mx-auto border-t border-black/5 dark:border-white/5">
+          </section>
+        ) : articles?.length === 0 && (
+          <section className="py-20 px-6 max-w-7xl mx-auto border-t border-black/5 dark:border-white/5">
             <div className="py-32 text-center text-gray-500 dark:text-gray-700 font-light text-xl border border-black/5 dark:border-white/5 rounded-[2rem] transition-colors duration-500">
               {__('The intelligence pipeline is warming up. Check back shortly.')}
             </div>
-            </section>
-            )}
+          </section>
+        )}
 
-            {/* ===== NEWSLETTER ===== */}
-            <section className="py-24 px-6 border-t border-black/5 dark:border-white/5">
-            <div className="max-w-4xl mx-auto">
+        {/* ===== NEWSLETTER ===== */}
+        <section className="py-24 px-6 border-t border-black/5 dark:border-white/5">
+          <div className="max-w-4xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -388,12 +363,12 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
                 </form>
               </div>
             </motion.div>
-            </div>
-            </section>
+          </div>
+        </section>
 
-            {/* ===== FOOTER ===== */}
-            <footer className="border-t border-black/5 dark:border-white/5 py-12">
-            <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+        {/* ===== FOOTER ===== */}
+        <footer className="border-t border-black/5 dark:border-white/5 py-12">
+          <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2.5">
               <img src="/img/logo_wbc.png" alt="Techy News" className="h-7 w-auto opacity-50 hover:opacity-100 transition-opacity dark:brightness-100 brightness-0" />
             </div>
@@ -405,8 +380,8 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
               <Link href="/about" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors">{__('About')}</Link>
               <a href="https://github.com/carlos-silveira" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-white transition-colors">GitHub</a>
             </div>
-            </div>
-            </footer>
+          </div>
+        </footer>
 
       </main>
     </div>
