@@ -162,6 +162,10 @@ class GenerateDailyNews extends Command
         $decoded = json_decode($content, true);
         if (is_string($decoded)) {
             $content = $decoded;
+        } elseif (is_array($decoded) && isset($decoded['type']) && $decoded['type'] === 'doc') {
+            // It's a TipTap JSON object, convert it to HTML
+            $geminiService = app(GeminiService::class);
+            $content = $geminiService->tipTapToHtml($decoded);
         }
 
         return trim($content);

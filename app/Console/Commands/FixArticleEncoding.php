@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Article;
+use App\Services\GeminiService;
 
 class FixArticleEncoding extends Command
 {
@@ -58,7 +59,12 @@ class FixArticleEncoding extends Command
                 continue;
             }
 
-            // If it decoded to an array/object it might be TipTap JSON — leave it
+            // If it decoded to an array/object it might be TipTap JSON
+            if (is_array($decoded) && isset($decoded['type']) && $decoded['type'] === 'doc') {
+                $content = app(GeminiService::class)->tipTapToHtml($decoded);
+                break;
+            }
+
             if (is_array($decoded)) {
                 break;
             }
