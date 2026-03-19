@@ -32,7 +32,7 @@ const DockerLogo = () => (
 
 const MySQLLogo = () => (
     <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-        <path d="M16.405 5.501c-.115 0-.193.014-.274.033v.013h.014c.054.104.146.18.214.273.054.107.1.214.154.32l.014-.015c.094-.066.14-.172.14-.333-.04-.047-.046-.094-.08-.14-.04-.067-.126-.1-.18-.151h-.002zm-5.71 3.03c-.024 0-.049 0-.067.013.048.143.135.28.21.41.168-.013.34-.038.508-.051v-.01c-.129-.18-.268-.36-.413-.53-.08.04-.157.083-.237.134v.034zm16.05 1.638c-.22-.63-.584-1.185-1.055-1.633a4.8 4.8 0 0 0-1.588-.958 5.6 5.6 0 0 0-1.79-.327c-.52-.012-1.042.003-1.562.007V7.25c-.01-.032-.016-.064-.026-.097a5.53 5.53 0 0 0-.69-1.525A5.607 5.607 0 0 0 19.55 4.5a5.474 5.474 0 0 0-1.75-.5c-.616-.028-1.234-.014-1.85.02-.49.026-.972.088-1.446.183a14.6 14.6 0 0 0-1.4.37c-.256.088-.503.191-.753.293-.065.026-.13.055-.195.083l-.09.04c-.213.095-.42.199-.625.312l-.3.18c-.166.107-.325.22-.476.34-.228.18-.443.372-.632.575-.072.08-.138.164-.198.252l.054.065c.1.087.196.177.287.27.18.18.35.374.518.568.16.184.316.37.469.557-.01-.03-.024-.058-.038-.087a4.68 4.68 0 0 0-1.51-2.01A5.09 5.09 0 0 0 8.1 4.87c-.3-.013-.605.01-.903.065-.158.032-.312.073-.462.12.008.005.019.007.027.012.077.045.152.094.227.14.135.087.265.18.389.276.33.255.638.535.92.835.276.293.53.604.754.932.185.27.354.55.506.844.18.348.336.706.466 1.073-.093-.085-.186-.17-.283-.25a5.22 5.22 0 0 0-.94-.605A4.697 4.697 0 0 0 7.2 7.73a5.15 5.15 0 0 0-.983-.075c.03.066.063.13.098.194.085.162.177.319.278.47.108.16.226.312.35.46l.017.02.03.034c.148.163.312.312.488.446.064.048.13.092.197.135.122.078.248.15.378.213.032.015.064.03.098.044a5.35 5.35 0 0 0 .452.158c.12.036.242.068.366.094.092.02.185.038.278.05l.024.003c.059.007.117.012.177.015.19.01.382.008.567-.01.025-.003.05-.007.073-.012.136-.026.268-.062.4-.106.062-.02.124-.042.185-.066.085-.034.167-.073.248-.115.065-.033.131-.067.194-.104A4.75 4.75 0 0 0 11.17 9a4.84 4.84 0 0 0 .405-.435c.087-.108.17-.22.247-.336.092-.14.175-.288.252-.44.062-.127.12-.257.173-.39.02-.052.04-.105.057-.159.14-.417.212-.85.215-1.285a4.08 4.08 0 0 0-.014-.327 7.54 7.54 0 0 0-.115-.64 7.59 7.59 0 0 0-.261-.595c-.157-.272-.348-.52-.56-.732-.23-.231-.5-.42-.81-.568-.135-.065-.28-.117-.43-.16-.27-.08-.553-.122-.835-.122-.116 0-.193.014-.274.033v.013h.014c.054.104.146.18.214.273.054.107.1.214.154.32l.014-.015c.094-.066.14-.172.14-.333-.04-.047-.046-.094-.08-.14-.04-.067-.126-.1-.18-.151h-.002z" fill="#00758F" />
+        <path d="M4.445 12.105c-2.235 0-4.445 1.117-4.445 2.794 0 1.676 2.21 2.794 4.445 2.794 2.236 0 4.446-1.118 4.446-2.794 0-1.677-2.21-2.794-4.446-2.794zm0 4.47c-1.118 0-2.222-.558-2.222-1.676 0-1.118 1.104-1.677 2.222-1.677 1.117 0 2.223.559 2.223 1.677 0 1.118-1.106 1.676-2.223 1.676zm15.111-13.415c-2.235 0-4.445 1.117-4.445 2.794 0 1.676 2.21 2.794 4.445 2.794 2.236 0 4.446-1.118 4.446-2.794 0-1.677-2.21-2.794-4.446-2.794zm0 4.47c-1.118 0-2.222-.558-2.222-1.676 0-1.118 1.104-1.677 2.222-1.677 1.117 0 2.223.559 2.223 1.677 0 1.118-1.106 1.676-2.223 1.676zm-7.556 6.708c-2.235 0-4.445 1.117-4.445 2.794 0 1.676 2.21 2.794 4.445 2.794 2.236 0 4.446-1.118 4.446-2.794 0-1.677-2.21-2.794-4.446-2.794zm0 4.47c-1.118 0-2.222-.558-2.222-1.676 0-1.118 1.104-1.677 2.222-1.677 1.117 0 2.223.559 2.223 1.677 0 1.118-1.106 1.676-2.223 1.676z" fill="#00758F" />
     </svg>
 );
 
@@ -48,10 +48,9 @@ const FramerLogo = () => (
     </svg>
 );
 
-const OllamaLogo = () => (
-    <svg viewBox="0 0 40 40" fill="currentColor" className="w-6 h-6">
-        <circle cx="20" cy="20" r="20" fill="#1a1a2e" />
-        <text x="50%" y="55%" dominantBaseline="middle" textAnchor="middle" fontSize="13" fontWeight="900" fill="white" fontFamily="monospace">AI</text>
+const GeminiLogo = () => (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+        <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z" fill="#4285F4" />
     </svg>
 );
 
@@ -95,7 +94,7 @@ const techStack = [
     { name: 'Laravel', logo: <LaravelLogo />, color: 'from-red-500/20 to-red-900/0' },
     { name: 'React', logo: <ReactLogo />, color: 'from-blue-400/20 to-blue-900/0' },
     { name: 'Tailwind CSS', logo: <TailwindLogo />, color: 'from-teal-400/20 to-teal-900/0' },
-    { name: 'Ollama AI', logo: <OllamaLogo />, color: 'from-purple-500/20 to-purple-900/0' },
+    { name: 'Gemini AI', logo: <GeminiLogo />, color: 'from-blue-500/20 to-blue-900/0' },
     { name: 'Docker', logo: <DockerLogo />, color: 'from-blue-500/20 to-blue-900/0' },
     { name: 'MySQL', logo: <MySQLLogo />, color: 'from-orange-500/20 to-orange-900/0' },
     { name: 'Framer Motion', logo: <FramerLogo />, color: 'from-blue-700/20 to-blue-900/0' },
@@ -242,7 +241,7 @@ export default function About() {
                                 A fully functional AI-powered journalism platform prototype. Features on-device summarization, command palette search, and infinite scroll discovery.
                             </p>
                             <Link href="/archive" className="inline-flex items-center mt-4 text-primary text-[10px] font-black uppercase tracking-widest hover:text-black dark:hover:text-white transition-colors gap-2">
-                                Explore the Platform <ExternalLink className="w-3 h-3" />
+                                {__('Explore the Platform')} <ExternalLink className="w-3 h-3" />
                             </Link>
                         </div>
                     </motion.div>
@@ -253,10 +252,10 @@ export default function About() {
                         transition={{ delay: 0.4 }}
                         className="md:col-span-4 bg-black dark:bg-white text-white dark:text-black rounded-[2.5rem] p-10 flex flex-col justify-center items-center text-center group cursor-pointer hover:scale-[1.01] transition-all duration-500"
                     >
-                        <h2 className="text-4xl font-black tracking-tight mb-2 text-white dark:text-black">Have a radical idea?</h2>
-                        <p className="text-xl text-gray-400 dark:text-gray-600 mb-8 font-medium max-w-xl">Let's build the next era of digital intelligence together. I'm always open to discussing technical challenges and ambitious products.</p>
+                        <h2 className="text-4xl font-black tracking-tight mb-2 text-white dark:text-black">{__('Have a radical idea?')}</h2>
+                        <p className="text-xl text-gray-400 dark:text-gray-600 mb-8 font-medium max-w-xl">{__("Let's build the next era of digital intelligence together. I'm always open to discussing technical challenges and ambitious products.")}</p>
                         <a href="mailto:hello@carlossilveira.com" className="px-10 py-4 bg-white dark:bg-black text-black dark:text-white rounded-2xl font-black flex items-center gap-3 hover:scale-105 transition-transform text-base shadow-2xl">
-                            Get in Touch <Mail className="w-5 h-5" />
+                            {__('Get in Touch')} <Mail className="w-5 h-5" />
                         </a>
                     </motion.div>
                 </div>
@@ -296,7 +295,7 @@ export default function About() {
                             {/* Modal Header */}
                             <div className="flex items-start justify-between p-8 border-b border-black/5 dark:border-white/5">
                                 <div>
-                                    <div className="text-[10px] font-black text-primary uppercase tracking-[0.25em] mb-2">Experience</div>
+                                    <div className="text-[10px] font-black text-primary uppercase tracking-[0.25em] mb-2">{__('Experience')}</div>
                                     <h2 className="text-2xl font-black tracking-tight text-gray-900 dark:text-white">{selectedExp.role}</h2>
                                     <div className="flex flex-wrap items-center gap-3 mt-2">
                                         <a href={selectedExp.companyUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-gray-400 font-bold flex items-center gap-1.5 hover:text-primary transition-colors group">
@@ -325,7 +324,7 @@ export default function About() {
                                 <p className="text-gray-600 dark:text-gray-400 font-light leading-relaxed">{selectedExp.description}</p>
 
                                 <div>
-                                    <div className="text-[10px] font-black text-gray-600 uppercase tracking-[0.25em] mb-3">Key Highlights</div>
+                                    <div className="text-[10px] font-black text-gray-600 uppercase tracking-[0.25em] mb-3">{__('Key Highlights')}</div>
                                     <ul className="space-y-2">
                                         {selectedExp.highlights.map((h, i) => (
                                             <li key={i} className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300 font-light">
@@ -337,7 +336,7 @@ export default function About() {
                                 </div>
 
                                 <div>
-                                    <div className="text-[10px] font-black text-gray-600 uppercase tracking-[0.25em] mb-3">Tech Stack</div>
+                                    <div className="text-[10px] font-black text-gray-600 uppercase tracking-[0.25em] mb-3">{__('Tech Stack')}</div>
                                     <div className="flex flex-wrap gap-2">
                                         {selectedExp.tech.map((t, i) => (
                                             <span key={i} className="text-[10px] font-black uppercase tracking-widest bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 text-gray-600 dark:text-gray-400 px-3 py-1.5 rounded-lg">

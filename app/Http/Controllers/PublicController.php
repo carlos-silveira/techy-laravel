@@ -32,6 +32,7 @@ class PublicController extends Controller
             $articles = Article::where('status', 'published')
                 ->where('is_editors_choice', true)
                 ->orderBy('created_at', 'desc')
+                ->select('id', 'title', 'slug', 'ai_summary', 'updated_at', 'cover_image_path', 'language', 'translations', 'reading_time_minutes', 'tags')
                 ->take(3)
                 ->get();
 
@@ -41,6 +42,7 @@ class PublicController extends Controller
         $articles = Cache::remember("homepage_articles_{$locale}", 3600, function () use ($locale) {
             $articles = Article::where('status', 'published')
                 ->orderBy('created_at', 'desc')
+                ->select('id', 'title', 'slug', 'ai_summary', 'updated_at', 'cover_image_path', 'language', 'translations', 'reading_time_minutes', 'tags')
                 ->take(10)
                 ->get();
 
@@ -103,7 +105,7 @@ class PublicController extends Controller
     /**
      * Helper to translate an article if the requested locale differs from source.
      */
-    private function translateIfNecessary(Article $article, string $locale): Article
+    public function translateIfNecessary(Article $article, string $locale): Article
     {
         // 1. If requested language is English and article is already in English, return it.
         // 2. If requested language matches article source language, return it.

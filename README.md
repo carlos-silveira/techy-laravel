@@ -1,64 +1,115 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# ⚡️ Techy News — The Intelligence Pipeline
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+[![Laravel 13](https://img.shields.io/badge/Laravel-13-FF2D20?style=for-the-badge&logo=laravel)](https://laravel.com)
+[![React 18](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org)
+[![Gemini 2.0](https://img.shields.io/badge/AI-Gemini%202.0-4285F4?style=for-the-badge&logo=google-gemini)](https://deepmind.google/technologies/gemini/)
+[![Vite](https://img.shields.io/badge/Vite-6.0-646CFF?style=for-the-badge&logo=vite)](https://vitejs.dev)
 
-## About Laravel
+> A cutting-edge, AI-powered journalism platform prototype that redefines information consumption through deep technical research and automated synthesis.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+**[Explore the Live Platform →](https://techynews.lat)**
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 🚀 The Vision
 
-## Learning Laravel
+Techy News isn't just a CMS; it's a **living intelligence ecosystem**. It aggregates global tech signals, processes them through advanced LLMs, and delivers deeply researched, developer-first narratives in real-time. Built with a focus on extreme performance, sophisticated typography, and multi-modal interaction.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## ✨ Core Features
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 🤖 The Intelligence Pipeline
+- **Automated Synthesis**: Aggregates data from TechCrunch, The Verge, and Hacker News to generate opinionated, 1500-word investigative drafts.
+- **On-the-fly Translation**: Seamlessly translates complex technical content into English, Spanish, and Portuguese while preserving semantic integrity and code blocks.
+- **Semantic Search**: Instant command-palette discovery (Cmd+K) powered by Eloquent and filtered by AI relevance.
 
-## Laravel Sponsors
+### 🎨 Modern Experience
+- **Fluid UI**: Framer Motion powered transitions and a bespoke Bento-grid architecture.
+- **Theme Intelligence**: Deeply integrated Dark/Light mode with automatic system detection.
+- **Developer-First Design**: Native syntax highlighting (Prism.js), Mermaid.js diagrams, and JetBrains Mono typography.
+- **Mobile Optimized**: Fully responsive hamburger navigation and touch-optimized reading experiences.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+### 🛠 Technical Excellence
+- **Laravel 13 Core**: Leveraging the latest PHP 8.2+ features and high-performance routing.
+- **Inertia.js + React**: Seamless SSR-like feel with the power of modern client-side components.
+- **Intelligent Caching**: Layered caching strategy (1hr articles, 24hr briefs) to minimize API latency.
+- **Raw HTML Engine**: Content is stored and rendered as raw semantic HTML, bypassing slow markdown parsers.
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+## 📦 Installation & Setup
 
-## Contributing
+### Prerequisites
+- PHP 8.2+
+- Node.js 20+
+- MySQL 8.0+
+- Gemini API Key (Google AI Studio)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Steps
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/carlos-silveira/techy-laravel.git
+   cd techy-laravel
+   ```
 
-## Code of Conduct
+2. **Backend Setup**
+   ```bash
+   composer install
+   cp .env.example .env
+   php artisan key:generate
+   php artisan migrate --seed
+   ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+3. **Frontend Setup**
+   ```bash
+   npm install
+   npm run build
+   ```
 
-## Security Vulnerabilities
+4. **Environment Configuration**
+   Ensure your `.env` includes:
+   ```env
+   GEMINI_API_KEY=your_api_key_here
+   GEMINI_MODEL=gemini-2.0-flash
+   ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+5. **Start the Engine**
+   ```bash
+   php artisan serve
+   ```
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 🏛 Architecture
+
+```mermaid
+graph TD
+    A[RSS Signals] --> B[NewsService]
+    B --> C[Gemini AI Engine]
+    C --> D[Automatic Drafting]
+    D --> E[Eloquent MySQL]
+    E --> F[Inertia.js Middleware]
+    F --> G[React Dashboard/Public]
+    G --> H[End User]
+```
+
+Detailed technical documentation can be found in the [`/docs`](/docs) directory:
+- [System Design Document (SDD)](/docs/SDD.md)
+- [AI Coding Guide](/docs/AI_CODING_GUIDE.md)
+- [Deployment Workflow](/docs/workflows/deploy.md)
+
+---
+
+## 👤 Author
+
+**Carlos Silveira**  
+*Senior Software Engineer & AI Architect*
+
+- [GitHub](https://github.com/carlos-silveira)
+- [LinkedIn](https://linkedin.com/in/carlos-silveira-hinojos)
+- [Portfolio](https://techynews.lat/about)
+
+---
+
+## 📄 License
+
+This project is open-source software licensed under the [MIT license](LICENSE).
