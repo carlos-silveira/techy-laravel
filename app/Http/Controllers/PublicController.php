@@ -175,19 +175,48 @@ class PublicController extends Controller
                 $locale
             );
 
+            // Robustly unwrap any potential double-encoded content from AI
+            $cleanTitle = $this->recursivelyUnwrap($result['title'] ?? $article->title);
+            $cleanSummary = $this->recursivelyUnwrap($result['summary'] ?? $article->ai_summary);
+            $cleanContent = $this->recursivelyUnwrap($result['content'] ?? $article->content);
+
             // Save to DB for future use
-            $translations[$locale] = $result;
+            $translations[$locale] = [
+                'title' => $cleanTitle,
+                'summary' => $cleanSummary,
+                'content' => $cleanContent,
+            ];
+            
             $article->update(['translations' => $translations]);
 
             // Apply to current instance
-            $article->title = $result['title'];
-            $article->ai_summary = $result['summary'];
-            $article->content = $result['content'];
+            $article->title = $cleanTitle;
+            $article->ai_summary = $cleanSummary;
+            $article->content = $cleanContent;
         } catch (\Exception $e) {
             Log::error("Translation failed for article {$article->id} to {$locale}: " . $e->getMessage());
         }
 
         return $article;
+    }
+
+    /**
+     * Recursively JSON-decode a string to handle double-encoding from AI models.
+     */
+    private function recursivelyUnwrap(mixed $value): mixed
+    {
+        if (!is_string($value)) {
+            return $value;
+        }
+
+        $decoded = json_decode($value, true);
+        if (json_last_error() === JSON_ERROR_NONE && (is_array($decoded) || is_string($decoded))) {
+            return $this->recursivelyUnwrap($decoded);
+        }
+
+        // Clean up escaped slashes and wrapping quotes that might remain
+        $value = stripslashes($value);
+        return trim($value, '"');
     }
 
     /**

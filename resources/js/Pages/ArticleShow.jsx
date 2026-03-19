@@ -90,7 +90,7 @@ export default function ArticleShow({ article, relatedArticles }) {
         }
 
         // Fix escaped forward slashes: <\/h2> → </h2>
-        content = content.replace(/\\\\\//g, '/');
+        content = content.replace(/\\\//g, '/');
         // Strip leading/trailing quotes if they were added by double encoding
         if (content.startsWith('"') && content.endsWith('"')) {
             content = content.substring(1, content.length - 1);
@@ -141,9 +141,17 @@ export default function ArticleShow({ article, relatedArticles }) {
                     <div className="absolute inset-0 bg-gradient-to-b from-[#02040a]/40 via-[#02040a]/80 to-[#02040a]"></div>
                 </div>
             ) : (
-                <div className="absolute top-0 w-full h-[50vh] overflow-hidden pointer-events-none">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-purple-600/10 opacity-40"></div>
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120vw] h-[120vw] bg-primary/5 rounded-full blur-[120px]"></div>
+                <div className="absolute top-0 w-full h-[70vh] overflow-hidden pointer-events-none opacity-50">
+                    <div 
+                        className="absolute inset-0 bg-cover bg-center blur-[4px]"
+                        style={{ 
+                            backgroundImage: article.slug.includes('not-paid-to-write-code') 
+                                ? 'url(https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=2072)'
+                                : 'url(https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=2072)',
+                            transform: `translateY(${scrollProgress * 1.2}px)`
+                        }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-primary/20 via-[#02040a]/80 to-[#02040a]"></div>
                 </div>
             )}
 
@@ -155,7 +163,7 @@ export default function ArticleShow({ article, relatedArticles }) {
                 >
                     <header className="mb-16">
                         <div className="flex items-center gap-3 text-primary font-black uppercase tracking-[0.2em] text-[10px] mb-6">
-                            <BookOpen className="w-4 h-4" /> Synthesized Discovery
+                            <BookOpen className="w-4 h-4" /> {__('Synthesized Discovery')}
                         </div>
                         <h1 className="text-4xl md:text-6xl font-black tracking-tighter mb-8 leading-[0.9] text-black dark:text-white transition-colors">
                             {article.title}
@@ -163,9 +171,9 @@ export default function ArticleShow({ article, relatedArticles }) {
                         <div className="flex items-center space-x-6 text-xs font-black uppercase tracking-widest text-gray-500">
                             <span>{dayjs(article.updated_at).format('MMMM D, YYYY')}</span>
                             <span className="w-1 h-1 bg-gray-800 rounded-full"></span>
-                            <span>{estimatedReadTime} MIN READ</span>
+                            <span>{estimatedReadTime} {__('min read')}</span>
                             <span className="w-1 h-1 bg-gray-800 rounded-full"></span>
-                            <span className="text-primary/60">INTELLIGENT DRAFT</span>
+                            <span className="text-primary/60">{__('INTELLIGENT DRAFT')}</span>
                         </div>
                     </header>
 
@@ -216,9 +224,9 @@ export default function ArticleShow({ article, relatedArticles }) {
                 {relatedArticles && relatedArticles.length > 0 && (
                     <section className="mt-40 pt-20 border-t border-black/5 dark:border-white/5">
                         <div className="flex items-center justify-between mb-12">
-                            <h2 className="text-4xl font-black tracking-tighter text-gray-900 dark:text-white">Read Next.</h2>
+                            <h2 className="text-4xl font-black tracking-tighter text-gray-900 dark:text-white">{__('Read Next.')}</h2>
                             <Link href="/archive" className="text-xs font-black uppercase tracking-widest text-primary hover:text-black dark:hover:text-white transition-colors flex items-center gap-2">
-                                Explorer Library <ArrowRight className="w-4 h-4" />
+                                {__('Explorer Library')} <ArrowRight className="w-4 h-4" />
                             </Link>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -272,6 +280,33 @@ const TipTapRenderer = ({ content }) => {
     React.useEffect(() => {
         mermaid.initialize({ startOnLoad: true, theme: document.documentElement.classList.contains('dark') ? 'dark' : 'default' });
         mermaid.contentLoaded();
+    }, [content]);
+
+    // Prism Syntax Highlighting
+    React.useEffect(() => {
+        if (!window.Prism) {
+            const script = document.createElement('script');
+            script.src = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js";
+            script.async = true;
+            document.body.appendChild(script);
+
+            const languages = ['javascript', 'php', 'css', 'markup', 'bash', 'python', 'json'];
+            languages.forEach(lang => {
+                const langScript = document.createElement('script');
+                langScript.src = `https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-${lang}.min.js`;
+                langScript.async = true;
+                document.body.appendChild(langScript);
+            });
+
+            const style = document.createElement('link');
+            style.rel = 'stylesheet';
+            style.href = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css";
+            document.head.appendChild(style);
+
+            script.onload = () => window.Prism?.highlightAll();
+        } else {
+            window.Prism?.highlightAll();
+        }
     }, [content]);
 
     if (!content) return null;

@@ -137,7 +137,7 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
                     href={`/article/${featured.slug}`}
                     className="inline-flex items-center gap-3 bg-black dark:bg-white text-white dark:text-black font-black px-8 py-4 rounded-xl hover:scale-105 transition-transform shadow-[0_0_40px_rgba(255,255,255,0.15)] uppercase tracking-wider text-sm group"
                   >
-                    Read Story
+                    {__('Read Story')}
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </Link>
                   <div className="flex items-center gap-2 text-gray-500 text-xs font-black uppercase tracking-widest">
@@ -336,21 +336,22 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
                 href="/archive"
                 className="inline-flex items-center gap-3 border border-black/10 dark:border-white/10 text-gray-400 hover:text-black dark:hover:text-white px-8 py-4 rounded-xl font-black text-xs uppercase tracking-widest transition-all hover:bg-black/5 dark:hover:bg-white/5 group"
               >
-                Load All Articles
+                {__('Load All Articles')}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
-          </section>
-        ) : articles?.length === 0 && (
-          <section className="py-20 px-6 max-w-7xl mx-auto border-t border-black/5 dark:border-white/5">
+            </section>
+            ) : articles?.length === 0 && (
+            <section className="py-20 px-6 max-w-7xl mx-auto border-t border-black/5 dark:border-white/5">
             <div className="py-32 text-center text-gray-500 dark:text-gray-700 font-light text-xl border border-black/5 dark:border-white/5 rounded-[2rem] transition-colors duration-500">
               {__('The intelligence pipeline is warming up. Check back shortly.')}
             </div>
-          </section>
-        )}
-        {/* ===== NEWSLETTER ===== */}
-        <section className="py-24 px-6 border-t border-black/5 dark:border-white/5">
-          <div className="max-w-4xl mx-auto">
+            </section>
+            )}
+
+            {/* ===== NEWSLETTER ===== */}
+            <section className="py-24 px-6 border-t border-black/5 dark:border-white/5">
+            <div className="max-w-4xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -361,12 +362,12 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
               <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/10 rounded-full blur-[100px] pointer-events-none transition-transform duration-700 group-hover:scale-125"></div>
               <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-purple-600/10 rounded-full blur-[100px] pointer-events-none"></div>
               <div className="relative z-10 text-center">
-                <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em] block mb-6">AI Weekly Digest</span>
+                <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em] block mb-6">{__('AI Weekly Digest')}</span>
                 <h2 className="text-5xl md:text-6xl font-black mb-6 tracking-tighter leading-[0.9] text-black dark:text-white transition-colors">
-                  Intelligence,<br />delivered weekly.
+                  {__('Intelligence,')}<br />{__('delivered weekly.')}
                 </h2>
                 <p className="text-gray-500 mb-12 font-light text-lg max-w-lg mx-auto leading-relaxed">
-                  Every Friday: AI research breakthroughs, engineering insights, and curated tools — synthesized by machine, filtered by humans.
+                  {__('Every Friday: AI research breakthroughs, engineering insights, and curated tools — synthesized by machine, filtered by humans.')}
                 </p>
                 <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-xl mx-auto">
                   <input
@@ -382,30 +383,30 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
                     disabled={isSubscribing}
                     className="w-full sm:w-auto px-8 py-4 rounded-xl bg-black dark:bg-white text-white dark:text-black font-black tracking-wider uppercase text-sm hover:scale-105 hover:bg-gray-800 dark:hover:bg-gray-200 transition-all disabled:opacity-70 flex items-center justify-center gap-2 shadow-lg dark:shadow-none"
                   >
-                    {isSubscribing ? 'Joining...' : 'Subscribe'}
+                    {isSubscribing ? __('Joining...') : __('Subscribe')}
                   </button>
                 </form>
               </div>
             </motion.div>
-          </div>
-        </section>
+            </div>
+            </section>
 
-        {/* ===== FOOTER ===== */}
-        <footer className="border-t border-black/5 dark:border-white/5 py-12">
-          <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+            {/* ===== FOOTER ===== */}
+            <footer className="border-t border-black/5 dark:border-white/5 py-12">
+            <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2.5">
               <img src="/img/logo_wbc.png" alt="Techy News" className="h-7 w-auto opacity-50 hover:opacity-100 transition-opacity dark:brightness-100 brightness-0" />
             </div>
             <p className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-700">
-              © 2026 · AI-Powered by Carlos Silveira
+              © 2026 · {__('AI-Powered by Carlos Silveira')}
             </p>
             <div className="flex items-center space-x-8">
-              <Link href="/archive" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-white transition-colors">Archive</Link>
-              <Link href="/about" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-white transition-colors">About</Link>
+              <Link href="/archive" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors">{__('Archive')}</Link>
+              <Link href="/about" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors">{__('About')}</Link>
               <a href="https://github.com/carlos-silveira" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-white transition-colors">GitHub</a>
             </div>
-          </div>
-        </footer>
+            </div>
+            </footer>
 
       </main>
     </div>

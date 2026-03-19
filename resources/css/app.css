@@ -52,4 +52,13 @@
   .prose :not(pre) > code {
     @apply px-1.5 py-0.5 rounded bg-black/5 dark:bg-white/10 text-primary font-bold transition-colors;
   }
+
+  /* Prism Fixes */
+  pre[class*="language-"] {
+    @apply !bg-transparent !m-0 !p-0;
+  }
+  
+  code[class*="language-"] {
+    @apply !bg-transparent !shadow-none;
+  }
 }
