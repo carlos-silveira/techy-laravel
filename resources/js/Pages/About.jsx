@@ -199,8 +199,8 @@ export default function About() {
                         <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-colors"></div>
                         <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.25em] mb-6">The Concept</h3>
                         <h2 className="text-3xl font-black mb-4 tracking-tight text-gray-900 dark:text-white">What is Techy?</h2>
-                        <p className="text-gray-400 text-sm leading-relaxed font-light">
-                            Techy is an <span className="text-white font-bold">AI-powered news ecosystem</span> designed to redefine information consumption. It merges high-performance web architecture with advanced language models to deliver a personalized, lightning-fast, and deeply immersive experience for the next generation of tech enthusiasts.
+                        <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed font-light transition-colors">
+                            Techy is an <span className="text-gray-900 dark:text-white font-black transition-colors">AI-powered news ecosystem</span> designed to redefine information consumption. It merges high-performance web architecture with advanced language models to deliver a personalized, lightning-fast, and deeply immersive experience for the next generation of tech enthusiasts.
                         </p>
                     </motion.div>
 
@@ -208,7 +208,7 @@ export default function About() {
                     <motion.div
                         {...fadeIn}
                         transition={{ delay: 0.3 }}
-                        className="md:col-span-2 bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-10 relative overflow-hidden group"
+                        className="md:col-span-2 bg-white dark:bg-white/[0.03] border border-black/5 dark:border-white/10 rounded-[2.5rem] p-10 relative overflow-hidden group shadow-sm dark:shadow-none transition-all duration-500"
                     >
                         <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.25em] mb-8">Experience</h3>
                         <div className="space-y-4">
@@ -216,7 +216,7 @@ export default function About() {
                                 <button
                                     key={i}
                                     onClick={() => setSelectedExp(exp)}
-                                    className="w-full text-left flex items-center justify-between p-5 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-primary/30 hover:bg-white/[0.04] transition-all group/exp"
+                                    className="w-full text-left flex items-center justify-between p-5 rounded-2xl bg-black/[0.01] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 hover:border-primary/30 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all group/exp"
                                 >
                                     <div>
                                         <div className="font-black text-gray-900 dark:text-white text-sm tracking-tight group-hover/exp:text-primary transition-colors">{exp.role}</div>
