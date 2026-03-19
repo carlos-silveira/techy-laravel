@@ -104,7 +104,7 @@ export default function ArticleShow({ article, relatedArticles }) {
     const estimatedReadTime = article.reading_time_minutes || Math.max(1, Math.ceil(contentString.split(' ').length / 200));
 
     return (
-        <div onMouseMove={handleMouseMove} className="min-h-screen bg-[#02040a] text-white font-sans selection:bg-primary/30 relative overflow-hidden">
+        <div onMouseMove={handleMouseMove} className="min-h-screen bg-[#f8f6f6] dark:bg-[#02040a] text-black dark:text-white font-sans selection:bg-primary/30 relative overflow-hidden transition-colors duration-500">
             <Head title={`${article.title} - Techy News`}>
                 <meta name="description" content={article.meta_description || article.ai_summary || `${__('Read')} ${article.title} ${__('on Techy News')}.`} />
                 <meta property="og:title" content={article.title} />
@@ -154,7 +154,7 @@ export default function ArticleShow({ article, relatedArticles }) {
                         <div className="flex items-center gap-3 text-primary font-black uppercase tracking-[0.2em] text-[10px] mb-6">
                             <BookOpen className="w-4 h-4" /> Synthesized Discovery
                         </div>
-                        <h1 className="text-5xl md:text-7xl font-black tracking-tighter mb-8 leading-[0.9] text-white">
+                        <h1 className="text-5xl md:text-7xl font-black tracking-tighter mb-8 leading-[0.9] text-black dark:text-white transition-colors">
                             {article.title}
                         </h1>
                         <div className="flex items-center space-x-6 text-xs font-black uppercase tracking-widest text-gray-500">
@@ -188,7 +188,7 @@ export default function ArticleShow({ article, relatedArticles }) {
                     </div>
 
                     {article.ai_summary && (
-                        <div className="mb-16 p-10 bg-white/[0.03] border border-white/10 rounded-[2.5rem] relative overflow-hidden group">
+                        <div className="mb-16 p-10 bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/10 rounded-[2.5rem] relative overflow-hidden group">
                             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[60px] -mr-32 -mt-32 transition-transform duration-700 group-hover:scale-110"></div>
                             <h3 className="text-primary font-black text-xs uppercase tracking-[0.2em] mb-4 flex items-center gap-2 relative z-10">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
@@ -198,7 +198,7 @@ export default function ArticleShow({ article, relatedArticles }) {
                         </div>
                     )}
 
-                    <div className="prose prose-invert prose-primary max-w-none prose-xl prose-headings:font-black prose-headings:tracking-tighter prose-headings:text-white prose-p:text-gray-400 prose-p:font-light prose-p:leading-relaxed prose-strong:text-white prose-a:text-primary hover:prose-a:text-white prose-code:text-emerald-400 prose-pre:bg-white/[0.03] prose-pre:border prose-pre:border-white/10 prose-pre:rounded-2xl transition-colors">
+                    <div className="prose dark:prose-invert prose-primary max-w-none prose-xl prose-headings:font-black prose-headings:tracking-tighter prose-headings:text-black dark:prose-headings:text-white prose-p:text-gray-600 dark:prose-p:text-gray-400 prose-p:font-light prose-p:leading-relaxed prose-strong:text-black dark:prose-strong:text-white prose-a:text-primary hover:prose-a:text-black dark:hover:prose-a:text-white prose-code:text-emerald-600 dark:prose-code:text-emerald-400 prose-pre:bg-black/[0.02] dark:prose-pre:bg-white/[0.03] prose-pre:border prose-pre:border-black/5 dark:prose-pre:border-white/10 prose-pre:rounded-2xl transition-colors">
                         {cleanHtml ? (
                             <div dangerouslySetInnerHTML={{ __html: cleanHtml }} />
                         ) : (
@@ -262,7 +262,14 @@ export default function ArticleShow({ article, relatedArticles }) {
     );
 }
 
+import mermaid from 'mermaid';
+
 const TipTapRenderer = ({ content }) => {
+    React.useEffect(() => {
+        mermaid.initialize({ startOnLoad: true, theme: document.documentElement.classList.contains('dark') ? 'dark' : 'default' });
+        mermaid.contentLoaded();
+    }, [content]);
+
     if (!content) return null;
     if (typeof content === 'string') return <div className="whitespace-pre-wrap">{content}</div>;
     if (!content.content) return null;
@@ -275,6 +282,7 @@ const TipTapRenderer = ({ content }) => {
                     if (mark.type === 'bold') text = <strong key={`bold-${index}`}>{text}</strong>;
                     if (mark.type === 'italic') text = <em key={`italic-${index}`}>{text}</em>;
                     if (mark.type === 'strike') text = <del key={`strike-${index}`}>{text}</del>;
+                    if (mark.type === 'code') text = <code key={`code-${index}`} className="bg-black/5 dark:bg-white/10 px-1.5 py-0.5 rounded">{text}</code>;
                 });
             }
             return text;
@@ -286,11 +294,18 @@ const TipTapRenderer = ({ content }) => {
             case 'heading':
                 const Tag = `h${node.attrs?.level || 2}`;
                 const levelClasses = node.attrs?.level === 1 ? 'text-5xl' : node.attrs?.level === 2 ? 'text-4xl' : 'text-3xl';
-                return <Tag key={index} className={`font-black mt-16 mb-6 tracking-tighter leading-tight ${levelClasses}`}>{node.content?.map((n, i) => renderNode(n, i))}</Tag>;
+                return <Tag key={index} className={`font-black mt-16 mb-6 tracking-tighter leading-tight text-black dark:text-white ${levelClasses}`}>{node.content?.map((n, i) => renderNode(n, i))}</Tag>;
             case 'bulletList':
                 return <ul key={index} className="list-disc pl-8 mb-8 space-y-4">{node.content?.map((n, i) => renderNode(n, i))}</ul>;
             case 'listItem':
                 return <li key={index} className="pl-2">{node.content?.map((n, i) => renderNode(n, i))}</li>;
+            case 'codeBlock':
+                if (node.attrs?.language === 'mermaid') {
+                    return <div key={index} className="mermaid bg-white dark:bg-[#0d1117] p-6 rounded-2xl border border-black/5 dark:border-white/10 mb-8 my-10 overflow-auto">{node.content?.[0]?.text}</div>;
+                }
+                return <pre key={index} className="bg-black/5 dark:bg-white/10 p-6 rounded-2xl border border-black/5 dark:border-white/10 mb-8 overflow-auto"><code className={`language-${node.attrs?.language}`}>{node.content?.[0]?.text}</code></pre>;
+            case 'blockquote':
+                return <blockquote key={index} className="border-l-4 border-primary pl-6 py-2 my-8 italic text-gray-700 dark:text-gray-300 bg-primary/5 rounded-r-xl">{node.content?.map((n, i) => renderNode(n, i))}</blockquote>;
             default:
                 return null;
         }

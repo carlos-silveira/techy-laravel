@@ -18,6 +18,16 @@
 
     <!-- Global Error Catcher -->
     <script>
+        // Theme initialization
+        (function() {
+            const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+
         window.onerror = function(message, source, lineno, colno, error) {
             const el = document.createElement('div');
             el.style = 'color:red; background:white; padding:20px; z-index:9999; position:fixed; top:0; left:0; width:100%; word-wrap: break-word;';

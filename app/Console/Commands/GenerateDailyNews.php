@@ -62,13 +62,16 @@ class GenerateDailyNews extends Command
         $this->info('📝 Generating summary and tags...');
         $meta = $geminiService->generateArticleMeta($idea['title'], $content);
 
-        // Fetch a cover image from Unsplash
+        // Resolve image placeholders in the content
+        $content = $this->resolveImagePlaceholders($content);
+
+        // Fetch a cover image from Unsplash if not already set (fallback)
         $coverImageUrl = $this->fetchCoverImage($idea['title'], $meta['tags'] ?? []);
 
         $slug = Str::slug($idea['title']) . '-' . Str::random(6);
         $wordCount = str_word_count(strip_tags($content));
 
-        Article::create([
+        $article = Article::create([
             'title' => $idea['title'],
             'slug' => $slug,
             'content' => $content, // Store raw HTML directly — NO json_encode
@@ -85,6 +88,26 @@ class GenerateDailyNews extends Command
         ]);
 
         $this->info('✅ Article published: "' . $idea['title'] . '"');
+
+        // PRE-TRANSLATION for ES and PT
+        $languages = ['es', 'pt'];
+        $translations = [];
+        
+        foreach ($languages as $lang) {
+            $this->info("⏳ Translating to " . strtoupper($lang) . "... (10s pause)");
+            sleep(10);
+            try {
+                $translations[$lang] = $geminiService->translateArticle($idea['title'], $meta['summary'], $content, $lang);
+                $this->info("✅ Translated to " . strtoupper($lang));
+            } catch (\Exception $e) {
+                $this->error("❌ Translation to " . strtoupper($lang) . " failed: " . $e->getMessage());
+            }
+        }
+
+        if (!empty($translations)) {
+            $article->update(['translations' => $translations]);
+        }
+
         if ($coverImageUrl) {
             $this->info("🖼️  Cover image: {$coverImageUrl}");
         }
@@ -169,5 +192,22 @@ class GenerateDailyNews extends Command
         }
 
         return trim($content);
+    }
+
+    /**
+     * Resolve <img src="PLACEHOLDER_IMAGE" alt="..."> tags by fetching relative images from Unsplash.
+     */
+    private function resolveImagePlaceholders(string $content): string
+    {
+        return preg_replace_callback('/<img src="PLACEHOLDER_IMAGE" alt="([^"]+)">/i', function ($matches) {
+            $alt = $matches[1];
+            $this->info("🖼️  Resolving placeholder image for: {$alt}");
+            
+            // Respect rate limits between image fetches if multiple
+            sleep(2); 
+
+            $url = $this->fetchCoverImage($alt, []);
+            return '<img src="' . ($url ?? 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=1200&q=80') . '" alt="' . $alt . '">';
+        }, $content);
     }
 }
