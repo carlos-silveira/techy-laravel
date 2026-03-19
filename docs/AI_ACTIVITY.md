@@ -44,4 +44,16 @@ This log tracks all actions performed by AI agents in this repository.
     - **Theme Support**: Implemented Dark/Light mode toggle in `Navbar.jsx` with persistent user preference and system detection.
     - **Content Enrichment**: Integrated Mermaid.js for diagram rendering and updated AI prompts to include diagrams and image placeholders.
     - **Image Resolution**: Updated `GenerateDailyNews` to resolve image placeholders using the Unsplash API.
-    - **Global Localization**: Implemented pre-translation for EN, ES, and PT during article creation and created `articles:pre-translate` command for existing content.
+    - **UI Polishing**: 
+        - Redesigned Navbar with a premium tech-blue/white theme and backdrop blur.
+        - Implemented native Dark Mode support for the About and Studio (Dashboard) pages.
+        - Enhanced code snippet rendering with language badges, premium typography, and hover effects.
+    - **Localization**: 
+        - Fixed language switching by moving the route to `web.php` for correct session/cookie persistence.
+        - Updated `LanguageController` and `useLanguage` hook for robust locale handling.
+    - **UX Fixes**: 
+        - Replaced static AI brief on home page with a dynamic one from the database.
+        - Fixed "warming up" message logic in `Welcome.jsx` to correctly detect empty states.
+        - Resolved `Log` facade import issue in `PublicController.php`.
+    - **Verification**: Performed full production build (`npm run build`) and verified all components.
+    - **Deployment**: Pushed updates to production via CI/CD.

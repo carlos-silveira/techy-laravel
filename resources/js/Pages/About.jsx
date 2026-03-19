@@ -110,23 +110,23 @@ export default function About() {
     };
 
     return (
-        <div className="min-h-screen bg-[#02040a] text-white font-sans selection:bg-primary/30 overflow-x-hidden relative">
+        <div className="min-h-screen bg-white dark:bg-[#02040a] text-gray-900 dark:text-white font-sans selection:bg-primary/30 overflow-x-hidden relative transition-colors duration-500">
             <Head title="Carlos Silveira | Full-Stack & AI Engineer" />
 
             {/* Glowing Background */}
-            <div className="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-primary/8 rounded-full blur-[120px] pointer-events-none mix-blend-screen"></div>
-            <div className="fixed bottom-[-10%] right-[-10%] w-[40vw] h-[40vw] bg-purple-600/8 rounded-full blur-[100px] pointer-events-none mix-blend-screen"></div>
+            <div className="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-primary/8 rounded-full blur-[120px] pointer-events-none mix-blend-screen overflow-hidden"></div>
+            <div className="fixed bottom-[-10%] right-[-10%] w-[40vw] h-[40vw] bg-purple-600/8 rounded-full blur-[100px] pointer-events-none mix-blend-screen overflow-hidden"></div>
 
             {/* Navbar */}
-            <nav className="border-b border-white/5 bg-[#02040a]/80 backdrop-blur-xl sticky top-0 z-50">
+            <nav className="border-b border-black/5 dark:border-white/5 bg-white/95 dark:bg-[#0a192f]/90 backdrop-blur-xl sticky top-0 z-50 transition-colors duration-500">
                 <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
                     <Link href="/" className="flex items-center">
-                        <img src="/img/logo_wbc.png" alt="Techy News" className="h-8 w-auto" />
+                        <img src="/img/logo_wbc.png" alt="Techy News" className="h-8 w-auto dark:invert-0 invert" />
                     </Link>
                     <div className="space-x-8 flex items-center">
-                        <Link href="/archive" className="text-sm font-black uppercase tracking-widest text-gray-400 hover:text-white transition-colors">Archive</Link>
-                        <Link href="/about" className="text-sm font-black uppercase tracking-widest text-white transition-colors">About</Link>
-                        <Link href="/dashboard" className="px-5 py-2.5 bg-white text-black font-bold rounded-lg hover:bg-gray-200 transition-all shadow-lg text-sm">
+                        <Link href="/archive" className="text-sm font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">Archive</Link>
+                        <Link href="/about" className="text-sm font-black uppercase tracking-widest text-black dark:text-white transition-colors">About</Link>
+                        <Link href="/dashboard" className="px-5 py-2.5 bg-black dark:bg-white text-white dark:text-black font-bold rounded-lg hover:scale-105 transition-all shadow-lg text-sm">
                             Studio
                         </Link>
                     </div>

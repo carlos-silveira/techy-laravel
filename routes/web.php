@@ -8,6 +8,7 @@ use App\Http\Controllers\ArchiveController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\ImageUploadController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\LanguageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,12 +19,13 @@ use App\Http\Controllers\ProfileController;
 | routes are loaded by the RouteServiceProvider within a group which
 | contains the "web" middleware group. Now create something great!
 |
-*/
+|*/
 
 Route::get('/', [PublicController::class, 'index']);
 Route::get('/article/{slug}', [PublicController::class, 'show']);
 Route::get('/about', [AboutController::class, 'index']);
 Route::get('/archive', [ArchiveController::class, 'index']);
+Route::post('/set-locale', [LanguageController::class, 'setLocale']);
 
 // Protected routes
 Route::middleware(['auth'])->group(function () {
