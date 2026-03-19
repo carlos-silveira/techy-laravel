@@ -141,7 +141,10 @@ export default function ArticleShow({ article, relatedArticles }) {
                     <div className="absolute inset-0 bg-gradient-to-b from-[#02040a]/40 via-[#02040a]/80 to-[#02040a]"></div>
                 </div>
             ) : (
-                <div className="absolute top-0 w-full h-96 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none"></div>
+                <div className="absolute top-0 w-full h-[50vh] overflow-hidden pointer-events-none">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-purple-600/10 opacity-40"></div>
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120vw] h-[120vw] bg-primary/5 rounded-full blur-[120px]"></div>
+                </div>
             )}
 
             <main className="max-w-4xl mx-auto px-6 py-20 relative z-10">
@@ -277,16 +280,16 @@ const TipTapRenderer = ({ content }) => {
 
     const renderNode = (node, index) => {
         if (node.type === 'text') {
-            let text = node.text;
+            let element = <React.Fragment key={index}>{node.text}</React.Fragment>;
             if (node.marks) {
                 node.marks.forEach(mark => {
-                    if (mark.type === 'bold') text = <strong key={`bold-${index}`}>{text}</strong>;
-                    if (mark.type === 'italic') text = <em key={`italic-${index}`}>{text}</em>;
-                    if (mark.type === 'strike') text = <del key={`strike-${index}`}>{text}</del>;
-                    if (mark.type === 'code') text = <code key={`code-${index}`} className="bg-black/5 dark:bg-white/10 px-1.5 py-0.5 rounded">{text}</code>;
+                    if (mark.type === 'bold') element = <strong key={`bold-${index}`}>{element}</strong>;
+                    if (mark.type === 'italic') element = <em key={`italic-${index}`}>{element}</em>;
+                    if (mark.type === 'strike') element = <del key={`strike-${index}`}>{element}</del>;
+                    if (mark.type === 'code') element = <code key={`code-${index}`} className="bg-black/5 dark:bg-white/10 px-1.5 py-0.5 rounded text-primary font-bold">{element}</code>;
                 });
             }
-            return text;
+            return element;
         }
 
         switch (node.type) {

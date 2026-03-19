@@ -41,7 +41,12 @@
 
   /* Basic token colors (manually handled or via prose) */
   .prose pre {
-    @apply bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl p-6 mb-8 overflow-auto;
+    @apply bg-gray-100 dark:bg-white/[0.03] border border-black/10 dark:border-white/10 rounded-2xl p-6 mb-8 overflow-auto transition-colors duration-500;
+  }
+
+  .prose pre code {
+    @apply text-gray-900 dark:text-gray-300 bg-transparent p-0 border-0 text-sm leading-relaxed;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Roboto Mono', monospace;
   }
 
   .prose :not(pre) > code {
