@@ -268,8 +268,8 @@ export default function About() {
                     <img src="/img/logo_wbc.png" alt="Techy News" className="h-7 w-auto opacity-50 hover:opacity-100 transition-opacity dark:brightness-100 brightness-0" />
                     <p className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-700">© 2026 Carlos Silveira</p>
                     <div className="flex space-x-8">
-                        <Link href="/" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors">Home</Link>
-                        <Link href="/archive" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors">Archive</Link>
+                        <Link href="/" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors">{__('Home')}</Link>
+                        <Link href="/archive" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors">{__('Archive')}</Link>
                         <a href="https://github.com/carlos-silveira" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors">GitHub</a>
                     </div>
                 </div>
