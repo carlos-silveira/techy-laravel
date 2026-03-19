@@ -2,38 +2,9 @@ import React from 'react';
 import { Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import LanguageSwitcher from './LanguageSwitcher';
+import ThemeToggle from './ThemeToggle';
 import useLanguage from '@/Hooks/useLanguage';
 import { Sun, Moon } from 'lucide-react';
-
-const ThemeToggle = () => {
-    const [isDark, setIsDark] = React.useState(false);
-
-    React.useEffect(() => {
-        setIsDark(document.documentElement.classList.contains('dark'));
-    }, []);
-
-    const toggleTheme = () => {
-        const newTheme = !isDark ? 'dark' : 'light';
-        setIsDark(!isDark);
-        if (newTheme === 'dark') {
-            document.documentElement.classList.add('dark');
-            localStorage.setItem('theme', 'dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-            localStorage.setItem('theme', 'light');
-        }
-    };
-
-    return (
-        <button
-            onClick={toggleTheme}
-            className="p-2 rounded-lg bg-white/5 border border-white/10 text-gray-400 hover:text-white transition-colors"
-            title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-        >
-            {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-        </button>
-    );
-};
 
 export default function Navbar() {
     const { __ } = useLanguage();
@@ -47,7 +18,11 @@ export default function Navbar() {
                     className="flex items-center"
                 >
                     <Link href="/">
-                        <img src="/img/logo_wbc.png" alt="Techy News" className="h-8 w-auto" />
+                        <img 
+                            src="/img/logo_wbc.png" 
+                            alt="Techy News" 
+                            className="h-8 w-auto transition-all duration-500 dark:brightness-100 brightness-0" 
+                        />
                     </Link>
                 </motion.div>
 
@@ -56,9 +31,9 @@ export default function Navbar() {
                     animate={{ opacity: 1, x: 0 }}
                     className="flex items-center space-x-4 md:space-x-8"
                 >
-                    <div className="hidden md:flex items-center space-x-8 mr-4 border-r border-white/10 pr-8 h-8">
-                        <Link href="/archive" className="text-sm font-black uppercase tracking-widest text-gray-400 hover:text-white transition-colors">{__('Archive')}</Link>
-                        <Link href="/about" className="text-sm font-black uppercase tracking-widest text-gray-400 hover:text-white transition-colors">{__('About')}</Link>
+                    <div className="hidden md:flex items-center space-x-8 mr-4 border-r border-black/5 dark:border-white/10 pr-8 h-8">
+                        <Link href="/archive" className="text-sm font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">{__('Archive')}</Link>
+                        <Link href="/about" className="text-sm font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">{__('About')}</Link>
                     </div>
                     
                     <div className="flex items-center gap-4">
