@@ -303,7 +303,18 @@ const TipTapRenderer = ({ content }) => {
                 if (node.attrs?.language === 'mermaid') {
                     return <div key={index} className="mermaid bg-white dark:bg-[#0d1117] p-6 rounded-2xl border border-black/5 dark:border-white/10 mb-8 my-10 overflow-auto">{node.content?.[0]?.text}</div>;
                 }
-                return <pre key={index} className="bg-black/5 dark:bg-white/10 p-6 rounded-2xl border border-black/5 dark:border-white/10 mb-8 overflow-auto"><code className={`language-${node.attrs?.language}`}>{node.content?.[0]?.text}</code></pre>;
+                return (
+                    <div key={index} className="group relative my-10">
+                        <div className="absolute -top-3 left-6 px-3 py-1 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-lg z-10 shadow-lg shadow-primary/20">
+                            {node.attrs?.language || 'code'}
+                        </div>
+                        <pre className="bg-black/5 dark:bg-white/[0.03] p-8 pt-10 rounded-[1.5rem] border border-black/5 dark:border-white/10 mb-8 overflow-auto group-hover:border-primary/30 transition-all duration-500 scrollbar-thin scrollbar-thumb-primary/20">
+                            <code className={`language-${node.attrs?.language} text-sm leading-relaxed block`}>
+                                {node.content?.[0]?.text}
+                            </code>
+                        </pre>
+                    </div>
+                );
             case 'blockquote':
                 return <blockquote key={index} className="border-l-4 border-primary pl-6 py-2 my-8 italic text-gray-700 dark:text-gray-300 bg-primary/5 rounded-r-xl">{node.content?.map((n, i) => renderNode(n, i))}</blockquote>;
             default:

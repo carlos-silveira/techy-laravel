@@ -262,11 +262,11 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
             </Link>
           </div>
 
-          {gridArticles.length === 0 ? (
-            <div className="py-32 text-center text-gray-700 font-light text-xl border border-white/5 rounded-[2rem]">
-              The intelligence pipeline is warming up. Check back shortly.
+          {articles?.length === 0 ? (
+            <div className="py-32 text-center text-gray-500 dark:text-gray-700 font-light text-xl border border-black/5 dark:border-white/5 rounded-[2rem] transition-colors duration-500">
+              {__('The intelligence pipeline is warming up. Check back shortly.')}
             </div>
-          ) : (
+          ) : gridArticles.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {gridArticles.map((article, index) => {
                 const isLarge = index === 0;

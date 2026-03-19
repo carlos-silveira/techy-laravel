@@ -158,7 +158,7 @@ function WizardView({ onComplete, onSwitchToEditor }) {
     return (
         <div className="flex-1 overflow-y-auto">
             {/* Step Progress Bar */}
-            <div className="sticky top-0 z-40 bg-[#02040a]/90 backdrop-blur-2xl border-b border-white/5 px-10 py-6">
+            <div className="sticky top-0 z-40 bg-white/80 dark:bg-[#02040a]/90 backdrop-blur-2xl border-b border-black/5 dark:border-white/5 px-10 py-6 transition-colors duration-500">
                 <div className="max-w-3xl mx-auto flex items-center gap-3">
                     {WIZARD_STEPS.map((name, i) => (
                         <React.Fragment key={name}>
@@ -699,41 +699,41 @@ export default function Dashboard({ auth, articles: initialArticles }) {
     };
 
     return (
-        <div className="min-h-screen bg-[#02040a] text-white flex overflow-hidden font-sans selection:bg-primary/30">
+        <div className="min-h-screen bg-white dark:bg-[#02040a] text-gray-900 dark:text-white flex overflow-hidden font-sans selection:bg-primary/30 transition-colors duration-500">
             <Head title="AI Studio" />
 
             {/* Main Sidebar */}
-            <aside className="w-20 md:w-64 border-r border-white/5 bg-[#02040a] flex flex-col py-10 px-4 justify-between sticky top-0 h-screen z-50">
+            <aside className="w-20 md:w-64 border-r border-black/5 dark:border-white/5 bg-white dark:bg-[#02040a] flex flex-col py-10 px-4 justify-between sticky top-0 h-screen z-50 transition-colors duration-500">
                 <div className="w-full flex-1 overflow-y-auto no-scrollbar">
                     <div className="flex items-center gap-3 mb-12 px-2">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center flex-shrink-0 shadow-2xl">
                             <Zap className="w-6 h-6 text-white" />
                         </div>
-                        <span className="hidden md:block font-black text-lg tracking-tighter text-white">STUDIO</span>
+                        <span className="hidden md:block font-black text-lg tracking-tighter text-gray-900 dark:text-white">STUDIO</span>
                     </div>
 
                     <nav className="space-y-2 w-full mb-10">
-                        <Link href="/" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:text-white hover:bg-white/5 transition-all group">
+                        <Link href="/" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-all group">
                             <Home className="w-5 h-5 group-hover:text-primary" />
                             <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Live View</span>
                         </Link>
-                        <button onClick={() => setView('wizard')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'wizard' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-gray-500 hover:text-white'}`}>
+                        <button onClick={() => setView('wizard')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'wizard' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white'}`}>
                             <Wand2 className="w-5 h-5" />
                             <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Quick Create</span>
                         </button>
-                        <button onClick={() => setView('list')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'list' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-gray-500 hover:text-white'}`}>
+                        <button onClick={() => setView('list')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'list' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white'}`}>
                             <Layout className="w-5 h-5" />
                             <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Archives</span>
                         </button>
-                        <button onClick={() => { resetEditor(); setView('editor'); }} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'editor' && !currentArticleId ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-white/5 text-white'}`}>
+                        <button onClick={() => { resetEditor(); setView('editor'); }} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'editor' && !currentArticleId ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-black/5 dark:bg-white/5 text-black dark:text-white'}`}>
                             <Edit3 className="w-5 h-5 text-primary" />
                             <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Advanced Editor</span>
                         </button>
                     </nav>
                 </div>
 
-                <div className="px-4 py-6 border-t border-white/5">
-                    <div className="flex items-center gap-3 text-gray-600">
+                <div className="px-4 py-6 border-t border-black/5 dark:border-white/5">
+                    <div className="flex items-center gap-3 text-gray-400 dark:text-gray-600">
                         <Cpu className="w-4 h-4" />
                         <span className="text-[9px] font-black uppercase tracking-[0.2em]">Gemini 2.0 Flash</span>
                     </div>
@@ -754,19 +754,19 @@ export default function Dashboard({ auth, articles: initialArticles }) {
                     <div className="flex-1 overflow-y-auto p-10 md:p-24 max-w-6xl mx-auto w-full">
                         <div className="mb-20">
                             <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-4">Central Archives</h3>
-                            <h2 className="text-5xl font-black tracking-tighter text-white">Narrative Repository.</h2>
+                            <h2 className="text-5xl font-black tracking-tighter text-gray-900 dark:text-white">Narrative Repository.</h2>
                         </div>
                         <div className="grid grid-cols-1 gap-4">
                             {articles.map((article, i) => (
-                                <div key={article.id} onClick={() => handleEdit(article)} className="p-6 bg-white/[0.02] border border-white/5 rounded-3xl hover:border-primary/30 transition-all flex items-center justify-between group cursor-pointer">
+                                <div key={article.id} onClick={() => handleEdit(article)} className="p-6 bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl hover:border-primary/30 transition-all flex items-center justify-between group cursor-pointer">
                                     <div className="flex items-center gap-6">
-                                        <div className="w-20 h-20 rounded-2xl bg-black overflow-hidden flex-shrink-0 border border-white/10">
+                                        <div className="w-20 h-20 rounded-2xl bg-black overflow-hidden flex-shrink-0 border border-black/5 dark:border-white/10">
                                             {article.cover_image_path && <img src={article.cover_image_path} className="w-full h-full object-cover" alt="" />}
                                         </div>
                                         <div>
-                                            <h3 className="font-black text-xl text-white group-hover:text-primary transition-colors">{article.title}</h3>
-                                            <div className="flex items-center gap-5 text-[10px] font-black text-gray-600 uppercase mt-1.5">
-                                                <span className={`px-2 py-0.5 rounded border ${article.status === 'published' ? 'text-primary border-primary/20 bg-primary/5' : 'text-gray-500 border-white/5'}`}>{article.status}</span>
+                                            <h3 className="font-black text-xl text-gray-900 dark:text-white group-hover:text-primary transition-colors">{article.title}</h3>
+                                            <div className="flex items-center gap-5 text-[10px] font-black text-gray-400 dark:text-gray-600 uppercase mt-1.5">
+                                                <span className={`px-2 py-0.5 rounded border ${article.status === 'published' ? 'text-primary border-primary/20 bg-primary/5' : 'text-gray-400 border-black/5 dark:border-white/5'}`}>{article.status}</span>
                                                 <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {new Date(article.created_at).toLocaleDateString()}</span>
                                             </div>
                                         </div>
@@ -781,13 +781,13 @@ export default function Dashboard({ auth, articles: initialArticles }) {
                 {view === 'editor' && (
                     <>
                         {/* Editor Column */}
-                        <div className="flex-1 flex flex-col border-r border-white/5 overflow-y-auto no-scrollbar">
-                            <header className="sticky top-0 z-40 bg-[#02040a]/80 backdrop-blur-2xl border-b border-white/5 px-10 h-20 flex items-center justify-between">
+                        <div className="flex-1 flex flex-col border-r border-black/5 dark:border-white/5 overflow-y-auto no-scrollbar">
+                            <header className="sticky top-0 z-40 bg-white/80 dark:bg-[#02040a]/80 backdrop-blur-2xl border-b border-black/5 dark:border-white/5 px-10 h-20 flex items-center justify-between transition-colors duration-500">
                                 <div className="flex items-center gap-6">
-                                    <button onClick={() => setView('list')} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl transition-all"><ChevronLeft className="w-5 h-5" /></button>
+                                    <button onClick={() => setView('list')} className="p-2.5 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 rounded-xl transition-all"><ChevronLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" /></button>
                                     <div className="flex flex-col">
-                                        <h4 className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Advanced Editor</h4>
-                                        <h2 className="text-sm font-black text-white truncate max-w-[200px]">{title || 'Untitled'}</h2>
+                                        <h4 className="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Advanced Editor</h4>
+                                        <h2 className="text-sm font-black text-gray-900 dark:text-white truncate max-w-[200px]">{title || 'Untitled'}</h2>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3">

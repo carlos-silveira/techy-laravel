@@ -8,6 +8,7 @@ use App\Models\Article;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\App;
 use App\Services\GeminiService;
 
@@ -47,7 +48,10 @@ class PublicController extends Controller
         });
 
         $dailyBrief = Cache::remember("homepage_daily_brief_{$locale}", 3600, function () {
-            return "The rapid evolution of artificial intelligence frameworks...";
+            $latestArticle = Article::where('status', 'published')
+                ->orderBy('created_at', 'desc')
+                ->first();
+            return $latestArticle?->ai_summary ?? "The rapid evolution of artificial intelligence frameworks...";
         });
 
         return Inertia::render('Welcome', [

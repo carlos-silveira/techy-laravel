@@ -39,7 +39,7 @@ export default function Navbar() {
     const { __ } = useLanguage();
 
     return (
-        <nav className="fixed w-full border-b border-white/5 bg-[#02040a]/80 backdrop-blur-xl z-50">
+        <nav className="fixed w-full border-b border-black/5 dark:border-white/5 bg-white/95 dark:bg-[#0a192f]/90 backdrop-blur-xl z-50 transition-colors duration-500">
             <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
                 <motion.div
                     initial={{ opacity: 0, x: -20 }}
