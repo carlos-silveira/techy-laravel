@@ -41,3 +41,7 @@ This log tracks all actions performed by AI agents in this repository.
     - **Frontend**: Enhanced `ArticleShow.jsx` to correctly decode and render JSON fallback via `TipTapRenderer`.
     - **Prompt Engineering**: Updated `GeminiService` drafts to explicitly forbid JSON-formatted article content.
     - **Quality Assurance**: Added unit tests for `tipTapToHtml()` conversion and verified PHP syntax across all modified files.
+    - **Theme Support**: Implemented Dark/Light mode toggle in `Navbar.jsx` with persistent user preference and system detection.
+    - **Content Enrichment**: Integrated Mermaid.js for diagram rendering and updated AI prompts to include diagrams and image placeholders.
+    - **Image Resolution**: Updated `GenerateDailyNews` to resolve image placeholders using the Unsplash API.
+    - **Global Localization**: Implemented pre-translation for EN, ES, and PT during article creation and created `articles:pre-translate` command for existing content.

@@ -60,7 +60,7 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
   const tickerItems = articles?.slice(0, 8) || [];
 
   return (
-    <div className="min-h-screen bg-[#02040a] text-white font-sans selection:bg-primary/30 overflow-x-hidden">
+    <div className="min-h-screen bg-[#f8f6f6] dark:bg-[#02040a] text-black dark:text-white font-sans selection:bg-primary/30 overflow-x-hidden transition-colors duration-500">
       <Head title={`${__('Home')} — Techy News — AI-Powered Tech Intelligence`} />
       <CommandPalette />
 
@@ -96,8 +96,8 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-[#02040a] to-purple-900/20" />
               )}
               {/* Multi-layer gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#02040a] via-[#02040a]/70 to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#02040a]/60 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#f8f6f6] dark:from-[#02040a] via-[#f8f6f6]/70 dark:via-[#02040a]/70 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#f8f6f6]/60 dark:from-[#02040a]/60 to-transparent" />
             </motion.div>
 
             {/* Hero content */}
@@ -119,19 +119,19 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
                 </motion.div>
 
                 <Link href={`/article/${featured.slug}`}>
-                  <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[0.9] mb-6 hover:text-primary transition-colors duration-500 cursor-pointer">
+                  <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[0.9] mb-6 text-black dark:text-white hover:text-primary transition-colors duration-500 cursor-pointer">
                     {featured.title}
                   </h1>
                 </Link>
 
-                <p className="text-xl text-gray-400 font-light leading-relaxed mb-10 max-w-2xl">
+                <p className="text-xl text-gray-600 dark:text-gray-400 font-light leading-relaxed mb-10 max-w-2xl">
                   {featured.ai_summary}
                 </p>
 
                 <div className="flex items-center gap-8">
                   <Link
                     href={`/article/${featured.slug}`}
-                    className="inline-flex items-center gap-3 bg-white text-black font-black px-8 py-4 rounded-xl hover:scale-105 transition-transform shadow-[0_0_40px_rgba(255,255,255,0.15)] uppercase tracking-wider text-sm group"
+                    className="inline-flex items-center gap-3 bg-black dark:bg-white text-white dark:text-black font-black px-8 py-4 rounded-xl hover:scale-105 transition-transform shadow-[0_0_40px_rgba(255,255,255,0.15)] uppercase tracking-wider text-sm group"
                   >
                     Read Story
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -161,7 +161,7 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
 
         {/* ===== AI TICKER / BRIEF RIBBON ===== */}
         {dailyBrief && (
-          <div className="border-y border-white/5 bg-white/[0.02] backdrop-blur-xl py-4 overflow-hidden">
+          <div className="border-y border-black/5 dark:border-white/5 bg-black/[0.01] dark:bg-white/[0.02] backdrop-blur-xl py-4 overflow-hidden">
             <div className="flex items-center">
               <div className="flex-shrink-0 flex items-center gap-3 bg-primary px-5 py-2 z-10 mr-8">
                 <Zap className="w-3.5 h-3.5 text-white" />
@@ -198,7 +198,7 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
               <div className="flex items-center justify-between mb-12">
                 <div className="flex items-center gap-4">
                   <div className="w-1 h-8 bg-amber-400 rounded-full"></div>
-                  <h2 className="text-4xl font-black tracking-tighter">{__('Editors Choice')}</h2>
+                  <h2 className="text-4xl font-black tracking-tighter text-black dark:text-white">{__('Editors Choice')}</h2>
                 </div>
                 <Link href="/archive" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-white transition-colors flex items-center gap-2 group">
                   {__('View All')} <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
@@ -216,7 +216,7 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
                     transition={{ duration: 0.6, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
                   >
                     <Link href={`/article/${article.slug}`} className="group block">
-                      <div className="relative rounded-[2rem] overflow-hidden bg-white/[0.03] border border-white/5 group-hover:border-amber-400/30 transition-all duration-500">
+                      <div className="relative rounded-[2rem] overflow-hidden bg-white/[0.6] dark:bg-white/[0.03] border border-black/5 dark:border-white/5 group-hover:border-amber-400/30 transition-all duration-500 shadow-sm dark:shadow-none">
                         <div
                           className="h-52 bg-gradient-to-br from-white/10 to-black/50 bg-cover bg-center relative overflow-hidden"
                           style={article.cover_image_path ? { backgroundImage: `url(${article.cover_image_path})` } : {}}
@@ -231,7 +231,7 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
                           <div className="text-[10px] font-black text-amber-400/60 uppercase tracking-[0.2em] mb-3">
                             {dayjs(article.updated_at).format('MMM D, YYYY')}
                           </div>
-                          <h3 className="text-xl font-black tracking-tight text-white group-hover:text-amber-200 transition-colors duration-300 line-clamp-2 leading-tight mb-3">
+                          <h3 className="text-xl font-black tracking-tight text-black dark:text-white group-hover:text-amber-500 dark:group-hover:text-amber-200 transition-colors duration-300 line-clamp-2 leading-tight mb-3">
                             {article.title}
                           </h3>
                           <p className="text-sm text-gray-600 font-light line-clamp-2 leading-relaxed">
@@ -248,13 +248,13 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
         )}
 
         {/* ===== BENTO ARTICLE GRID ===== */}
-        <section className="py-20 px-6 max-w-7xl mx-auto border-t border-white/5">
+        <section className="py-20 px-6 max-w-7xl mx-auto border-t border-black/5 dark:border-white/5">
           <div className="flex items-center justify-between mb-12">
             <div className="flex items-center gap-4">
               <div className="w-1 h-8 bg-primary rounded-full"></div>
               <div>
                 <span className="text-[10px] font-black text-primary uppercase tracking-[0.25em] block mb-1">{__('Latest Discoveries')}</span>
-                <h2 className="text-4xl font-black tracking-tighter">{__('Now Reading')}</h2>
+                <h2 className="text-4xl font-black tracking-tighter text-black dark:text-white">{__('Now Reading')}</h2>
               </div>
             </div>
             <Link href="/archive" className="hidden md:flex text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-white transition-colors items-center gap-2 group">
@@ -280,7 +280,7 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
                     className={isLarge ? 'lg:col-span-2 lg:row-span-2' : ''}
                   >
                     <Link href={`/article/${article.slug}`} className="group block h-full">
-                      <div className={`h-full bg-white/[0.02] border border-white/5 group-hover:border-primary/30 rounded-[2rem] overflow-hidden transition-all duration-500 flex flex-col ${isLarge ? 'min-h-[500px]' : 'min-h-[280px]'}`}>
+                      <div className={`h-full bg-white/[0.6] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 group-hover:border-primary/30 rounded-[2rem] overflow-hidden transition-all duration-500 flex flex-col shadow-sm dark:shadow-none ${isLarge ? 'min-h-[500px]' : 'min-h-[280px]'}`}>
                         {article.cover_image_path && (
                           <div
                             className={`w-full bg-cover bg-center flex-shrink-0 relative overflow-hidden ${isLarge ? 'h-72' : 'h-40'}`}
@@ -310,7 +310,7 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
                                 </span>
                               )}
                             </div>
-                            <h3 className={`font-black tracking-tight text-white group-hover:text-primary transition-colors duration-300 leading-tight line-clamp-3 ${isLarge ? 'text-3xl md:text-4xl' : 'text-xl'}`}>
+                             <h3 className={`font-black tracking-tight text-black dark:text-white group-hover:text-primary transition-colors duration-300 leading-tight line-clamp-3 ${isLarge ? 'text-3xl md:text-4xl' : 'text-xl'}`}>
                               {article.title}
                             </h3>
                           </div>
@@ -344,20 +344,20 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
         </section>
 
         {/* ===== NEWSLETTER ===== */}
-        <section className="py-24 px-6 border-t border-white/5">
+        <section className="py-24 px-6 border-t border-black/5 dark:border-white/5">
           <div className="max-w-4xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-              className="bg-white/[0.03] border border-white/10 rounded-[3rem] p-14 md:p-20 relative overflow-hidden group"
+              className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/10 rounded-[3rem] p-14 md:p-20 relative overflow-hidden group shadow-sm dark:shadow-none"
             >
               <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/10 rounded-full blur-[100px] pointer-events-none transition-transform duration-700 group-hover:scale-125"></div>
               <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-purple-600/10 rounded-full blur-[100px] pointer-events-none"></div>
               <div className="relative z-10 text-center">
                 <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em] block mb-6">AI Weekly Digest</span>
-                <h2 className="text-5xl md:text-6xl font-black mb-6 tracking-tighter leading-[0.9]">
+                <h2 className="text-5xl md:text-6xl font-black mb-6 tracking-tighter leading-[0.9] text-black dark:text-white transition-colors">
                   Intelligence,<br />delivered weekly.
                 </h2>
                 <p className="text-gray-500 mb-12 font-light text-lg max-w-lg mx-auto leading-relaxed">
@@ -375,7 +375,7 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
                   <button
                     type="submit"
                     disabled={isSubscribing}
-                    className="w-full sm:w-auto px-8 py-4 rounded-xl bg-white text-black font-black tracking-wider uppercase text-sm hover:scale-105 hover:bg-gray-200 transition-all disabled:opacity-70 flex items-center justify-center gap-2"
+                    className="w-full sm:w-auto px-8 py-4 rounded-xl bg-black dark:bg-white text-white dark:text-black font-black tracking-wider uppercase text-sm hover:scale-105 hover:bg-gray-800 dark:hover:bg-gray-200 transition-all disabled:opacity-70 flex items-center justify-center gap-2 shadow-lg dark:shadow-none"
                   >
                     {isSubscribing ? 'Joining...' : 'Subscribe'}
                   </button>
@@ -386,7 +386,7 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
         </section>
 
         {/* ===== FOOTER ===== */}
-        <footer className="border-t border-white/5 py-12">
+        <footer className="border-t border-black/5 dark:border-white/5 py-12">
           <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2.5">
               <img src="/img/logo_wbc.png" alt="Techy News" className="h-7 w-auto opacity-50 hover:opacity-100 transition-opacity" />

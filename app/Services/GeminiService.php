@@ -156,7 +156,9 @@ HTML RULES:
 - <h2> for section headers (never h1, never h3)
 - <p> for paragraphs (3-4 sentences max per paragraph)
 - <strong> for emphasis on key technical terms
-- <blockquote> for impactful quotes or key takeaways (use at least once)
+- <blockquote> for impactful quotes or 'Key Insight' boxes (use at least once)
+- <pre><code class=\"language-mermaid\">...</code></pre> for Mermaid.js diagrams (graph TD/LR) to explain patterns or concepts (at least once)
+- <figure><img src=\"PLACEHOLDER_IMAGE\" alt=\"Descriptive search term for Unsplash\"><figcaption>Relevant caption</figcaption></figure> (at least twice)
 - <pre><code> for code snippets (use at least once)
 - <ul><li> for comparison lists
 - <em> for secondary emphasis
