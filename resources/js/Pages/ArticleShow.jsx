@@ -9,11 +9,13 @@ import CommandPalette from '@/Components/CommandPalette';
 import Navbar from '@/Components/Navbar';
 import useLanguage from '@/Hooks/useLanguage';
 
-export default function ArticleShow({ article, relatedArticles }) {
+export default function ArticleShow({ article, relatedArticles, auth }) {
     const { __ } = useLanguage();
     const [scrollProgress, setScrollProgress] = useState(0);
     const [likes, setLikes] = useState(article.likes_count || 0);
     const [isLiking, setIsLiking] = useState(false);
+
+    const isAuthorized = !!auth?.user;
 
     // Spotlight mouse movement
     const mouseX = useMotionValue(0);
@@ -27,7 +29,7 @@ export default function ArticleShow({ article, relatedArticles }) {
         const handleScroll = () => {
             const totalScroll = document.documentElement.scrollTop;
             const windowHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-            const scroll = `${totalScroll / windowHeight}`;
+            const scroll = windowHeight === 0 ? 0 : totalScroll / windowHeight;
             setScrollProgress(scroll * 100);
         };
         window.addEventListener('scroll', handleScroll);
@@ -63,13 +65,11 @@ export default function ArticleShow({ article, relatedArticles }) {
 
     /**
      * Recursively decode JSON-encoded strings and unescape slashes.
-     * Handles: json_encode(html), double-encoded, escaped slashes, etc.
      */
     const sanitizeContent = (raw) => {
         if (!raw || typeof raw !== 'string') return '';
         let content = raw;
 
-        // Only attempt to parse if it looks like a JSON string (starts with " or { or [)
         if (content.trim().startsWith('"') || content.trim().startsWith('{') || content.trim().startsWith('[')) {
             for (let i = 0; i < 5; i++) {
                 try {
@@ -78,7 +78,6 @@ export default function ArticleShow({ article, relatedArticles }) {
                         content = parsed;
                         continue;
                     }
-                    // If it's a TipTap object, return null so we use the renderer
                     if (parsed && typeof parsed === 'object' && parsed.type === 'doc') {
                         return null;
                     }
@@ -89,18 +88,40 @@ export default function ArticleShow({ article, relatedArticles }) {
             }
         }
 
-        // Fix escaped forward slashes: <\/h2> → </h2>
         content = content.replace(/\\\//g, '/');
-        // Strip leading/trailing quotes if they were added by double encoding
         if (content.startsWith('"') && content.endsWith('"')) {
             content = content.substring(1, content.length - 1);
         }
         return content;
     };
 
+    /**
+     * Helper to find the first image in the TipTap JSON content.
+     */
+    const findFirstImage = (content) => {
+        if (!content || !content.content) return null;
+        for (const node of content.content) {
+            if (node.type === 'image' && node.attrs?.src) return node.attrs.src;
+            if (node.content) {
+                const found = findFirstImage(node);
+                if (found) return found;
+            }
+        }
+        return null;
+    };
+
     const cleanHtml = typeof article.content === 'string' ? sanitizeContent(article.content) : null;
-    const parsedContent = article.content || { type: 'doc', content: [] };
-    const contentString = typeof parsedContent === 'string' ? parsedContent : JSON.stringify(parsedContent);
+    const parsedContent = (typeof article.content === 'string' && !cleanHtml) ? (() => { 
+        try { return JSON.parse(article.content); } catch { return { type: 'doc', content: [] }; }
+    })() : (article.content || { type: 'doc', content: [] });
+
+    // Fallback image logic: column -> content image -> generic tech image
+    const contentImage = !cleanHtml ? findFirstImage(parsedContent) : null;
+    const finalCoverImage = article.cover_image_path || contentImage || (article.slug.includes('not-paid-to-write-code') 
+        ? 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=2072'
+        : 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=2072');
+
+    const contentString = typeof article.content === 'string' ? article.content : JSON.stringify(article.content);
     const estimatedReadTime = article.reading_time_minutes || Math.max(1, Math.ceil(contentString.split(' ').length / 200));
 
     return (
@@ -109,51 +130,25 @@ export default function ArticleShow({ article, relatedArticles }) {
                 <meta name="description" content={article.meta_description || article.ai_summary || `${__('Read')} ${article.title} ${__('on Techy News')}.`} />
                 <meta property="og:title" content={article.title} />
                 <meta property="og:type" content="article" />
+                <meta property="og:image" content={finalCoverImage} />
             </Head>
             <CommandPalette />
 
-            {/* Dynamic Spotlight */}
-            <motion.div
-                className="fixed inset-0 z-0 pointer-events-none opacity-30 mix-blend-screen"
-                style={{
-                    background: useSpring(
-                        `radial-gradient(800px circle at ${mouseX}px ${mouseY}px, rgba(43, 124, 238, 0.1), transparent 80%)`,
-                        { damping: 50, stiffness: 400 }
-                    )
-                }}
-            />
-
-            {/* Reading Progress Bar */}
             <div className="fixed top-0 left-0 h-1 bg-gradient-to-r from-primary to-purple-600 z-[100] transition-all duration-150 ease-out" style={{ width: `${scrollProgress}%` }}></div>
 
-            {/* ===== NAVBAR ===== */}
             <Navbar />
 
             {/* Parallax Hero Background */}
-            {article.cover_image_path ? (
-                <div
-                    className="absolute top-0 w-full h-[70vh] bg-cover bg-center pointer-events-none opacity-40 blur-[2px]"
-                    style={{
-                        backgroundImage: `url(${article.cover_image_path})`,
+            <div className="absolute top-0 w-full h-[70vh] overflow-hidden pointer-events-none opacity-40 blur-[2px]">
+                <div 
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{ 
+                        backgroundImage: `url(${finalCoverImage})`,
                         transform: `translateY(${scrollProgress * 1.5}px)`
                     }}
-                >
-                    <div className="absolute inset-0 bg-gradient-to-b from-[#02040a]/40 via-[#02040a]/80 to-[#02040a]"></div>
-                </div>
-            ) : (
-                <div className="absolute top-0 w-full h-[70vh] overflow-hidden pointer-events-none opacity-50">
-                    <div 
-                        className="absolute inset-0 bg-cover bg-center blur-[4px]"
-                        style={{ 
-                            backgroundImage: article.slug.includes('not-paid-to-write-code') 
-                                ? 'url(https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=2072)'
-                                : 'url(https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=2072)',
-                            transform: `translateY(${scrollProgress * 1.2}px)`
-                        }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-primary/20 via-[#02040a]/80 to-[#02040a]"></div>
-                </div>
-            )}
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-[#02040a]/40 via-[#02040a]/80 to-[#02040a]"></div>
+            </div>
 
             <main className="max-w-4xl mx-auto px-6 py-20 relative z-10">
                 <motion.article
@@ -173,12 +168,24 @@ export default function ArticleShow({ article, relatedArticles }) {
                             <span className="w-1 h-1 bg-gray-800 rounded-full"></span>
                             <span>{estimatedReadTime} {__('min read')}</span>
                             <span className="w-1 h-1 bg-gray-800 rounded-full"></span>
-                            <span className="text-primary/60">{__('INTELLIGENT DRAFT')}</span>
+                            <span className="text-primary/60 uppercase">{__('Intelligent Draft')}</span>
                         </div>
                     </header>
 
                     {/* Floating Interaction Bar */}
                     <div className="fixed bottom-8 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-12 md:top-1/2 md:-translate-y-1/2 md:bottom-auto z-50 flex md:flex-col items-center gap-6 bg-white/80 dark:bg-white/[0.03] backdrop-blur-2xl border border-black/5 dark:border-white/10 py-4 px-6 md:py-8 md:px-4 rounded-full shadow-2xl transition-colors duration-500">
+                        {isAuthorized && (
+                            <>
+                                <Link 
+                                    href="/dashboard" 
+                                    className="p-3 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-all"
+                                    title={__('Edit Article')}
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 012.828 0L21 8.586a2 2 0 010 2.828l-10.586 10.586a2 2 0 01-0.707.293l-3.992.399 0.399-3.992a2 2 0 010.293-0.707L17.586 3.414z" /></svg>
+                                </Link>
+                                <div className="w-[1px] h-6 md:w-6 md:h-[1px] bg-black/5 dark:bg-white/10"></div>
+                            </>
+                        )}
                         <button
                             onClick={handleLike}
                             className="group flex flex-col items-center gap-1 transition-transform active:scale-95"
@@ -203,7 +210,7 @@ export default function ArticleShow({ article, relatedArticles }) {
                             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[60px] -mr-32 -mt-32 transition-transform duration-700 group-hover:scale-110"></div>
                             <h3 className="text-primary font-black text-xs uppercase tracking-[0.2em] mb-4 flex items-center gap-2 relative z-10">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                                Executive Summary
+                                {__('Executive Summary')}
                             </h3>
                             <p className="text-xl text-gray-700 dark:text-gray-300 font-light leading-relaxed relative z-10 italic">"{article.ai_summary}"</p>
                         </div>
@@ -213,9 +220,7 @@ export default function ArticleShow({ article, relatedArticles }) {
                         {cleanHtml ? (
                             <div dangerouslySetInnerHTML={{ __html: cleanHtml }} />
                         ) : (
-                            <TipTapRenderer content={typeof article.content === 'string' ? (() => { 
-                                try { return JSON.parse(article.content); } catch { return article.content; }
-                            })() : article.content} />
+                            <TipTapRenderer content={parsedContent} />
                         )}
                     </div>
                 </motion.article>
@@ -264,8 +269,8 @@ export default function ArticleShow({ article, relatedArticles }) {
                     <img src="/img/logo_wbc.png" alt="Techy News" className="h-7 w-auto opacity-50 hover:opacity-100 transition-opacity dark:brightness-100 brightness-0" />
                     <p className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-700">© 2026 Carlos Silveira</p>
                     <div className="flex space-x-8">
-                        <Link href="/" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors">Home</Link>
-                        <Link href="/archive" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors">Archive</Link>
+                        <Link href="/" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors">{__('Home')}</Link>
+                        <Link href="/archive" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors">{__('Archive')}</Link>
                         <a href="https://github.com/carlos-silveira" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors">GitHub</a>
                     </div>
                 </div>
@@ -295,6 +300,19 @@ const TipTapRenderer = ({ content }) => {
                     document.body.appendChild(script);
                 });
 
+                // Load required dependencies for languages
+                const dependencies = ['markup-templating'];
+                for (const dep of dependencies) {
+                    await new Promise((resolve) => {
+                        const script = document.createElement('script');
+                        script.src = `https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-${dep}.min.js`;
+                        script.async = true;
+                        script.onload = resolve;
+                        script.onerror = resolve;
+                        document.body.appendChild(script);
+                    });
+                }
+
                 // Load languages
                 const languages = ['javascript', 'php', 'css', 'markup', 'bash', 'python', 'json'];
                 for (const lang of languages) {
@@ -303,7 +321,7 @@ const TipTapRenderer = ({ content }) => {
                         langScript.src = `https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-${lang}.min.js`;
                         langScript.async = true;
                         langScript.onload = resolve;
-                        langScript.onerror = resolve; // Continue even if one fails
+                        langScript.onerror = resolve;
                         document.body.appendChild(langScript);
                     });
                 }
