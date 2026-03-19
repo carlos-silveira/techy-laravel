@@ -67,44 +67,57 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
      * Recursively decode JSON-encoded strings and unescape slashes.
      */
     const sanitizeContent = (raw) => {
-        if (!raw || typeof raw !== 'string') return '';
-        let content = raw;
+        if (!raw) return '';
+        let content = String(raw);
 
+        // Aggressively attempt to parse JSON if it looks like it's encoded
         if (content.trim().startsWith('"') || content.trim().startsWith('{') || content.trim().startsWith('[')) {
-            for (let i = 0; i < 5; i++) {
-                try {
-                    const parsed = JSON.parse(content);
-                    if (typeof parsed === 'string') {
-                        content = parsed;
-                        continue;
-                    }
-                    if (parsed && typeof parsed === 'object' && parsed.type === 'doc') {
-                        return null;
-                    }
-                    break;
-                } catch {
-                    break;
+            try {
+                // Remove outer quotes and handle double slashes before parsing if it's a simple string
+                let temp = content.trim();
+                if (temp.startsWith('"') && temp.endsWith('"')) {
+                    temp = temp.substring(1, temp.length - 1);
                 }
+                
+                // If it still looks like JSON after stripping quotes, try to parse
+                const parsed = JSON.parse(content);
+                if (typeof parsed === 'string') return sanitizeContent(parsed);
+                if (parsed && typeof parsed === 'object' && parsed.type === 'doc') return null;
+                if (typeof parsed === 'string') content = parsed;
+            } catch {
+                // If parsing fails, just continue with raw content
             }
         }
 
-        content = content.replace(/\\\//g, '/');
+        // Standard cleanup for HTML strings
+        content = content.replace(/\\\\\//g, '/').replace(/\\/g, '');
         if (content.startsWith('"') && content.endsWith('"')) {
             content = content.substring(1, content.length - 1);
         }
+        
+        // Remove literal "\n" or "\r" strings that some AI models return
+        content = content.replace(/\\n/g, '').replace(/\\r/g, '');
+        
         return content;
     };
 
     /**
-     * Helper to find the first image in the TipTap JSON content.
+     * Helper to find the first image in the content (HTML string or JSON object).
      */
     const findFirstImage = (content) => {
-        if (!content || !content.content) return null;
-        for (const node of content.content) {
-            if (node.type === 'image' && node.attrs?.src) return node.attrs.src;
-            if (node.content) {
-                const found = findFirstImage(node);
-                if (found) return found;
+        if (!content) return null;
+        if (typeof content === 'string') {
+            const match = content.match(/<img[^>]+src="([^">]+)"/);
+            if (match) return match[1];
+            return null;
+        }
+        if (typeof content === 'object') {
+            if (content.type === 'image' && content.attrs?.src) return content.attrs.src;
+            if (content.content && Array.isArray(content.content)) {
+                for (const node of content.content) {
+                    const found = findFirstImage(node);
+                    if (found) return found;
+                }
             }
         }
         return null;
@@ -115,8 +128,8 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
         try { return JSON.parse(article.content); } catch { return { type: 'doc', content: [] }; }
     })() : (article.content || { type: 'doc', content: [] });
 
-    // Fallback image logic: column -> content image -> generic tech image
-    const contentImage = !cleanHtml ? findFirstImage(parsedContent) : null;
+    // Fallback image logic
+    const contentImage = findFirstImage(article.content);
     const finalCoverImage = article.cover_image_path || contentImage || (article.slug.includes('not-paid-to-write-code') 
         ? 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=2072'
         : 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=2072');
@@ -238,13 +251,7 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
                             {relatedArticles.map(related => (
                                 <Link key={related.id} href={`/article/${related.slug}`} className="group block h-full">
                                     <div className="bg-white dark:bg-white/[0.03] rounded-[2rem] overflow-hidden border border-black/5 dark:border-white/10 group-hover:border-primary/30 transition-all p-6 h-full flex flex-col shadow-sm dark:shadow-none">
-                                        {related.cover_image_path ? (
-                                            <div className="h-40 rounded-2xl bg-cover bg-center mb-6 shadow-xl" style={{ backgroundImage: `url(${related.cover_image_path})` }} />
-                                        ) : (
-                                            <div className="h-40 rounded-2xl bg-gradient-to-br from-black/5 to-transparent dark:from-white/10 dark:to-transparent flex items-center justify-center mb-6 border border-black/5 dark:border-white/5">
-                                                <BookOpen className="w-8 h-8 text-gray-400 dark:text-gray-800" />
-                                            </div>
-                                        )}
+                                        <div className="h-40 rounded-2xl bg-cover bg-center mb-6 shadow-xl" style={{ backgroundImage: `url(${related.cover_image_path || findFirstImage(related.content) || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=2072'})` }} />
                                         <div className="flex flex-col flex-1">
                                             <div className="text-[10px] font-black text-primary uppercase tracking-widest mb-3">
                                                 {dayjs(related.updated_at).format('MMM D, YYYY')}
@@ -321,7 +328,6 @@ const TipTapRenderer = ({ content }) => {
                         langScript.src = `https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-${lang}.min.js`;
                         langScript.async = true;
                         langScript.onload = resolve;
-                        langScript.onerror = resolve;
                         document.body.appendChild(langScript);
                     });
                 }

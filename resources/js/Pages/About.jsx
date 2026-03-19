@@ -31,8 +31,9 @@ const DockerLogo = () => (
 );
 
 const MySQLLogo = () => (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-        <path d="M4.445 12.105c-2.235 0-4.445 1.117-4.445 2.794 0 1.676 2.21 2.794 4.445 2.794 2.236 0 4.446-1.118 4.446-2.794 0-1.677-2.21-2.794-4.446-2.794zm0 4.47c-1.118 0-2.222-.558-2.222-1.676 0-1.118 1.104-1.677 2.222-1.677 1.117 0 2.223.559 2.223 1.677 0 1.118-1.106 1.676-2.223 1.676zm15.111-13.415c-2.235 0-4.445 1.117-4.445 2.794 0 1.676 2.21 2.794 4.445 2.794 2.236 0 4.446-1.118 4.446-2.794 0-1.677-2.21-2.794-4.446-2.794zm0 4.47c-1.118 0-2.222-.558-2.222-1.676 0-1.118 1.104-1.677 2.222-1.677 1.117 0 2.223.559 2.223 1.677 0 1.118-1.106 1.676-2.223 1.676zm-7.556 6.708c-2.235 0-4.445 1.117-4.445 2.794 0 1.676 2.21 2.794 4.445 2.794 2.236 0 4.446-1.118 4.446-2.794 0-1.677-2.21-2.794-4.446-2.794zm0 4.47c-1.118 0-2.222-.558-2.222-1.676 0-1.118 1.104-1.677 2.222-1.677 1.117 0 2.223.559 2.223 1.677 0 1.118-1.106 1.676-2.223 1.676z" fill="#00758F" />
+    <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6">
+        <path d="M12.11 18.55c-.17.02-.34.04-.51.05-1.3.08-2.56-.1-3.7-.52-.4-.15-.78-.34-1.14-.56-.36-.23-.69-.49-.98-.78-.29-.3-.54-.63-.74-.99-.21-.36-.36-.75-.46-1.16-.1-.41-.15-.84-.15-1.29 0-.45.05-.88.15-1.29.1-.41.25-.8.46-1.16.2-.36.45-.69.74-.99.29-.3.62-.56.98-.78.36-.22.74-.41 1.14-.56 1.14-.42 2.4-.6 3.7-.52.17.01.34.03.51.05V18.55z" fill="#00758F"/>
+        <path d="M12.11 5.01c.17-.02.34-.04.51-.05 1.3-.08 2.56.1 3.7.52.4.15.78.34 1.14.56.36.23.69.49.98.78.29.3.54.63.74.99.21.36.36.75.46 1.16.1.41.15.84.15 1.29 0 .45-.05.88-.15 1.29-.1.41-.25.8-.46 1.16-.2.36-.45.69-.74.99-.29.3-.62.56-.98.78-.36.22-.74.41-1.14.56-1.14.42-2.4.6-3.7.52-.17-.01-.34-.03-.51-.05V5.01z" fill="#F29111"/>
     </svg>
 );
 
@@ -55,36 +56,36 @@ const GeminiLogo = () => (
 );
 
 // ─── Experience Data ─────────────────────────────────────────────────────
-const experiences = [
+const getExperiences = (__) => [
     {
-        role: 'Senior Software Engineer',
+        role: __('Senior Software Engineer'),
         company: 'Tendencys Innovations',
         companyUrl: 'https://www.linkedin.com/company/tendencys-innovation',
         period: 'Sep 2024 – Present',
         location: 'Monterrey, Mexico',
-        description: 'Architected and scaled a global shipping API (Laravel Lumen) for Envia.com, integrating international logistics providers via RESTful APIs. Optimized core backend performance and deployed features to streamline global logistics workflows.',
+        description: __('Architected and scaled a global shipping API (Laravel Lumen) for Envia.com, integrating international logistics providers via RESTful APIs. Optimized core backend performance and deployed features to streamline global logistics workflows.'),
         tech: ['Laravel', 'Lumen', 'RESTful APIs', 'PHP', 'MySQL'],
-        highlights: ['Architected global shipping API for Envia.com', 'Integrated international logistics providers', 'Optimized core backend performance at scale']
+        highlights: [__('Architected global shipping API for Envia.com'), __('Integrated international logistics providers'), __('Optimized core backend performance at scale')]
     },
     {
-        role: 'Tech Lead & Senior Software Engineer',
+        role: __('Tech Lead & Senior Software Engineer'),
         company: 'Buscabot',
         companyUrl: 'https://www.linkedin.com/company/buscabot/',
         period: 'Jan 2022 – Jul 2024',
         location: 'Remote',
-        description: 'Engineered features for a B2B WhatsApp chatbot platform using Laravel, React, Tailwind CSS, MySQL, and GCP, integrated with Twilio. Built internal APIs for car service endpoints and integrated platforms like Parts Tech, Stripe, and Facturapi. Translated automotive industry requirements into technical specifications and implemented TDD and SCRUM methodologies.',
+        description: __('Engineered features for a B2B WhatsApp chatbot platform using Laravel, React, Tailwind CSS, MySQL, and GCP, integrated with Twilio. Built internal APIs for car service endpoints and integrated platforms like Parts Tech, Stripe, and Facturapi. Translated automotive industry requirements into technical specifications and implemented TDD and SCRUM methodologies.'),
         tech: ['Laravel', 'React', 'Tailwind CSS', 'MySQL', 'GCP', 'Twilio', 'Stripe', 'PHPUnit'],
-        highlights: ['Led technical direction of B2B WhatsApp chatbot', 'Integrated Stripe, Twilio, Parts Tech & Facturapi', 'Implemented TDD (PHPUnit) and SCRUM workflows']
+        highlights: [__('Led technical direction of B2B WhatsApp chatbot'), __('Integrated Stripe, Twilio, Parts Tech & Facturapi'), __('Implemented TDD (PHPUnit) and SCRUM workflows')]
     },
     {
-        role: 'Associate Software Engineer',
+        role: __('Associate Software Engineer'),
         company: 'Justia',
         companyUrl: 'https://www.linkedin.com/company/justia/',
         period: 'Jun 2019 – Jan 2022',
         location: 'Remote',
-        description: 'Built Laravel data parsers to process US government website information for high-traffic platforms including Justia.com and Oyez.org via AWS. Managed technical execution of large-scale email marketing campaigns (Mailchimp, Mandrill, Mailgun). Conducted peer code reviews and resolved complex backend issues for Jurispro.com.',
+        description: __('Built Laravel data parsers to process US government website information for high-traffic platforms including Justia.com and Oyez.org via AWS. Managed technical execution of large-scale email marketing campaigns (Mailchimp, Mandrill, Mailgun). Conducted peer code reviews and resolved complex backend issues for Jurispro.com.'),
         tech: ['Laravel', 'PHP', 'AWS', 'Mailchimp', 'Mandrill', 'Mailgun', 'MySQL'],
-        highlights: ['Built data parsers for Justia.com & Oyez.org on AWS', 'Managed large-scale email marketing infrastructure', 'Peer code reviews for Jurispro.com backend']
+        highlights: [__('Built data parsers for Justia.com & Oyez.org on AWS'), __('Managed large-scale email marketing infrastructure'), __('Peer code reviews for Jurispro.com backend')]
     }
 ];
 
@@ -104,6 +105,7 @@ const techStack = [
 export default function About() {
     const [selectedExp, setSelectedExp] = useState(null);
     const { __ } = useLanguage();
+    const experiences = getExperiences(__);
 
     const fadeIn = {
         initial: { opacity: 0, y: 20 },
@@ -113,13 +115,12 @@ export default function About() {
 
     return (
         <div className="min-h-screen bg-[#f8f6f6] dark:bg-[#02040a] text-gray-900 dark:text-white font-sans selection:bg-primary/30 overflow-x-hidden relative transition-colors duration-500">
-            <Head title="Carlos Silveira | Full-Stack & AI Engineer" />
+            <Head title={`${__('Carlos Silveira')} | ${__('Full-Stack & AI Engineer')}`} />
 
             {/* Glowing Background */}
             <div className="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-primary/8 rounded-full blur-[120px] pointer-events-none mix-blend-screen overflow-hidden"></div>
             <div className="fixed bottom-[-10%] right-[-10%] w-[40vw] h-[40vw] bg-purple-600/8 rounded-full blur-[100px] pointer-events-none mix-blend-screen overflow-hidden"></div>
 
-            {/* Navbar */}
             <Navbar />
 
             <main className="max-w-7xl mx-auto px-6 py-32 relative z-10">
@@ -132,12 +133,12 @@ export default function About() {
                         className="md:col-span-3 bg-white/[0.6] dark:bg-white/[0.03] border border-black/5 dark:border-white/10 rounded-[2.5rem] p-10 flex flex-col justify-center relative overflow-hidden group shadow-sm dark:shadow-none transition-all duration-500"
                     >
                         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[60px] -mr-32 -mt-32 transition-transform duration-700 group-hover:scale-110"></div>
-                        <div className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-4">Portfolio</div>
+                        <div className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-4">{__('Portfolio')}</div>
                         <h1 className="text-4xl md:text-6xl font-black tracking-tighter mb-4">
-                            Hi, I'm <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-400">Carlos Silveira.</span>
+                            {__("Hi, I'm")} <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-400">{__('Carlos Silveira.')}</span>
                         </h1>
                         <p className="text-xl text-gray-600 dark:text-gray-400 font-light leading-relaxed max-w-2xl">
-                            Senior Software Engineer with 6+ years shipping Laravel and React products. I write clean backends, build real-time UIs, and integrate AI where it actually makes a difference.
+                            {__('Senior Software Engineer with 6+ years shipping Laravel and React products. I write clean backends, build real-time UIs, and integrate AI where it actually makes a difference.')}
                         </p>
                     </motion.div>
 
@@ -147,7 +148,7 @@ export default function About() {
                         transition={{ delay: 0.1 }}
                         className="md:col-span-1 bg-white/[0.6] dark:bg-white/[0.03] border border-black/5 dark:border-white/10 rounded-[2.5rem] p-8 flex flex-col justify-between shadow-sm dark:shadow-none transition-all duration-500"
                     >
-                        <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.25em] mb-6">Connect</h3>
+                        <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.25em] mb-6">{__('Connect')}</h3>
                         <div className="grid grid-cols-1 gap-3">
                             {[
                                 { icon: <Github className="w-5 h-5" />, label: 'GitHub', href: 'https://github.com/carlos-silveira' },
@@ -170,7 +171,7 @@ export default function About() {
                     >
                         <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-primary/5 to-transparent pointer-events-none"></div>
                         <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.25em] mb-8 flex items-center gap-2 relative z-10">
-                            The Arsenal
+                            {__('The Arsenal')}
                         </h3>
                         <div className="grid grid-cols-2 gap-3 relative z-10">
                             {techStack.map((tech, i) => (
@@ -186,10 +187,10 @@ export default function About() {
                         className="md:col-span-2 bg-white/[0.6] dark:bg-white/[0.03] border border-black/5 dark:border-white/10 rounded-[2.5rem] p-10 relative overflow-hidden group flex flex-col justify-center shadow-sm dark:shadow-none transition-all duration-500"
                     >
                         <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-colors"></div>
-                        <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.25em] mb-6">The Concept</h3>
-                        <h2 className="text-3xl font-black mb-4 tracking-tight text-gray-900 dark:text-white">What is Techy?</h2>
-                        <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed font-light transition-colors">
-                            Techy is an <span className="text-gray-900 dark:text-white font-black transition-colors">AI-powered news ecosystem</span> designed to redefine information consumption. It merges high-performance web architecture with advanced language models to deliver a personalized, lightning-fast, and deeply immersive experience for the next generation of tech enthusiasts.
+                        <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.25em] mb-6">{__('The Concept')}</h3>
+                        <h2 className="text-3xl font-black mb-4 tracking-tight text-gray-900 dark:text-white">{__('What is Techy?')}</h2>
+                        <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed font-light transition-colors text-pretty text-balance">
+                            {__('Techy is an')} <span className="text-gray-900 dark:text-white font-black transition-colors">{__('AI-powered news ecosystem')}</span> {__('designed to redefine information consumption. It merges high-performance web architecture with advanced language models to deliver a personalized, lightning-fast, and deeply immersive experience for the next generation of tech enthusiasts.')}
                         </p>
                     </motion.div>
 
@@ -199,7 +200,7 @@ export default function About() {
                         transition={{ delay: 0.3 }}
                         className="md:col-span-2 bg-white/[0.6] dark:bg-white/[0.03] border border-black/5 dark:border-white/10 rounded-[2.5rem] p-10 relative overflow-hidden group shadow-sm dark:shadow-none transition-all duration-500"
                     >
-                        <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.25em] mb-8">Experience</h3>
+                        <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.25em] mb-8">{__('Experience')}</h3>
                         <div className="space-y-4">
                             {experiences.map((exp, i) => (
                                 <button
@@ -207,18 +208,18 @@ export default function About() {
                                     onClick={() => setSelectedExp(exp)}
                                     className="w-full text-left flex items-center justify-between p-5 rounded-2xl bg-black/[0.01] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 hover:border-primary/30 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all group/exp"
                                 >
-                                    <div>
-                                        <div className="font-black text-gray-900 dark:text-white text-sm tracking-tight group-hover/exp:text-primary transition-colors">{exp.role}</div>
-                                        <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1 flex items-center gap-2">
-                                            <Briefcase className="w-3 h-3" />{exp.company}
+                                    <div className="min-w-0 flex-1 pr-4">
+                                        <div className="font-black text-gray-900 dark:text-white text-sm tracking-tight group-hover/exp:text-primary transition-colors truncate">{exp.role}</div>
+                                        <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1 flex items-center gap-2 truncate">
+                                            <Briefcase className="w-3 h-3 flex-shrink-0" />{exp.company}
                                         </div>
                                     </div>
-                                    <div className="text-right flex-shrink-0 ml-4">
-                                        <div className="text-[10px] font-black text-gray-600 uppercase tracking-widest flex items-center gap-1">
+                                    <div className="text-right flex-shrink-0 flex flex-col items-end">
+                                        <div className="text-[10px] font-black text-gray-600 uppercase tracking-widest flex items-center gap-1 whitespace-nowrap">
                                             <Calendar className="w-3 h-3" />{exp.period}
                                         </div>
                                         <div className="mt-1.5 text-[10px] font-black text-primary opacity-0 group-hover/exp:opacity-100 transition-opacity uppercase tracking-widest">
-                                            View Details →
+                                            {__('View Details')} →
                                         </div>
                                     </div>
                                 </button>
@@ -233,12 +234,12 @@ export default function About() {
                         className="md:col-span-2 bg-white/[0.6] dark:bg-white/[0.03] border border-black/5 dark:border-white/10 rounded-[2.5rem] p-10 flex items-center gap-8 group shadow-sm dark:shadow-none transition-all duration-500"
                     >
                         <div className="w-20 h-20 shrink-0 rounded-2xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-2xl group-hover:rotate-6 transition-transform duration-500">
-                            <img src="/img/logo_wbc.png" alt="Techy News" className="w-14 h-14 object-contain" />
+                            <img src="/img/logo_wbc.png" alt="Techy News" className="w-14 h-14 object-contain dark:brightness-100 brightness-0" />
                         </div>
-                        <div>
-                            <h3 className="text-2xl font-black mb-2 tracking-tight text-gray-900 dark:text-white">Techy News CMS</h3>
-                            <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
-                                A fully functional AI-powered journalism platform prototype. Features on-device summarization, command palette search, and infinite scroll discovery.
+                        <div className="min-w-0">
+                            <h3 className="text-2xl font-black mb-2 tracking-tight text-gray-900 dark:text-white truncate">{__('Techy News CMS')}</h3>
+                            <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed line-clamp-3">
+                                {__('A fully functional AI-powered journalism platform prototype. Features on-device summarization, command palette search, and infinite scroll discovery.')}
                             </p>
                             <Link href="/archive" className="inline-flex items-center mt-4 text-primary text-[10px] font-black uppercase tracking-widest hover:text-black dark:hover:text-white transition-colors gap-2">
                                 {__('Explore the Platform')} <ExternalLink className="w-3 h-3" />
@@ -252,8 +253,8 @@ export default function About() {
                         transition={{ delay: 0.4 }}
                         className="md:col-span-4 bg-black dark:bg-white text-white dark:text-black rounded-[2.5rem] p-10 flex flex-col justify-center items-center text-center group cursor-pointer hover:scale-[1.01] transition-all duration-500"
                     >
-                        <h2 className="text-4xl font-black tracking-tight mb-2 text-white dark:text-black">{__('Have a radical idea?')}</h2>
-                        <p className="text-xl text-gray-400 dark:text-gray-600 mb-8 font-medium max-w-xl">{__("Let's build the next era of digital intelligence together. I'm always open to discussing technical challenges and ambitious products.")}</p>
+                        <h2 className="text-4xl font-black tracking-tight mb-2">{__('Have a radical idea?')}</h2>
+                        <p className="text-xl text-gray-400 dark:text-gray-600 mb-8 font-medium max-w-xl text-pretty">{__("Let's build the next era of digital intelligence together. I'm always open to discussing technical challenges and ambitious products.")}</p>
                         <a href="mailto:hello@carlossilveira.com" className="px-10 py-4 bg-white dark:bg-black text-black dark:text-white rounded-2xl font-black flex items-center gap-3 hover:scale-105 transition-transform text-base shadow-2xl">
                             {__('Get in Touch')} <Mail className="w-5 h-5" />
                         </a>
@@ -261,7 +262,6 @@ export default function About() {
                 </div>
             </main>
 
-            {/* Footer */}
             <footer className="border-t border-black/5 dark:border-white/5 py-12 relative z-10 transition-colors duration-500">
                 <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
                     <img src="/img/logo_wbc.png" alt="Techy News" className="h-7 w-auto opacity-50 hover:opacity-100 transition-opacity dark:brightness-100 brightness-0" />
@@ -274,72 +274,74 @@ export default function About() {
                 </div>
             </footer>
 
-            {/* ─── Experience Modal ─────────────────────────────────── */}
+            {/* ─── Experience Modal ─── */}
             <AnimatePresence>
                 {selectedExp && (
-                    <>
+                    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-6 overflow-hidden">
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={() => setSelectedExp(null)}
-                            className="fixed inset-0 bg-black/70 backdrop-blur-md z-[9999]"
+                            className="absolute inset-0 bg-black/80 backdrop-blur-md"
                         />
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.95, y: 30 }}
+                            initial={{ opacity: 0, scale: 0.9, y: 40 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: 30 }}
-                            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] max-w-2xl bg-white dark:bg-[#02040a] border border-black/10 dark:border-white/10 rounded-3xl shadow-[0_30px_80px_rgba(0,0,0,0.8)] z-[10000] overflow-hidden flex flex-col max-h-[90vh]"
+                            exit={{ opacity: 0, scale: 0.9, y: 40 }}
+                            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                            className="relative w-full max-w-2xl bg-white dark:bg-[#02040a] border border-black/10 dark:border-white/10 rounded-[2.5rem] shadow-[0_30px_100px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col max-h-[85vh] md:max-h-[90vh]"
                         >
                             {/* Modal Header */}
-                            <div className="flex items-start justify-between p-8 border-b border-black/5 dark:border-white/5 flex-shrink-0">
-                                <div>
+                            <div className="flex items-start justify-between p-8 md:p-10 border-b border-black/5 dark:border-white/5 flex-shrink-0 bg-white/50 dark:bg-white/[0.02] backdrop-blur-sm">
+                                <div className="min-w-0 pr-6">
                                     <div className="text-[10px] font-black text-primary uppercase tracking-[0.25em] mb-2">{__('Experience')}</div>
-                                    <h2 className="text-2xl font-black tracking-tight text-gray-900 dark:text-white">{selectedExp.role}</h2>
-                                    <div className="flex flex-wrap items-center gap-3 mt-2">
-                                        <a href={selectedExp.companyUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-gray-400 font-bold flex items-center gap-1.5 hover:text-primary transition-colors group">
+                                    <h2 className="text-2xl md:text-3xl font-black tracking-tight text-gray-900 dark:text-white truncate">{selectedExp.role}</h2>
+                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-3">
+                                        <a href={selectedExp.companyUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-gray-500 font-bold flex items-center gap-1.5 hover:text-primary transition-colors group">
                                             <Briefcase className="w-4 h-4" />
                                             {selectedExp.company}
                                             <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                                         </a>
-                                        <span className="text-[10px] text-gray-600 font-black uppercase tracking-widest flex items-center gap-1">
-                                            <Calendar className="w-3 h-3" />{selectedExp.period}
+                                        <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest flex items-center gap-1.5 whitespace-nowrap">
+                                            <Calendar className="w-3.5 h-3.5" />{selectedExp.period}
                                         </span>
-                                        <span className="text-[10px] text-gray-600 font-black uppercase tracking-widest flex items-center gap-1">
-                                            <MapPin className="w-3 h-3" />{selectedExp.location}
+                                        <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest flex items-center gap-1.5 whitespace-nowrap">
+                                            <MapPin className="w-3.5 h-3.5" />{selectedExp.location}
                                         </span>
                                     </div>
                                 </div>
                                 <button
                                     onClick={() => setSelectedExp(null)}
-                                    className="w-10 h-10 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 flex items-center justify-center transition-colors text-gray-400 hover:text-white"
+                                    className="w-12 h-12 rounded-2xl bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 flex items-center justify-center transition-all group flex-shrink-0"
                                 >
-                                    <X className="w-5 h-5" />
+                                    <X className="w-6 h-6 text-gray-400 group-hover:text-black dark:group-hover:text-white transition-colors" />
                                 </button>
                             </div>
 
                             {/* Modal Body */}
-                            <div className="p-8 space-y-6 overflow-y-auto">
-                                <p className="text-gray-600 dark:text-gray-400 font-light leading-relaxed">{selectedExp.description}</p>
-
+                            <div className="p-8 md:p-10 space-y-8 overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 hover:scrollbar-thumb-primary/40 scrollbar-track-transparent">
                                 <div>
-                                    <div className="text-[10px] font-black text-gray-600 uppercase tracking-[0.25em] mb-3">{__('Key Highlights')}</div>
-                                    <ul className="space-y-2">
+                                    <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 font-light leading-relaxed text-pretty">{selectedExp.description}</p>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.25em]">{__('Key Highlights')}</div>
+                                    <ul className="space-y-3">
                                         {selectedExp.highlights.map((h, i) => (
-                                            <li key={i} className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300 font-light">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0"></span>
+                                            <li key={i} className="flex items-start gap-4 text-base md:text-lg text-gray-700 dark:text-gray-300 font-light leading-snug">
+                                                <span className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0 shadow-[0_0_10px_rgba(43,124,238,0.5)]"></span>
                                                 {h}
                                             </li>
                                         ))}
                                     </ul>
                                 </div>
 
-                                <div>
-                                    <div className="text-[10px] font-black text-gray-600 uppercase tracking-[0.25em] mb-3">{__('Tech Stack')}</div>
-                                    <div className="flex flex-wrap gap-2">
+                                <div className="space-y-4 pt-2 pb-4">
+                                    <div className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.25em]">{__('Tech Stack')}</div>
+                                    <div className="flex flex-wrap gap-2.5">
                                         {selectedExp.tech.map((t, i) => (
-                                            <span key={i} className="text-[10px] font-black uppercase tracking-widest bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 text-gray-600 dark:text-gray-400 px-3 py-1.5 rounded-lg">
+                                            <span key={i} className="text-[10px] font-black uppercase tracking-widest bg-primary/5 dark:bg-primary/10 border border-primary/10 text-primary px-4 py-2 rounded-xl">
                                                 {t}
                                             </span>
                                         ))}
@@ -347,7 +349,7 @@ export default function About() {
                                 </div>
                             </div>
                         </motion.div>
-                    </>
+                    </div>
                 )}
             </AnimatePresence>
         </div>
@@ -379,13 +381,13 @@ function InteractiveCard({ tech }) {
         >
             <div
                 style={{ transform: "translateZ(30px)" }}
-                className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-xl bg-gradient-to-br ${tech.color} to-transparent flex-shrink-0`}
+                className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-xl bg-gradient-to-br ${tech.color} to-transparent flex-shrink-0 overflow-hidden`}
             >
                 {tech.logo}
             </div>
             <span
                 style={{ transform: "translateZ(20px)" }}
-                className="font-black text-sm text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors tracking-tight"
+                className="font-black text-sm text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors tracking-tight truncate"
             >
                 {tech.name}
             </span>
