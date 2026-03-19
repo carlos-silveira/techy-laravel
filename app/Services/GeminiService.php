@@ -170,6 +170,7 @@ TONE:
 
 ABSOLUTE PROHIBITIONS:
 - NO markdown syntax of any kind — HTML only
+- NO JSON formatted content — even if returned as a string
 - NO code fences wrapping your entire response  
 - NO <h1> or <title> tags (title is handled separately)
 - NO self-promotional language about AI or 'as an AI'
@@ -414,5 +415,70 @@ Return exactly a JSON object (no markdown fences):
             if (is_array($decoded)) return $decoded;
         }
         return [];
+    }
+
+    /**
+     * Convert TipTap/ProseMirror JSON structure to raw HTML.
+     */
+    public function tipTapToHtml(array $node): string
+    {
+        if (!isset($node['type'])) {
+            return '';
+        }
+
+        if ($node['type'] === 'text') {
+            $text = $node['text'] ?? '';
+            if (isset($node['marks'])) {
+                foreach ($node['marks'] as $mark) {
+                    if ($mark['type'] === 'bold') {
+                        $text = "<strong>{$text}</strong>";
+                    }
+                    if ($mark['type'] === 'italic') {
+                        $text = "<em>{$text}</em>";
+                    }
+                    if ($mark['type'] === 'code') {
+                        $text = "<code>{$text}</code>";
+                    }
+                    if ($mark['type'] === 'link' && isset($mark['attrs']['href'])) {
+                        $text = "<a href=\"{$mark['attrs']['href']}\">{$text}</a>";
+                    }
+                }
+            }
+            return $text;
+        }
+
+        $html = '';
+        if (isset($node['content']) && is_array($node['content'])) {
+            foreach ($node['content'] as $child) {
+                $html .= $this->tipTapToHtml($child);
+            }
+        }
+
+        switch ($node['type']) {
+            case 'doc':
+                return $html;
+            case 'paragraph':
+                return "<p>{$html}</p>\n";
+            case 'heading':
+                $level = $node['attrs']['level'] ?? 2;
+                return "<h{$level}>{$html}</h{$level}>\n";
+            case 'bulletList':
+                return "<ul>\n{$html}</ul>\n";
+            case 'orderedList':
+                return "<ol>\n{$html}</ol>\n";
+            case 'listItem':
+                return "<li>{$html}</li>\n";
+            case 'blockquote':
+                return "<blockquote>\n<p>{$html}</p>\n</blockquote>\n";
+            case 'codeBlock':
+                $language = $node['attrs']['language'] ?? '';
+                return "<pre><code class=\"language-{$language}\">{$html}</code></pre>\n";
+            case 'horizontalRule':
+                return "<hr />\n";
+            case 'hardBreak':
+                return "<br />\n";
+            default:
+                return $html;
+        }
     }
 }

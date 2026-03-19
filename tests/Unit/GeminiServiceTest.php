@@ -178,4 +178,35 @@ class GeminiServiceTest extends TestCase
 
         $this->assertEquals('test', $meta['summary']);
     }
+
+    /** @test */
+    public function it_converts_tiptap_json_to_html()
+    {
+        $json = [
+            'type' => 'doc',
+            'content' => [
+                [
+                    'type' => 'heading',
+                    'attrs' => ['level' => 2],
+                    'content' => [['type' => 'text', 'text' => 'Hello World']]
+                ],
+                [
+                    'type' => 'paragraph',
+                    'content' => [
+                        ['type' => 'text', 'text' => 'This is '],
+                        ['type' => 'text', 'marks' => [['type' => 'bold']], 'text' => 'bold'],
+                        ['type' => 'text', 'text' => ' and '],
+                        ['type' => 'text', 'marks' => [['type' => 'italic']], 'text' => 'italic'],
+                        ['type' => 'text', 'text' => '.']
+                    ]
+                ]
+            ]
+        ];
+
+        $service = new GeminiService();
+        $html = $service->tipTapToHtml($json);
+
+        $this->assertStringContainsString('<h2>Hello World</h2>', $html);
+        $this->assertStringContainsString('<p>This is <strong>bold</strong> and <em>italic</em>.</p>', $html);
+    }
 }

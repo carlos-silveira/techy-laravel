@@ -78,6 +78,10 @@ export default function ArticleShow({ article, relatedArticles }) {
                         content = parsed;
                         continue;
                     }
+                    // If it's a TipTap object, return null so we use the renderer
+                    if (parsed && typeof parsed === 'object' && parsed.type === 'doc') {
+                        return null;
+                    }
                     break;
                 } catch {
                     break;
@@ -198,7 +202,9 @@ export default function ArticleShow({ article, relatedArticles }) {
                         {cleanHtml ? (
                             <div dangerouslySetInnerHTML={{ __html: cleanHtml }} />
                         ) : (
-                            <TipTapRenderer content={article.content} />
+                            <TipTapRenderer content={typeof article.content === 'string' ? (() => { 
+                                try { return JSON.parse(article.content); } catch { return article.content; }
+                            })() : article.content} />
                         )}
                     </div>
                 </motion.article>
