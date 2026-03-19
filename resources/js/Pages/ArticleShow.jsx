@@ -154,7 +154,7 @@ export default function ArticleShow({ article, relatedArticles }) {
                         <div className="flex items-center gap-3 text-primary font-black uppercase tracking-[0.2em] text-[10px] mb-6">
                             <BookOpen className="w-4 h-4" /> Synthesized Discovery
                         </div>
-                        <h1 className="text-5xl md:text-7xl font-black tracking-tighter mb-8 leading-[0.9] text-black dark:text-white transition-colors">
+                        <h1 className="text-4xl md:text-6xl font-black tracking-tighter mb-8 leading-[0.9] text-black dark:text-white transition-colors">
                             {article.title}
                         </h1>
                         <div className="flex items-center space-x-6 text-xs font-black uppercase tracking-widest text-gray-500">
@@ -198,7 +198,7 @@ export default function ArticleShow({ article, relatedArticles }) {
                         </div>
                     )}
 
-                    <div className="prose dark:prose-invert prose-primary max-w-none prose-xl prose-headings:font-black prose-headings:tracking-tighter prose-headings:text-black dark:prose-headings:text-white prose-p:text-gray-600 dark:prose-p:text-gray-400 prose-p:font-light prose-p:leading-relaxed prose-strong:text-black dark:prose-strong:text-white prose-a:text-primary hover:prose-a:text-black dark:hover:prose-a:text-white prose-code:text-emerald-600 dark:prose-code:text-emerald-400 prose-pre:bg-black/[0.02] dark:prose-pre:bg-white/[0.03] prose-pre:border prose-pre:border-black/5 dark:prose-pre:border-white/10 prose-pre:rounded-2xl transition-colors">
+                    <div className="prose dark:prose-invert prose-primary max-w-none prose-lg prose-headings:font-black prose-headings:tracking-tighter prose-headings:text-black dark:prose-headings:text-white prose-p:text-gray-600 dark:prose-p:text-gray-400 prose-p:font-light prose-p:leading-relaxed prose-strong:text-black dark:prose-strong:text-white prose-a:text-primary hover:prose-a:text-black dark:hover:prose-a:text-white prose-code:text-emerald-600 dark:prose-code:text-emerald-400 prose-pre:bg-gray-100 dark:prose-pre:bg-white/[0.03] prose-pre:border prose-pre:border-black/10 dark:prose-pre:border-white/10 prose-pre:rounded-2xl transition-colors">
                         {cleanHtml ? (
                             <div dangerouslySetInnerHTML={{ __html: cleanHtml }} />
                         ) : (
@@ -249,12 +249,13 @@ export default function ArticleShow({ article, relatedArticles }) {
             </main>
 
             <footer className="border-t border-black/5 dark:border-white/5 py-12 mt-20 relative z-10 transition-colors duration-500">
-                <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between text-[10px] text-gray-500 dark:text-gray-600 font-black uppercase tracking-widest">
-                    <p>© 2026 Carlos Silveira. All rights reserved.</p>
-                    <div className="flex space-x-8 mt-4 md:mt-0">
-                        <Link href="/" className="hover:text-black dark:hover:text-white transition-colors">Home</Link>
-                        <Link href="/archive" className="hover:text-black dark:hover:text-white transition-colors">Archive</Link>
-                        <a href="https://github.com/carlos-silveira" className="hover:text-black dark:hover:text-white transition-colors capitalize">GitHub</a>
+                <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <img src="/img/logo_wbc.png" alt="Techy News" className="h-7 w-auto opacity-50 hover:opacity-100 transition-opacity dark:brightness-100 brightness-0" />
+                    <p className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-700">© 2026 Carlos Silveira</p>
+                    <div className="flex space-x-8">
+                        <Link href="/" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors">Home</Link>
+                        <Link href="/archive" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors">Archive</Link>
+                        <a href="https://github.com/carlos-silveira" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors">GitHub</a>
                     </div>
                 </div>
             </footer>
@@ -293,7 +294,7 @@ const TipTapRenderer = ({ content }) => {
                 return <p key={index} className="mb-8">{node.content?.map((n, i) => renderNode(n, i))}</p>;
             case 'heading':
                 const Tag = `h${node.attrs?.level || 2}`;
-                const levelClasses = node.attrs?.level === 1 ? 'text-5xl' : node.attrs?.level === 2 ? 'text-4xl' : 'text-3xl';
+                const levelClasses = node.attrs?.level === 1 ? 'text-4xl' : node.attrs?.level === 2 ? 'text-3xl' : 'text-2xl';
                 return <Tag key={index} className={`font-black mt-16 mb-6 tracking-tighter leading-tight text-black dark:text-white ${levelClasses}`}>{node.content?.map((n, i) => renderNode(n, i))}</Tag>;
             case 'bulletList':
                 return <ul key={index} className="list-disc pl-8 mb-8 space-y-4">{node.content?.map((n, i) => renderNode(n, i))}</ul>;
@@ -309,8 +310,8 @@ const TipTapRenderer = ({ content }) => {
                         <div className="absolute -top-3 left-6 px-3 py-1 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-lg z-10 shadow-lg shadow-primary/20">
                             {node.attrs?.language || 'code'}
                         </div>
-                        <pre className="bg-black/5 dark:bg-white/[0.03] p-8 pt-10 rounded-[1.5rem] border border-black/5 dark:border-white/10 mb-8 overflow-auto group-hover:border-primary/30 transition-all duration-500 scrollbar-thin scrollbar-thumb-primary/20">
-                            <code className={`language-${node.attrs?.language} text-sm leading-relaxed block whitespace-pre`}>
+                        <pre className="bg-gray-100 dark:bg-white/[0.03] p-8 pt-10 rounded-[1.5rem] border border-black/10 dark:border-white/10 mb-8 overflow-auto group-hover:border-primary/30 transition-all duration-500 scrollbar-thin scrollbar-thumb-primary/20">
+                            <code className={`language-${node.attrs?.language} text-sm text-gray-900 dark:text-gray-300 leading-relaxed block whitespace-pre`}>
                                 {codeContent}
                             </code>
                         </pre>

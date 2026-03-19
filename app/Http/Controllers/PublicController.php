@@ -40,8 +40,8 @@ class PublicController extends Controller
 
         $articles = Cache::remember("homepage_articles_{$locale}", 3600, function () use ($locale) {
             $articles = Article::where('status', 'published')
-                ->where('is_editors_choice', false)
                 ->orderBy('created_at', 'desc')
+                ->take(10)
                 ->get();
 
             return $articles->map(fn($a) => $this->translateIfNecessary($a, $locale));
