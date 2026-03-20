@@ -42,6 +42,12 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/articles/{id}', [ArticleController::class, 'destroy'])->name('articles.destroy');
     Route::post('/articles/{id}/publish', [ArticleController::class, 'publish'])->name('articles.publish');
 
+    // Maintenance / Fix Tools
+    Route::get('/maintenance/fix-encoding', function () {
+        \Illuminate\Support\Facades\Artisan::call('article:fix-encoding');
+        return "Fix command executed. Result: <pre>" . \Illuminate\Support\Facades\Artisan::output() . "</pre>";
+    })->name('maintenance.fix-encoding');
+
     // Media Uploads
     Route::post('/upload-image', [ImageUploadController::class, 'store'])->name('image.upload');
 });

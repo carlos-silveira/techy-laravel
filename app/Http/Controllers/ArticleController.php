@@ -80,6 +80,10 @@ class ArticleController extends Controller
         
         $this->fillArticle($article, $validated);
         $article->title = $title;
+        
+        // Clear translations so they are re-generated with the new content
+        $article->translations = [];
+        
         $article->save();
 
         Cache::flush();
@@ -108,7 +112,17 @@ class ArticleController extends Controller
     private function fillArticle(Article $article, array $validated)
     {
         $article->title = $validated['title'];
-        $article->content = $validated['content'];
+        
+        // Clean up content from potential double encoding from the frontend
+        $content = $validated['content'];
+        if (is_string($content)) {
+            // If it's a string that starts with escaped quotes, try to unwrap it once
+            if (str_starts_with($content, '\"') && str_ends_with($content, '\"')) {
+                $content = stripslashes(trim($content, '\"'));
+            }
+        }
+        $article->content = $content;
+
         $article->status = ($validated['is_published'] ?? false) ? 'published' : 'draft';
         $article->is_editors_choice = $validated['is_editors_choice'] ?? false;
         $article->cover_image_path = $validated['cover_image_path'] ?? null;
