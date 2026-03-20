@@ -63,7 +63,7 @@ class GeminiServiceTest extends TestCase
     }
 
     /** @test */
-    public function it_generates_a_draft_article()
+    public function it_generates_a_draft_article_as_array()
     {
         config(['services.gemini.api_key' => 'test-key']);
 
@@ -72,7 +72,7 @@ class GeminiServiceTest extends TestCase
                 'candidates' => [[
                     'content' => [
                         'parts' => [[
-                            'text' => '<h2>Test Article</h2><p>This is a test draft.</p>'
+                            'text' => '{"titular": "Refactored Title", "tldr_twitter": "Short summary", "cuerpo_noticia": "<p>Content</p>", "categoria_principal": "Artificial Intelligence"}'
                         ]]
                     ]
                 ]]
@@ -80,10 +80,12 @@ class GeminiServiceTest extends TestCase
         ]);
 
         $service = new GeminiService();
-        $draft = $service->generateDraft('Test Title', 'A test prompt', []);
+        $result = $service->generateDraft('Test Title', 'A test prompt', []);
 
-        $this->assertIsString($draft);
-        $this->assertStringContainsString('<h2>Test Article</h2>', $draft);
+        $this->assertIsArray($result);
+        $this->assertEquals('Refactored Title', $result['titular']);
+        $this->assertEquals('Short summary', $result['tldr_twitter']);
+        $this->assertEquals('Artificial Intelligence', $result['categoria_principal']);
     }
 
     /** @test */
@@ -142,7 +144,7 @@ class GeminiServiceTest extends TestCase
     }
 
     /** @test */
-    public function it_handles_gemini_api_errors_gracefully()
+    public function it_handles_gemini_api_errors_gracefully_by_throwing_on_non_json_requests()
     {
         config(['services.gemini.api_key' => 'test-key']);
 
@@ -153,7 +155,34 @@ class GeminiServiceTest extends TestCase
         $service = new GeminiService();
 
         $this->expectException(\RuntimeException::class);
-        $service->generateDraft('Test', 'Prompt', []);
+        // regenerateDraft calls callGemini with expectJson = false, so it should throw
+        $service->regenerateDraft('Test', 'Prompt', 'Feedback', 'Old');
+    }
+
+    /** @test */
+    public function it_generates_daily_brief()
+    {
+        config(['services.gemini.api_key' => 'test-key']);
+
+        Http::fake([
+            'generativelanguage.googleapis.com/*' => Http::response([
+                'candidates' => [[
+                    'content' => [
+                        'parts' => [[
+                            'text' => 'This is a daily brief summary.'
+                        ]]
+                    ]
+                ]]
+            ], 200)
+        ]);
+
+        $service = new GeminiService();
+        $brief = $service->generateDailyBrief([
+            ['title' => 'News 1', 'description' => 'Desc 1', 'source' => 'Test']
+        ]);
+
+        $this->assertIsString($brief);
+        $this->assertEquals('This is a daily brief summary.', $brief);
     }
 
     /** @test */
