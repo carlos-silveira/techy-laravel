@@ -73,7 +73,8 @@ class AiController extends Controller
                 'draft' => $html,
                 'title' => $result['titular'],
                 'summary' => $result['tldr_twitter'],
-                'image_prompt' => $result['sugerencia_imagen']
+                'image_prompt' => $result['sugerencia_imagen'],
+                'category' => $result['categoria_principal']
             ]);
         } catch (\RuntimeException $e) {
             return response()->json(['error' => $e->getMessage()], 503);

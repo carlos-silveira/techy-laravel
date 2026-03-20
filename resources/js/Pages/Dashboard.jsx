@@ -77,7 +77,8 @@ function WizardView({ onComplete, onSwitchToEditor }) {
                     ...prev,
                     summary: res.data.summary,
                     meta_description: res.data.summary.substring(0, 155),
-                    image_prompt: res.data.image_prompt || ''
+                    image_prompt: res.data.image_prompt || '',
+                    tags: res.data.category ? [res.data.category] : []
                 }));
             }
 

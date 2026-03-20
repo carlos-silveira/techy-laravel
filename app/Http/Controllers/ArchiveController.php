@@ -48,17 +48,15 @@ class ArchiveController extends Controller
             return $paginator;
         });
 
-        // Fetch top tags for the UI
-        $popularTags = Cache::remember('archive_popular_tags', 3600, function () {
-            return Article::where('status', 'published')
-                ->whereNotNull('tags')
-                ->pluck('tags')
-                ->flatten()
-                ->countBy()
-                ->sortDesc()
-                ->take(15)
-                ->keys();
-        });
+        // Fetch top tags for the UI, prioritizing official categories
+        $officialTags = [
+            'Artificial Intelligence', 'Gadgets & Hardware', 'Software & Apps', 
+            'Cybersecurity & Privacy', 'Business Tech', 'Gaming', 
+            'Mobility & Transport', 'Science & Space', 'Culture & Social Media', 
+            'Crypto & Web3', 'Reviews', 'Tutorials & Guides', 'Deals', 'Opinion'
+        ];
+        
+        $popularTags = collect($officialTags);
 
         if ($request->wantsJson()) {
             return response()->json($articles);
