@@ -105,83 +105,45 @@ Return ONLY a JSON array, no markdown fences:
     /**
      * Generate a long-form, daily.dev-quality investigative article.
      */
-    public function generateDraft(string $title, string $ideaPrompt, array $newsItems): string
+    public function generateDraft(string $title, string $ideaPrompt, array $newsItems): array
     {
         $context = implode("\n", array_map(function ($n) {
             $source = $n['source'] ?? 'News';
             return "- [{$source}] {$n['title']}";
         }, $newsItems));
 
-        $prompt = "You are a senior investigative tech journalist writing for daily.dev — the #1 developer news platform with 1M+ daily readers.
+        $prompt = "Act as an Editor-in-Chief for a tech news site designed for 'people in a hurry'. Your audience wants to be informed without reading long, boring articles.
 
-ARTICLE TITLE: {$title}
+ARTICLE TOPIC: {$title}
 EDITORIAL BRIEF: {$ideaPrompt}
 TODAY'S NEWS CONTEXT:
 {$context}
 
-Write a LONG-FORM, deeply researched article of **1500-2000 words** in clean HTML.
+Generate a refactored version strictly following this JSON format:
+{
+  \"titular\": \"Catchy, direct headline. Max 12 words.\",
+  \"tldr_twitter\": \"Summary in under 280 characters. Impactful, independent context.\",
+  \"cuerpo_noticia\": \"2 to 3 short paragraphs (max 4 lines each). Direct, slightly sarcastic/entertaining but 100% informative. Explain 'why it matters' without fluff. Use basic Markdown (**bold**) for keywords.\",
+  \"snippet_codigo\": \"OPTIONAL. Include a code block ONLY if it adds real value (e.g., terminal command, API JSON, config). If business news, leave null. NO joke code.\",
+  \"lenguaje_snippet\": \"Language of the snippet (e.g., bash, json, python). Null if snippet is null.\",
+  \"sugerencia_imagen\": \"Short English prompt for a text-to-image model for the cover image. Descriptive and visually appealing.\"
+}
 
-MANDATORY STRUCTURE (follow this exact blueprint):
+RULES:
+- No corporate fluff or journalistic filler. Write like you're telling a developer colleague over coffee.
+- NO markdown fences around the response, output raw JSON only.";
 
-1. **THE HOOK** (2-3 sentences max):
-   - Start with a surprising stat, a bold claim, or a concrete scenario. Examples:
-     'Last Tuesday, a 23-line pull request broke 4,000 CI pipelines across GitHub.'
-     'The average React app now ships 2.1MB of JavaScript. Five years ago, it was 400KB.'
-   - NEVER open with 'In today's rapidly evolving...' or any variation. That's lazy journalism.
-
-2. **THE CONTEXT** (2-3 paragraphs):
-   - What happened? Why now? Connect today's news items into a narrative.
-   - Include at least ONE specific number, benchmark, or data point.
-   - Name real companies, tools, or people when relevant.
-
-3. **THE DEEP DIVE** — Use 3-5 <h2> sections. Each section header MUST be opinionated:
-   - ✅ 'The Hidden Cost of Microservices Nobody Talks About'
-   - ✅ 'Why Your Bundle Size Is Lying to You'
-   - ❌ 'Overview of Current Trends' (boring, rejected)
-   
-   In at least ONE section, include a practical code example:
-   <pre><code class=\"language-javascript\">// Wrap code in pre+code tags
-const example = 'like this';
-</code></pre>
-
-4. **THE COUNTERARGUMENT** (1-2 paragraphs):
-   - Steel-man the opposing view. Show intellectual honesty.
-   - 'To be fair, proponents of X argue that...'
-
-5. **THE PREDICTION** (final section):
-   - End with a bold, specific, time-bound prediction developers can hold you to.
-   - 'By Q4 2026, I predict X will Y. Here's what you should do NOW to prepare.'
-
-HTML RULES:
-- <h2> for section headers (never h1, never h3)
-- <p> for paragraphs (3-4 sentences max per paragraph)
-- <strong> for emphasis on key technical terms
-- <blockquote> for impactful quotes or 'Key Insight' boxes (use at least once)
-- <pre><code class=\"language-mermaid\">...</code></pre> for Mermaid.js diagrams (graph TD/LR) to explain patterns or concepts (at least once)
-- <figure><img src=\"PLACEHOLDER_IMAGE\" alt=\"Descriptive search term for Unsplash\"><figcaption>Relevant caption</figcaption></figure> (at least twice)
-- <pre><code> for code snippets (use at least once)
-- <ul><li> for comparison lists
-- <em> for secondary emphasis
-
-TONE:
-- Write like Wired meets Hacker News: technically precise but never boring
-- Take a CLEAR editorial stance — fence-sitting is lazy journalism
-- Use 'you' and 'your' to speak directly to developers
-- Include specific numbers: GitHub stars, npm downloads, benchmark results, funding amounts
-- Reference real tools, libraries, and frameworks by name
-
-ABSOLUTE PROHIBITIONS:
-- NO markdown syntax of any kind — HTML only
-- NO JSON formatted content — even if returned as a string
-- NO code fences wrapping your entire response  
-- NO <h1> or <title> tags (title is handled separately)
-- NO self-promotional language about AI or 'as an AI'
-- NO generic filler paragraphs — every sentence must carry information
-- Article MUST be at least 1500 words. Short articles are REJECTED.
-
-Output ONLY the raw HTML content. Nothing else.";
-
-        return $this->callGemini($prompt, false);
+        $result = $this->callGemini($prompt, true);
+        
+        // Ensure we always return the expected structure even if Gemini fails partially
+        return [
+            'titular' => $result['titular'] ?? $title,
+            'tldr_twitter' => $result['tldr_twitter'] ?? $ideaPrompt,
+            'cuerpo_noticia' => $result['cuerpo_noticia'] ?? 'Failed to generate content.',
+            'snippet_codigo' => $result['snippet_codigo'] ?? null,
+            'lenguaje_snippet' => $result['lenguaje_snippet'] ?? null,
+            'sugerencia_imagen' => $result['sugerencia_imagen'] ?? '',
+        ];
     }
 
     /**

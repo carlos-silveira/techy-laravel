@@ -68,6 +68,19 @@ function WizardView({ onComplete, onSwitchToEditor }) {
         try {
             const res = await axios.post('/api/generate-draft', { title, prompt });
             setDraft(res.data.draft || '');
+            
+            if (res.data.title) {
+                setSelectedIdea(prev => ({ ...prev, title: res.data.title }));
+            }
+            if (res.data.summary) {
+                setMeta(prev => ({
+                    ...prev,
+                    summary: res.data.summary,
+                    meta_description: res.data.summary.substring(0, 155),
+                    image_prompt: res.data.image_prompt || ''
+                }));
+            }
+
             setStep(2);
             toast.success('Article ready for review!');
         } catch (err) {
@@ -109,16 +122,21 @@ function WizardView({ onComplete, onSwitchToEditor }) {
                 title: selectedIdea.title, 
                 content: draft 
             });
-            setMeta(res.data.meta || {});
+            setMeta(prev => ({
+                ...prev,
+                ...res.data.meta,
+                summary: prev.summary || res.data.meta.summary
+            }));
             setStep(3);
         } catch {
             // Fallback meta
-            setMeta({ 
-                summary: draft.replace(/<[^>]*>/g, '').substring(0, 200),
-                meta_description: draft.replace(/<[^>]*>/g, '').substring(0, 155),
+            setMeta(prev => ({ 
+                ...prev,
+                summary: prev.summary || draft.replace(/<[^>]*>/g, '').substring(0, 200),
+                meta_description: prev.meta_description || draft.replace(/<[^>]*>/g, '').substring(0, 155),
                 seo_keywords: '',
                 tags: []
-            });
+            }));
             setStep(3);
         } finally {
             setIsLoading(false);

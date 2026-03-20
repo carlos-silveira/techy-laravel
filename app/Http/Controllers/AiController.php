@@ -46,12 +46,35 @@ class AiController extends Controller
 
         try {
             $news = $this->newsService->fetchTodayTechNews();
-            $draft = $this->geminiService->generateDraft(
+            $result = $this->geminiService->generateDraft(
                 $request->input('title'),
                 $request->input('prompt'),
                 $news
             );
-            return response()->json(['draft' => $draft]);
+
+            // Build HTML from result
+            $html = "";
+            $paragraphs = explode("\n", $result['cuerpo_noticia']);
+            foreach ($paragraphs as $p) {
+                $p = trim($p);
+                if (empty($p)) continue;
+                // simple bold replace
+                $p = preg_replace('/\*\*(.*?)\*\*/', '<strong>$1</strong>', $p);
+                $html .= "<p>{$p}</p>";
+            }
+            
+            if (!empty($result['snippet_codigo'])) {
+                $lang = $result['lenguaje_snippet'] ?? 'javascript';
+                // HTML special chars to prevent syntax breaking the editor
+                $html .= "<pre><code class=\"language-{$lang}\">" . htmlspecialchars($result['snippet_codigo']) . "</code></pre>";
+            }
+
+            return response()->json([
+                'draft' => $html,
+                'title' => $result['titular'],
+                'summary' => $result['tldr_twitter'],
+                'image_prompt' => $result['sugerencia_imagen']
+            ]);
         } catch (\RuntimeException $e) {
             return response()->json(['error' => $e->getMessage()], 503);
         }
