@@ -119,14 +119,31 @@ EDITORIAL BRIEF: {$ideaPrompt}
 TODAY'S NEWS CONTEXT:
 {$context}
 
+OFFICIAL CATEGORIES: 
+- Artificial Intelligence
+- Gadgets & Hardware
+- Software & Apps
+- Cybersecurity & Privacy
+- Business Tech
+- Gaming
+- Mobility & Transport
+- Science & Space
+- Culture & Social Media
+- Crypto & Web3
+- Reviews
+- Tutorials & Guides
+- Deals
+- Opinion
+
 Generate a refactored version strictly following this JSON format:
 {
   \"titular\": \"Catchy, direct headline. Max 12 words.\",
   \"tldr_twitter\": \"Summary in under 280 characters. Impactful, independent context.\",
-  \"cuerpo_noticia\": \"2 to 3 short paragraphs (max 4 lines each). Direct, slightly sarcastic/entertaining but 100% informative. Explain 'why it matters' without fluff. Use basic Markdown (**bold**) for keywords.\",
+  \"cuerpo_noticia\": \"2 to 3 short paragraphs (max 4 lines each). Direct, slightly sarcastic/entertaining but 100% informative. Explain 'why it matters' without fluff. Use basic Markdown (**bold**) for keywords. YOU MUST include an inline image placeholder like <img src=\\\"https://source.unsplash.com/800x400/?technology,ai\\\" alt=\\\"relevant description\\\"> inside the content.\",
   \"snippet_codigo\": \"OPTIONAL. Include a code block ONLY if it adds real value (e.g., terminal command, API JSON, config). If business news, leave null. NO joke code.\",
   \"lenguaje_snippet\": \"Language of the snippet (e.g., bash, json, python). Null if snippet is null.\",
-  \"sugerencia_imagen\": \"Short English prompt for a text-to-image model for the cover image. Descriptive and visually appealing.\"
+  \"sugerencia_imagen\": \"Short English prompt for a text-to-image model for the cover image. Descriptive and visually appealing.\",
+  \"categoria_principal\": \"MUST be exactly one of the OFFICIAL CATEGORIES listed above.\"
 }
 
 RULES:
@@ -143,7 +160,37 @@ RULES:
             'snippet_codigo' => $result['snippet_codigo'] ?? null,
             'lenguaje_snippet' => $result['lenguaje_snippet'] ?? null,
             'sugerencia_imagen' => $result['sugerencia_imagen'] ?? '',
+            'categoria_principal' => $result['categoria_principal'] ?? 'Business Tech',
         ];
+    }
+
+    /**
+     * Generate a Daily Brief summarizing the day's top tech news.
+     */
+    public function generateDailyBrief(array $newsItems): string
+    {
+        if (empty($newsItems)) {
+            return "The intelligence pipeline is resting. Check back later for the latest tech signals.";
+        }
+
+        // Take only top 5 to keep the prompt focused
+        $topNews = array_slice($newsItems, 0, 5);
+        $context = implode("\n", array_map(function ($n) {
+            $source = $n['source'] ?? 'News';
+            return "- [{$source}] {$n['title']}: {$n['description']}";
+        }, $topNews));
+
+        $prompt = "You are the Editor-in-Chief of a TL;DR tech news site. 
+Based on these top headlines from today:
+
+{$context}
+
+Write a punchy, engaging 'Daily Brief' summarizing the most important trends or events from these headlines. 
+Keep it to exactly 2 short paragraphs. 
+Tone: Entertaining, insightful, no-fluff. Like a quick update to a developer friend.
+Do NOT use markdown code fences. Just return the text.";
+
+        return $this->callGemini($prompt, false);
     }
 
     /**

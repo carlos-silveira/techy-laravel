@@ -126,9 +126,38 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
 
       <main className="relative z-10 pt-20">
 
+        {/* ===== DAILY BRIEF (The True TL;DR) ===== */}
+        {dailyBrief && (
+          <section className="relative z-20 max-w-5xl mx-auto px-6 mb-12">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.1 }}
+              className="bg-white/80 dark:bg-[#0a0f1c]/80 backdrop-blur-2xl border border-black/5 dark:border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[60px] -mr-32 -mt-32"></div>
+              <div className="flex flex-col md:flex-row gap-8 items-start md:items-center">
+                <div className="flex-shrink-0">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg">
+                    <Zap className="w-8 h-8 text-white" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-sm font-black uppercase tracking-[0.25em] text-primary mb-3">{__('Daily Briefing')}</h2>
+                  <div className="prose dark:prose-invert prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:font-medium prose-p:text-lg md:prose-p:text-xl prose-p:leading-relaxed max-w-none">
+                    {dailyBrief.split('\n').map((paragraph, index) => (
+                      <p key={index} className="mb-4 last:mb-0">{paragraph}</p>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </section>
+        )}
+
         {/* ===== HERO: FEATURED ARTICLE ===== */}
         {featured && (
-          <section className="relative min-h-[92vh] flex flex-col justify-end overflow-hidden">
+          <section className="relative min-h-[80vh] flex flex-col justify-end overflow-hidden mb-12">
             {/* Background image with parallax */}
             <motion.div
               className="absolute inset-0"
@@ -239,7 +268,7 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
         {/* ===== BENTO ARTICLE GRID ===== */}
         {(articles?.length > 0 && gridArticles.length > 0) ? (
           <section className="py-20 px-6 max-w-7xl mx-auto border-t border-black/5 dark:border-white/5">
-            <div className="flex items-center justify-between mb-12">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-12 gap-6">
               <div className="flex items-center gap-4">
                 <div className="w-1 h-8 bg-primary rounded-full"></div>
                 <div>
@@ -247,7 +276,21 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
                   <h2 className="text-4xl font-black tracking-tighter text-black dark:text-white">{__('Now Reading')}</h2>
                 </div>
               </div>
-              <Link href="/archive" className="hidden md:flex text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-white transition-colors items-center gap-2 group">
+
+              {/* Category Pills */}
+              <div className="flex overflow-x-auto gap-2 pb-2 w-full md:w-auto scrollbar-hide">
+                {['Artificial Intelligence', 'Gadgets & Hardware', 'Software & Apps', 'Business Tech', 'Gaming', 'Cybersecurity & Privacy'].map(cat => (
+                  <Link 
+                    key={cat}
+                    href={`/archive?tag=${encodeURIComponent(cat)}`}
+                    className="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all bg-black/5 dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:bg-primary/10 hover:text-primary border border-transparent hover:border-primary/20"
+                  >
+                    {__(cat)}
+                  </Link>
+                ))}
+              </div>
+
+              <Link href="/archive" className="hidden md:flex text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors items-center gap-2 group flex-shrink-0">
                 {__('Full Archive')} <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
