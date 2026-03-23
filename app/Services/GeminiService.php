@@ -93,6 +93,8 @@ Generate exactly 3 article ideas. Each MUST:
 3. Connect multiple headlines into a single narrative when possible
 4. Include a developer-action angle: what should devs learn, build, or stop doing
 
+CRITICAL RECENCY RULE: ONLY focus on actual, confirmed events from the EXACT last 24 to 48 hours. DO NOT output older news or repetitive rumors (such as old Nintendo Switch 2 leaks or stale Apple rumors). If the news isn't happening today, discard it.
+
 Return ONLY a JSON array, no markdown fences:
 [{\"title\": \"...\", \"prompt\": \"A detailed 2-sentence editorial brief describing the angle, tone, and key arguments\"}]";
 
@@ -118,6 +120,8 @@ ARTICLE TOPIC: {$title}
 EDITORIAL BRIEF: {$ideaPrompt}
 TODAY'S NEWS CONTEXT:
 {$context}
+
+CRITICAL RECENCY RULE: If the topic appears to be an old rumor (e.g., Switch 2 leaks from months ago) or not a recent confirmed event, pivot the angle to why old rumors resurface or focus strictly on the newest development from TODAY. The content MUST feel fresh, immediate, and highly relevant to the last 24 hours.
 
 OFFICIAL CATEGORIES: 
 - Artificial Intelligence
@@ -162,6 +166,37 @@ RULES:
             'sugerencia_imagen' => $result['sugerencia_imagen'] ?? '',
             'categoria_principal' => $result['categoria_principal'] ?? 'Business Tech',
         ];
+    }
+
+    /**
+     * Generate a hyperlinked Daily Briefing summarizing the site's recent internal articles.
+     */
+    public function generateInternalDailyBrief(\Illuminate\Database\Eloquent\Collection $articles): string
+    {
+        if ($articles->isEmpty()) {
+            return "The intelligence pipeline is resting. Check back later for the latest tech signals.";
+        }
+
+        $context = "";
+        foreach ($articles as $idx => $a) {
+            $context .= ($idx + 1) . ". Title: {$a->title} (Slug: {$a->slug})\n   Summary: {$a->ai_summary}\n\n";
+        }
+
+        $prompt = "You are the Editor-in-Chief of a high-end tech news site. 
+Based on our site's latest published articles below:
+
+{$context}
+
+Write a punchy, engaging 'Daily Brief' summarizing these exact articles. 
+Keep it to exactly 2 short paragraphs. 
+Tone: Entertaining, insightful, no-fluff. Like a quick update to a developer friend.
+
+CRITICAL RULE: You MUST create inline HTML hyperlinks to the articles you mention.
+Use this format: <a href=\"/article/THE-SLUG-HERE\" class=\"font-bold text-primary hover:text-purple-500 underline transition-colors decoration-primary/30 underline-offset-4\">The Article Title or relevant text</a>
+
+Do NOT use markdown code fences. Output ONLY the raw HTML string for the paragraphs. Do NOT hallucinate any news outside of the provided articles.";
+
+        return $this->callGemini($prompt, false);
     }
 
     /**

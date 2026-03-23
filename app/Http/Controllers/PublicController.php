@@ -52,32 +52,7 @@ class PublicController extends Controller
             return $articles->map(fn($a) => $this->translateIfNecessary($a, $locale));
         });
 
-        $dailyBrief = Cache::remember("homepage_daily_brief_{$locale}", 3600 * 12, function () use ($locale) {
-            try {
-                $news = $this->newsService->fetchTodayTechNews();
-                $briefEn = $this->geminiService->generateDailyBrief($news);
-                
-                if ($locale === 'en') {
-                    return $briefEn;
-                }
-                
-                // Translate the brief
-                $prompt = "Translate this text to " . ($locale === 'es' ? 'Spanish' : 'Portuguese') . ":\n\n" . $briefEn;
-                $translation = \Illuminate\Support\Facades\Http::timeout(60)->post(
-                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" . config('services.gemini.api_key', env('GEMINI_API_KEY')),
-                    ['contents' => [['parts' => [['text' => $prompt]]]]]
-                );
-                
-                if ($translation->successful()) {
-                    return trim($translation->json()['candidates'][0]['content']['parts'][0]['text'] ?? $briefEn);
-                }
-                return $briefEn;
-                
-            } catch (\Exception $e) {
-                Log::error("Failed to generate daily brief: " . $e->getMessage());
-                return "The intelligence pipeline is resting. Check back later for the latest tech signals.";
-            }
-        });
+        $dailyBrief = Cache::get("homepage_daily_brief_{$locale}", "The intelligence pipeline is resting. Check back later for the latest tech signals.");
 
         return Inertia::render('Welcome', [
             'editorsChoice' => $editorsChoice,

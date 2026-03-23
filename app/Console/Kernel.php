@@ -15,8 +15,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // Generate a daily.dev-quality news article every morning at 6am
-        $schedule->command('news:generate-daily')->dailyAt('06:00');
+        // Generate a daily.dev-quality news article every morning at 7am Mexico Time
+        $schedule->command('news:generate-daily')->dailyAt('07:00')->timezone('America/Mexico_City');
     }
 
     /**

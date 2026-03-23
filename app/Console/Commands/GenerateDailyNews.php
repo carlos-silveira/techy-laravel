@@ -45,10 +45,32 @@ class GenerateDailyNews extends Command
         sleep(10);
 
         $this->info('✍️  Generating long-form article...');
-        $content = $geminiService->generateDraft($idea['title'], $idea['prompt'], $newsItems);
+        
+        $content = '';
+        $attempts = 0;
+        
+        while ($attempts < 3) {
+            $this->info("⏳ Attempt " . ($attempts + 1) . " of 3...");
+            $draftData = $geminiService->generateDraft($idea['title'], $idea['prompt'], $newsItems);
+            
+            if (!empty($draftData) && !empty($draftData['cuerpo_noticia']) && $draftData['cuerpo_noticia'] !== 'Failed to generate content.') {
+                $content = $draftData['cuerpo_noticia'];
+                if (!empty($draftData['snippet_codigo'])) {
+                    $lang = $draftData['lenguaje_snippet'] ?? '';
+                    $content .= "\n<pre><code class=\"language-{$lang}\">\n" . htmlspecialchars($draftData['snippet_codigo']) . "\n</code></pre>";
+                }
+                break;
+            }
+            
+            $attempts++;
+            if ($attempts < 3) {
+                $this->warn('Generation failed or returned invalid data. Retrying in 10s...');
+                sleep(10);
+            }
+        }
 
         if (empty($content)) {
-            $this->error('Content generation failed.');
+            $this->error('Content generation failed after 3 attempts. Aborting publication.');
             return 1;
         }
 
@@ -111,6 +133,36 @@ class GenerateDailyNews extends Command
         if ($coverImageUrl) {
             $this->info("🖼️  Cover image: {$coverImageUrl}");
         }
+
+        // --- NEW: Generate the Daily Briefing based on our INTERNAL site articles ---
+        $this->info("📈 Generating and pre-caching internal Daily Briefing in EN, ES, PT...");
+        try {
+            sleep(5);
+            $recentArticles = Article::where('status', 'published')
+                                ->orderBy('created_at', 'desc')
+                                ->take(6)
+                                ->get();
+            
+            $briefEn = $geminiService->generateInternalDailyBrief($recentArticles);
+            \Illuminate\Support\Facades\Cache::forever("homepage_daily_brief_en", $briefEn);
+            $this->info("✅ Cached EN Daily Briefing");
+
+            // Translate into ES
+            sleep(5);
+            $briefEsResponse = $geminiService->translateArticle('Daily Brief', 'Summary', $briefEn, 'es');
+            \Illuminate\Support\Facades\Cache::forever("homepage_daily_brief_es", $briefEsResponse['content'] ?? $briefEn);
+            $this->info("✅ Cached ES Daily Briefing");
+
+            // Translate into PT
+            sleep(5);
+            $briefPtResponse = $geminiService->translateArticle('Daily Brief', 'Summary', $briefEn, 'pt');
+            \Illuminate\Support\Facades\Cache::forever("homepage_daily_brief_pt", $briefPtResponse['content'] ?? $briefEn);
+            $this->info("✅ Cached PT Daily Briefing");
+
+        } catch (\Exception $e) {
+            $this->error("❌ Failed to generate Daily Briefing: " . $e->getMessage());
+        }
+
         return 0;
     }
 
