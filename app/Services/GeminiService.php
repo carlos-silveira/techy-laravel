@@ -202,10 +202,20 @@ Do NOT use markdown code fences. Output ONLY the raw HTML string for the paragra
     /**
      * Generate a long-form article for a specific category.
      */
-    public function generateCategoryDraft(string $category): array
+    public function generateCategoryDraft(string $category, array $newsItems = []): array
     {
+        $context = "";
+        if (!empty($newsItems)) {
+            $context = "TODAY'S NEWS CONTEXT:\n" . implode("\n", array_map(function ($n) {
+                return "- " . ($n['title'] ?? '');
+            }, array_slice($newsItems, 0, 10))) . "\n\n";
+        }
+
         $prompt = "Act as an Editor-in-Chief for a tech news site designed for 'people in a hurry'. 
 Generate a highly engaging, unique, and realistic tech news article specifically for the category: {$category}.
+
+{$context}
+CRITICAL RECENCY RULE: ONLY focus on actual, confirmed events from the EXACT last 24 to 48 hours. DO NOT output older news or repetitive rumors (such as old Nintendo Switch 2 leaks). If there is no real breaking news for this category in the context, synthesize the most recent trend.
 
 Write 4 to 6 paragraphs. Use high-impact HTML formatting (<h2> for subheaders, <strong> for emphasis).
 Explain 'why it matters' without fluff. YOU MUST include an inline image placeholder like <img src=\"PLACEHOLDER_IMAGE\" alt=\"relevant description\"> inside the content where appropriate.

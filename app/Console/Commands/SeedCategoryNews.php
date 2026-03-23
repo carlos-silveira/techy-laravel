@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\Article;
 use App\Services\GeminiService;
+use App\Services\NewsService;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -24,10 +25,14 @@ class SeedCategoryNews extends Command
     /**
      * Execute the console command.
      */
-    public function handle(GeminiService $geminiService)
+    public function handle(GeminiService $geminiService, NewsService $newsService)
     {
         $this->info('🗑  Emptying the articles table...');
         Article::truncate();
+        \Illuminate\Support\Facades\Artisan::call('cache:clear');
+
+        $this->info('📰 Fetching real news context...');
+        $newsItems = $newsService->fetchTodayTechNews();
 
         $categories = [
             'Artificial Intelligence',
@@ -44,10 +49,31 @@ class SeedCategoryNews extends Command
             // Respect API limits
             sleep(5);
 
-            $draftData = $geminiService->generateCategoryDraft($category);
+            $draftData = null;
+            $attempts = 0;
+            
+            while ($attempts < 3) {
+                $this->info("⏳ Attempt " . ($attempts + 1) . " of 3...");
+                $draftData = $geminiService->generateCategoryDraft($category, $newsItems);
+                
+                if (!empty($draftData['html_content']) && strpos($draftData['html_content'], 'Content missing.') === false && strpos($draftData['html_content'], 'Content generation failed.') === false) {
+                    break;
+                }
+                
+                $attempts++;
+                if ($attempts < 3) {
+                    $this->warn('Generation failed or returned invalid data. Retrying in 10s...');
+                    sleep(10);
+                }
+            }
+
+            if (empty($draftData['html_content']) || strpos($draftData['html_content'], 'Content missing.') !== false || strpos($draftData['html_content'], 'Content generation failed.') !== false) {
+                $this->error("Failed to generate category {$category} after 3 attempts. Skipping...");
+                continue;
+            }
             
             $title = $draftData['title'] ?? 'The Future of ' . $category;
-            $htmlContent = $draftData['html_content'] ?? '<p>Content missing.</p>';
+            $htmlContent = $draftData['html_content'];
             
             $this->info("💡 Generated Title: {$title}");
             
@@ -105,6 +131,30 @@ class SeedCategoryNews extends Command
             }
             
             $this->info("--------------------------------------------------");
+        }
+        
+        \Illuminate\Support\Facades\Artisan::call('cache:clear');
+        
+        $this->info("📈 Generating and caching Daily Briefing...");
+        try {
+            sleep(5);
+            $recentArticles = Article::where('status', 'published')->orderBy('created_at', 'desc')->take(6)->get();
+            $briefEn = $geminiService->generateInternalDailyBrief($recentArticles);
+            \Illuminate\Support\Facades\Cache::forever("homepage_daily_brief_en", $briefEn);
+            $this->info("✅ Cached EN Daily Briefing");
+
+            sleep(5);
+            $briefEsResponse = $geminiService->translateArticle('Daily Brief', 'Summary', $briefEn, 'es');
+            \Illuminate\Support\Facades\Cache::forever("homepage_daily_brief_es", $briefEsResponse['content'] ?? $briefEn);
+            $this->info("✅ Cached ES Daily Briefing");
+
+            sleep(5);
+            $briefPtResponse = $geminiService->translateArticle('Daily Brief', 'Summary', $briefEn, 'pt');
+            \Illuminate\Support\Facades\Cache::forever("homepage_daily_brief_pt", $briefPtResponse['content'] ?? $briefEn);
+            $this->info("✅ Cached PT Daily Briefing");
+
+        } catch (\Exception $e) {
+            $this->error("❌ Failed to generate Daily Briefing: " . $e->getMessage());
         }
         
         $this->info('🎉 Completely finished seeding categories!');
