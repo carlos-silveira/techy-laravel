@@ -1,0 +1,23 @@
+name: Seed Categories on Production
+
+on:
+  workflow_dispatch:
+
+jobs:
+  seed:
+    name: 🌱 Seed Categories
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🏃 Run news:seed-categories
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: "66.29.148.140"
+          username: "baifywfnnq"
+          port: "21098"
+          script_stop: true
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/baifywfnnq/techynews.lat
+            php artisan news:seed-categories
+            php artisan cache:clear
+            echo "✅ Seeding complete"
