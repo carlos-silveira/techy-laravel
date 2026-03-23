@@ -144,11 +144,10 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
                 </div>
                 <div className="flex-1">
                   <h2 className="text-sm font-black uppercase tracking-[0.25em] text-primary mb-3">{__('Daily Briefing')}</h2>
-                  <div className="prose dark:prose-invert prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:font-medium prose-p:text-lg md:prose-p:text-xl prose-p:leading-relaxed max-w-none">
-                    {dailyBrief.split('\n').map((paragraph, index) => (
-                      <p key={index} className="mb-4 last:mb-0">{paragraph}</p>
-                    ))}
-                  </div>
+                  <div 
+                    className="prose dark:prose-invert prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:font-medium prose-p:text-lg md:prose-p:text-xl prose-p:leading-relaxed prose-a:font-bold prose-a:text-primary prose-a:no-underline hover:prose-a:text-purple-500 transition-colors max-w-none"
+                    dangerouslySetInnerHTML={{ __html: dailyBrief }}
+                  />
                 </div>
               </div>
             </motion.div>

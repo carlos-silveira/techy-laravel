@@ -151,17 +151,7 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
 
             <Navbar />
 
-            {/* Parallax Hero Background */}
-            <div className="absolute top-0 w-full h-[70vh] overflow-hidden pointer-events-none opacity-40 blur-[2px]">
-                <div 
-                    className="absolute inset-0 bg-cover bg-center"
-                    style={{ 
-                        backgroundImage: `url(${finalCoverImage})`,
-                        transform: `translateY(${scrollProgress * 1.5}px)`
-                    }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-b from-[#02040a]/40 via-[#02040a]/80 to-[#02040a]"></div>
-            </div>
+            {/* Removed Problematic Parallax Background for Clean Light Mode */}
 
             <main className="max-w-4xl mx-auto px-6 py-20 relative z-10">
                 <motion.article
@@ -170,18 +160,28 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
                     transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                 >
                     <header className="mb-16">
-                        <div className="flex items-center gap-3 text-primary font-black uppercase tracking-[0.2em] text-[10px] mb-6">
+                        <div className="flex flex-wrap items-center gap-3 text-primary font-black uppercase tracking-[0.2em] text-[10px] mb-8">
                             <BookOpen className="w-4 h-4" /> {__('Synthesized Discovery')}
                         </div>
-                        <h1 className="text-4xl md:text-6xl font-black tracking-tighter mb-8 leading-[0.9] text-black dark:text-white transition-colors">
+                        
+                        <div className="w-full aspect-[21/9] md:aspect-[2.5/1] rounded-3xl overflow-hidden mb-12 shadow-2xl relative group bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10">
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 dark:group-hover:bg-white/5 z-10 transition-colors duration-500 pointer-events-none"></div>
+                            <img 
+                                src={finalCoverImage} 
+                                alt={article.title}
+                                className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                            />
+                        </div>
+
+                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter mb-8 leading-[1.1] text-gray-900 dark:text-white transition-colors">
                             {article.title}
                         </h1>
-                        <div className="flex items-center space-x-6 text-xs font-black uppercase tracking-widest text-gray-500">
+                        <div className="flex flex-wrap items-center gap-4 md:gap-6 text-xs font-black uppercase tracking-widest text-gray-600 dark:text-gray-500">
                             <span>{dayjs(article.updated_at).format('MMMM D, YYYY')}</span>
-                            <span className="w-1 h-1 bg-gray-800 rounded-full"></span>
+                            <span className="hidden md:inline-block w-1 h-1 bg-gray-300 dark:bg-gray-800 rounded-full"></span>
                             <span>{estimatedReadTime} {__('min read')}</span>
-                            <span className="w-1 h-1 bg-gray-800 rounded-full"></span>
-                            <span className="text-primary/60 uppercase">{__('Intelligent Draft')}</span>
+                            <span className="hidden md:inline-block w-1 h-1 bg-gray-300 dark:bg-gray-800 rounded-full"></span>
+                            <span className="text-primary/70 uppercase">{__('Intelligent Draft')}</span>
                         </div>
                     </header>
 
