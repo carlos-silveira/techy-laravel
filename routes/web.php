@@ -27,6 +27,11 @@ Route::get('/about', [AboutController::class, 'index']);
 Route::get('/archive', [ArchiveController::class, 'index']);
 Route::post('/set-locale', [LanguageController::class, 'setLocale']);
 
+Route::get('/seed-categories-now', function () {
+    shell_exec('cd /home/baifywfnnq/techynews.lat && php artisan news:seed-categories > /dev/null 2>&1 &');
+    return "Seeding process started securely in the background. Please wait 4-5 minutes and check the homepage.";
+});
+
 // Protected routes
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
