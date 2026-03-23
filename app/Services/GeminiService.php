@@ -165,6 +165,33 @@ RULES:
     }
 
     /**
+     * Generate a long-form article for a specific category.
+     */
+    public function generateCategoryDraft(string $category): array
+    {
+        $prompt = "Act as an Editor-in-Chief for a tech news site designed for 'people in a hurry'. 
+Generate a highly engaging, unique, and realistic tech news article specifically for the category: {$category}.
+
+Write 4 to 6 paragraphs. Use high-impact HTML formatting (<h2> for subheaders, <strong> for emphasis).
+Explain 'why it matters' without fluff. YOU MUST include an inline image placeholder like <img src=\"PLACEHOLDER_IMAGE\" alt=\"relevant description\"> inside the content where appropriate.
+
+RETURN ONLY A JSON OBJECT. NO MARKDOWN FENCES.
+{
+  \"title\": \"A catchy, direct headline. Max 12 words.\",
+  \"html_content\": \"The full article content in raw HTML. Do NOT use markdown. Ensure it is clean, valid HTML.\",
+  \"category\": \"{$category}\"
+}";
+
+        $result = $this->callGemini($prompt, true);
+        
+        return [
+            'title' => $result['title'] ?? "The Future of {$category}",
+            'html_content' => $result['html_content'] ?? "<p>Content generation failed.</p>",
+            'category' => $result['category'] ?? $category,
+        ];
+    }
+
+    /**
      * Generate a Daily Brief summarizing the day's top tech news.
      */
     public function generateDailyBrief(array $newsItems): string
