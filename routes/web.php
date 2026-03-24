@@ -28,8 +28,16 @@ Route::get('/archive', [ArchiveController::class, 'index']);
 Route::post('/set-locale', [LanguageController::class, 'setLocale']);
 
 Route::get('/seed-categories-now', function () {
-    shell_exec('cd /home/baifywfnnq/techynews.lat && php artisan news:seed-categories > /dev/null 2>&1 &');
-    return "Seeding process started securely in the background. Please wait 4-5 minutes and check the homepage.";
+    shell_exec('cd /home/baifywfnnq/techynews.lat && php artisan news:seed-categories > storage/logs/seed.log 2>&1 &');
+    return "Seeding process started securely in the background logging to seed.log.";
+});
+
+Route::get('/read-seed-log', function() {
+    $path = storage_path('logs/seed.log');
+    if (file_exists($path)) {
+        return "<pre>" . file_get_contents($path) . "</pre>";
+    }
+    return "No seed.log found.";
 });
 
 // Protected routes
