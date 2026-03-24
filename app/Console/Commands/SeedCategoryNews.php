@@ -46,24 +46,26 @@ class SeedCategoryNews extends Command
         foreach ($categories as $category) {
             $this->info("🚀 Generating article for category: {$category}");
             
-            // Respect API limits
-            sleep(5);
-
             $draftData = null;
             $attempts = 0;
             
             while ($attempts < 3) {
                 $this->info("⏳ Attempt " . ($attempts + 1) . " of 3...");
-                $draftData = $geminiService->generateCategoryDraft($category, $newsItems);
+                sleep(10); // Mandatory 10s API delay
                 
-                if (!empty($draftData['html_content']) && strpos($draftData['html_content'], 'Content missing.') === false && strpos($draftData['html_content'], 'Content generation failed.') === false) {
-                    break;
+                try {
+                    $draftData = $geminiService->generateCategoryDraft($category, $newsItems);
+                    if (!empty($draftData['html_content']) && strpos($draftData['html_content'], 'Content missing.') === false && strpos($draftData['html_content'], 'Content generation failed.') === false) {
+                        break;
+                    }
+                } catch (\Exception $e) {
+                    $this->error("API Error: " . $e->getMessage());
                 }
                 
                 $attempts++;
                 if ($attempts < 3) {
-                    $this->warn('Generation failed or returned invalid data. Retrying in 10s...');
-                    sleep(10);
+                    $this->warn('Generation failed or returned invalid data. Retrying in 15s...');
+                    sleep(15);
                 }
             }
 
@@ -82,8 +84,14 @@ class SeedCategoryNews extends Command
             $htmlContent = preg_replace('/\s*```\s*$/', '', $htmlContent);
             
             $this->info('📝 Generating summary and meta...');
-            sleep(5);
-            $meta = $geminiService->generateArticleMeta($title, $htmlContent);
+            sleep(10); // Mandatory 10s API delay
+
+            $meta = [];
+            try {
+                $meta = $geminiService->generateArticleMeta($title, $htmlContent);
+            } catch (\Exception $e) {
+                $this->error("Meta generation failed. Proceeding with defaults. " . $e->getMessage());
+            }
             
             // Resolve image placeholders
             $htmlContent = $this->resolveImagePlaceholders($htmlContent, $category);
@@ -116,8 +124,8 @@ class SeedCategoryNews extends Command
             $languages = ['es', 'pt'];
             $translations = [];
             foreach ($languages as $lang) {
-                $this->info("⏳ Translating to " . strtoupper($lang) . "... (5s pause)");
-                sleep(5);
+                $this->info("⏳ Translating to " . strtoupper($lang) . "... (10s pause)");
+                sleep(10); // Mandatory 10s API delay
                 try {
                     $translations[$lang] = $geminiService->translateArticle($title, $article->ai_summary, $htmlContent, $lang);
                     $this->info("✅ Translated to " . strtoupper($lang));
@@ -137,18 +145,18 @@ class SeedCategoryNews extends Command
         
         $this->info("📈 Generating and caching Daily Briefing...");
         try {
-            sleep(5);
+            sleep(10); // Mandatory 10s API delay
             $recentArticles = Article::where('status', 'published')->orderBy('created_at', 'desc')->take(6)->get();
             $briefEn = $geminiService->generateInternalDailyBrief($recentArticles);
             \Illuminate\Support\Facades\Cache::forever("homepage_daily_brief_en", $briefEn);
             $this->info("✅ Cached EN Daily Briefing");
 
-            sleep(5);
+            sleep(10); // Mandatory 10s API delay
             $briefEsResponse = $geminiService->translateArticle('Daily Brief', 'Summary', $briefEn, 'es');
             \Illuminate\Support\Facades\Cache::forever("homepage_daily_brief_es", $briefEsResponse['content'] ?? $briefEn);
             $this->info("✅ Cached ES Daily Briefing");
 
-            sleep(5);
+            sleep(10); // Mandatory 10s API delay
             $briefPtResponse = $geminiService->translateArticle('Daily Brief', 'Summary', $briefEn, 'pt');
             \Illuminate\Support\Facades\Cache::forever("homepage_daily_brief_pt", $briefPtResponse['content'] ?? $briefEn);
             $this->info("✅ Cached PT Daily Briefing");
