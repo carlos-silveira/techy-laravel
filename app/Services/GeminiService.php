@@ -386,10 +386,9 @@ Return exactly a JSON object (no markdown fences):
 
         $fallbackModels = [
             $this->model,
-            'gemini-3-flash',
-            'gemini-2.5-flash-lite',
-            'gemini-3.1-flash-lite',
-            'gemma-2-27b-it'
+            'gemini-2.0-flash',
+            'gemini-1.5-flash',
+            'gemini-1.5-flash-8b'
         ];
         $fallbackModels = array_values(array_unique($fallbackModels));
 
@@ -449,10 +448,9 @@ Return exactly a JSON object (no markdown fences):
 
         $fallbackModels = [
             $this->model,
-            'gemini-3-flash',
-            'gemini-2.5-flash-lite',
-            'gemini-3.1-flash-lite',
-            'gemma-2-27b-it'
+            'gemini-2.0-flash',
+            'gemini-1.5-flash',
+            'gemini-1.5-flash-8b'
         ];
         $fallbackModels = array_values(array_unique($fallbackModels));
 
