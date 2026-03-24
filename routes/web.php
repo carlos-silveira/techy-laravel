@@ -35,11 +35,16 @@ Route::get('/seed-categories-invincible', function () {
 });
 
 Route::get('/read-seed-log', function() {
-    $path = storage_path('logs/seed.log');
+    $path = storage_path('logs/laravel.log');
     if (file_exists($path)) {
-        return "<pre>" . file_get_contents($path) . "</pre>";
+        // Read the last 20000 bytes
+        $file = fopen($path, 'r');
+        fseek($file, -20000, SEEK_END);
+        $content = fread($file, 20000);
+        fclose($file);
+        return "<pre>" . htmlspecialchars($content) . "</pre>";
     }
-    return "No seed.log found.";
+    return "No log found.";
 });
 
 // Protected routes
