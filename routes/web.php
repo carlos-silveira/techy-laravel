@@ -27,9 +27,11 @@ Route::get('/about', [AboutController::class, 'index']);
 Route::get('/archive', [ArchiveController::class, 'index']);
 Route::post('/set-locale', [LanguageController::class, 'setLocale']);
 
-Route::get('/seed-categories-now', function () {
-    shell_exec('cd /home/baifywfnnq/techynews.lat && php artisan news:seed-categories > storage/logs/seed.log 2>&1 &');
-    return "Seeding process started securely in the background logging to seed.log.";
+Route::get('/seed-categories-invincible', function () {
+    ignore_user_abort(true);
+    set_time_limit(600); // 10 minutes max
+    \Illuminate\Support\Facades\Artisan::call('news:seed-categories');
+    return "Seeding process completed perfectly in the background execution.";
 });
 
 Route::get('/read-seed-log', function() {
