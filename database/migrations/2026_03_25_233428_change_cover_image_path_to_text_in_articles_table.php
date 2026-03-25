@@ -13,7 +13,7 @@ class ChangeCoverImagePathToTextInArticlesTable extends Migration
      */
     public function up(): void
     {
-        Schema::table('articles', function (Blueprint $table) {
+        \Illuminate\Support\Facades\Schema::table('articles', function (\Illuminate\Database\Schema\Blueprint $table) {
             $table->text('cover_image_path')->nullable()->change();
         });
     }
@@ -25,7 +25,7 @@ class ChangeCoverImagePathToTextInArticlesTable extends Migration
      */
     public function down(): void
     {
-        Schema::table('articles', function (Blueprint $table) {
+        \Illuminate\Support\Facades\Schema::table('articles', function (\Illuminate\Database\Schema\Blueprint $table) {
             $table->string('cover_image_path', 255)->nullable()->change();
         });
     }
