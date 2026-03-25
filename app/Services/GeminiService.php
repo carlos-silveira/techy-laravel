@@ -386,52 +386,41 @@ Return exactly a JSON object (no markdown fences):
     {
         $this->ensureApiKey();
 
-        $fallbackModels = [
-            $this->model,
-            'gemini-2.0-flash',
-            'gemini-1.5-flash',
-            'gemini-1.5-flash-8b'
-        ];
-        $fallbackModels = array_values(array_unique($fallbackModels));
-
-        $maxRetriesPerModel = 1;
+        $maxRetriesPerModel = 5;
         $lastError = 'Unknown error';
 
-        foreach ($fallbackModels as $currentModel) {
-            for ($attempt = 0; $attempt <= $maxRetriesPerModel; $attempt++) {
-                try {
-                    $response = Http::timeout(60)->post(
-                        "https://generativelanguage.googleapis.com/v1beta/models/{$currentModel}:generateContent?key={$this->apiKey}",
-                        ['contents' => $messages]
-                    );
+        for ($attempt = 0; $attempt <= $maxRetriesPerModel; $attempt++) {
+            try {
+                $response = Http::timeout(60)->post(
+                    "https://generativelanguage.googleapis.com/v1beta/models/{$this->model}:generateContent?key={$this->apiKey}",
+                    ['contents' => $messages]
+                );
 
-                    if ($response->successful()) {
-                        return $response->json()['candidates'][0]['content']['parts'][0]['text'] ?? '';
-                    }
+                if ($response->successful()) {
+                    return $response->json()['candidates'][0]['content']['parts'][0]['text'] ?? '';
+                }
 
-                    $status = $response->status();
-                    if ($status === 429) {
-                        Log::warning("Gemini 429 on [{$currentModel}] Conversational — Switching to next fallback model immediately.");
-                        continue 2;
-                    }
+                $status = $response->status();
+                if ($status === 429) {
+                    Log::warning("Gemini 429 on Conversational — Sleeping 60s to refresh quota (Attempt " . (string)$attempt . ").");
+                    sleep(60);
+                    continue;
+                }
 
-                    $errorBody = substr($response->body(), 0, 500);
-                    $lastError = "API Error ({$status}) on {$currentModel}: {$errorBody}";
-                    Log::error("Gemini API Error", ['model' => $currentModel, 'status' => $status, 'body' => $errorBody]);
+                $errorBody = substr($response->body(), 0, 500);
+                $lastError = "API Error ({$status}): {$errorBody}";
+                Log::error("Gemini API Error", ['status' => $status, 'body' => $errorBody]);
 
-                    if ($attempt < $maxRetriesPerModel) {
-                        sleep(5);
-                        continue;
-                    }
-                    continue 2;
-                } catch (\Exception $e) {
-                    $lastError = "Connection Error on {$currentModel}: " . $e->getMessage();
-                    Log::error($lastError);
-                    if ($attempt < $maxRetriesPerModel) {
-                        sleep(5);
-                        continue;
-                    }
-                    continue 2;
+                if ($attempt < $maxRetriesPerModel) {
+                    sleep(15);
+                    continue;
+                }
+            } catch (\Exception $e) {
+                $lastError = "Connection Error: " . $e->getMessage();
+                Log::error($lastError);
+                if ($attempt < $maxRetriesPerModel) {
+                    sleep(15);
+                    continue;
                 }
             }
         }
@@ -448,53 +437,55 @@ Return exactly a JSON object (no markdown fences):
     {
         $this->ensureApiKey();
 
-        $fallbackModels = [
-            $this->model,
-            'gemini-2.0-flash',
-            'gemini-1.5-flash',
-            'gemini-1.5-flash-8b'
-        ];
-        $fallbackModels = array_values(array_unique($fallbackModels));
-
-        $maxRetriesPerModel = 1;
+        $maxRetriesPerModel = 5;
         $lastError = 'Unknown error';
 
-        foreach ($fallbackModels as $currentModel) {
-            for ($attempt = 0; $attempt <= $maxRetriesPerModel; $attempt++) {
-                try {
-                    $response = Http::timeout(60)->post(
-                        "https://generativelanguage.googleapis.com/v1beta/models/{$currentModel}:generateContent?key={$this->apiKey}",
-                        ['contents' => [['parts' => [['text' => $prompt]]]]]
-                    );
+        $payload = ['contents' => [['parts' => [['text' => $prompt]]]]];
 
-                    if ($response->successful()) {
-                        $text = $response->json()['candidates'][0]['content']['parts'][0]['text'] ?? '';
-                        return $expectJson ? $this->extractJson($text) : trim($text);
+        for ($attempt = 0; $attempt <= $maxRetriesPerModel; $attempt++) {
+            try {
+                $response = Http::timeout(120)->post(
+                    "https://generativelanguage.googleapis.com/v1beta/models/{$this->model}:generateContent?key={$this->apiKey}",
+                    $payload
+                );
+
+                if ($response->successful()) {
+                    $text = $response->json()['candidates'][0]['content']['parts'][0]['text'] ?? '';
+
+                    if ($expectJson) {
+                        $text = str_replace(['```json', '```', '```JSON'], '', $text);
+                        $decoded = json_decode($text, true);
+                        if (!$decoded) {
+                            Log::error("Gemini JSON Decode failed. Raw string: \n" . $text);
+                        }
+                        return $decoded ?: [];
                     }
 
-                    $status = $response->status();
-                    if ($status === 429) {
-                        Log::warning("Gemini 429 API rate limit on [{$currentModel}] — Switching to next free model in cascade.");
-                        continue 2;
-                    }
+                    return trim($text);
+                }
 
-                    $errorBody = substr($response->body(), 0, 500);
-                    $lastError = "Gemini API error ({$status}) on {$currentModel}: {$errorBody}";
-                    Log::error('Gemini API Error', ['model' => $currentModel, 'status' => $status, 'body' => $errorBody]);
+                $status = $response->status();
+                if ($status === 429) {
+                    Log::warning("Gemini 429 API rate limit — Sleeping full 60 seconds to reset Free Tier Quota (Attempt " . (string)$attempt . ").");
+                    sleep(60);
+                    continue;
+                }
 
-                    if ($attempt < $maxRetriesPerModel) {
-                        sleep(5);
-                        continue;
-                    }
-                    continue 2;
-                } catch (\Exception $e) {
-                    $lastError = "Connection Error on {$currentModel}: " . $e->getMessage();
-                    Log::error($lastError);
-                    if ($attempt < $maxRetriesPerModel) {
-                        sleep(5);
-                        continue;
-                    }
-                    continue 2;
+                $errorBody = substr($response->body(), 0, 500);
+                $lastError = "Gemini API error ({$status}): {$errorBody}";
+                Log::error('Gemini API Error', ['status' => $status, 'body' => $errorBody]);
+
+                if ($attempt < $maxRetriesPerModel) {
+                    sleep(15);
+                    continue;
+                }
+            } catch (\Exception $e) {
+                $lastError = "Gemini connection error: " . $e->getMessage();
+                Log::error($lastError);
+
+                if ($attempt < $maxRetriesPerModel) {
+                    sleep(15);
+                    continue;
                 }
             }
         }
@@ -502,7 +493,7 @@ Return exactly a JSON object (no markdown fences):
         if ($expectJson) {
             return [];
         }
-        throw new \RuntimeException("All fallback models exhausted. Last error: " . $lastError);
+        throw new \RuntimeException("All retries exhausted for model {$this->model}. Last error: " . $lastError);
     }
 
     /**

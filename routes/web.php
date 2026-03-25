@@ -29,7 +29,7 @@ Route::post('/set-locale', [LanguageController::class, 'setLocale']);
 
 Route::get('/seed-categories-invincible', function () {
     ignore_user_abort(true);
-    set_time_limit(600); // 10 minutes max
+    set_time_limit(0); // Unlimited execution time to allow 60s quota backoff sleeps
     \Illuminate\Support\Facades\Artisan::call('news:seed-categories');
     return "Seeding process completed perfectly in the background execution.";
 });
