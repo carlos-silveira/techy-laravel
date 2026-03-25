@@ -217,6 +217,8 @@ Generate a highly engaging, unique, and realistic tech news article specifically
 {$context}
 CRITICAL RECENCY RULE: ONLY focus on actual, confirmed events from the EXACT last 24 to 48 hours. DO NOT output older news or repetitive rumors (such as old Nintendo Switch 2 leaks). If there is no real breaking news for this category in the context, synthesize the most recent trend.
 
+CRITICAL EDITORIAL RULE: You MUST strictly write about pure {$category} topics. UNLESS the {$category} is exactly 'AI', you ABSOLUTELY MUST NOT mention Artificial Intelligence, OpenAI, ChatGPT, LLMs, or Machine Learning. Force topic diversity and strict adherence to the non-AI classical nature of the category.
+
 Write 4 to 6 paragraphs. Use high-impact HTML formatting (<h2> for subheaders, <strong> for emphasis).
 Explain 'why it matters' without fluff. YOU MUST include an inline image placeholder like <img src=\"PLACEHOLDER_IMAGE\" alt=\"relevant description\"> inside the content where appropriate.
 

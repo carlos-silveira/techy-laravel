@@ -52,7 +52,21 @@ class PublicController extends Controller
             return $articles->map(fn($a) => $this->translateIfNecessary($a, $locale));
         });
 
-        $dailyBrief = Cache::get("homepage_daily_brief_{$locale}", "The intelligence pipeline is resting. Check back later for the latest tech signals.");
+        $restingMessage = "The intelligence pipeline is resting. Check back later for the latest tech signals.";
+        $dailyBrief = Cache::get("homepage_daily_brief_{$locale}");
+
+        // If cache failed or is empty, dynamically build a fallback brief to prevent an empty site
+        if (empty($dailyBrief) || $dailyBrief === $restingMessage) {
+            if ($articles->count() > 0) {
+                $dailyBrief = "<p><strong>⚡ Breaking Signals:</strong></p><ul>";
+                foreach ($articles->take(3) as $a) {
+                    $dailyBrief .= "<li><a href='/article/{$a->slug}' class='text-primary-400 hover:text-primary-300 transition-colors'>{$a->title}</a></li>";
+                }
+                $dailyBrief .= "</ul>";
+            } else {
+                $dailyBrief = $restingMessage;
+            }
+        }
 
         return Inertia::render('Welcome', [
             'editorsChoice' => $editorsChoice,

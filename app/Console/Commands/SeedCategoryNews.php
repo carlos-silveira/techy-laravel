@@ -97,7 +97,7 @@ class SeedCategoryNews extends Command
             $htmlContent = $this->resolveImagePlaceholders($htmlContent, $category);
             
             // Fetch cover image
-            $coverImageUrl = $this->fetchCoverImage($title, $meta['tags'] ?? [$category]);
+            $coverImageUrl = $this->fetchCoverImage($title, $meta['tags'] ?? [], $category);
             
             $slug = Str::slug($title) . '-' . Str::random(6);
             $wordCount = str_word_count(strip_tags($htmlContent));
@@ -151,15 +151,23 @@ class SeedCategoryNews extends Command
             \Illuminate\Support\Facades\Cache::forever("homepage_daily_brief_en", $briefEn);
             $this->info("✅ Cached EN Daily Briefing");
 
-            sleep(10); // Mandatory 10s API delay
-            $briefEsResponse = $geminiService->translateArticle('Daily Brief', 'Summary', $briefEn, 'es');
-            \Illuminate\Support\Facades\Cache::forever("homepage_daily_brief_es", $briefEsResponse['content'] ?? $briefEn);
-            $this->info("✅ Cached ES Daily Briefing");
+            try {
+                sleep(10); // Mandatory 10s API delay
+                $briefEsResponse = $geminiService->translateArticle('Daily Brief', 'Summary', $briefEn, 'es');
+                \Illuminate\Support\Facades\Cache::forever("homepage_daily_brief_es", $briefEsResponse['content'] ?? $briefEn);
+                $this->info("✅ Cached ES Daily Briefing");
+            } catch (\Exception $e) {
+                $this->error("❌ Failed to translate ES Daily Briefing: " . $e->getMessage());
+            }
 
-            sleep(10); // Mandatory 10s API delay
-            $briefPtResponse = $geminiService->translateArticle('Daily Brief', 'Summary', $briefEn, 'pt');
-            \Illuminate\Support\Facades\Cache::forever("homepage_daily_brief_pt", $briefPtResponse['content'] ?? $briefEn);
-            $this->info("✅ Cached PT Daily Briefing");
+            try {
+                sleep(10); // Mandatory 10s API delay
+                $briefPtResponse = $geminiService->translateArticle('Daily Brief', 'Summary', $briefEn, 'pt');
+                \Illuminate\Support\Facades\Cache::forever("homepage_daily_brief_pt", $briefPtResponse['content'] ?? $briefEn);
+                $this->info("✅ Cached PT Daily Briefing");
+            } catch (\Exception $e) {
+                $this->error("❌ Failed to translate PT Daily Briefing: " . $e->getMessage());
+            }
 
         } catch (\Exception $e) {
             $this->error("❌ Failed to generate Daily Briefing: " . $e->getMessage());
@@ -169,13 +177,13 @@ class SeedCategoryNews extends Command
         return 0;
     }
 
-    private function fetchCoverImage(string $title, array $tags): ?string
+    private function fetchCoverImage(string $title, array $tags, string $category = 'technology'): ?string
     {
         $accessKey = config('services.unsplash.access_key');
         if (empty($accessKey)) return null;
 
-        $query = $tags[0] ?? explode(' ', $title)[0];
-        $query = trim($query . ' technology');
+        // Force broad logical fallback terms so Unsplash ALWAYS finds an aesthetic image
+        $query = trim($category . ' abstract neon technology');
 
         try {
             $response = Http::withHeaders([
