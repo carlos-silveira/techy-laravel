@@ -44,6 +44,15 @@ Route::get('/read-seed-log', function () {
     return "<pre>" . htmlspecialchars($output ?? '') . "</pre>";
 });
 
+Route::get('/force-migrate', function () {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        return "<pre>" . \Illuminate\Support\Facades\Artisan::output() . "</pre>";
+    } catch (\Exception $e) {
+        return "<pre>Error: " . $e->getMessage() . "\n" . $e->getTraceAsString() . "</pre>";
+    }
+});
+
 // Protected routes
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
