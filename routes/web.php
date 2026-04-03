@@ -28,10 +28,11 @@ Route::get('/archive', [ArchiveController::class, 'index']);
 Route::post('/set-locale', [LanguageController::class, 'setLocale']);
 
 Route::get('/seed-categories-invincible', function () {
-    ignore_user_abort(true);
-    set_time_limit(0); // Unlimited execution time to allow 60s quota backoff sleeps
-    \Illuminate\Support\Facades\Artisan::call('news:seed-categories');
-    return "Seeding process completed perfectly in the background execution.";
+    // OS-level background fork. This makes the database seed entirely immune to cPanel FPM limits
+    // and returns immediately, allowing the background server process to take as long as it needs.
+    $command = "cd " . escapeshellarg(base_path()) . " && php -d memory_limit=512M artisan news:seed-categories > /dev/null 2>&1 &";
+    exec($command);
+    return "Generation dispatched to host OS successfully. Please wait up to 10 minutes for full DB repopulation.";
 });
 
 Route::get('/read-seed-log', function () {
