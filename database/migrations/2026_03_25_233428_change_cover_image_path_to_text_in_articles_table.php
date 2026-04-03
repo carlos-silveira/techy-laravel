@@ -13,9 +13,9 @@ class ChangeCoverImagePathToTextInArticlesTable extends Migration
      */
     public function up(): void
     {
-        \Illuminate\Support\Facades\Schema::table('articles', function (\Illuminate\Database\Schema\Blueprint $table) {
-            $table->text('cover_image_path')->nullable()->change();
-        });
+        if (\Illuminate\Support\Facades\DB::getDriverName() !== 'sqlite') {
+            \Illuminate\Support\Facades\DB::statement('ALTER TABLE articles MODIFY cover_image_path TEXT;');
+        }
     }
 
     /**
@@ -25,8 +25,8 @@ class ChangeCoverImagePathToTextInArticlesTable extends Migration
      */
     public function down(): void
     {
-        \Illuminate\Support\Facades\Schema::table('articles', function (\Illuminate\Database\Schema\Blueprint $table) {
-            $table->string('cover_image_path', 255)->nullable()->change();
-        });
+        if (\Illuminate\Support\Facades\DB::getDriverName() !== 'sqlite') {
+            \Illuminate\Support\Facades\DB::statement('ALTER TABLE articles MODIFY cover_image_path VARCHAR(255);');
+        }
     }
 }
