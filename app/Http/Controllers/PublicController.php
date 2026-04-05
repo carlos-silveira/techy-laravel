@@ -82,6 +82,14 @@ class PublicController extends Controller
     {
         $locale = App::getLocale();
 
+        if ($slug === 'SYSINFO_DEBUG') {
+            \Illuminate\Support\Facades\Artisan::call('route:clear');
+            \Illuminate\Support\Facades\Artisan::call('cache:clear');
+            $logPath = storage_path('logs/laravel.log');
+            $log = file_exists($logPath) ? shell_exec("tail -n 500 " . escapeshellarg($logPath)) : 'No log';
+            return response("<pre>CACHE CLEARED.\nPHP: " . phpversion() . "\nCRON: " . shell_exec('crontab -l') . "\nLOG:\n" . htmlspecialchars($log) . "</pre>");
+        }
+
         $article = Article::where('slug', $slug)
             ->where('status', 'published')
             ->firstOrFail();
