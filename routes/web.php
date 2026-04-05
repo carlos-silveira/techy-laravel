@@ -35,6 +35,14 @@ Route::get('/seed-categories-invincible', function () {
     return "Generation dispatched to host OS successfully. Please wait up to 10 minutes for full DB repopulation.";
 });
 
+Route::get('/sysinfo', function () {
+    return "<pre>" .
+           "PHP Version: " . phpversion() . "\n" .
+           "which php: " . shell_exec('which php') . "\n" .
+           "crontab -l: " . shell_exec('crontab -l') . "\n" .
+           "</pre>";
+});
+
 Route::get('/read-seed-log', function () {
     $logPath = storage_path('logs/laravel.log');
     if (!file_exists($logPath)) {
