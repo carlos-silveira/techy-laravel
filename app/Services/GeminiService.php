@@ -114,7 +114,7 @@ Return ONLY a JSON array, no markdown fences:
             return "- [{$source}] {$n['title']}";
         }, $newsItems));
 
-        $prompt = "Act as an Editor-in-Chief for a tech news site designed for 'people in a hurry'. Your audience wants to be informed without reading long, boring articles.
+        $prompt = "Act as an Editor-in-Chief for a cutting-edge tech news site designed for 'people in a hurry'. Your audience wants to be informed without reading long, boring articles.
 
 ARTICLE TOPIC: {$title}
 EDITORIAL BRIEF: {$ideaPrompt}
@@ -122,6 +122,11 @@ TODAY'S NEWS CONTEXT:
 {$context}
 
 CRITICAL RECENCY RULE: If the topic appears to be an old rumor (e.g., Switch 2 leaks from months ago) or not a recent confirmed event, pivot the angle to why old rumors resurface or focus strictly on the newest development from TODAY. The content MUST feel fresh, immediate, and highly relevant to the last 24 hours.
+
+TONE & STYLE:
+1. Start with a punchy, controversial, or highly engaging HOOK. No boring introductions.
+2. Focus heavily on 'Why this actually matters' and the human/industry impact, not just dry specifications.
+3. Use a modern, ultra-readable, and slightly witty tone (similar to TechCrunch, The Verge, or Casey Newton).
 
 OFFICIAL CATEGORIES: 
 - Artificial Intelligence
@@ -211,16 +216,21 @@ Do NOT use markdown code fences. Output ONLY the raw HTML string for the paragra
             }, array_slice($newsItems, 0, 10))) . "\n\n";
         }
 
-        $prompt = "Act as an Editor-in-Chief for a tech news site designed for 'people in a hurry'. 
-Generate a highly engaging, unique, and realistic tech news article specifically for the category: {$category}.
+        $prompt = "Act as an Editor-in-Chief for a cutting-edge tech news site designed for 'people in a hurry'. 
+Generate a highly engaging, unique, and slightly opinionated tech news article specifically for the category: {$category}.
 
 {$context}
 CRITICAL RECENCY RULE: ONLY focus on actual, confirmed events from the EXACT last 24 to 48 hours. DO NOT output older news or repetitive rumors (such as old Nintendo Switch 2 leaks). If there is no real breaking news for this category in the context, synthesize the most recent trend.
 
 CRITICAL EDITORIAL RULE: You MUST strictly write about pure {$category} topics. UNLESS the category is exactly 'Artificial Intelligence', you ABSOLUTELY MUST NOT mention Artificial Intelligence, OpenAI, ChatGPT, LLMs, or Machine Learning. Force topic diversity and strict adherence to the non-AI classical nature of the category.
 
-Write 4 to 6 paragraphs. Use high-impact HTML formatting (<h2> for subheaders, <strong> for emphasis).
-Explain 'why it matters' without fluff. YOU MUST include an inline image placeholder like <img src=\"PLACEHOLDER_IMAGE\" alt=\"relevant description\"> inside the content where appropriate.
+TONE & STYLE:
+1. Start with a punchy, controversial, or highly engaging HOOK. No boring introductions.
+2. Focus heavily on 'Why this actually matters' and the human/industry impact, not just dry specifications.
+3. Use a modern, ultra-readable, and slightly witty tone (similar to TechCrunch, The Verge, or Casey Newton).
+4. Use high-impact HTML formatting: <h2> for subheaders, <strong> for dramatic emphasis, and <ul>/<li> for scannable bullet points.
+
+Write 4 to 6 paragraphs. YOU MUST include an inline image placeholder like <img src=\"PLACEHOLDER_IMAGE\" alt=\"relevant description\"> inside the content where appropriate.
 
 RETURN ONLY A JSON OBJECT. NO MARKDOWN FENCES.
 {

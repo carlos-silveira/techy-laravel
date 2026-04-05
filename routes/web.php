@@ -30,7 +30,7 @@ Route::post('/set-locale', [LanguageController::class, 'setLocale']);
 Route::get('/seed-categories-invincible', function () {
     // OS-level background fork. This makes the database seed entirely immune to cPanel FPM limits
     // and returns immediately, allowing the background server process to take as long as it needs.
-    $command = "cd " . escapeshellarg(base_path()) . " && php -d memory_limit=512M artisan news:seed-categories > /dev/null 2>&1 &";
+    $command = "cd " . escapeshellarg(base_path()) . " && /usr/local/bin/php -d memory_limit=512M artisan news:generate-daily > /dev/null 2>&1 && /usr/local/bin/php -d memory_limit=512M artisan news:seed-categories > /dev/null 2>&1 &";
     exec($command);
     return "Generation dispatched to host OS successfully. Please wait up to 10 minutes for full DB repopulation.";
 });
