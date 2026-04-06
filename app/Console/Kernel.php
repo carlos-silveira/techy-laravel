@@ -23,6 +23,9 @@ class Kernel extends ConsoleKernel
 
         // AI QA Editor: Sweeps through recently published articles to polish them
         $schedule->command('article:polish')->everyFourHours()->timezone('America/Mexico_City');
+        
+        // CTO Audience Growth Engine: Slowly drip-feed backlog articles to Twitter every 2 hours to beat algorithm limits
+        $schedule->command('social:sync-backlog', ['--limit' => 2])->everyTwoHours()->timezone('America/Mexico_City');
     }
 
     /**
