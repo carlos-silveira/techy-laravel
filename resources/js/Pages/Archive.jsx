@@ -6,6 +6,7 @@ import axios from 'axios';
 import { Loader2, Archive as ArchiveIcon, BookOpen } from 'lucide-react';
 import CommandPalette from '@/Components/CommandPalette';
 import Navbar from '@/Components/Navbar';
+import PublicFooter from '@/Components/PublicFooter';
 import useLanguage from '@/Hooks/useLanguage';
 
 /**
@@ -219,17 +220,7 @@ export default function Archive({ articles: originalArticles, currentTag, popula
                 </div>
             </main>
 
-            <footer className="border-t border-black/5 dark:border-white/5 py-12 relative z-10 transition-colors duration-500">
-                <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
-                    <img src="/img/logo_wbc.png" alt="Techy News" className="h-7 w-auto opacity-50 hover:opacity-100 transition-opacity dark:brightness-100 brightness-0" />
-                    <p className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-700">© 2026 Carlos Silveira</p>
-                    <div className="flex space-x-8">
-                        <Link href="/" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors">{__('Home')}</Link>
-                        <Link href="/archive" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors">{__('Archive')}</Link>
-                        <a href="https://github.com/carlos-silveira" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors">GitHub</a>
-                    </div>
-                </div>
-            </footer>
+            <PublicFooter />
         </div>
     );
 }

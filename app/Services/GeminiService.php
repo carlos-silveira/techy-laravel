@@ -148,7 +148,7 @@ Generate a refactored version strictly following this JSON format:
 {
   \"titular\": \"Catchy, direct headline. Max 12 words.\",
   \"tldr_twitter\": \"Summary in under 280 characters. Impactful, independent context.\",
-  \"cuerpo_noticia\": \"2 to 3 short paragraphs (max 4 lines each). Direct, slightly sarcastic/entertaining but 100% informative. Explain 'why it matters' without fluff. Use basic Markdown (**bold**) for keywords. YOU MUST include an inline image placeholder like <img src=\\\"https://source.unsplash.com/800x400/?technology,ai\\\" alt=\\\"relevant description\\\"> inside the content.\",
+  \"cuerpo_noticia\": \"2 to 3 short paragraphs (max 4 lines each). Direct, professional, and deeply investigative. Zero sarcasm, no jokes, 100% serious and informative. Explain 'why it matters' analytically. Use basic Markdown (**bold**) for keywords. YOU MUST include an inline image placeholder like <img src=\\\"https://source.unsplash.com/800x400/?technology,ai\\\" alt=\\\"relevant description\\\"> inside the content.\",
   \"snippet_codigo\": \"OPTIONAL. Include a code block ONLY if it adds real value (e.g., terminal command, API JSON, config). If business news, leave null. NO joke code.\",
   \"lenguaje_snippet\": \"Language of the snippet (e.g., bash, json, python). Null if snippet is null.\",
   \"sugerencia_imagen\": \"Short English prompt for a text-to-image model for the cover image. Descriptive and visually appealing.\",
@@ -194,7 +194,7 @@ Based on our site's latest published articles below:
 
 Write a punchy, engaging 'Daily Brief' summarizing these exact articles. 
 Keep it to exactly 2 short paragraphs. 
-Tone: Entertaining, insightful, no-fluff. Like a quick update to a developer friend.
+Tone: Professional, investigative, and objective. No jokes, no sarcasm, pure journalistic integrity.
 
 CRITICAL RULE: You MUST create inline HTML hyperlinks to the articles you mention.
 Use this format: <a href=\"/article/THE-SLUG-HERE\" class=\"font-bold text-primary hover:text-purple-500 underline transition-colors decoration-primary/30 underline-offset-4\">The Article Title or relevant text</a>
@@ -227,7 +227,7 @@ CRITICAL EDITORIAL RULE: You MUST strictly write about pure {$category} topics. 
 TONE & STYLE:
 1. Start with a punchy, controversial, or highly engaging HOOK. No boring introductions.
 2. Focus heavily on 'Why this actually matters' and the human/industry impact, not just dry specifications.
-3. Use a modern, ultra-readable, and slightly witty tone (similar to TechCrunch, The Verge, or Casey Newton).
+3. Use a serious, authoritative, and deeply investigative journalistic tone (similar to Reuters or Bloomberg). Absolutely NO jokes, NO sarcasm, and NO informal filler.
 4. Use high-impact HTML formatting: <h2> for subheaders, <strong> for dramatic emphasis, and <ul>/<li> for scannable bullet points.
 
 Write 4 to 6 paragraphs. YOU MUST include an inline image placeholder like <img src=\"PLACEHOLDER_IMAGE\" alt=\"relevant description\"> inside the content where appropriate.
