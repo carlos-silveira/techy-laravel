@@ -1,0 +1,32 @@
+name: Mass Generate Articles (AdSense Prep)
+
+on:
+  workflow_dispatch:
+    inputs:
+      runs:
+        description: 'Number of times to run the seed command (each run creates 6 articles)'
+        required: true
+        default: '5'
+
+jobs:
+  generate:
+    name: 🧠 Generate Content
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚀 Trigger Generation on Production
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: "66.29.148.140"
+          username: "baifywfnnq"
+          port: "21098"
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/baifywfnnq/techynews.lat
+            echo "Starting mass generation of AI Articles..."
+            for i in {1..${{ github.event.inputs.runs }}}
+            do
+              echo "Run $i"
+              php artisan news:seed-categories
+            done
+            php artisan cache:clear
+            echo "✅ Mass generation complete"

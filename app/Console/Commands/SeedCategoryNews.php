@@ -27,9 +27,9 @@ class SeedCategoryNews extends Command
      */
     public function handle(GeminiService $geminiService, NewsService $newsService)
     {
-        $this->info('🗑  Cleaning up articles older than 3 days...');
-        \App\Models\Article::where('created_at', '<', now()->subDays(3))->delete();
-        \Illuminate\Support\Facades\Artisan::call('cache:clear');
+        $this->info('🗑  Skipping cleanup: Accumulating volume for AdSense...');
+        // \App\Models\Article::where('created_at', '<', now()->subDays(3))->delete();
+        // \Illuminate\Support\Facades\Artisan::call('cache:clear');
 
         $this->info('📰 Fetching real news context...');
         $newsItems = $newsService->fetchTodayTechNews();
