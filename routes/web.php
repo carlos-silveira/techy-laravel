@@ -23,8 +23,12 @@ use App\Http\Controllers\LanguageController;
 
 Route::get('/', [PublicController::class, 'index']);
 Route::get('/article/{slug}', [PublicController::class, 'show']);
+Route::get('/sitemap.xml', [App\Http\Controllers\SitemapController::class, 'index']);
+
 Route::get('/about', [AboutController::class, 'index']);
 Route::get('/archive', [ArchiveController::class, 'index']);
+Route::get('/terms', function () { return inertia('Terms'); });
+Route::get('/privacy', function () { return inertia('Privacy'); });
 Route::post('/set-locale', [LanguageController::class, 'setLocale']);
 
 Route::get('/seed-categories-invincible', function () {

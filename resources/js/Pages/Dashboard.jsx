@@ -454,7 +454,7 @@ function WizardView({ onComplete, onSwitchToEditor }) {
 /* ──────────────────────────────────────────────
    MAIN DASHBOARD COMPONENT
    ────────────────────────────────────────────── */
-export default function Dashboard({ auth, articles: initialArticles }) {
+export default function Dashboard({ auth, articles: initialArticles, analytics }) {
     const [articles, setArticles] = useState(initialArticles || []);
     const [title, setTitle] = useState('');
     const [richContent, setRichContent] = useState(null);
@@ -748,6 +748,10 @@ export default function Dashboard({ auth, articles: initialArticles }) {
                             <Layout className="w-5 h-5" />
                             <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Archives</span>
                         </button>
+                        <button onClick={() => setView('analytics')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'analytics' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white'}`}>
+                            <BarChart2 className="w-5 h-5" />
+                            <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Analytics</span>
+                        </button>
                         <button onClick={() => { resetEditor(); setView('editor'); }} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'editor' && !currentArticleId ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-black/5 dark:bg-white/5 text-black dark:text-white'}`}>
                             <Edit3 className="w-5 h-5 text-primary" />
                             <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Advanced Editor</span>
@@ -798,6 +802,16 @@ export default function Dashboard({ auth, articles: initialArticles }) {
                                 </div>
                             ))}
                         </div>
+                    </div>
+                )}
+
+                {view === 'analytics' && (
+                    <div className="flex-1 overflow-y-auto p-10 md:p-24 max-w-6xl mx-auto w-full">
+                        <div className="mb-20">
+                            <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-4">Live Metrics</h3>
+                            <h2 className="text-5xl font-black tracking-tighter text-gray-900 dark:text-white">Analytics.</h2>
+                        </div>
+                        <AnalyticsChart analyticsData={analytics} />
                     </div>
                 )}
 

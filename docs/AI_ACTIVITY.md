@@ -98,3 +98,11 @@ This file tracks significant architectural changes and UI/UX improvements perfor
 - Stripped the hardcoded strings 'technology abstract neon' from 'Unsplash' which skewed queries into making all posts seemingly identical.
 - Modified 'generateCategoryDraft' to include a 'suggested_cover_query' asking Gemini to suggest exact concrete English words for physical objects related to the news issue.
 - Added an artisan job 'news:update-images' to retrospectively extract highly visual string markers from existing headlines, and executed it across Production to retro-fit all old entries.
+
+## April 05, 2026 - Final Production Polish
+- Created Legal Pages (Terms of Use and Privacy Policy) and integrated them into a new `PublicFooter.jsx` component.
+- Purged real-world brand references from `README.md` to avoid competitor mentioning.
+- Delivered a free, zero-dependency in-house Analytics Tracker by creating a `page_views` migration, `TrackPageView` HTTP middleware, aggregated metrics in `DashboardController`, and visualized total traffic and top articles with Recharts in the React frontend.
+- Implemented dynamic `sitemap.xml` generation and `robots.txt` core files for immediate web indexing.
+- Hardened the editorial boundaries in `GeminiService.php` to demand Bloomberg-style objective investigative journalism, aggressively rejecting sarcasm, fluff, and filler jokes to preserve credibility.
+

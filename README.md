@@ -18,7 +18,7 @@ Techy News isn't just a CMS; it's a **living intelligence ecosystem**. It aggreg
 ## ✨ Core Features
 
 ### 🤖 The Intelligence Pipeline
-- **Automated Synthesis**: Aggregates data from TechCrunch, The Verge, and Hacker News to generate opinionated, 1500-word investigative drafts.
+- **Automated Synthesis**: Aggregates global tech data signals to generate opinionated, 1500-word investigative drafts.
 - **On-the-fly Translation**: Seamlessly translates complex technical content into English, Spanish, and Portuguese while preserving semantic integrity and code blocks.
 - **Semantic Search**: Instant command-palette discovery (Cmd+K) powered by Eloquent and filtered by AI relevance.
 
