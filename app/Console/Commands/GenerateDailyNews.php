@@ -190,8 +190,8 @@ class GenerateDailyNews extends Command
             $query = implode(' ', array_slice(array_values($keywords), 0, 3));
         }
 
-        // Always add 'technology' to bias results toward tech imagery
-        $query = trim($query . ' technology');
+        // Let Unsplash resolve strictly based on the extracted query terms instead of forcing ' technology'
+        $query = trim($query);
 
         try {
             $response = Http::withHeaders([

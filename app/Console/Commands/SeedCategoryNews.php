@@ -97,7 +97,7 @@ class SeedCategoryNews extends Command
             $htmlContent = $this->resolveImagePlaceholders($htmlContent, $category);
             
             // Fetch cover image
-            $coverImageUrl = $this->fetchCoverImage($title, $meta['tags'] ?? [], $category);
+            $coverImageUrl = $this->fetchCoverImage($title, [$draftData['suggested_cover_query'] ?? ''], $category);
             
             $slug = Str::slug($title) . '-' . Str::random(6);
             $wordCount = str_word_count(strip_tags($htmlContent));
@@ -182,8 +182,15 @@ class SeedCategoryNews extends Command
         $accessKey = config('services.unsplash.access_key');
         if (empty($accessKey)) return null;
 
-        // Force broad logical fallback terms so Unsplash ALWAYS finds an aesthetic image
-        $query = trim($category . ' abstract neon technology');
+        $query = trim($tags[0] ?? '');
+        if (empty($query)) {
+            $words = explode(' ', str_replace([':', ',', '.', '!', '?'], '', $title));
+            $stopWords = ['the', 'a', 'an', 'of', 'in', 'for', 'to', 'and', 'is', 'are', 'on', 'with', 'from', 'what', 'how', 'why', 'when'];
+            $keywords = array_filter($words, function ($w) use ($stopWords) {
+                return strlen($w) > 3 && !in_array(strtolower($w), $stopWords);
+            });
+            $query = implode(' ', array_slice(array_values($keywords), 0, 2));
+        }
 
         try {
             $response = Http::withHeaders([

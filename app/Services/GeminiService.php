@@ -236,7 +236,8 @@ RETURN ONLY A JSON OBJECT. NO MARKDOWN FENCES.
 {
   \"title\": \"A catchy, direct headline. Max 12 words.\",
   \"html_content\": \"The full article content in raw HTML. Do NOT use markdown. Ensure it is clean, valid HTML.\",
-  \"category\": \"{$category}\"
+  \"category\": \"{$category}\",
+  \"suggested_cover_query\": \"1 to 3 short concrete English words for Unsplash image search (e.g., 'spacex', 'smartphone lab', 'electric car', 'robot arm'). NO abstract concepts, NO 'neon', NO 'technology'.\"
 }";
 
         $result = $this->callGemini($prompt, true);
@@ -245,6 +246,7 @@ RETURN ONLY A JSON OBJECT. NO MARKDOWN FENCES.
             'title' => $result['title'] ?? "The Future of {$category}",
             'html_content' => $result['html_content'] ?? "<p>Content generation failed.</p>",
             'category' => $result['category'] ?? $category,
+            'suggested_cover_query' => $result['suggested_cover_query'] ?? null,
         ];
     }
 
