@@ -45,6 +45,12 @@ Route::get('/run-image-update', function () {
     return "Mass image updater dispatched. Check /read-seed-log (temporarily repointed to image-update.log)";
 });
 
+Route::get('/run-twitter-sync', function () {
+    $command = "cd " . escapeshellarg(base_path()) . " && /usr/local/bin/php artisan social:sync-backlog > storage/logs/twitter-sync.log 2>&1 &";
+    exec($command);
+    return "Twitter backlog sync dispatched successfully. Posting up to 10 articles in the background. Check Twitter!";
+});
+
 Route::get('/sysinfo', function () {
     return "<pre>" .
            "PHP Version: " . phpversion() . "\n" .
