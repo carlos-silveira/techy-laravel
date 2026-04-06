@@ -1,0 +1,32 @@
+{
+  "mcpServers": {
+    "tavily": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@tavily/mcp-server"
+      ],
+      "env": {
+        "TAVILY_API_KEY": "YOUR_TAVILY_API_KEY_HERE"
+      }
+    },
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7"
+      ],
+      "env": {
+        "UPSTASH_REDIS_REST_URL": "YOUR_REDIS_URL_HERE",
+        "UPSTASH_REDIS_REST_TOKEN": "YOUR_REDIS_TOKEN_HERE"
+      }
+    },
+    "task-master-ai": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "claude-task-master"
+      ]
+    }
+  }
+}

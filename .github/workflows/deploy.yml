@@ -94,7 +94,7 @@ jobs:
           script: |
             # Remove any existing Laravel scheduler cron, then add fresh
             crontab -l 2>/dev/null | grep -v "artisan schedule:run" | crontab -
-            (crontab -l 2>/dev/null; echo "* * * * * cd /home/baifywfnnq/techynews.lat && php artisan schedule:run >> /dev/null 2>&1") | crontab -
+            (crontab -l 2>/dev/null; echo "* * * * * cd /home/baifywfnnq/techynews.lat && /usr/local/bin/php artisan schedule:run >> /dev/null 2>&1") | crontab -
             echo "✅ Laravel scheduler cron registered"
             crontab -l | grep schedule
 

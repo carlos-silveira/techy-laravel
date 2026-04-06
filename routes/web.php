@@ -35,6 +35,12 @@ Route::get('/seed-categories-invincible', function () {
     return "Generation dispatched to host OS successfully. Please wait up to 10 minutes for full DB repopulation.";
 });
 
+Route::get('/run-image-update', function () {
+    $command = "cd " . escapeshellarg(base_path()) . " && /usr/local/bin/php artisan news:update-images > storage/logs/image-update.log 2>&1 &";
+    exec($command);
+    return "Mass image updater dispatched. Check /read-seed-log (temporarily repointed to image-update.log)";
+});
+
 Route::get('/sysinfo', function () {
     return "<pre>" .
            "PHP Version: " . phpversion() . "\n" .
@@ -44,7 +50,12 @@ Route::get('/sysinfo', function () {
 });
 
 Route::get('/read-seed-log', function () {
-    $logPath = storage_path('logs/laravel.log');
+    $logPath = storage_path('logs/image-update.log');
+    if (!file_exists($logPath)) {
+        // Fallback
+        $logPath = storage_path('logs/laravel.log');
+    }
+    
     if (!file_exists($logPath)) {
         return "Log file not found.";
     }

@@ -27,3 +27,7 @@ tests.log
 # SSH Configuration (personal keys and config)
 ~/.ssh/
 .ssh/
+
+# AI Agent Skills
+/.gemini/skills/*
+!/.gemini/skills/.gitkeep
