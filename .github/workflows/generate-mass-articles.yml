@@ -1,12 +1,9 @@
 name: Mass Generate Articles (AdSense Prep)
 
 on:
-  workflow_dispatch:
-    inputs:
-      runs:
-        description: 'Number of times to run the seed command (each run creates 6 articles)'
-        required: true
-        default: '5'
+  push:
+    branches:
+      - main
 
 jobs:
   generate:
@@ -23,7 +20,7 @@ jobs:
           script: |
             cd /home/baifywfnnq/techynews.lat
             echo "Starting mass generation of AI Articles..."
-            for i in {1..${{ github.event.inputs.runs }}}
+            for i in {1..5}
             do
               echo "Run $i"
               php artisan news:seed-categories
