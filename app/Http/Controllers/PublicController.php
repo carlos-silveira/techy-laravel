@@ -55,6 +55,40 @@ class PublicController extends Controller
         $restingMessage = "The intelligence pipeline is resting. Check back later for the latest tech signals.";
         $dailyBrief = Cache::get("homepage_daily_brief_{$locale}");
 
+        // Trending: Top 5 viewed articles in last 7 days
+        $trendingArticles = Cache::remember("homepage_trending_{$locale}", 1800, function () use ($locale) {
+            $ids = \Illuminate\Support\Facades\DB::table('page_views')
+                ->where('created_at', '>=', now()->subDays(7))
+                ->whereNotNull('article_id')
+                ->select('article_id', \Illuminate\Support\Facades\DB::raw('count(*) as total_views'))
+                ->groupBy('article_id')
+                ->orderByDesc('total_views')
+                ->limit(5)
+                ->pluck('article_id');
+
+            if ($ids->isEmpty()) {
+                // Fallback to latest articles if no recent activity data
+                $articles = Article::where('status', 'published')
+                    ->orderByDesc('created_at')
+                    ->limit(5)
+                    ->get();
+            } else {
+                $articles = Article::whereIn('id', $ids)
+                    ->where('status', 'published')
+                    ->get()
+                    ->sortBy(function($a) use ($ids) {
+                        return array_search($a->id, $ids->toArray());
+                    });
+            }
+
+            // Ensure we at least have SOME fallback if absolute view count is also low
+            if ($articles->isEmpty()) {
+                $articles = Article::where('status', 'published')->latest()->limit(5)->get();
+            }
+
+            return $articles->map(fn($a) => $this->translateIfNecessary($a, $locale));
+        });
+
         // If cache failed or is empty, dynamically build a fallback brief to prevent an empty site
         if (empty($dailyBrief) || $dailyBrief === $restingMessage) {
             if ($articles->count() > 0) {
@@ -71,6 +105,7 @@ class PublicController extends Controller
         return Inertia::render('Welcome', [
             'editorsChoice' => $editorsChoice,
             'articles' => $articles,
+            'trendingArticles' => $trendingArticles,
             'dailyBrief' => $dailyBrief,
         ]);
     }
