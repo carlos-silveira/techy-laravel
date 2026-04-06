@@ -11,6 +11,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import CommandPalette from '@/Components/CommandPalette';
 import Navbar from '@/Components/Navbar';
 import PublicFooter from '@/Components/PublicFooter';
+import AdSlot from '@/Components/AdSlot';
 import { ArrowRight, Zap, BookOpen, Clock } from 'lucide-react';
 import useLanguage from '@/Hooks/useLanguage';
 
@@ -371,6 +372,10 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
             </div>
           </section>
         )}
+
+        <section className="px-6 max-w-7xl mx-auto py-12">
+            <AdSlot className="my-8" />
+        </section>
 
         {/* ===== NEWSLETTER ===== */}
         <section className="py-24 px-6 border-t border-black/5 dark:border-white/5">
