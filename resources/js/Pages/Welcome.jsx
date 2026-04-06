@@ -131,40 +131,11 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
       {/* ===== NAVBAR ===== */}
       <Navbar />
 
-      <main className="relative z-10 pt-20">
-
-        {/* ===== DAILY BRIEF (The True TL;DR) ===== */}
-        {dailyBrief && (
-          <section className="relative z-20 max-w-5xl mx-auto px-6 mb-12">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.1 }}
-              className="bg-white/80 dark:bg-[#0a0f1c]/80 backdrop-blur-2xl border border-black/5 dark:border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden"
-            >
-              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[60px] -mr-32 -mt-32"></div>
-              <div className="flex flex-col md:flex-row gap-8 items-start md:items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg">
-                    <Zap className="w-8 h-8 text-white" />
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <h2 className="text-sm font-black uppercase tracking-[0.25em] text-primary mb-3">{__('Daily Briefing')}</h2>
-                  <div 
-                    className="prose dark:prose-invert prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:font-medium prose-p:text-lg md:prose-p:text-xl prose-p:leading-relaxed prose-a:font-bold prose-a:text-primary prose-a:no-underline hover:prose-a:text-purple-500 transition-colors max-w-none"
-                    dangerouslySetInnerHTML={{ __html: dailyBrief }}
-                  />
-                </div>
-              </div>
-            </motion.div>
-          </section>
-        )}
-
-        {/* ===== HERO: FEATURED ARTICLE ===== */}
-        {featured && (
-          <section className="relative min-h-[80vh] flex flex-col justify-end overflow-hidden mb-12">
-            {/* Background image with parallax */}
+      <main className="relative z-10">
+        {/* ===== MASTER HERO SECTION ===== */}
+        <section className="relative flex flex-col justify-end overflow-hidden mb-12 z-20 min-h-[90vh]">
+          {/* Global Hero Background (tied to Featured Story) */}
+          {featured && (
             <motion.div
               className="absolute inset-0"
               style={{ scale: useTransform(scrollYProgress, [0, 0.3], [1.05, 1]) }}
@@ -173,58 +144,92 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
                 className="absolute inset-0 bg-cover bg-center"
                 style={{ backgroundImage: `url(${getFinalImage(featured)})` }}
               />
-              {/* Multi-layer gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#f8f6f6] dark:from-[#02040a] via-[#f8f6f6]/70 dark:via-[#02040a]/70 to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#f8f6f6]/60 dark:from-[#02040a]/60 to-transparent" />
+              {/* Multi-layer gradient overlay to fade into page background smoothly */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#f8f6f6] dark:from-[#02040a] via-[#f8f6f6]/80 dark:via-[#02040a]/80 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#f8f6f6]/80 dark:from-[#02040a]/80 to-transparent" />
             </motion.div>
+          )}
 
-            {/* Hero content */}
-            <div className="relative z-10 max-w-7xl mx-auto px-6 pb-20 w-full">
-              <motion.div
-                initial={{ opacity: 0, y: 60 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-                className="max-w-3xl"
-              >
+          {/* Master Content Wrapper wrapper */}
+          <div className="relative z-30 max-w-7xl mx-auto px-6 pt-12 pb-20 w-full flex flex-col justify-between min-h-[85vh]">
+            
+            {/* TOP: DAILY BRIEF (The True TL;DR) */}
+            <div>
+              {dailyBrief && (
                 <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.1 }}
-                  className="inline-flex items-center gap-3 bg-primary/10 border border-primary/20 rounded-full px-5 py-2 mb-8 backdrop-blur-md"
+                  className="bg-white/80 dark:bg-[#0a0f1c]/80 backdrop-blur-2xl border border-black/5 dark:border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden max-w-5xl mx-auto mb-16"
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">{__('Featured Story')}</span>
-                </motion.div>
-
-                <Link href={`/article/${featured.slug}`}>
-                  <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[0.9] mb-6 text-black dark:text-white hover:text-primary transition-colors duration-500 cursor-pointer">
-                    {featured.title}
-                  </h1>
-                </Link>
-
-                <p className="text-xl text-gray-600 dark:text-gray-400 font-light leading-relaxed mb-10 max-w-2xl">
-                  {featured.ai_summary}
-                </p>
-
-                <div className="flex items-center gap-8">
-                  <Link
-                    href={`/article/${featured.slug}`}
-                    className="inline-flex items-center gap-3 bg-black dark:bg-white text-white dark:text-black font-black px-8 py-4 rounded-xl hover:scale-105 transition-transform shadow-[0_0_40px_rgba(255,255,255,0.15)] uppercase tracking-wider text-sm group"
-                  >
-                    {__('Read Story')}
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                  <div className="flex items-center gap-2 text-gray-500 text-xs font-black uppercase tracking-widest">
-                    <Clock className="w-4 h-4" />
-                    {featured.reading_time_minutes || '5'} {__('min read')}
-                    <span className="mx-2">·</span>
-                    {dayjs(featured.updated_at).fromNow()}
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[60px] -mr-32 -mt-32"></div>
+                  <div className="flex flex-col md:flex-row gap-8 items-start md:items-center">
+                    <div className="flex-shrink-0">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg">
+                        <Zap className="w-8 h-8 text-white" />
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <h2 className="text-sm font-black uppercase tracking-[0.25em] text-primary mb-3">{__('Daily Briefing')}</h2>
+                      <div 
+                        className="prose dark:prose-invert prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:font-medium prose-p:text-lg lg:prose-p:text-xl prose-p:leading-relaxed prose-a:font-bold prose-a:text-primary hover:prose-a:text-purple-500 transition-colors max-w-none"
+                        dangerouslySetInnerHTML={{ __html: dailyBrief }}
+                      />
+                    </div>
                   </div>
-                </div>
-              </motion.div>
+                </motion.div>
+              )}
             </div>
-          </section>
-        )}
+
+            {/* BOTTOM: FEATURED ARTICLE */}
+            <div>
+              {featured && (
+                <motion.div
+                  initial={{ opacity: 0, y: 60 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+                  className="max-w-3xl"
+                >
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.8, delay: 0.1 }}
+                    className="inline-flex items-center gap-3 bg-primary/10 border border-primary/20 rounded-full px-5 py-2 mb-8 backdrop-blur-md"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">{__('Featured Story')}</span>
+                  </motion.div>
+
+                  <Link href={`/article/${featured.slug}`}>
+                    <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[0.9] mb-6 text-black dark:text-white hover:text-primary transition-colors duration-500 cursor-pointer">
+                      {featured.title}
+                    </h1>
+                  </Link>
+
+                  <p className="text-lg md:text-xl text-gray-700 dark:text-gray-300 font-light leading-relaxed mb-10 max-w-2xl drop-shadow-sm">
+                    {featured.ai_summary}
+                  </p>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-8">
+                    <Link
+                      href={`/article/${featured.slug}`}
+                      className="inline-flex items-center justify-center gap-3 bg-black dark:bg-white text-white dark:text-black font-black px-8 py-4 rounded-xl hover:scale-105 transition-transform shadow-[0_0_40px_rgba(255,255,255,0.15)] uppercase tracking-wider text-sm group"
+                    >
+                      {__('Read Story')}
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </Link>
+                    <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 text-xs font-black uppercase tracking-widest bg-white/20 dark:bg-black/20 backdrop-blur-md px-4 py-3 rounded-xl border border-black/5 dark:border-white/5">
+                      <Clock className="w-4 h-4" />
+                      {featured.reading_time_minutes || '5'} {__('min read')}
+                      <span className="mx-2">·</span>
+                      {dayjs(featured.updated_at).fromNow()}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </div>
+          </div>
+        </section>
 
         {/* ===== EDITORS CHOICE ===== */}
         {editorsChoice && editorsChoice.length > 0 && (
