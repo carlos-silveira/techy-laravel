@@ -488,12 +488,7 @@ Return exactly a JSON object (no markdown fences):
                     $text = $response->json()['candidates'][0]['content']['parts'][0]['text'] ?? '';
 
                     if ($expectJson) {
-                        $text = str_replace(['```json', '```', '```JSON'], '', $text);
-                        $decoded = json_decode($text, true);
-                        if (!$decoded) {
-                            Log::error("Gemini JSON Decode failed. Raw string: \n" . $text);
-                        }
-                        return $decoded ?: [];
+                        return $this->extractJson($text);
                     }
 
                     return trim($text);
