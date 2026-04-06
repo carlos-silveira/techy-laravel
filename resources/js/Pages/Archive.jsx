@@ -207,9 +207,11 @@ export default function Archive({ articles: originalArticles, currentTag, popula
                                             <h2 className="text-2xl font-black text-black dark:text-white leading-tight group-hover:text-primary transition-colors tracking-tight line-clamp-2">
                                                 {article.title}
                                             </h2>
-                                            <p className="mt-4 text-gray-600 dark:text-gray-400 font-light line-clamp-2 leading-relaxed text-sm">
-                                                {article.ai_summary || __("Explore this synthesized intelligence narrative.")}
-                                            </p>
+                                            {article.ai_summary && (
+                                                <p className="mt-4 text-gray-600 dark:text-gray-400 font-light line-clamp-2 leading-relaxed text-sm">
+                                                    {article.ai_summary}
+                                                </p>
+                                            )}
 
                                             <div className="mt-6 flex flex-wrap gap-2">
                                                 {article.tags && article.tags.slice(0, 3).map(tag => (
