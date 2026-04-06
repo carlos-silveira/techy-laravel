@@ -93,3 +93,8 @@ This file tracks significant architectural changes and UI/UX improvements perfor
 - Fixed automatic CRON scheduling bug by changing raw 'php' execution string to the absolute cPanel PHP 8.2 host path ('/usr/local/bin/php'), successfully detaching from the base OS defaults.
 - Stopped the daily database genocide trigger: 'Article::truncate()' was replaced with a rolling 3-day TTL ('subDays(3)->delete()') allowing 'news:generate-daily' articles to survive the 'news:seed-categories' cleanup phase.
 - Reconfigured 'GeminiService' prompt matrices to assume the persona of a sassy, ultra-modern tech-journalist (akin to The Verge), severely boosting headline punchiness and the 'Why This Matters' semantic weight of the content.
+
+## April 05, 2026 - Illustrative Cover Imagery Refactor
+- Stripped the hardcoded strings 'technology abstract neon' from 'Unsplash' which skewed queries into making all posts seemingly identical.
+- Modified 'generateCategoryDraft' to include a 'suggested_cover_query' asking Gemini to suggest exact concrete English words for physical objects related to the news issue.
+- Added an artisan job 'news:update-images' to retrospectively extract highly visual string markers from existing headlines, and executed it across Production to retro-fit all old entries.
