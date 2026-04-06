@@ -50,14 +50,26 @@ const findFirstImage = (content) => {
   return null;
 };
 
-const getFinalImage = (article) => {
-  if (article.cover_image_path) return article.cover_image_path;
-  const contentImage = findFirstImage(article.content);
-  if (contentImage) return contentImage;
+const getFinalImage = (article, width = 1200) => {
+  let url = article.cover_image_path;
+  if (!url) {
+    url = findFirstImage(article.content);
+  }
   
   // Generic tech fallbacks based on keywords or slug
-  if (article.slug.includes('not-paid-to-write-code')) return 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=2072';
-  return 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=2072';
+  if (!url) {
+    url = article.slug.includes('not-paid-to-write-code') 
+      ? 'https://images.unsplash.com/photo-1498050108023-c5249f4df085'
+      : 'https://images.unsplash.com/photo-1451187580459-43490279c0fa';
+  }
+
+  // Inject Unsplash optimization parameters if it's an unsplash URL
+  if (url.includes('unsplash.com')) {
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}auto=format&fit=crop&q=80&w=${width}`;
+  }
+
+  return url;
 };
 
 export default function Welcome({ articles, editorsChoice, dailyBrief }) {
@@ -115,6 +127,13 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
         <meta property="og:title" content="Techy News — AI-Powered Tech Intelligence" />
         <meta property="og:description" content="A cutting-edge, AI-powered journalism platform delivering deep technical research and automated synthesis of global tech news." />
         <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://techynews.lat" />
+        <meta property="og:image" content="https://techynews.lat/img/logo_wbc.png" />
+        <meta property="og:site_name" content="Techy News" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:site" content="@TechyNewsLat" />
+        <meta name="twitter:title" content="Techy News — AI-Powered Tech Intelligence" />
+        <meta name="twitter:description" content="AI-powered journalism platform delivering deep technical research and automated synthesis of global tech news." />
       </Head>
       <CommandPalette />
 
@@ -141,8 +160,8 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
               style={{ scale: useTransform(scrollYProgress, [0, 0.3], [1.05, 1]) }}
             >
               <div
-                className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: `url(${getFinalImage(featured)})` }}
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-[10s] group-hover:scale-110"
+                style={{ backgroundImage: `url(${getFinalImage(featured, 1600)})` }}
               />
               {/* Multi-layer gradient overlay to fade into page background smoothly */}
               <div className="absolute inset-0 bg-gradient-to-t from-[#f8f6f6] dark:from-[#02040a] via-[#f8f6f6]/80 dark:via-[#02040a]/80 to-transparent" />
@@ -259,7 +278,7 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
                     <div className="relative rounded-[2rem] overflow-hidden bg-white/[0.6] dark:bg-white/[0.03] border border-black/5 dark:border-white/5 group-hover:border-amber-400/30 transition-all duration-500 shadow-sm dark:shadow-none">
                       <div
                         className="h-52 bg-gradient-to-br from-white/10 to-black/50 bg-cover bg-center relative overflow-hidden"
-                        style={{ backgroundImage: `url(${getFinalImage(article)})` }}
+                        style={{ backgroundImage: `url(${getFinalImage(article, 600)})` }}
                       >
                         <div className="absolute inset-0 bg-gradient-to-t from-[#02040a] to-transparent opacity-60" />
                         <div className="absolute inset-0 group-hover:bg-amber-400/5 transition-colors duration-500" />
@@ -329,7 +348,7 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
                       <div className={`h-full bg-white/[0.6] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 group-hover:border-primary/30 rounded-[2rem] overflow-hidden transition-all duration-500 flex flex-col shadow-sm dark:shadow-none ${isLarge ? 'min-h-[500px]' : 'min-h-[280px]'}`}>
                         <div
                           className={`w-full bg-cover bg-center flex-shrink-0 relative overflow-hidden ${isLarge ? 'h-72' : 'h-40'}`}
-                          style={{ backgroundImage: `url(${getFinalImage(article)})` }}
+                          style={{ backgroundImage: `url(${getFinalImage(article, isLarge ? 1200 : 600)})` }}
                         >
                           <div className="absolute inset-0 bg-gradient-to-t from-[#02040a] via-transparent to-transparent" />
                           <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-colors duration-700 mix-blend-overlay" />

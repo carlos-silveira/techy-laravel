@@ -125,16 +125,32 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
         return null;
     };
 
+    const getFinalImage = (article, width = 1600) => {
+        let url = article.cover_image_path;
+        if (!url) {
+            url = findFirstImage(article.content);
+        }
+        
+        // Generic tech fallbacks
+        if (!url) {
+            url = article.slug.includes('not-paid-to-write-code') 
+                ? 'https://images.unsplash.com/photo-1498050108023-c5249f4df085'
+                : 'https://images.unsplash.com/photo-1451187580459-43490279c0fa';
+        }
+
+        if (url && url.includes('unsplash.com')) {
+            const separator = url.includes('?') ? '&' : '?';
+            return `${url}${separator}auto=format&fit=crop&q=80&w=${width}`;
+        }
+
+        return url;
+    };
+
+    const finalCoverImage = getFinalImage(article);
     const cleanHtml = typeof article.content === 'string' ? sanitizeContent(article.content) : null;
     const parsedContent = (typeof article.content === 'string' && !cleanHtml) ? (() => { 
         try { return JSON.parse(article.content); } catch { return { type: 'doc', content: [] }; }
     })() : (article.content || { type: 'doc', content: [] });
-
-    // Fallback image logic
-    const contentImage = findFirstImage(article.content);
-    const finalCoverImage = article.cover_image_path || contentImage || (article.slug.includes('not-paid-to-write-code') 
-        ? 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=2072'
-        : 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=2072');
 
     const contentString = typeof article.content === 'string' ? article.content : JSON.stringify(article.content);
     const estimatedReadTime = article.reading_time_minutes || Math.max(1, Math.ceil(contentString.split(' ').length / 200));

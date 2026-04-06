@@ -82,14 +82,6 @@ class PublicController extends Controller
     {
         $locale = App::getLocale();
 
-        if ($slug === 'SYSINFO_DEBUG') {
-            \Illuminate\Support\Facades\Artisan::call('route:clear');
-            \Illuminate\Support\Facades\Artisan::call('cache:clear');
-            $logPath = storage_path('logs/laravel.log');
-            $log = file_exists($logPath) ? shell_exec("tail -n 500 " . escapeshellarg($logPath)) : 'No log';
-            return response("<pre>CACHE CLEARED.\nPHP: " . phpversion() . "\nCRON: " . shell_exec('crontab -l') . "\nLOG:\n" . htmlspecialchars($log) . "</pre>");
-        }
-
         $article = Article::where('slug', $slug)
             ->where('status', 'published')
             ->firstOrFail();
@@ -121,97 +113,23 @@ class PublicController extends Controller
      */
     public function translateIfNecessary(Article $article, string $locale): Article
     {
-        // 1. If requested language is English and article is already in English, return it.
-        // 2. If requested language matches article source language, return it.
+        // 1. If matches source language, return it.
         if ($article->language === $locale || ($locale === 'en' && $article->language === 'en')) {
-            // Even if we match, we might want to pre-translate the OTHER mandatory language (ES/EN)
-            $this->preTranslateMandatoryLocales($article);
             return $article;
         }
 
         $translations = $article->translations ?? [];
 
+        // 2. If translation exists in cache, return it.
         if (isset($translations[$locale])) {
             $article->title = $translations[$locale]['title'];
             $article->ai_summary = $translations[$locale]['summary'];
             $article->content = $translations[$locale]['content'];
-            
-            // Ensure the OTHER mandatory language is also being prepared
-            $this->preTranslateMandatoryLocales($article);
-            
             return $article;
         }
 
-        // Trigger AI translation for the current request
-        $article = $this->performTranslation($article, $locale);
-        
-        // Ensure both ES and EN are cached
-        $this->preTranslateMandatoryLocales($article);
-
-        return $article;
-    }
-
-    /**
-     * Pre-translate into mandatory languages (EN and ES) to minimize future Gemini calls.
-     */
-    private function preTranslateMandatoryLocales(Article $article): void
-    {
-        $mandatoryLocales = ['en', 'es'];
-        foreach ($mandatoryLocales as $mandatoryLocale) {
-            if ($article->language !== $mandatoryLocale && !isset(($article->translations ?? [])[$mandatoryLocale])) {
-                // Pre-translate this language
-                // Note: In a real environment with high traffic, this should be a background Job.
-                // We'll perform it now to satisfy the "always cache" requirement.
-                $this->performTranslation($article, $mandatoryLocale);
-            }
-        }
-    }
-
-    /**
-     * Perform the actual Gemini translation and save it.
-     */
-    private function performTranslation(Article $article, string $locale): Article
-    {
-        try {
-            // Skip if it's already translated
-            $translations = $article->translations ?? [];
-            if (isset($translations[$locale])) {
-                return $article;
-            }
-
-            // Also skip if it's the original language
-            if ($article->language === $locale) {
-                return $article;
-            }
-
-            $result = $this->geminiService->translateArticle(
-                $article->title,
-                $article->ai_summary ?? '',
-                $article->content ?? '',
-                $locale
-            );
-
-            // Robustly unwrap any potential double-encoded content from AI
-            $cleanTitle = $this->recursivelyUnwrap($result['title'] ?? $article->title);
-            $cleanSummary = $this->recursivelyUnwrap($result['summary'] ?? $article->ai_summary);
-            $cleanContent = $this->recursivelyUnwrap($result['content'] ?? $article->content);
-
-            // Save to DB for future use
-            $translations[$locale] = [
-                'title' => $cleanTitle,
-                'summary' => $cleanSummary,
-                'content' => $cleanContent,
-            ];
-            
-            $article->update(['translations' => $translations]);
-
-            // Apply to current instance
-            $article->title = $cleanTitle;
-            $article->ai_summary = $cleanSummary;
-            $article->content = $cleanContent;
-        } catch (\Exception $e) {
-            Log::error("Translation failed for article {$article->id} to {$locale}: " . $e->getMessage());
-        }
+        // 3. Trigger background translation for the future, but return original for now (non-blocking)
+        \App\Jobs\TranslateArticle::dispatch($article, $locale);
 
         return $article;
     }
