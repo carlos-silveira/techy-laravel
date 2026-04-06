@@ -118,6 +118,8 @@ class SeedCategoryNews extends Command
                 'cover_image_path' => $coverImageUrl,
             ]);
 
+            \App\Events\ArticlePublished::dispatch($article);
+
             $this->info("✅ Saved article: '{$title}'");
             
             // Translation

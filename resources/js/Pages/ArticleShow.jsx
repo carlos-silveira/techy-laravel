@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import CommandPalette from '@/Components/CommandPalette';
 import Navbar from '@/Components/Navbar';
 import PublicFooter from '@/Components/PublicFooter';
+import AdSlot from '@/Components/AdSlot';
 import useLanguage from '@/Hooks/useLanguage';
 
 export default function ArticleShow({ article, relatedArticles, auth }) {
@@ -238,6 +239,9 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
                         )}
                     </div>
                 </motion.article>
+
+                {/* Article Footer Ad Slot */}
+                <AdSlot className="mt-20 mb-8" />
 
                 {/* Read Next Section */}
                 {relatedArticles && relatedArticles.length > 0 && (

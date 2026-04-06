@@ -109,6 +109,8 @@ class GenerateDailyNews extends Command
             'cover_image_path' => $coverImageUrl,
         ]);
 
+        \App\Events\ArticlePublished::dispatch($article);
+
         $this->info('✅ Article published: "' . $idea['title'] . '"');
 
         // PRE-TRANSLATION for ES and PT
