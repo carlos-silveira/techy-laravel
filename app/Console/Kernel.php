@@ -15,11 +15,14 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // Generates the daily briefing
-        $schedule->command('news:generate-daily')->dailyAt('07:00')->timezone('America/Mexico_City');
+        // Generate the rolling daily briefing every 4 hours
+        $schedule->command('news:generate-daily')->everyFourHours()->timezone('America/Mexico_City');
         
-        // Fully wipe and regenerate the category articles database every morning
-        $schedule->command('news:seed-categories')->dailyAt('07:05')->timezone('America/Mexico_City');
+        // Stockpile new AI articles for categories every 4 hours
+        $schedule->command('news:seed-categories')->everyFourHours()->timezone('America/Mexico_City');
+
+        // AI QA Editor: Sweeps through recently published articles to polish them
+        $schedule->command('article:polish')->everyFourHours()->timezone('America/Mexico_City');
     }
 
     /**
