@@ -106,3 +106,14 @@ This file tracks significant architectural changes and UI/UX improvements perfor
 - Implemented dynamic `sitemap.xml` generation and `robots.txt` core files for immediate web indexing.
 - Hardened the editorial boundaries in `GeminiService.php` to demand Bloomberg-style objective investigative journalism, aggressively rejecting sarcasm, fluff, and filler jokes to preserve credibility.
 
+
+## April 05, 2026 - CTO Sprint: Security, SEO, & Growth Engine
+- **SECURITY HARDENING**: Replaced 6 publicly-exposed admin routes (`/force-migrate`, `/sysinfo`, `/read-seed-log`, `/sync.php`, etc.) with token-gated `/admin/*` endpoints requiring `?token=<ADMIN_SECRET>`. Deleted raw PHP backdoor `public/sync.php`.
+- **SEO: Twitter Cards**: Added `twitter:card=summary_large_image`, `twitter:title`, `twitter:description`, `twitter:image`, `twitter:site` meta tags to `ArticleShow.jsx`. Tweets will now render as rich visual preview cards instead of plain links.
+- **SEO: JSON-LD Structured Data**: Added full `schema.org/NewsArticle` markup to every article page for Google News indexing eligibility.
+- **SEO: Complete OG Tags**: Added missing `og:url`, `og:description`, `og:site_name` to article pages.
+- **FOOTER**: Added Twitter/X social link (`@TechyNewsLat`) to `PublicFooter.jsx` for cross-platform audience discoverability.
+- **AI QA Bot**: Created `article:polish` artisan command + `polishArticleHtml()` in `GeminiService` + `qa_passed` database column. Scheduled every 4 hours via Cron.
+- **Content Pipeline 4x**: Upgraded all Cron schedules from `dailyAt()` to `everyFourHours()`. Added `social:sync-backlog --limit=2` every 2 hours for autonomous Twitter drip-feeding.
+- **AdSense**: Created `public/ads.txt` with publisher ID `ca-pub-6228787275246149` for Google AdSense domain verification.
+- **Bulk Generation**: Dispatched `news:generate-daily` + `news:seed-categories` on production server via SSH to stockpile content.
