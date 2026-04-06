@@ -143,9 +143,32 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
         <div onMouseMove={handleMouseMove} className="min-h-screen bg-[#f8f6f6] dark:bg-[#02040a] text-black dark:text-white font-sans selection:bg-primary/30 relative overflow-hidden transition-colors duration-500">
             <Head title={`${article.title} - Techy News`}>
                 <meta name="description" content={article.meta_description || article.ai_summary || `${__('Read')} ${article.title} ${__('on Techy News')}.`} />
+                {/* Open Graph */}
                 <meta property="og:title" content={article.title} />
                 <meta property="og:type" content="article" />
                 <meta property="og:image" content={finalCoverImage} />
+                <meta property="og:url" content={`https://techynews.lat/article/${article.slug}`} />
+                <meta property="og:description" content={article.ai_summary || article.meta_description || ''} />
+                <meta property="og:site_name" content="Techy News" />
+                {/* Twitter Card — makes tweets show rich preview cards */}
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content={article.title} />
+                <meta name="twitter:description" content={article.ai_summary || article.meta_description || ''} />
+                <meta name="twitter:image" content={finalCoverImage} />
+                <meta name="twitter:site" content="@TechyNewsLat" />
+                {/* JSON-LD Structured Data — Google News & Search eligibility */}
+                <script type="application/ld+json">{JSON.stringify({
+                    "@context": "https://schema.org",
+                    "@type": "NewsArticle",
+                    "headline": article.title,
+                    "image": [finalCoverImage],
+                    "datePublished": article.created_at,
+                    "dateModified": article.updated_at || article.created_at,
+                    "author": [{ "@type": "Organization", "name": "Techy News", "url": "https://techynews.lat" }],
+                    "publisher": { "@type": "Organization", "name": "Techy News", "logo": { "@type": "ImageObject", "url": "https://techynews.lat/img/logo_wbc.png" } },
+                    "description": article.ai_summary || article.meta_description || '',
+                    "mainEntityOfPage": { "@type": "WebPage", "@id": `https://techynews.lat/article/${article.slug}` }
+                })}</script>
             </Head>
             <CommandPalette />
 
