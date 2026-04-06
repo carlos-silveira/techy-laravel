@@ -92,7 +92,8 @@ class PublicController extends Controller
         // If cache failed or is empty, dynamically build a fallback brief to prevent an empty site
         if (empty($dailyBrief) || $dailyBrief === $restingMessage) {
             if ($articles->count() > 0) {
-                $dailyBrief = "<p><strong>⚡ Breaking Signals:</strong></p><ul>";
+                $signalLabel = $locale === 'es' ? 'Señales de Última Hora' : ($locale === 'pt' ? 'Sinais de Última Hora' : 'Breaking Signals');
+                $dailyBrief = "<p><strong>⚡ {$signalLabel}:</strong></p><ul>";
                 foreach ($articles->take(3) as $a) {
                     $dailyBrief .= "<li><a href='/article/{$a->slug}' class='text-primary-400 hover:text-primary-300 transition-colors'>{$a->title}</a></li>";
                 }
