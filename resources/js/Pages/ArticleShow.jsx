@@ -157,6 +157,18 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
 
     return (
         <div onMouseMove={handleMouseMove} className="min-h-screen bg-[#f8f6f6] dark:bg-[#02040a] text-black dark:text-white font-sans selection:bg-primary/30 relative overflow-hidden transition-colors duration-500">
+            {/* READING PROGRESS BAR */}
+            <div className="fixed top-0 left-0 w-full h-[3px] z-[100] bg-black/5 dark:bg-white/5">
+                <motion.div 
+                    className="h-full bg-gradient-to-r from-primary via-purple-500 to-primary"
+                    style={{ 
+                        width: `${scrollProgress}%`,
+                        boxShadow: scrollProgress > 0 ? '0 0 10px rgba(43,124,238,0.5)' : 'none'
+                    }}
+                    transition={{ type: 'spring', stiffness: 100, damping: 30 }}
+                />
+            </div>
+
             <Head title={`${article.title} - Techy News`}>
                 <meta name="description" content={article.meta_description || article.ai_summary || `${__('Read')} ${article.title} ${__('on Techy News')}.`} />
                 {/* Open Graph */}

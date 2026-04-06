@@ -72,11 +72,10 @@ const getFinalImage = (article, width = 1200) => {
   return url;
 };
 
-export default function Welcome({ articles, editorsChoice, dailyBrief }) {
+export default function Welcome({ articles, editorsChoice, dailyBrief, trendingArticles }) {
   const { __ } = useLanguage();
   const { scrollYProgress } = useScroll();
-
-  // Dynamic Mouse Spotlight
+  const [isScrolled, setIsScrolled] = useState(false);
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const smoothX = useSpring(mouseX, { damping: 50, stiffness: 400 });
@@ -225,29 +224,99 @@ export default function Welcome({ articles, editorsChoice, dailyBrief }) {
               <div className="lg:col-span-5 order-1 lg:order-2">
                 {dailyBrief && (
                   <motion.div
-                    initial={{ opacity: 0, x: 40 }}
-                    animate={{ opacity: 1, x: 0 }}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.8, delay: 0.3 }}
-                    className="bg-white/70 dark:bg-[#0a0f1c]/70 backdrop-blur-3xl border border-white/40 dark:border-white/10 rounded-[2.5rem] p-8 md:p-10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] relative overflow-hidden group hover:bg-white/80 dark:hover:bg-[#0a0f1c]/90 transition-colors duration-500"
+                    className="relative group h-full"
                   >
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[60px] -mr-32 -mt-32 group-hover:bg-primary/20 transition-all duration-700"></div>
-                    <div className="absolute bottom-0 left-0 w-40 h-40 bg-purple-500/10 rounded-full blur-[50px] -ml-20 -mb-20"></div>
+                    {/* Outer Glow */}
+                    <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 to-purple-600/30 rounded-[2.5rem] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
                     
-                    <div className="relative z-10">
-                      <div className="flex items-center gap-4 mb-8 border-b border-black/5 dark:border-white/10 pb-6">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg shadow-primary/20">
-                          <Zap className="w-5 h-5 text-white" />
+                    <div className="relative bg-white/70 dark:bg-[#0a0f1c]/80 backdrop-blur-3xl border border-white/40 dark:border-white/10 rounded-[2.5rem] p-8 md:p-10 shadow-2xl overflow-hidden h-full">
+                      {/* Terminal Scanline Effect */}
+                      <div className="absolute inset-0 pointer-events-none opacity-[0.03] dark:opacity-[0.07] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]" />
+                      
+                      <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-8 border-b border-black/5 dark:border-white/10 pb-6">
+                          <div className="flex items-center gap-4">
+                            <div className="relative">
+                              <div className="w-12 h-12 rounded-xl bg-black dark:bg-white/5 flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform duration-500">
+                                <Zap className="w-6 h-6 text-primary" />
+                              </div>
+                              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-[#0a0f1c] animate-pulse"></div>
+                            </div>
+                            <div>
+                              <h2 className="text-xs font-black uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">{__('Intelligence Feed')}</h2>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="text-sm font-black text-black dark:text-white tracking-tighter uppercase">{__('Daily Briefing')}</span>
+                                <span className="inline-block w-1.5 h-4 bg-primary/40 animate-[blink_1s_infinite]"></span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="hidden sm:flex items-center gap-2 bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-full border border-black/5 dark:border-white/5">
+                            <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-ping"></span>
+                            <span className="text-[9px] font-black uppercase tracking-widest text-gray-500">Live AI Output</span>
+                          </div>
                         </div>
-                        <div>
-                          <h2 className="text-sm font-black uppercase tracking-[0.25em] text-gray-900 dark:text-white">{__('Daily Briefing')}</h2>
-                          <div className="text-xs font-semibold text-primary/80 tracking-widest uppercase mt-1">Real-time Signals</div>
+
+                        {/* SIGNAL CONTENT */}
+                        <div className="prose prose-sm dark:prose-invert max-w-none 
+                          prose-p:text-gray-600 dark:prose-p:text-gray-400 prose-p:font-light prose-p:leading-relaxed
+                          prose-strong:text-black dark:prose-strong:text-white prose-strong:font-black prose-strong:uppercase prose-strong:tracking-widest prose-strong:text-[10px]
+                          prose-ul:list-none prose-ul:p-0 prose-li:p-0 prose-li:mb-4
+                          prose-a:no-underline prose-a:text-primary prose-a:font-bold hover:prose-a:text-primary/80 transition-colors
+                          [&_li]:relative [&_li]:pl-6 [&_li]:before:content-['>'] [&_li]:before:absolute [&_li]:before:left-0 [&_li]:before:text-primary/60 [&_li]:before:font-black [&_li]:before:text-[10px]
+                        ">
+                          <div dangerouslySetInnerHTML={{ __html: dailyBrief }} />
+                        </div>
+
+                        <div className="mt-8 pt-6 border-t border-black/5 dark:border-white/5 flex items-center justify-between">
+                           <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest italic font-mono">
+                             ST-ID: {Math.random().toString(36).substring(7).toUpperCase()}
+                           </div>
+                           <div className="text-[10px] font-black text-primary/60 uppercase tracking-widest">
+                             {dayjs().format('HH:mm:ss')} UTC
+                           </div>
                         </div>
                       </div>
-                      
-                      <div 
-                        className="prose dark:prose-invert prose-p:text-gray-800 dark:prose-p:text-gray-200 prose-p:font-medium prose-p:text-base lg:prose-p:text-lg prose-p:leading-relaxed prose-a:font-bold prose-a:text-primary hover:prose-a:text-purple-500 transition-colors max-w-none marker:text-primary prose-ul:pl-2"
-                        dangerouslySetInnerHTML={{ __html: dailyBrief }}
-                      />
+                    </div>
+                  </motion.div>
+                )}
+                
+                {/* TRENDING MINI SECTION */}
+                {trendingArticles?.length > 0 && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8, delay: 0.2 }}
+                    className="mt-8 pt-8 border-t border-black/5 dark:border-white/5"
+                  >
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-primary mb-6 flex items-center gap-2">
+                       <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
+                       {__('Trending Now')}
+                    </h3>
+                    <div className="space-y-6">
+                      {trendingArticles.map((article, index) => (
+                        <Link 
+                          key={article.id} 
+                          href={`/article/${article.slug}`}
+                          className="flex gap-4 group/item"
+                        >
+                          <span className="text-2xl font-black text-black/10 dark:text-white/10 group-hover/item:text-primary/40 transition-colors leading-none font-mono">
+                            0{index + 1}
+                          </span>
+                          <div>
+                            <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100 group-hover/item:text-primary transition-colors line-clamp-2 leading-snug">
+                              {article.title}
+                            </h4>
+                            <div className="flex items-center gap-2 mt-1 text-[9px] font-black uppercase tracking-widest text-gray-500">
+                              {article.reading_time_minutes || 5} MIN READ
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
                     </div>
                   </motion.div>
                 )}

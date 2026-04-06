@@ -1,0 +1,9 @@
+/* TEAM */
+  CTO: Antigravity (Advanced AI Coding Agent)
+  CEO: Carlos Silveira
+
+/* SITE */
+  Last update: 2026-04-06
+  Language: Spanish, English
+  Tech Stack: Laravel 13, React, Inertia.js, Tailwind, Gemini AI
+  Host: Spaceship.com
