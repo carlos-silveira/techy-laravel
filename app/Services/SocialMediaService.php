@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Article;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Abraham\TwitterOAuth\TwitterOAuth;
 
 class SocialMediaService
 {
@@ -15,30 +16,30 @@ class SocialMediaService
      */
     public function postToTwitter(Article $article)
     {
-        if (!env('TWITTER_CONSUMER_KEY') || !env('TWITTER_ACCESS_TOKEN')) {
-            Log::warning('Twitter post skipped. API Keys missing in .env.');
+        $consumerKey = env('TWITTER_CONSUMER_KEY');
+        $consumerSecret = env('TWITTER_CONSUMER_SECRET');
+        $accessToken = env('TWITTER_ACCESS_TOKEN');
+        $accessTokenSecret = env('TWITTER_ACCESS_TOKEN_SECRET');
+
+        if (!$consumerKey || !$consumerSecret || !$accessToken || !$accessTokenSecret) {
+            Log::warning('Twitter post skipped. OAuth 1.0a API Keys missing in .env.');
             return false;
         }
 
         try {
             $tweetText = $this->formatPostText($article);
             
-            // X/Twitter API v2 endpoint for posting tweets
-            $response = Http::withToken(env('TWITTER_BEARER_TOKEN'))
-                ->withHeaders([
-                    'Authorization' => "Bearer " . env('TWITTER_BEARER_TOKEN'),
-                ]) // Note: Full OAuth 1.0a signature logic is complex, 
-                   // modern developers often use OAuth2 or the V2 Bearer if elevated.
-                   // For a basic implementation, we attempt a standard JSON POST.
-                ->post('https://api.twitter.com/2/tweets', [
-                    'text' => $tweetText
-                ]);
+            // Twitter requires OAuth 1.0a to post tweets; Bearer tokens are read-only.
+            $connection = new TwitterOAuth($consumerKey, $consumerSecret, $accessToken, $accessTokenSecret);
+            $connection->setApiVersion('2');
+            
+            $response = $connection->post("tweets", ["text" => $tweetText], ["jsonPayload" => true]);
 
-            if ($response->successful()) {
+            if ($connection->getLastHttpCode() == 201) {
                 Log::info("Successfully posted to Twitter: {$article->slug}");
                 return true;
             } else {
-                Log::error("Failed to post to Twitter: " . $response->body());
+                Log::error("Failed to post to Twitter: " . json_encode($response));
                 return false;
             }
         } catch (\Exception $e) {
