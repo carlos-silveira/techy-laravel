@@ -5,8 +5,8 @@ import React, { useEffect, useRef } from 'react';
  * It remains invisible if no VITE_ADSENSE_ID is configured in the .env file.
  */
 export default function AdSlot({ 
-    adClient = import.meta.env.VITE_ADSENSE_ID, 
-    adSlot = import.meta.env.VITE_ADSENSE_DEFAULT_SLOT, 
+    adClient = import.meta.env.VITE_ADSENSE_ID || 'ca-pub-6228787275246149', 
+    adSlot = import.meta.env.VITE_ADSENSE_DEFAULT_SLOT || null, 
     format = 'auto', 
     responsive = 'true',
     className = ''
@@ -15,7 +15,7 @@ export default function AdSlot({
     const adRef = useRef(null);
 
     useEffect(() => {
-        if (!adClient || !adSlot) return;
+        if (!adClient) return;
 
         try {
             // Push the ad to AdSense on mount if not already pushed
@@ -28,12 +28,12 @@ export default function AdSlot({
     }, [adClient, adSlot]);
 
     // If keys are missing and not in dev mode, render nothing to avoid breaking the UI
-    if ((!adClient || !adSlot) && !isDev) {
+    if (!adClient && !isDev) {
         return null;
     }
 
     // In DEV mode, if keys are missing, render a placeholder block to help with layout design
-    if ((!adClient || !adSlot) && isDev) {
+    if (!adClient && isDev) {
         return (
             <div className={`w-full flex items-center justify-center bg-gray-200 dark:bg-white/5 border border-dashed border-gray-400 dark:border-white/20 rounded-xl overflow-hidden min-h-[100px] ${className}`}>
                 <span className="text-gray-500 font-bold uppercase tracking-widest text-xs opacity-50">
@@ -49,7 +49,7 @@ export default function AdSlot({
                 className="adsbygoogle"
                 style={{ display: 'block' }}
                 data-ad-client={adClient}
-                data-ad-slot={adSlot}
+                {...(adSlot ? { 'data-ad-slot': adSlot } : {})}
                 data-ad-format={format}
                 data-full-width-responsive={responsive}
                 ref={adRef}

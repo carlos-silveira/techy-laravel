@@ -44,9 +44,7 @@
     </script>
 
     <!-- Monetization (Google AdSense) -->
-    @if(env('VITE_ADSENSE_ID'))
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ env('VITE_ADSENSE_ID') }}" crossorigin="anonymous"></script>
-    @endif
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6228787275246149" crossorigin="anonymous"></script>
 
     <!-- Scripts -->
     @routes
