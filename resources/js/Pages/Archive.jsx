@@ -34,11 +34,23 @@ const findFirstImage = (content) => {
   return null;
 };
 
-const getFinalImage = (article) => {
-  if (article.cover_image_path) return article.cover_image_path;
-  const contentImage = findFirstImage(article.content);
-  if (contentImage) return contentImage;
-  return 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=2072';
+const getFinalImage = (article, width = 600) => {
+  let url = article.cover_image_path;
+  if (!url) {
+    url = findFirstImage(article.content);
+  }
+  
+  // Generic tech fallbacks
+  if (!url) {
+    url = 'https://images.unsplash.com/photo-1451187580459-43490279c0fa';
+  }
+
+  if (url.includes('unsplash.com')) {
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}auto=format&fit=crop&q=80&w=${width}`;
+  }
+
+  return url;
 };
 
 export default function Archive({ articles: originalArticles, currentTag, popularTags }) {
@@ -94,7 +106,14 @@ export default function Archive({ articles: originalArticles, currentTag, popula
 
     return (
         <div onMouseMove={handleMouseMove} className="min-h-screen bg-[#f8f6f6] dark:bg-[#02040a] text-black dark:text-white font-sans selection:bg-primary/30 relative overflow-hidden transition-colors duration-500">
-            <Head title={`Archive - Techy News`} />
+            <Head title={`Archive - Techy News`}>
+                <meta name="description" content="Browse all articles from Techy News — AI-powered tech journalism covering AI, cybersecurity, gaming, business tech, and more." />
+                <meta property="og:title" content="Archive - Techy News" />
+                <meta property="og:description" content="Browse all articles from Techy News — AI-powered tech journalism." />
+                <meta property="og:url" content="https://techynews.lat/archive" />
+                <meta name="twitter:card" content="summary" />
+                <meta name="twitter:site" content="@TechyNewsLat" />
+            </Head>
             <CommandPalette />
 
             {/* Dynamic Spotlight */}

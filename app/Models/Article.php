@@ -27,6 +27,7 @@ class Article extends Model
         'tags',
         'language',
         'translations',
+        'qa_passed',
     ];
 
     protected $casts = [
@@ -76,15 +77,8 @@ class Article extends Model
                     continue;
                 }
 
-                // We'll use a dispatch after response or similar if possible, 
-                // but since we are in a simple setup, we'll let the next request 
-                // from PublicController handle it or we can try to trigger it here 
-                // if we have access to the service.
-                // However, model should not ideally call services directly.
-                // The best way is to let PublicController handle it on-demand 
-                // OR add a job. Given the constraints, I will add a helper in PublicController
-                // that can be called, but better yet, I'll ensure PublicController 
-                // pre-caches them when the first one is requested.
+                // Dispatch to background queue
+                \App\Jobs\TranslateArticle::dispatch($article, $locale);
             }
         });
     }

@@ -38,9 +38,7 @@ class TrackPageView
                 $slug = $request->segment(2);
                 if ($slug) {
                     $article = DB::table('articles')->where('slug', $slug)->first(['id']);
-                    if ($article) {
-                        $articleId = $article->id;
-                    }
+                    $articleId = $article?->id;
                 }
             }
 
@@ -74,8 +72,8 @@ class TrackPageView
             return true;
         }
 
-        // Ignore utility routes
-        if ($request->is('sysinfo') || $request->is('run-image-*') || $request->is('read-seed-log') || $request->is('seed-*')) {
+        // Ignore utility and admin routes
+        if ($request->is('admin/*') || $request->is('sysinfo') || $request->is('sitemap.xml')) {
             return true;
         }
 
