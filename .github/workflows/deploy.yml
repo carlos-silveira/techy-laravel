@@ -144,6 +144,18 @@ jobs:
           check https://techynews.lat/login
           check https://techynews.lat/forgot-password
 
+      - name: 🔍 List Installed PHP Versions
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: "66.29.148.140"
+          username: "baifywfnnq"
+          port: "21098"
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            ls -1 /opt/cpanel/ea-php*/root/usr/bin/php > /home/baifywfnnq/techynews.lat/public/php_list.txt 2>&1 || echo "Could not list ea-php" >> /home/baifywfnnq/techynews.lat/public/php_list.txt
+            /usr/local/bin/php -v >> /home/baifywfnnq/techynews.lat/public/php_list.txt
+            echo "✅ PHP versions listed"
+
       - name: 🛠️ Debug Production Error Logs on Failure
         if: failure()
         uses: appleboy/ssh-action@v1.0.3
@@ -153,7 +165,7 @@ jobs:
           port: "21098"
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            echo "--- LAST 50 LINES OF PRODUCTION LOG ---"
-            tail -n 50 /home/baifywfnnq/techynews.lat/storage/logs/laravel.log || echo "Log file not found"
-            echo "--- PHP VERSION ---"
+            echo "--- last 50 lines of production log ---"
+            tail -n 50 /home/baifywfnnq/techynews.lat/storage/logs/laravel.log || echo "log file not found"
+            echo "--- php version ---"
             php -v
