@@ -5,11 +5,11 @@
     "keywords": ["framework", "laravel"],
     "license": "MIT",
     "require": {
-        "php": "^8.4",
+        "php": "^8.2",
         "abraham/twitteroauth": "*",
         "guzzlehttp/guzzle": "^7.8",
         "inertiajs/inertia-laravel": "*",
-        "laravel/framework": "^13.0",
+        "laravel/framework": "^11.0",
         "laravel/sanctum": "*",
         "laravel/tinker": "*",
         "silviolleite/laravelpwa": "*",
