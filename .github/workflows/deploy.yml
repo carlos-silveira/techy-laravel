@@ -65,7 +65,7 @@ jobs:
           REMOTE_PORT: "21098"
           TARGET: "/home/baifywfnnq/techynews.lat/"
 
-      - name: 📁 Ensure Storage and Cache Directories Exist
+      - name: 📁 Ensure Storage and Permissions
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: "66.29.148.140"
@@ -73,13 +73,15 @@ jobs:
           port: "21098"
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            mkdir -p /home/baifywfnnq/techynews.lat/storage/framework/{sessions,views,cache}
-            mkdir -p /home/baifywfnnq/techynews.lat/storage/logs
-            mkdir -p /home/baifywfnnq/techynews.lat/bootstrap/cache
-            # Ensure the web server (or the SSH user) has permission to write
-            chmod -R 777 /home/baifywfnnq/techynews.lat/storage
-            chmod -R 777 /home/baifywfnnq/techynews.lat/bootstrap/cache
-            echo "✅ Storage directories ensured"
+            cd /home/baifywfnnq/techynews.lat
+            mkdir -p storage/framework/{sessions,views,cache} storage/logs bootstrap/cache
+            
+            echo "🔧 Fixing permissions..."
+            find . -type d -exec chmod 755 {} \;
+            find . -type f -exec chmod 644 {} \;
+            chmod -R 775 storage bootstrap/cache
+            
+            echo "✅ Permissions and directories ensured"
 
       - name: 🗄️ Run Migrations & Clear Caches on Production
         uses: appleboy/ssh-action@v1.0.3
