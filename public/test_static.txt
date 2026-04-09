@@ -1,0 +1,1 @@
+Hello, the server is serving static files correctly.
