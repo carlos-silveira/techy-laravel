@@ -22,6 +22,7 @@ class DashboardController extends Controller
         $articles = \App\Models\Article::latest()->get();
 
         // Analytics Data — Views + Unique Visitors per day (14 days)
+        // SQLite uses DATE() for dates, which is fine.
         $viewsPerDay = \Illuminate\Support\Facades\DB::table('page_views')
             ->selectRaw('DATE(created_at) as date, COUNT(DISTINCT ip_address) as visitors, COUNT(id) as views')
             ->where('created_at', '>=', now()->subDays(14))
@@ -93,14 +94,17 @@ class DashboardController extends Controller
                 ];
             });
 
-        // Hourly Traffic (last 24h)
+        // Hourly Traffic (last 24h) - COMPATIBILITY FIX FOR SQLITE
+        $isSqlite = config('database.default') === 'sqlite';
+        $hourFunc = $isSqlite ? "strftime('%H', created_at)" : "HOUR(created_at)";
+
         $hourlyTraffic = \Illuminate\Support\Facades\DB::table('page_views')
-            ->selectRaw('HOUR(created_at) as hour, COUNT(*) as views')
+            ->selectRaw("{$hourFunc} as hour, COUNT(*) as views")
             ->where('created_at', '>=', now()->subHours(24))
             ->groupBy('hour')
             ->orderBy('hour')
             ->get()
-            ->map(fn($item) => ['hour' => sprintf('%02d:00', $item->hour), 'views' => $item->views]);
+            ->map(fn($item) => ['hour' => sprintf('%02d:00', (int)$item->hour), 'views' => $item->views]);
 
         // Summary Stats
         $totalViews7d = \Illuminate\Support\Facades\DB::table('page_views')
@@ -113,6 +117,11 @@ class DashboardController extends Controller
             ->distinct('ip_address')->count('ip_address');
         $totalArticles = \App\Models\Article::where('status', 'published')->count();
         $totalLikes = \App\Models\Article::sum('likes_count');
+        $totalViewsAllTime = \App\Models\Article::sum('views_count');
+
+        $engagementRate = $totalViewsAllTime > 0 
+            ? round(($totalLikes / $totalViewsAllTime) * 100, 2)
+            : 0;
 
         $viewsGrowth = $totalViewsPrev7d > 0 
             ? round((($totalViews7d - $totalViewsPrev7d) / $totalViewsPrev7d) * 100, 1) 
@@ -133,8 +142,11 @@ class DashboardController extends Controller
                     'uniqueVisitors7d' => $uniqueVisitors7d,
                     'totalArticles' => $totalArticles,
                     'totalLikes' => $totalLikes,
+                    'engagementRate' => $engagementRate, // NEW
+                    'totalViewsAllTime' => $totalViewsAllTime, // NEW
                 ],
             ]
         ]);
     }
 }
+

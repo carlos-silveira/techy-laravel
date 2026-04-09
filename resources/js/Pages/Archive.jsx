@@ -53,7 +53,7 @@ const getFinalImage = (article, width = 600) => {
   return url;
 };
 
-export default function Archive({ articles: originalArticles, currentTag, popularTags }) {
+export default function Archive({ articles: originalArticles, currentTag, popularTags, dailyBrief }) {
     const { __ } = useLanguage();
     const [articlesList, setArticlesList] = useState(originalArticles.data);
     const [nextPageUrl, setNextPageUrl] = useState(originalArticles.next_page_url);
@@ -148,9 +148,17 @@ export default function Archive({ articles: originalArticles, currentTag, popula
                             <>{__('Exploring')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-400 capitalize">#{currentTag}</span></>
                         ) : __('/The Archive.')}
                     </h1>
-                    <p className="text-xl text-gray-600 dark:text-gray-400 font-light max-w-2xl leading-relaxed">
-                        {__('A complete repository of every AI-synthesized narrative, research piece, and digital discovery recorded on this platform.')}
-                    </p>
+                    
+                    {dailyBrief ? (
+                        <div className="text-xl text-gray-600 dark:text-gray-400 font-light max-w-2xl leading-relaxed prose prose-sm dark:prose-invert prose-p:italic prose-p:text-gray-500">
+                             <div dangerouslySetInnerHTML={{ __html: dailyBrief }} />
+                        </div>
+                    ) : (
+                        <p className="text-xl text-gray-600 dark:text-gray-400 font-light max-w-2xl leading-relaxed">
+                            {__('A complete repository of every AI-synthesized narrative, research piece, and digital discovery recorded on this platform.')}
+                        </p>
+                    )}
+
 
                     {/* Tag Cloud Filter */}
                     {popularTags && popularTags.length > 0 && (

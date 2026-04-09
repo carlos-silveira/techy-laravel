@@ -66,6 +66,8 @@ class ArchiveController extends Controller
             'articles' => $articles,
             'currentTag' => $request->input('tag'),
             'popularTags' => $popularTags,
+            'dailyBrief' => $this->publicController->getDailyBrief($locale),
         ]);
     }
 }
+

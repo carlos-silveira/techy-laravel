@@ -43,6 +43,13 @@ class TranslateArticle implements ShouldQueue
                 return;
             }
 
+            // Check if AI is currently paused globally due to RPD limit
+            if ($geminiService->isQuotaExhausted()) {
+                \Illuminate\Support\Facades\Log::notice("AI Quota exhausted. Postponing translation for Article #{$this->article->id} ({$this->locale}) to tomorrow.");
+                $this->release(86400); // Try again in 24 hours
+                return;
+            }
+
             // Mandatory delay to respect Gemini Free Tier rate limits (RPM/RPD)
             sleep(10);
 
@@ -54,7 +61,7 @@ class TranslateArticle implements ShouldQueue
                 $this->locale
             );
 
-            // VALDIATION: Only save if we got a real title that is different from original
+            // VALIDATION: Only save if we got a real title that is different from original
             // If it is the same, it likely failed or Gemini returned original text
             if (empty($result['title']) || $result['title'] === $this->article->title) {
                 throw new \RuntimeException("Translation failed or returned original text for Article #{$this->article->id} ({$this->locale})");
@@ -71,6 +78,13 @@ class TranslateArticle implements ShouldQueue
             
             \Illuminate\Support\Facades\Log::info("Background translation complete for Article #{$this->article->id} -> {$this->locale}");
         } catch (\Exception $e) {
+            // Handle specific Quota Exhausted exception from service
+            if (str_contains($e->getMessage(), 'QUOTA_EXHAUSTED')) {
+                \Illuminate\Support\Facades\Log::notice("Gemini Quota Hit. Re-queueing Article #{$this->article->id} for tomorrow.");
+                $this->release(86400); 
+                return;
+            }
+
             \Illuminate\Support\Facades\Log::error("Background translation failed: " . $e->getMessage());
             throw $e; // Retry according to queue config
         }
