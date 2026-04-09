@@ -44,7 +44,7 @@ class HandleInertiaRequests extends Middleware
                 return file_exists($file) ? json_decode(file_get_contents($file), true) : [];
             },
             'ziggy' => function () use ($request) {
-                return array_merge((new \Tightenco\Ziggy\Ziggy)->toArray(), [
+                    return array_merge((new \Tighten\Ziggy\Ziggy)->toArray(), [
                     'location' => $request->url(),
                 ]);
             },
