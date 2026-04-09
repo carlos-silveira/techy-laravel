@@ -21,8 +21,8 @@ jobs:
           extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, libxml, json, phar
           coverage: none
 
-      - name: 📦 Install Composer Dependencies
-        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist --optimize-autoloader
+      - name: 📦 Install PHP Dependencies
+        run: composer update --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs --no-progress --prefer-dist
 
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
