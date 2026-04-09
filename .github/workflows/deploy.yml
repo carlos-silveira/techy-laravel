@@ -58,7 +58,7 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           ARGS: "-avzr --delete"
-          EXCLUDE: "/.git/, /node_modules/, /.env, /storage/, /bootstrap/cache/, /tests/, phpunit.xml, README.md, .github/, .htaccess"
+          EXCLUDE: "/.git/, /node_modules/, /.env, /storage/, /bootstrap/cache/, /tests/, phpunit.xml, README.md, .github/"
           SOURCE: "./"
           REMOTE_HOST: "66.29.148.140"
           REMOTE_USER: "baifywfnnq"
