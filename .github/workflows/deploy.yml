@@ -113,3 +113,17 @@ jobs:
           check https://techynews.lat/archive
           check https://techynews.lat/login
           check https://techynews.lat/forgot-password
+
+      - name: 🛠️ Debug Production Error Logs on Failure
+        if: failure()
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: "66.29.148.140"
+          username: "baifywfnnq"
+          port: "21098"
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "--- LAST 50 LINES OF PRODUCTION LOG ---"
+            tail -n 50 /home/baifywfnnq/techynews.lat/storage/logs/laravel.log || echo "Log file not found"
+            echo "--- PHP VERSION ---"
+            php -v
