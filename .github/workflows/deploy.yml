@@ -98,6 +98,18 @@ jobs:
             echo "✅ Laravel scheduler cron registered"
             crontab -l | grep schedule
 
+      - name: 🌐 Check Web Server PHP Version
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: "66.29.148.140"
+          username: "baifywfnnq"
+          port: "21098"
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "<?php echo 'Web PHP: ' . PHP_VERSION;" > /home/baifywfnnq/techynews.lat/public/php_version_test.php
+            curl -s https://techynews.lat/php_version_test.php
+            rm /home/baifywfnnq/techynews.lat/public/php_version_test.php
+
       - name: 🔍 Health Check — Verify Key Pages Return 200
         run: |
           check() {
