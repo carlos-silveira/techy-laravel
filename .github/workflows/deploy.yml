@@ -17,7 +17,7 @@ jobs:
       - name: 🐘 Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.5'
           extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, libxml, json, phar
           coverage: none
 
@@ -74,14 +74,14 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /home/baifywfnnq/techynews.lat
-            php artisan migrate --force
-            php artisan db:seed --class=AdminUserSeeder --force
-            php artisan articles:reset-stats
-            php artisan storage:fix
-            php artisan config:clear
-            php artisan cache:clear
-            php artisan view:clear
-            php artisan route:cache
+            /opt/alt/php85/usr/bin/php artisan migrate --force
+            /opt/alt/php85/usr/bin/php artisan db:seed --class=AdminUserSeeder --force
+            /opt/alt/php85/usr/bin/php artisan articles:reset-stats
+            /opt/alt/php85/usr/bin/php artisan storage:fix
+            /opt/alt/php85/usr/bin/php artisan config:clear
+            /opt/alt/php85/usr/bin/php artisan cache:clear
+            /opt/alt/php85/usr/bin/php artisan view:clear
+            /opt/alt/php85/usr/bin/php artisan route:cache
             echo "✅ Production migrations & cache clear complete"
 
       - name: ⏰ Setup Laravel Scheduler Cron Job
@@ -94,7 +94,7 @@ jobs:
           script: |
             # Remove any existing Laravel scheduler cron, then add fresh
             crontab -l 2>/dev/null | grep -v "artisan schedule:run" | crontab -
-            (crontab -l 2>/dev/null; echo "* * * * * cd /home/baifywfnnq/techynews.lat && /usr/local/bin/php artisan schedule:run >> /dev/null 2>&1") | crontab -
+            (crontab -l 2>/dev/null; echo "* * * * * cd /home/baifywfnnq/techynews.lat && /opt/alt/php85/usr/bin/php artisan schedule:run >> /dev/null 2>&1") | crontab -
             echo "✅ Laravel scheduler cron registered"
             crontab -l | grep schedule
 
