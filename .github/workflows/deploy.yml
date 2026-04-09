@@ -144,20 +144,6 @@ jobs:
           check https://techynews.lat/login
           check https://techynews.lat/forgot-password
 
-      - name: 🔍 List Installed PHP Versions
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: "66.29.148.140"
-          username: "baifywfnnq"
-          port: "21098"
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            echo "--- ea-php binaries ---" > /home/baifywfnnq/techynews.lat/public/test_static.txt
-            ls -1 /opt/cpanel/ea-php*/root/usr/bin/php >> /home/baifywfnnq/techynews.lat/public/test_static.txt 2>&1
-            echo "--- cli php version ---" >> /home/baifywfnnq/techynews.lat/public/test_static.txt
-            /usr/local/bin/php -v >> /home/baifywfnnq/techynews.lat/public/test_static.txt
-            echo "✅ PHP versions listed"
-
       - name: 🛠️ Debug Production Error Logs on Failure
         if: failure()
         uses: appleboy/ssh-action@v1.0.3
