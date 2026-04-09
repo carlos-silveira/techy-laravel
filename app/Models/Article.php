@@ -55,6 +55,9 @@ class Article extends Model
     protected static function booted()
     {
         static::saved(function ($article) {
+            // Clear all caches when an article is saved/updated
+            \Illuminate\Support\Facades\Cache::flush();
+
             // Only pre-translate published articles to save API costs
             if ($article->status !== 'published') {
                 return;

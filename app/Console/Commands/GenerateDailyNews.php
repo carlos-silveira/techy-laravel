@@ -165,6 +165,9 @@ class GenerateDailyNews extends Command
             $this->error("❌ Failed to generate Daily Briefing: " . $e->getMessage());
         }
 
+        \Illuminate\Support\Facades\Cache::flush();
+        $this->info("🧹 Cache flushed to ensure latest content is visible.");
+
         return 0;
     }
 

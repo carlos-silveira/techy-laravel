@@ -52,10 +52,6 @@ class PublicController extends Controller
             return $articles->map(fn($a) => $this->translateIfNecessary($a, $locale));
         });
 
-        $restingMessage = "The intelligence pipeline is resting. Check back later for the latest tech signals.";
-        $dailyBrief = Cache::get("homepage_daily_brief_{$locale}");
-
-        // Trending: Top 5 viewed articles in last 7 days
         $trendingArticles = Cache::remember("homepage_trending_{$locale}", 1800, function () use ($locale) {
             $ids = \Illuminate\Support\Facades\DB::table('page_views')
                 ->where('created_at', '>=', now()->subDays(7))
@@ -67,21 +63,14 @@ class PublicController extends Controller
                 ->pluck('article_id');
 
             if ($ids->isEmpty()) {
-                // Fallback to latest articles if no recent activity data
-                $articles = Article::where('status', 'published')
-                    ->orderByDesc('created_at')
-                    ->limit(5)
-                    ->get();
+                $articles = Article::where('status', 'published')->orderByDesc('created_at')->limit(5)->get();
             } else {
                 $articles = Article::whereIn('id', $ids)
                     ->where('status', 'published')
                     ->get()
-                    ->sortBy(function($a) use ($ids) {
-                        return array_search($a->id, $ids->toArray());
-                    });
+                    ->sortBy(fn($a) => array_search($a->id, $ids->toArray()));
             }
 
-            // Ensure we at least have SOME fallback if absolute view count is also low
             if ($articles->isEmpty()) {
                 $articles = Article::where('status', 'published')->latest()->limit(5)->get();
             }
@@ -89,27 +78,40 @@ class PublicController extends Controller
             return $articles->map(fn($a) => $this->translateIfNecessary($a, $locale));
         });
 
-        // If cache failed or is empty, dynamically build a fallback brief to prevent an empty site
-        if (empty($dailyBrief) || $dailyBrief === $restingMessage) {
-            if ($articles->count() > 0) {
-                $signalLabel = $locale === 'es' ? 'Señales de Última Hora' : ($locale === 'pt' ? 'Sinais de Última Hora' : 'Breaking Signals');
-                $dailyBrief = "<p><strong>⚡ {$signalLabel}:</strong></p><ul>";
-                foreach ($articles->take(3) as $a) {
-                    $dailyBrief .= "<li><a href='/article/{$a->slug}' class='text-primary-400 hover:text-primary-300 transition-colors'>{$a->title}</a></li>";
-                }
-                $dailyBrief .= "</ul>";
-            } else {
-                $dailyBrief = $restingMessage;
-            }
-        }
-
         return Inertia::render('Welcome', [
             'editorsChoice' => $editorsChoice,
             'articles' => $articles,
             'trendingArticles' => $trendingArticles,
-            'dailyBrief' => $dailyBrief,
+            'dailyBrief' => $this->getDailyBrief($locale),
         ]);
     }
+
+    /**
+     * Reusable logic to get the cached daily briefing or generate a dynamic fallback.
+     */
+    public function getDailyBrief(string $locale): string
+    {
+        $restingMessage = "The intelligence pipeline is resting. Check back later for the latest tech signals.";
+        $brief = Cache::get("homepage_daily_brief_{$locale}");
+
+        if (empty($brief) || $brief === $restingMessage) {
+            $latest = Article::where('status', 'published')->latest()->take(3)->get();
+            if ($latest->count() > 0) {
+                $signalLabel = $locale === 'es' ? 'Señales de Última Hora' : ($locale === 'pt' ? 'Sinais de Última Hora' : 'Breaking Signals');
+                $brief = "<p><strong>⚡ {$signalLabel}:</strong></p><ul>";
+                foreach ($latest as $a) {
+                    $translated = $this->translateIfNecessary($a, $locale);
+                    $brief .= "<li><a href='/article/{$translated->slug}' class='text-primary-400 hover:text-primary-300 transition-colors'>{$translated->title}</a></li>";
+                }
+                $brief .= "</ul>";
+            } else {
+                $brief = $restingMessage;
+            }
+        }
+
+        return $brief;
+    }
+
 
     /**
      * Display a specific published article.

@@ -6,32 +6,45 @@ import { Eye, Users, Newspaper, Heart, TrendingUp, TrendingDown, Monitor, Smartp
 const DEVICE_COLORS = { Desktop: '#2b7cee', Mobile: '#8b5cf6', Tablet: '#06b6d4', Bot: '#6b7280' };
 const DEVICE_ICONS = { Desktop: Monitor, Mobile: Smartphone, Tablet: Tablet, Bot: Bot };
 
-function StatCard({ icon: Icon, label, value, subValue, trend, color = 'primary' }) {
+function StatCard({ icon: Icon, label, value, subValue, trend, color = 'blue' }) {
     const isPositive = trend > 0;
+    const colorMap = {
+        primary: 'text-primary bg-primary',
+        blue: 'text-blue-500 bg-blue-500',
+        purple: 'text-purple-500 bg-purple-500',
+        emerald: 'text-emerald-500 bg-emerald-500',
+        pink: 'text-pink-500 bg-pink-500',
+        orange: 'text-orange-500 bg-orange-500',
+        amber: 'text-amber-500 bg-amber-500',
+    };
+    
+    const colorClasses = colorMap[color] || colorMap.primary;
+
     return (
-        <div className="bg-white/[0.03] border border-white/5 rounded-2xl p-5 hover:border-primary/20 transition-colors group relative overflow-hidden">
-            <div className={`absolute top-0 right-0 w-20 h-20 bg-${color}/5 blur-[40px] rounded-full -mr-8 -mt-8 group-hover:bg-${color}/10 transition-all`} />
+        <div className="bg-white/[0.03] border border-white/5 rounded-2xl p-5 hover:border-white/10 transition-colors group relative overflow-hidden">
+            <div className={`absolute top-0 right-0 w-24 h-24 blur-[40px] rounded-full -mr-10 -mt-10 opacity-10 group-hover:opacity-20 transition-all ${colorClasses.split(' ')[1]}`} />
             <div className="relative z-10">
                 <div className="flex items-center justify-between mb-3">
                     <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
-                        <Icon className="w-4 h-4 text-primary" />
+                        <Icon className={`w-4 h-4 ${colorClasses.split(' ')[0]}`} />
                     </div>
                     {trend !== undefined && trend !== null && (
-                        <div className={`flex items-center gap-1 text-[10px] font-black uppercase tracking-widest ${isPositive ? 'text-emerald-400' : 'text-red-400'}`}>
+                        <div className={`flex items-center gap-1 text-[10px] font-black uppercase tracking-widest ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
                             {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                             {Math.abs(trend)}%
                         </div>
                     )}
                 </div>
                 <div className="text-2xl font-black text-white tracking-tight">
-                    {typeof value === 'number' ? value.toLocaleString() : value}
+                    {value}
                 </div>
-                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mt-1">{label}</div>
-                {subValue && <div className="text-[9px] text-gray-600 mt-0.5">{subValue}</div>}
+                <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">{label}</div>
+                {subValue && <div className="text-[9px] text-gray-500 mt-1 font-medium">{subValue}</div>}
             </div>
         </div>
     );
 }
+
 
 export default function AnalyticsChart({ analyticsData }) {
     if (!analyticsData) {
@@ -54,12 +67,15 @@ export default function AnalyticsChart({ analyticsData }) {
     return (
         <div className="space-y-6">
             {/* ═══ STAT CARDS ═══ */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <StatCard icon={Eye} label="Views (7d)" value={stats.totalViews7d || 0} trend={stats.viewsGrowth} />
-                <StatCard icon={Users} label="Unique Visitors" value={stats.uniqueVisitors7d || 0} subValue="Last 7 days" />
-                <StatCard icon={Newspaper} label="Published" value={stats.totalArticles || 0} />
-                <StatCard icon={Heart} label="Total Likes" value={stats.totalLikes || 0} />
+            <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
+                <StatCard icon={Eye} label="Views (7d)" value={stats.totalViews7d || 0} trend={stats.viewsGrowth} color="primary" />
+                <StatCard icon={Users} label="Unique Visitors" value={stats.uniqueVisitors7d || 0} subValue="Last 7 days" color="purple" />
+                <StatCard icon={Newspaper} label="Articles" value={stats.totalArticles || 0} color="emerald" />
+                <StatCard icon={Heart} label="Likes" value={stats.totalLikes || 0} color="pink" />
+                <StatCard icon={TrendingUp} label="Eng. Rate" value={`${stats.engagementRate || 0}%`} color="orange" />
+                <StatCard icon={Eye} label="Lifetime Views" value={stats.totalViewsAllTime || 0} color="blue" />
             </div>
+
 
             {/* ═══ MAIN CHART: VIEWS + VISITORS ═══ */}
             {viewsPerDay && viewsPerDay.length > 0 && (

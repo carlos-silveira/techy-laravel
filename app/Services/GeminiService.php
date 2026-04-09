@@ -6,11 +6,13 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class GeminiService
 {
     private string $apiKey;
     private string $model;
+    private const QUOTA_CACHE_KEY = 'gemini_quota_exhausted';
 
     public function __construct()
     {
@@ -19,10 +21,59 @@ class GeminiService
     }
 
     /**
+     * Check if the API is currently paused due to quota exhaustion.
+     */
+    public function isQuotaExhausted(): bool
+    {
+        return (bool) Cache::get(self::QUOTA_CACHE_KEY, false);
+    }
+
+    /**
+     * Clear the quota exhaustion flag manually.
+     */
+    public function resetQuota(): void
+    {
+        Cache::forget(self::QUOTA_CACHE_KEY);
+        Log::info("Gemini API quota manual reset confirmed.");
+    }
+
+    private function ensureQuotaNotExhausted(): void
+    {
+        if ($this->isQuotaExhausted()) {
+            throw new \RuntimeException("QUOTA_EXHAUSTED: Gemini API daily quota is currently paused for the day.");
+        }
+    }
+
+    /**
+     * Detect if a 429 error is a permanent daily limit (RPD) or just temporary (RPM/TPM).
+     */
+    private function handle429($response, int $attempt): void
+    {
+        $body = $response->body();
+        
+        // If the body suggests the DAILY limit (Requests Per Day) is hit, vs just Requests Per Minute
+        // Common messages: "Resource has been exhausted (e.g. check quota)."
+        if (str_contains($body, 'exhausted')) {
+            Log::error("Gemini DAILY QUOTA (RPD) EXHAUSTED. Pausing AI operations until midnight.");
+            Cache::put(self::QUOTA_CACHE_KEY, true, now()->endOfDay());
+            return;
+        }
+
+        Log::warning("Gemini RPM/TPM rate limit hit — Sleeping 45s (Attempt " . (string)$attempt . ").");
+        sleep(45);
+    }
+
+    /**
      * Handle a conversational chat specialized for creating news.
      */
     public function studioChat(string $message, array $history = []): string
     {
+        try {
+            $this->ensureQuotaNotExhausted();
+        } catch (\Exception $e) {
+            return $e->getMessage();
+        }
+
         $systemContext = "You are 'Techy AI', a world-class investigative tech journalist and editor.
         Your goal is to help the user build viral, high-authority tech news.
         
@@ -72,6 +123,8 @@ class GeminiService
      */
     public function generateIdeas(array $newsItems): array
     {
+        if ($this->isQuotaExhausted()) return [];
+        
         if (empty($newsItems)) {
             return [['title' => 'The State of Developer Tools in 2026', 'prompt' => 'Analyze emerging developer tooling trends.']];
         }
@@ -82,21 +135,22 @@ class GeminiService
             $newsContext .= "- [{$source}] {$item['title']}: {$item['description']}\n";
         }
 
-        $prompt = "You are a senior editor at daily.dev — the developer-first news platform. 
+        $prompt = "You are a senior editor at a top-tier tech publication, synthesizing insights from sources like The Verge and Stratechery.
 You have these trending headlines from today's tech news cycle:
 
 {$newsContext}
 
 Generate exactly 3 article ideas. Each MUST:
-1. Have a provocative, opinion-driven title (like 'Why X Changes Everything' or 'The Hidden Cost of Y')
-2. Target developers specifically — not general tech audiences
-3. Connect multiple headlines into a single narrative when possible
-4. Include a developer-action angle: what should devs learn, build, or stop doing
+1. Have a provocative, insightful title that frames a strong thesis.
+2. Target a professional audience of developers, strategists, and investors.
+3. Connect multiple headlines into a single, non-obvious narrative when possible.
+4. Include a developer-action angle or a strategic takeaway.
+5. Include a new 'angle' field suggesting the analytical approach: 'cultural_impact' (analyzing how technology affects users and society) or 'strategic_analysis' (analyzing business models and market shifts).
 
 CRITICAL RECENCY RULE: ONLY focus on actual, confirmed events from the EXACT last 24 to 48 hours. DO NOT output older news or repetitive rumors (such as old Nintendo Switch 2 leaks or stale Apple rumors). If the news isn't happening today, discard it.
 
 Return ONLY a JSON array, no markdown fences:
-[{\"title\": \"...\", \"prompt\": \"A detailed 2-sentence editorial brief describing the angle, tone, and key arguments\"}]";
+[{\"title\": \"...\", \"prompt\": \"A detailed 2-sentence editorial brief describing the angle, tone, and key arguments\", \"angle\": \"cultural_impact\"}]";
 
         $result = $this->callGemini($prompt, true);
         return is_array($result) && !empty($result) ? $result : [
@@ -109,55 +163,30 @@ Return ONLY a JSON array, no markdown fences:
      */
     public function generateDraft(string $title, string $ideaPrompt, array $newsItems): array
     {
+        if ($this->isQuotaExhausted()) return ['cuerpo_noticia' => 'Quota exhausted. Check back tomorrow.'];
+
         $context = implode("\n", array_map(function ($n) {
             $source = $n['source'] ?? 'News';
             return "- [{$source}] {$n['title']}";
         }, $newsItems));
 
-        $prompt = "Act as an Editor-in-Chief for a cutting-edge tech news site designed for 'people in a hurry'. Your audience wants to be informed without reading long, boring articles.
+        $prompt = "Act as a senior tech analyst.
 
 ARTICLE TOPIC: {$title}
 EDITORIAL BRIEF: {$ideaPrompt}
-TODAY'S NEWS CONTEXT:
+NEWS CONTEXT:
 {$context}
 
-CRITICAL RECENCY RULE: If the topic appears to be an old rumor (e.g., Switch 2 leaks from months ago) or not a recent confirmed event, pivot the angle to why old rumors resurface or focus strictly on the newest development from TODAY. The content MUST feel fresh, immediate, and highly relevant to the last 24 hours.
+Generate an article as a JSON object. The 'cuerpo_noticia' field MUST contain valid HTML and follow this five-part structure:
 
-TONE & STYLE:
-1. Start with a punchy, controversial, or highly engaging HOOK. No boring introductions.
-2. Focus heavily on 'Why this actually matters' and the human/industry impact, not just dry specifications.
-3. Use a modern, ultra-readable, and slightly witty tone (similar to TechCrunch, The Verge, or Casey Newton).
+1.  **Thesis**: A single, non-obvious thesis statement. (HTML: `<p>...</p>`)
+2.  **Why It Matters**: The immediate impact of the news. (HTML: `<h2>Why It Matters</h2>...`)
+3.  **Deeper Analysis**: The strategic, non-obvious implications. (HTML: `<h2>The Deeper Analysis</h2>...`)
+4.  **Counter-Argument**: Risks, downsides, or alternative viewpoints. (HTML: `<h2>The Counter-Argument</h2>...`)
+5.  **Forward Outlook**: Future predictions or strategic takeaways. (HTML: `<h2>Forward Outlook</h2>...`)
 
-OFFICIAL CATEGORIES: 
-- Artificial Intelligence
-- Gadgets & Hardware
-- Software & Apps
-- Cybersecurity & Privacy
-- Business Tech
-- Gaming
-- Mobility & Transport
-- Science & Space
-- Culture & Social Media
-- Crypto & Web3
-- Reviews
-- Tutorials & Guides
-- Deals
-- Opinion
-
-Generate a refactored version strictly following this JSON format:
-{
-  \"titular\": \"Catchy, direct headline. Max 12 words.\",
-  \"tldr_twitter\": \"Summary in under 280 characters. Impactful, independent context.\",
-  \"cuerpo_noticia\": \"2 to 3 short paragraphs (max 4 lines each). Direct, professional, and deeply investigative. Zero sarcasm, no jokes, 100% serious and informative. Explain 'why it matters' analytically. Use basic Markdown (**bold**) for keywords. YOU MUST include an inline image placeholder like <img src=\\\"https://source.unsplash.com/800x400/?technology,ai\\\" alt=\\\"relevant description\\\"> inside the content.\",
-  \"snippet_codigo\": \"OPTIONAL. Include a code block ONLY if it adds real value (e.g., terminal command, API JSON, config). If business news, leave null. NO joke code.\",
-  \"lenguaje_snippet\": \"Language of the snippet (e.g., bash, json, python). Null if snippet is null.\",
-  \"sugerencia_imagen\": \"Short English prompt for a text-to-image model for the cover image. Descriptive and visually appealing.\",
-  \"categoria_principal\": \"MUST be exactly one of the OFFICIAL CATEGORIES listed above.\"
-}
-
-RULES:
-- No corporate fluff or journalistic filler. Write like you're telling a developer colleague over coffee.
-- NO markdown fences around the response, output raw JSON only.";
+Return ONLY a valid JSON object with these exact keys: \"titular\", \"tldr_twitter\", \"cuerpo_noticia\", \"snippet_codigo\", \"lenguaje_snippet\", \"sugerencia_imagen\", \"categoria_principal\". Ensure the 'cuerpo_noticia' includes an unsplash image placeholder.
+";
 
         $result = $this->callGemini($prompt, true);
         
@@ -178,7 +207,7 @@ RULES:
      */
     public function generateInternalDailyBrief(\Illuminate\Database\Eloquent\Collection $articles): string
     {
-        if ($articles->isEmpty()) {
+        if ($this->isQuotaExhausted() || $articles->isEmpty()) {
             return "The intelligence pipeline is resting. Check back later for the latest tech signals.";
         }
 
@@ -209,6 +238,8 @@ Do NOT use markdown code fences. Output ONLY the raw HTML string for the paragra
      */
     public function generateCategoryDraft(string $category, array $newsItems = []): array
     {
+        if ($this->isQuotaExhausted()) return ['html_content' => '<p>Quota exhausted.</p>'];
+
         $context = "";
         if (!empty($newsItems)) {
             $context = "TODAY'S NEWS CONTEXT:\n" . implode("\n", array_map(function ($n) {
@@ -255,7 +286,7 @@ RETURN ONLY A JSON OBJECT. NO MARKDOWN FENCES.
      */
     public function generateDailyBrief(array $newsItems): string
     {
-        if (empty($newsItems)) {
+        if ($this->isQuotaExhausted() || empty($newsItems)) {
             return "The intelligence pipeline is resting. Check back later for the latest tech signals.";
         }
 
@@ -284,6 +315,8 @@ Do NOT use markdown code fences. Just return the text.";
      */
     public function generateArticleMeta(string $title, string $content): array
     {
+        if ($this->isQuotaExhausted()) return [];
+        
         $excerpt = substr(strip_tags($content), 0, 500);
 
         $prompt = "Given this article titled \"{$title}\" with content starting: \"{$excerpt}...\"
@@ -351,9 +384,12 @@ Output ONLY the HTML content.";
 
     /**
      * Translate an article to a target language.
+     * Throws an exception on quota exhaustion to notify calling jobs.
      */
     public function translateArticle(string $title, string $summary, string $content, string $targetLocale): array
     {
+        $this->ensureQuotaNotExhausted();
+
         $languages = [
             'en' => 'English',
             'es' => 'Spanish',
@@ -383,10 +419,14 @@ Return exactly a JSON object (no markdown fences):
 
         $result = $this->callGemini($prompt, true);
 
+        if (empty($result) || empty($result['title']) || $result['title'] === $title) {
+             throw new \RuntimeException("Translation to {$targetLanguage} failed: Invalid response or returned original text.");
+        }
+
         return [
-            'title' => $result['title'] ?? $title,
-            'summary' => $result['summary'] ?? $summary,
-            'content' => $result['content'] ?? $content,
+            'title' => $result['title'],
+            'summary' => $result['summary'],
+            'content' => $result['content'],
         ];
     }
 
@@ -425,6 +465,8 @@ Return exactly a JSON object (no markdown fences):
         $lastError = 'Unknown error';
 
         for ($attempt = 0; $attempt <= $maxRetriesPerModel; $attempt++) {
+            if ($this->isQuotaExhausted()) break;
+
             try {
                 $response = Http::timeout(60)->post(
                     "https://generativelanguage.googleapis.com/v1beta/models/{$this->model}:generateContent?key={$this->apiKey}",
@@ -437,14 +479,13 @@ Return exactly a JSON object (no markdown fences):
 
                 $status = $response->status();
                 if ($status === 429) {
-                    Log::warning("Gemini 429 on Conversational — Sleeping 60s to refresh quota (Attempt " . (string)$attempt . ").");
-                    sleep(60);
+                    $this->handle429($response, $attempt);
+                    if ($this->isQuotaExhausted()) break;
                     continue;
                 }
 
                 $errorBody = substr($response->body(), 0, 500);
                 $lastError = "API Error ({$status}): {$errorBody}";
-                Log::error("Gemini API Error", ['status' => $status, 'body' => $errorBody]);
 
                 if ($attempt < $maxRetriesPerModel) {
                     sleep(15);
@@ -452,7 +493,6 @@ Return exactly a JSON object (no markdown fences):
                 }
             } catch (\Exception $e) {
                 $lastError = "Connection Error: " . $e->getMessage();
-                Log::error($lastError);
                 if ($attempt < $maxRetriesPerModel) {
                     sleep(15);
                     continue;
@@ -460,24 +500,25 @@ Return exactly a JSON object (no markdown fences):
             }
         }
         
-        return 'Gemini API returned an error across all fallback models. Please check your API key configuration. Last error: ' . $lastError;
+        return 'Gemini API is currently resting or unavailable. Please try again later. Notice: ' . $lastError;
     }
 
     /**
      * Call Gemini API for single-prompt requests.
-     * Returns parsed JSON array or trimmed string depending on $expectJson.
-     * Throws GeminiApiException if the API is unreachable.
      */
     private function callGemini(string $prompt, bool $expectJson = false)
     {
         $this->ensureApiKey();
+        $this->ensureQuotaNotExhausted();
 
-        $maxRetriesPerModel = 5;
+        $maxRetriesPerModel = 3;
         $lastError = 'Unknown error';
 
         $payload = ['contents' => [['parts' => [['text' => $prompt]]]]];
 
         for ($attempt = 0; $attempt <= $maxRetriesPerModel; $attempt++) {
+            if ($this->isQuotaExhausted()) break;
+
             try {
                 $response = Http::timeout(120)->post(
                     "https://generativelanguage.googleapis.com/v1beta/models/{$this->model}:generateContent?key={$this->apiKey}",
@@ -486,43 +527,38 @@ Return exactly a JSON object (no markdown fences):
 
                 if ($response->successful()) {
                     $text = $response->json()['candidates'][0]['content']['parts'][0]['text'] ?? '';
-
-                    if ($expectJson) {
-                        return $this->extractJson($text);
-                    }
-
-                    return trim($text);
+                    return $expectJson ? $this->extractJson($text) : trim($text);
                 }
 
                 $status = $response->status();
                 if ($status === 429) {
-                    Log::warning("Gemini 429 API rate limit — Sleeping full 60 seconds to reset Free Tier Quota (Attempt " . (string)$attempt . ").");
-                    sleep(60);
+                    $this->handle429($response, $attempt);
+                    if ($this->isQuotaExhausted()) break;
                     continue;
                 }
 
                 $errorBody = substr($response->body(), 0, 500);
                 $lastError = "Gemini API error ({$status}): {$errorBody}";
-                Log::error('Gemini API Error', ['status' => $status, 'body' => $errorBody]);
+                Log::error($lastError);
 
                 if ($attempt < $maxRetriesPerModel) {
-                    sleep(15);
+                    sleep(10);
                     continue;
                 }
             } catch (\Exception $e) {
                 $lastError = "Gemini connection error: " . $e->getMessage();
-                Log::error($lastError);
-
                 if ($attempt < $maxRetriesPerModel) {
-                    sleep(15);
+                    sleep(10);
                     continue;
                 }
             }
         }
 
-        if ($expectJson) {
-            return [];
+        if ($this->isQuotaExhausted()) {
+            throw new \RuntimeException("QUOTA_EXHAUSTED: Gemini API quota paused.");
         }
+
+        if ($expectJson) return [];
         throw new \RuntimeException("All retries exhausted for model {$this->model}. Last error: " . $lastError);
     }
 
@@ -532,9 +568,7 @@ Return exactly a JSON object (no markdown fences):
     private function ensureApiKey(): void
     {
         if (empty($this->apiKey)) {
-            throw new \RuntimeException(
-                'GEMINI_API_KEY is not configured. Please set it in your .env file.'
-            );
+            throw new \RuntimeException('GEMINI_API_KEY is not configured.');
         }
     }
 
@@ -566,6 +600,9 @@ Return exactly a JSON object (no markdown fences):
             $decoded = json_decode($json, true);
             if (is_array($decoded)) return $decoded;
         }
+
+        // If decoding fails, log the raw text for debugging
+        Log::warning("GeminiService: Failed to decode JSON. Raw response was: " . $text);
         return [];
     }
 
