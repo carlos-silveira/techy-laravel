@@ -65,7 +65,7 @@ jobs:
           REMOTE_PORT: "21098"
           TARGET: "/home/baifywfnnq/techynews.lat/"
 
-      - name: 📁 Ensure Storage and Permissions
+      - name: 🔐 Comprehensive Permission Reset
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: "66.29.148.140"
@@ -74,20 +74,12 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /home/baifywfnnq/techynews.lat
-            # Force clear all caches which might be stale from PHP 8.4 attempt
-            /usr/local/bin/php artisan optimize:clear || echo "Optimize clear failed"
-            /usr/local/bin/php artisan config:clear || echo "Config clear failed"
-            /usr/local/bin/php artisan cache:clear || echo "Cache clear failed"
-            /usr/local/bin/php artisan view:clear || echo "View clear failed"
-            
-            # Check if ver.php exists for health check
-            echo "<?php echo phpversion();" > public/health.php
-            mkdir -p storage/framework/{sessions,views,cache} storage/logs bootstrap/cache
-            
-            echo "🔧 Fixing permissions..."
-            find . -type d -exec chmod 755 {} \;
-            find . -type f -exec chmod 644 {} \;
+            # Reset all dirs to 755 and files to 644 (Safe for LiteSpeed/cPanel)
+            find . -type d -exec chmod 755 {} +
+            find . -type f -exec chmod 644 {} +
+            # Re-ensure Laravel writable perms
             chmod -R 775 storage bootstrap/cache
+            echo "✅ Global permissions reset"
             
             echo "✅ Permissions and directories ensured"
 
