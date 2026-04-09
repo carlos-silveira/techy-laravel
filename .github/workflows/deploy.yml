@@ -152,8 +152,10 @@ jobs:
           port: "21098"
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            ls -1 /opt/cpanel/ea-php*/root/usr/bin/php > /home/baifywfnnq/techynews.lat/public/php_list.txt 2>&1 || echo "Could not list ea-php" >> /home/baifywfnnq/techynews.lat/public/php_list.txt
-            /usr/local/bin/php -v >> /home/baifywfnnq/techynews.lat/public/php_list.txt
+            echo "--- ea-php binaries ---" > /home/baifywfnnq/techynews.lat/public/test_static.txt
+            ls -1 /opt/cpanel/ea-php*/root/usr/bin/php >> /home/baifywfnnq/techynews.lat/public/test_static.txt 2>&1
+            echo "--- cli php version ---" >> /home/baifywfnnq/techynews.lat/public/test_static.txt
+            /usr/local/bin/php -v >> /home/baifywfnnq/techynews.lat/public/test_static.txt
             echo "✅ PHP versions listed"
 
       - name: 🛠️ Debug Production Error Logs on Failure
