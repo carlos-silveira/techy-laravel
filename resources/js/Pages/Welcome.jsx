@@ -12,6 +12,7 @@ import CommandPalette from '@/Components/CommandPalette';
 import Navbar from '@/Components/Navbar';
 import PublicFooter from '@/Components/PublicFooter';
 import AdSlot from '@/Components/AdSlot';
+import RagCopilot from '@/Components/RagCopilot';
 import { ArrowRight, Zap, BookOpen, Clock } from 'lucide-react';
 import useLanguage from '@/Hooks/useLanguage';
 
@@ -519,8 +520,11 @@ export default function Welcome({ articles, editorsChoice, dailyBrief, trendingA
           </div>
         </section>
 
+        {/* ===== NEWSLETTER ===== */}
+        {/* ... */}
         {/* ===== FOOTER ===== */}
         <PublicFooter />
+        <RagCopilot />
 
       </main>
     </div>

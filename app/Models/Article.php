@@ -28,6 +28,7 @@ class Article extends Model
         'language',
         'translations',
         'qa_passed',
+        'embedding',
     ];
 
     protected $casts = [
@@ -37,6 +38,7 @@ class Article extends Model
         'views_count' => 'integer',
         'reading_time_minutes' => 'integer',
         'translations' => 'array',
+        'embedding' => 'array',
     ];
 
     /**
@@ -45,6 +47,42 @@ class Article extends Model
     public function getIsPublishedAttribute(): bool
     {
         return $this->status === 'published';
+    }
+
+    /**
+     * Dynamically translate title if a translation exists.
+     */
+    public function getTitleAttribute($value)
+    {
+        $locale = app()->getLocale();
+        if ($locale !== 'en' && !empty($this->translations[$locale]['title'])) {
+            return $this->translations[$locale]['title'];
+        }
+        return $value;
+    }
+
+    /**
+     * Dynamically translate content if a translation exists.
+     */
+    public function getContentAttribute($value)
+    {
+        $locale = app()->getLocale();
+        if ($locale !== 'en' && !empty($this->translations[$locale]['content'])) {
+            return $this->translations[$locale]['content'];
+        }
+        return $value;
+    }
+
+    /**
+     * Dynamically translate summary if a translation exists.
+     */
+    public function getAiSummaryAttribute($value)
+    {
+        $locale = app()->getLocale();
+        if ($locale !== 'en' && !empty($this->translations[$locale]['summary'])) {
+            return $this->translations[$locale]['summary'];
+        }
+        return $value;
     }
 
     /**

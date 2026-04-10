@@ -39,7 +39,8 @@ Techy News isn't just a CMS; it's a **living intelligence ecosystem**. It aggreg
 ## 📦 Installation & Setup
 
 ### Prerequisites
-- PHP 8.2+
+- PHP 8.4+ (Production runs on 8.5)
+- Inertia.js 2.0+
 - Node.js 20+
 - MySQL 8.0+
 - Gemini API Key (Google AI Studio)

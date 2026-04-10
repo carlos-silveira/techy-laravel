@@ -9,6 +9,7 @@ import CommandPalette from '@/Components/CommandPalette';
 import Navbar from '@/Components/Navbar';
 import PublicFooter from '@/Components/PublicFooter';
 import AdSlot from '@/Components/AdSlot';
+import RagCopilot from '@/Components/RagCopilot';
 import useLanguage from '@/Hooks/useLanguage';
 
 export default function ArticleShow({ article, relatedArticles, auth }) {
@@ -328,6 +329,7 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
             </main>
 
             <PublicFooter className="mt-20" />
+            <RagCopilot />
         </div>
     );
 }
