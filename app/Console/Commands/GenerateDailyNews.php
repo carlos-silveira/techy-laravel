@@ -113,6 +113,16 @@ class GenerateDailyNews extends Command
 
         $this->info('✅ Article published: "' . $idea['title'] . '"');
 
+        $this->info('🧠 Generating embedding for RAG...');
+        $textToEmbed = "Title: {$article->title}\nSummary: {$article->ai_summary}\n\n" . strip_tags($article->content);
+        $embedding = $geminiService->embedText(substr($textToEmbed, 0, 5000));
+        if (!empty($embedding)) {
+            $article->update(['embedding' => $embedding]);
+            $this->info('✅ Embedding stored.');
+        } else {
+            $this->warn('⚠️ Failed to store embedding.');
+        }
+
         // PRE-TRANSLATION for ES and PT
         $languages = ['es', 'pt'];
         $translations = [];

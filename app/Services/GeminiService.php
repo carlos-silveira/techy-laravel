@@ -170,20 +170,28 @@ Return ONLY a JSON array, no markdown fences:
             return "- [{$source}] {$n['title']}";
         }, $newsItems));
 
-        $prompt = "Act as a senior tech analyst.
+        $prompt = "Act as a senior tech analyst and investigative journalist for a site like The Verge or Stratechery.
 
 ARTICLE TOPIC: {$title}
 EDITORIAL BRIEF: {$ideaPrompt}
 NEWS CONTEXT:
 {$context}
 
-Generate an article as a JSON object. The 'cuerpo_noticia' field MUST contain valid HTML and follow this five-part structure:
+Generate an article as a JSON object. The 'cuerpo_noticia' field MUST contain valid HTML and follow this structural flow:
 
-1.  **Thesis**: A single, non-obvious thesis statement. (HTML: `<p>...</p>`)
-2.  **Why It Matters**: The immediate impact of the news. (HTML: `<h2>Why It Matters</h2>...`)
+CRITICAL WRITING RULES (ANTI-SLOP):
+- NEVER use generic intros like 'In today's fast-paced digital world', 'In the ever-evolving landscape of', or 'Technology is advancing'.
+- NEVER use buzzwords like 'delve', 'testament', 'tapestry', 'a symphony of', 'navigating the complexities'.
+- Start immediately with the news hook. Be direct, authoritative, and punchy.
+- Use concrete examples and technical specifics, not vague generalizations.
+- DO NOT summarize everything at the end with 'In conclusion'. End with a forward-looking prediction.
+- Keep sentences relatively short and impactful. 
+
+1.  **Thesis**: A single, bold, non-obvious thesis statement. Hook the reader immediately. (HTML: `<p>...</p>`)
+2.  **Why It Matters**: The immediate, concrete impact of this news. (HTML: `<h2>Why It Matters</h2>...`)
 3.  **Deeper Analysis**: The strategic, non-obvious implications. (HTML: `<h2>The Deeper Analysis</h2>...`)
-4.  **Counter-Argument**: Risks, downsides, or alternative viewpoints. (HTML: `<h2>The Counter-Argument</h2>...`)
-5.  **Forward Outlook**: Future predictions or strategic takeaways. (HTML: `<h2>Forward Outlook</h2>...`)
+4.  **Counter-Argument**: Risks, downsides, or why this might fail. (HTML: `<h2>The Counter-Argument</h2>...`)
+5.  **Forward Outlook**: Strategic takeaways for builders and investors. (HTML: `<h2>Forward Outlook</h2>...`)
 
 Return ONLY a valid JSON object with these exact keys: \"titular\", \"tldr_twitter\", \"cuerpo_noticia\", \"snippet_codigo\", \"lenguaje_snippet\", \"sugerencia_imagen\", \"categoria_principal\". Ensure the 'cuerpo_noticia' includes an unsplash image placeholder.
 ";
@@ -604,6 +612,39 @@ Return exactly a JSON object (no markdown fences):
         // If decoding fails, log the raw text for debugging
         Log::warning("GeminiService: Failed to decode JSON. Raw response was: " . $text);
         return [];
+    }
+
+    /**
+     * Generate an embedding vector for the given text using text-embedding-004.
+     * Returns an array of floats (typically 768 dimensions for Gemini).
+     */
+    public function embedText(string $text): array
+    {
+        $this->ensureApiKey();
+
+        try {
+            $response = Http::timeout(60)->post(
+                "https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key={$this->apiKey}",
+                [
+                    'model' => 'models/text-embedding-004',
+                    'content' => [
+                        'parts' => [
+                            ['text' => $text]
+                        ]
+                    ]
+                ]
+            );
+
+            if ($response->successful()) {
+                return $response->json()['embedding']['values'] ?? [];
+            }
+
+            Log::error("Gemini Embedding Error: " . $response->body());
+            return [];
+        } catch (\Exception $e) {
+            Log::error("Gemini Embedding Connection Error: " . $e->getMessage());
+            return [];
+        }
     }
 
     /**

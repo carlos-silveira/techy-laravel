@@ -2,7 +2,9 @@
 - **Agent**: Antigravity (Advanced Agentic Mode)
 - **Task**: Stabilization of Laravel 13 Upgrade & YOLO mode Autonomous Pipeline.
 - **Summary**:
-    - Finalized migration to Laravel 13 (PHP 8.4) and removal of legacy service providers.
+    - **Major Upgrade**: Upgraded application to **Laravel 13** and **PHP 8.5** after confirming server support in cPanel.
+    - **Frontend Modernization**: Upgraded to **Inertia 2.0** and **Ziggy 2.0**.
+    - **DevOps**: Updated GitHub Actions to use PHP 8.5 and point to the correct binaries on the host.
     - Enhanced Analytics Dashboard with real engagement metrics (Likes, Views, Engagement Rate) and fixed SQLite hourly traffic queries.
     - Integrated AI Daily Briefing into the Archive page as a synthetic narrative.
     - Synchronized YOLO mode translation pipeline (ES/PT) and implemented automatic cache flushing on article saves to ensure immediate availability of multi-language content.

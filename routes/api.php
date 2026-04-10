@@ -42,6 +42,7 @@ Route::get('/articles/{id}/stats', [AnalyticsController::class, 'articleStats'])
 
 // Global Discovery
 Route::get('/search', [\App\Http\Controllers\PublicController::class, 'search']);
+Route::post('/rag-chat', [\App\Http\Controllers\ChatController::class, 'ask']);
 
 // Protected API Routes (if any) using Sanctum
 Route::middleware('auth:sanctum')->group(function () {
