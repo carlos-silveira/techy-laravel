@@ -624,9 +624,9 @@ Return exactly a JSON object (no markdown fences):
 
         try {
             $response = Http::timeout(60)->post(
-                "https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key={$this->apiKey}",
+                "https://generativelanguage.googleapis.com/v1beta/models/embedding-001:embedContent?key={$this->apiKey}",
                 [
-                    'model' => 'models/text-embedding-004',
+                    'model' => 'models/embedding-001',
                     'content' => [
                         'parts' => [
                             ['text' => $text]
