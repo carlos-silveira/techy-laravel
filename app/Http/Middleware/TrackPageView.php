@@ -44,6 +44,8 @@ class TrackPageView
 
             DB::table('page_views')->insert([
                 'url' => substr($request->fullUrl(), 0, 255),
+                'referrer' => substr($request->headers->get('referer', ''), 0, 255),
+                'utm_source' => substr($request->query('utm_source', ''), 0, 100),
                 'route_name' => $request->route() ? $request->route()->getName() : null,
                 'session_id' => $request->session()->getId(),
                 'ip_address' => $ipHash,

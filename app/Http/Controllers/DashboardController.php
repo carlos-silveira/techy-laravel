@@ -94,6 +94,22 @@ class DashboardController extends Controller
                 ];
             });
 
+        // Top Referrers (from referrer and utm_source)
+        $topReferrers = \Illuminate\Support\Facades\DB::table('page_views')
+            ->selectRaw("
+                CASE
+                    WHEN utm_source IS NOT NULL AND utm_source != '' THEN utm_source
+                    WHEN referrer IS NULL OR referrer = '' THEN 'Direct'
+                    ELSE SUBSTRING_INDEX(REPLACE(REPLACE(referrer, 'https://', ''), 'http://', ''), '/', 1)
+                END as source,
+                COUNT(*) as views
+            ")
+            ->where('created_at', '>=', now()->subDays(7))
+            ->groupBy('source')
+            ->orderByDesc('views')
+            ->limit(8)
+            ->get();
+
         // Hourly Traffic (last 24h) - COMPATIBILITY FIX FOR SQLITE
         $isSqlite = config('database.default') === 'sqlite';
         $hourFunc = $isSqlite ? "strftime('%H', created_at)" : "HOUR(created_at)";
@@ -135,6 +151,7 @@ class DashboardController extends Controller
                 'topArticles' => $topArticlesWithData,
                 'deviceBreakdown' => $deviceBreakdown,
                 'topPages' => $topPages,
+                'topReferrers' => $topReferrers,
                 'hourlyTraffic' => $hourlyTraffic,
                 'summary' => [
                     'totalViews7d' => $totalViews7d,

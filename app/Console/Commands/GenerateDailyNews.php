@@ -182,21 +182,12 @@ class GenerateDailyNews extends Command
     }
 
     /**
-     * Fetch a copyright-free cover image from Unsplash API.
+     * Fetch a copyright-free cover image from Unsplash or Wikimedia Commons fallback.
      */
     private function fetchCoverImage(string $title, array $tags): ?string
     {
-        $accessKey = config('services.unsplash.access_key');
-
-        if (empty($accessKey)) {
-            $this->warn('⚠️  UNSPLASH_ACCESS_KEY not set — skipping cover image.');
-            return null;
-        }
-
-        // Build search query from title + first tag
         $query = $tags[0] ?? '';
         if (empty($query)) {
-            // Extract main keyword from title
             $words = explode(' ', $title);
             $stopWords = ['the', 'a', 'an', 'of', 'in', 'for', 'to', 'and', 'is', 'are', 'what', 'how', 'why', 'when', 'your', 'you', 'need', 'know'];
             $keywords = array_filter($words, function ($w) use ($stopWords) {
@@ -205,38 +196,67 @@ class GenerateDailyNews extends Command
             $query = implode(' ', array_slice(array_values($keywords), 0, 3));
         }
 
-        // Let Unsplash resolve strictly based on the extracted query terms instead of forcing ' technology'
         $query = trim($query);
+        $accessKey = config('services.unsplash.access_key');
 
+        if (!empty($accessKey)) {
+            try {
+                $response = \Illuminate\Support\Facades\Http::withHeaders([
+                    'Authorization' => "Client-ID {$accessKey}",
+                ])->get('https://api.unsplash.com/search/photos', [
+                    'query' => $query,
+                    'per_page' => 1,
+                    'orientation' => 'landscape',
+                    'content_filter' => 'high',
+                ]);
+
+                if ($response->successful()) {
+                    $results = $response->json()['results'] ?? [];
+                    if (!empty($results)) {
+                        $photo = $results[0];
+                        $imageUrl = $photo['urls']['regular'] ?? $photo['urls']['small'] ?? null;
+                        $photographer = $photo['user']['name'] ?? 'Unknown';
+                        $this->info("📸 Photo by {$photographer} on Unsplash");
+                        return $imageUrl;
+                    }
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::warning('Unsplash API error: ' . $e->getMessage());
+            }
+        }
+
+        // FALLBACK: Wikimedia Commons API (Free, No Keys Required)
+        $this->warn('⚠️  Falling back to Wikimedia Commons API for image fetching...');
         try {
-            $response = Http::withHeaders([
-                'Authorization' => "Client-ID {$accessKey}",
-            ])->get('https://api.unsplash.com/search/photos', [
-                'query' => $query,
-                'per_page' => 1,
-                'orientation' => 'landscape',
-                'content_filter' => 'high',
+            $response = \Illuminate\Support\Facades\Http::get('https://commons.wikimedia.org/w/api.php', [
+                'action' => 'query',
+                'generator' => 'search',
+                'gsrsearch' => "filetype:bitmap " . $query,
+                'gsrnamespace' => 6, // File namespace
+                'gsrlimit' => 3,
+                'prop' => 'imageinfo',
+                'iiprop' => 'url',
+                'format' => 'json'
             ]);
 
             if ($response->successful()) {
-                $results = $response->json()['results'] ?? [];
-                if (!empty($results)) {
-                    // Use Unsplash CDN URL (hotlinking required by TOS)
-                    $photo = $results[0];
-                    $imageUrl = $photo['urls']['regular'] ?? $photo['urls']['small'] ?? null;
-                    $photographer = $photo['user']['name'] ?? 'Unknown';
-                    $this->info("📸 Photo by {$photographer} on Unsplash");
-                    return $imageUrl;
+                $pages = $response->json()['query']['pages'] ?? [];
+                if (!empty($pages)) {
+                    // Get the first available image
+                    $firstPage = reset($pages);
+                    $imageUrl = $firstPage['imageinfo'][0]['url'] ?? null;
+                    if ($imageUrl) {
+                        $this->info("📸 Photo sourced from Wikimedia Commons: {$imageUrl}");
+                        return $imageUrl;
+                    }
                 }
             }
-
-            $this->warn('⚠️  No Unsplash images found for: ' . $query);
-            return null;
         } catch (\Exception $e) {
-            Log::warning('Unsplash API error: ' . $e->getMessage());
-            $this->warn('⚠️  Unsplash API error — skipping cover image.');
-            return null;
+            \Illuminate\Support\Facades\Log::warning('Wikimedia API error: ' . $e->getMessage());
         }
+
+        $this->warn('⚠️  No images found at all. Skipping cover image.');
+        return null;
     }
 
     /**

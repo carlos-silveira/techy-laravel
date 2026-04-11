@@ -15,6 +15,7 @@ import {
 import AnalyticsChart from '@/Components/AnalyticsChart';
 import RichEditor from '@/Components/RichEditor';
 import ThemeToggle from '@/Components/ThemeToggle';
+import RagCopilot from '@/Components/RagCopilot';
 
 /* ──────────────────────────────────────────────
    WIZARD STEPS COMPONENT — No-code guided flow
@@ -938,6 +939,7 @@ export default function Dashboard({ auth, articles: initialArticles, analytics }
                     </>
                 )}
             </main>
+            <RagCopilot />
         </div>
     );
 }

@@ -58,7 +58,7 @@ export default function AnalyticsChart({ analyticsData }) {
         );
     }
 
-    const { viewsPerDay, topArticles, deviceBreakdown, topPages, hourlyTraffic, summary } = analyticsData;
+    const { viewsPerDay, topArticles, deviceBreakdown, topPages, topReferrers, hourlyTraffic, summary } = analyticsData;
     const stats = summary || {};
 
     const deviceData = (deviceBreakdown || []).map(d => ({ name: d.device, value: d.count }));
@@ -206,20 +206,38 @@ export default function AnalyticsChart({ analyticsData }) {
                 </div>
             </div>
 
-            {/* ═══ TOP PAGES ═══ */}
-            {topPages && topPages.length > 0 && (
-                <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6">
-                    <h3 className="text-xs font-black text-white mb-5 uppercase tracking-widest">Top Pages (7 Days)</h3>
-                    <div className="space-y-2">
-                        {topPages.map((page, i) => (
-                            <div key={i} className="flex items-center justify-between py-1.5">
-                                <span className="text-xs text-gray-400 font-mono truncate max-w-[70%]">{page.path}</span>
-                                <span className="text-[10px] font-black text-gray-500">{page.views}</span>
-                            </div>
-                        ))}
+            {/* ═══ TOP PAGES & REFERRERS ═══ */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {topPages && topPages.length > 0 && (
+                    <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6">
+                        <h3 className="text-xs font-black text-white mb-5 uppercase tracking-widest">Top Pages (7 Days)</h3>
+                        <div className="space-y-2">
+                            {topPages.map((page, i) => (
+                                <div key={i} className="flex items-center justify-between py-1.5">
+                                    <span className="text-xs text-gray-400 font-mono truncate max-w-[70%]">{page.path}</span>
+                                    <span className="text-[10px] font-black text-gray-500">{page.views}</span>
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
+                
+                {topReferrers && topReferrers.length > 0 && (
+                    <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6">
+                        <h3 className="text-xs font-black text-emerald-400 mb-5 uppercase tracking-widest">Traffic Sources (7 Days)</h3>
+                        <div className="space-y-2">
+                            {topReferrers.map((ref, i) => (
+                                <div key={i} className="flex items-center justify-between py-1.5">
+                                    <span className="text-xs text-gray-300 font-medium truncate max-w-[70%] capitalize">
+                                        {ref.source === 'Direct' ? <span className="text-gray-500 italic">Direct / Unknown</span> : ref.source}
+                                    </span>
+                                    <span className="text-[10px] font-black text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-lg">{ref.views}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
