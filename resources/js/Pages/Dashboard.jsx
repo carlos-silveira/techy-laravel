@@ -789,7 +789,7 @@ export default function Dashboard({ auth, articles: initialArticles, analytics }
             </aside>
 
             {/* Primary Workspace */}
-            <main className="flex-1 flex flex-col overflow-hidden relative">
+            <main id="cascade" className="flex-1 flex flex-col overflow-hidden relative">
                 {/* Mobile Header Toggle */}
                 <header className="md:hidden flex items-center justify-between px-6 h-16 border-b border-black/5 dark:border-white/5 bg-white dark:bg-[#02040a] z-40 shrink-0">
                     <button onClick={() => setShowMobileSidebar(true)} className="p-2 -ml-2 text-gray-600 dark:text-gray-400">
