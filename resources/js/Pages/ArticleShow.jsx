@@ -240,7 +240,7 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
                     </header>
 
                     {/* Floating Interaction Bar */}
-                    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-12 md:top-1/2 md:-translate-y-1/2 md:bottom-auto z-50 flex md:flex-col items-center gap-6 bg-white/80 dark:bg-white/[0.03] backdrop-blur-2xl border border-black/5 dark:border-white/10 py-4 px-6 md:py-8 md:px-4 rounded-full shadow-2xl transition-colors duration-500">
+                    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-12 md:top-1/2 md:-translate-y-1/2 md:bottom-auto z-[60] flex md:flex-col items-center gap-6 bg-white/90 dark:bg-white/[0.05] backdrop-blur-2xl border border-black/5 dark:border-white/10 py-3 px-6 md:py-8 md:px-4 rounded-full shadow-2xl transition-all duration-300">
                         {isAuthorized && (
                             <>
                                 <Link 
