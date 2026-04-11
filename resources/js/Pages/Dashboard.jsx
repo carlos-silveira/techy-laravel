@@ -968,6 +968,7 @@ export default function Dashboard({ auth, articles: initialArticles, analytics }
                         </div>
                     </>
                 )}
+            </div>
             </main>
             <RagCopilot />
         </div>
