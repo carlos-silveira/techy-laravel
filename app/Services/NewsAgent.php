@@ -56,9 +56,11 @@ class NewsAgent
         Log::info("NewsAgent: Processing '{$title}'");
 
         // 3. DRAFT
-        $draft = $this->gemini->generateDraft($title, $idea['prompt'], $contextNews);
-        if (empty($draft['cuerpo_noticia']) || $draft['cuerpo_noticia'] === 'Failed to generate content.') {
-            return ['title' => $title, 'status' => 'failed', 'reason' => 'Drafting failed'];
+        try {
+            $draft = $this->gemini->generateDraft($title, $idea['prompt'], $contextNews);
+        } catch (\App\Exceptions\GenerationException $e) {
+            Log::error("NewsAgent: Drafting failed for '{$title}': " . $e->getMessage());
+            return ['title' => $title, 'status' => 'failed', 'reason' => 'Drafting failed: ' . $e->getMessage()];
         }
 
         // 4. CRITIQUE & POLISH

@@ -41,15 +41,15 @@ class RewriteArticles extends Command
             $promptContext = 'Rewrite this article to make it infinitely better, maintaining the original topic but enforcing strict rules. Current Summary: ' . $article->ai_summary;
             
             try {
-                // Pass a dummy news context, or maybe the existing content itself as the context
+                // Pass the existing content itself as the context for better continuity
                 $newsContext = [
-                    ['title' => 'Original existing content reference', 'source' => 'Database']
+                    ['title' => $article->title, 'source' => 'Original Content']
                 ];
 
                 // Generate new content
                 $result = $gemini->generateDraft($article->title, $promptContext, $newsContext);
                 
-                // Update article
+                // Update article ONLY if we got a valid result (Exception would have been thrown otherwise)
                 $article->title = $result['titular'] ?? $article->title;
                 $article->content = $result['cuerpo_noticia'] ?? $article->content;
                 $article->ai_summary = $result['tldr_twitter'] ?? $article->ai_summary;
@@ -58,11 +58,14 @@ class RewriteArticles extends Command
                 $article->translations = [];
                 
                 $article->save();
+                $this->info("\n✅ Re-drafted: {$article->title}");
 
                 // Wait 15 seconds to avoid rate-limiting the Gemini API
                 sleep(15);
+            } catch (\App\Exceptions\GenerationException $e) {
+                $this->error("\n⚠️ Skipping article ID {$article->id} due to generation failure: " . $e->getMessage());
             } catch (\Exception $e) {
-                $this->error("\nFailed to rewrite article ID {$article->id}: " . $e->getMessage());
+                $this->error("\n❌ System error on article ID {$article->id}: " . $e->getMessage());
             }
 
             $bar->advance();
