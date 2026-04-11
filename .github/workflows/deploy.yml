@@ -23,9 +23,10 @@ jobs:
           coverage: none
 
       - name: 📦 Install PHP Dependencies
-        uses: ramsey/composer-install@v3
-        with:
-          composer-options: "--optimize-autoloader --ignore-platform-reqs --no-dev --no-scripts --no-plugins"
+        run: |
+          export COMPOSER_ALLOW_SUPERUSER=1
+          export COMPOSER_MEMORY_LIMIT=-1
+          composer install --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-reqs --no-dev --no-scripts --no-plugins -vvv
 
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
