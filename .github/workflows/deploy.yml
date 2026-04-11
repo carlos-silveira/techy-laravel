@@ -22,7 +22,7 @@ jobs:
           coverage: none
 
       - name: 📦 Install PHP Dependencies
-        run: composer update --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-reqs
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-reqs --no-dev
 
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
