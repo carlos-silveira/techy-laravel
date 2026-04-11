@@ -30,8 +30,10 @@ jobs:
           node-version: '20'
 
       - name: 🏗️ Install NPM Dependencies & Build
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
         run: |
-          npm install --legacy-peer-deps
+          npm install --legacy-peer-deps --prefer-offline --no-audit
           npm run build
 
 
