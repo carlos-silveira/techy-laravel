@@ -51,21 +51,22 @@ class GenerateDailyNews extends Command
         
         while ($attempts < 3) {
             $this->info("⏳ Attempt " . ($attempts + 1) . " of 3...");
-            $draftData = $geminiService->generateDraft($idea['title'], $idea['prompt'], $newsItems);
-            
-            if (!empty($draftData) && !empty($draftData['cuerpo_noticia']) && $draftData['cuerpo_noticia'] !== 'Failed to generate content.') {
+            try {
+                $draftData = $geminiService->generateDraft($idea['title'], $idea['prompt'], $newsItems);
+                
                 $content = $draftData['cuerpo_noticia'];
                 if (!empty($draftData['snippet_codigo'])) {
                     $lang = $draftData['lenguaje_snippet'] ?? '';
                     $content .= "\n<pre><code class=\"language-{$lang}\">\n" . htmlspecialchars($draftData['snippet_codigo']) . "\n</code></pre>";
                 }
                 break;
-            }
-            
-            $attempts++;
-            if ($attempts < 3) {
-                $this->warn('Generation failed or returned invalid data. Retrying in 10s...');
-                sleep(10);
+            } catch (\App\Exceptions\GenerationException $e) {
+                $this->warn("⚠️ Attempt failed: " . $e->getMessage());
+                $attempts++;
+                if ($attempts < 3) {
+                    $this->info('Retrying in 10s...');
+                    sleep(10);
+                }
             }
         }
 

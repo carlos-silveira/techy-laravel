@@ -199,11 +199,24 @@ Return ONLY a valid JSON object with these exact keys: \"titular\", \"tldr_twitt
 
         $result = $this->callGemini($prompt, true);
         
-        // Ensure we always return the expected structure even if Gemini fails partially
+        // --- ADDED VALIDATION ---
+        if (empty($result) || !isset($result['cuerpo_noticia'])) {
+            throw new \App\Exceptions\GenerationException("Gemini returned an empty or invalid JSON structure for '{$title}'.");
+        }
+
+        $content = $result['cuerpo_noticia'];
+
+        // Prevent prompt leaking or failure message persistence
+        if (str_contains($content, 'Failed to generate content') || 
+            str_contains($content, 'Rewrite this article') || 
+            strlen(strip_tags($content)) < 300) {
+            throw new \App\Exceptions\GenerationException("Gemini returned low quality or failed content for '{$title}'. Length: " . strlen($content));
+        }
+        
         return [
             'titular' => $result['titular'] ?? $title,
             'tldr_twitter' => $result['tldr_twitter'] ?? $ideaPrompt,
-            'cuerpo_noticia' => $result['cuerpo_noticia'] ?? 'Failed to generate content.',
+            'cuerpo_noticia' => $content,
             'snippet_codigo' => $result['snippet_codigo'] ?? null,
             'lenguaje_snippet' => $result['lenguaje_snippet'] ?? null,
             'sugerencia_imagen' => $result['sugerencia_imagen'] ?? '',
