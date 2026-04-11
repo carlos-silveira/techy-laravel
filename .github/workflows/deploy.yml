@@ -26,16 +26,13 @@ jobs:
       - name: 🐘 Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: '8.4'
           extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, libxml, json, phar
           tools: composer:v2
           coverage: none
 
       - name: 📦 Install PHP Dependencies
-        run: |
-          export COMPOSER_ALLOW_SUPERUSER=1
-          export COMPOSER_MEMORY_LIMIT=-1
-          composer install --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-reqs --no-dev --no-scripts --no-plugins -vvv
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-reqs --no-dev --no-scripts --no-plugins -vvv
 
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
