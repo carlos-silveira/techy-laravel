@@ -17,12 +17,12 @@ jobs:
       - name: 🐘 Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.5'
+          php-version: '8.4'
           extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, libxml, json, phar
           coverage: none
 
       - name: 📦 Install PHP Dependencies
-        run: composer install --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-reqs --no-dev
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-reqs --no-dev --no-scripts
 
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
