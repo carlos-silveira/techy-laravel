@@ -6,7 +6,7 @@ export default function PublicFooter({ className = '' }) {
     const { __ } = useLanguage();
 
     return (
-        <footer className={`border-t border-black/5 dark:border-white/5 py-12 relative z-10 transition-colors duration-500 ${className}`}>
+        <footer className={`border-t border-black/5 dark:border-white/5 py-12 pb-32 md:pb-12 relative z-10 transition-colors duration-500 ${className}`}>
             <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-4">
                 <img src="/img/logo_wbc.png" alt="Techy News" className="h-7 w-auto opacity-50 hover:opacity-100 transition-opacity dark:brightness-100 brightness-0" />
                 <p className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-700">© 2026 Carlos Silveira</p>

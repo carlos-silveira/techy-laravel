@@ -143,6 +143,28 @@ class DashboardController extends Controller
             ? round((($totalViews7d - $totalViewsPrev7d) / $totalViewsPrev7d) * 100, 1) 
             : ($totalViews7d > 0 ? 100 : 0);
 
+        // Gemini Usage Stats (Last 7 days)
+        $dateFunc = $isSqlite ? "DATE(created_at)" : "DATE(created_at)";
+        $geminiUsagePerDay = \Illuminate\Support\Facades\Schema::hasTable('gemini_logs') ? 
+            \Illuminate\Support\Facades\DB::table('gemini_logs')
+                ->selectRaw("{$dateFunc} as date, SUM(total_tokens) as tokens, COUNT(*) as requests")
+                ->where('created_at', '>=', now()->subDays(7))
+                ->groupBy('date')
+                ->orderBy('date', 'asc')
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'date' => \Carbon\Carbon::parse($item->date)->format('M d'),
+                        'tokens' => $item->tokens,
+                        'requests' => $item->requests,
+                    ];
+                }) : collect([]);
+
+        $totalGeminiTokens7d = \Illuminate\Support\Facades\Schema::hasTable('gemini_logs') ? 
+            \Illuminate\Support\Facades\DB::table('gemini_logs')
+            ->where('created_at', '>=', now()->subDays(7))
+            ->sum('total_tokens') : 0;
+
         return Inertia::render('Dashboard', [
             'initialBrief' => 'The AI Daily Brief will appear here.',
             'articles' => $articles,
@@ -153,14 +175,16 @@ class DashboardController extends Controller
                 'topPages' => $topPages,
                 'topReferrers' => $topReferrers,
                 'hourlyTraffic' => $hourlyTraffic,
+                'geminiUsage' => $geminiUsagePerDay, // NEW
                 'summary' => [
                     'totalViews7d' => $totalViews7d,
                     'viewsGrowth' => $viewsGrowth,
                     'uniqueVisitors7d' => $uniqueVisitors7d,
                     'totalArticles' => $totalArticles,
                     'totalLikes' => $totalLikes,
-                    'engagementRate' => $engagementRate, // NEW
-                    'totalViewsAllTime' => $totalViewsAllTime, // NEW
+                    'engagementRate' => $engagementRate,
+                    'totalViewsAllTime' => $totalViewsAllTime,
+                    'totalGeminiTokens7d' => $totalGeminiTokens7d, // NEW
                 ],
             ]
         ]);

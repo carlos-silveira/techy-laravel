@@ -1,7 +1,7 @@
 import React from 'react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import Skeleton from './Skeleton';
-import { Eye, Users, Newspaper, Heart, TrendingUp, TrendingDown, Monitor, Smartphone, Tablet, Bot } from 'lucide-react';
+import { Eye, Users, Newspaper, Heart, TrendingUp, TrendingDown, Monitor, Smartphone, Tablet, Bot, Zap } from 'lucide-react';
 
 const DEVICE_COLORS = { Desktop: '#2b7cee', Mobile: '#8b5cf6', Tablet: '#06b6d4', Bot: '#6b7280' };
 const DEVICE_ICONS = { Desktop: Monitor, Mobile: Smartphone, Tablet: Tablet, Bot: Bot };
@@ -58,7 +58,7 @@ export default function AnalyticsChart({ analyticsData }) {
         );
     }
 
-    const { viewsPerDay, topArticles, deviceBreakdown, topPages, topReferrers, hourlyTraffic, summary } = analyticsData;
+    const { viewsPerDay, topArticles, deviceBreakdown, topPages, topReferrers, hourlyTraffic, summary, geminiUsage } = analyticsData;
     const stats = summary || {};
 
     const deviceData = (deviceBreakdown || []).map(d => ({ name: d.device, value: d.count }));
@@ -67,13 +67,14 @@ export default function AnalyticsChart({ analyticsData }) {
     return (
         <div className="space-y-6">
             {/* ═══ STAT CARDS ═══ */}
-            <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
+                <StatCard icon={Zap} label="LLM Tokens" value={stats.totalGeminiTokens7d?.toLocaleString() || 0} subValue="Last 7 Days" color="orange" />
                 <StatCard icon={Eye} label="Views (7d)" value={stats.totalViews7d || 0} trend={stats.viewsGrowth} color="primary" />
-                <StatCard icon={Users} label="Unique Visitors" value={stats.uniqueVisitors7d || 0} subValue="Last 7 days" color="purple" />
+                <StatCard icon={Users} label="Unique" value={stats.uniqueVisitors7d || 0} color="purple" />
                 <StatCard icon={Newspaper} label="Articles" value={stats.totalArticles || 0} color="emerald" />
                 <StatCard icon={Heart} label="Likes" value={stats.totalLikes || 0} color="pink" />
-                <StatCard icon={TrendingUp} label="Eng. Rate" value={`${stats.engagementRate || 0}%`} color="orange" />
-                <StatCard icon={Eye} label="Lifetime Views" value={stats.totalViewsAllTime || 0} color="blue" />
+                <StatCard icon={TrendingUp} label="Engagement" value={`${stats.engagementRate || 0}%`} color="amber" />
+                <StatCard icon={Eye} label="Lifetime" value={stats.totalViewsAllTime || 0} color="blue" />
             </div>
 
 

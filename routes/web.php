@@ -9,6 +9,7 @@ use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\ImageUploadController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\SeoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,7 +24,8 @@ use App\Http\Controllers\LanguageController;
 
 Route::get('/', [PublicController::class, 'index']);
 Route::get('/article/{slug}', [PublicController::class, 'show']);
-Route::get('/sitemap.xml', [App\Http\Controllers\SitemapController::class, 'index']);
+Route::get('/sitemap.xml', [SeoController::class, 'sitemap']);
+Route::get('/feed', [SeoController::class, 'rss']);
 
 Route::get('/about', [AboutController::class, 'index']);
 Route::get('/archive', [ArchiveController::class, 'index']);

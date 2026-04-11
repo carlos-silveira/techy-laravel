@@ -1,0 +1,19 @@
+# Techy News
+
+AI-Powered Tech News Ecosystem built with Laravel + React + Gemini.
+
+## Main Endpoints
+- Homepage: https://techynews.lat/
+- Archive: https://techynews.lat/archive
+- About: https://techynews.lat/about
+- Sitemap: https://techynews.lat/sitemap.xml
+- RSS Feed: https://techynews.lat/feed
+
+## Content
+All articles on this site are synthesized from multiple tech sources and summarized using AI models (Gemini 2.0 Flash). We focus on high-performance architecture, RAG systems, and modern web development trends.
+
+## Technical Details
+This platform explores the intersection of Journalism and AI. It features:
+- Real-time LLM-powered news generation.
+- RAG Copilot for querying site context.
+- High-fidelity UI with dark mode and glassmorphism.

@@ -461,6 +461,7 @@ export default function Dashboard({ auth, articles: initialArticles, analytics }
     const [richContent, setRichContent] = useState(null);
     const [isGenerating, setIsGenerating] = useState(false);
     const [currentArticleId, setCurrentArticleId] = useState(null);
+    const [showMobileSidebar, setShowMobileSidebar] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [isPublished, setIsPublished] = useState(false);
     const [isEditorsChoice, setIsEditorsChoice] = useState(false);
@@ -723,17 +724,35 @@ export default function Dashboard({ auth, articles: initialArticles, analytics }
     };
 
     return (
-        <div className="min-h-screen bg-white dark:bg-[#02040a] text-gray-900 dark:text-white flex overflow-hidden font-sans selection:bg-primary/30 transition-colors duration-500">
+        <div className="min-h-screen bg-white dark:bg-[#02040a] text-gray-900 dark:text-white flex overflow-hidden font-sans selection:bg-primary/30 transition-colors duration-500 relative">
             <Head title="AI Studio" />
 
+            {/* Mobile Sidebar Overlay */}
+            <AnimatePresence>
+                {showMobileSidebar && (
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setShowMobileSidebar(false)}
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] md:hidden"
+                    />
+                )}
+            </AnimatePresence>
+
             {/* Main Sidebar */}
-            <aside className="w-20 md:w-64 border-r border-black/5 dark:border-white/5 bg-white dark:bg-[#02040a] flex flex-col py-10 px-4 justify-between sticky top-0 h-screen z-50 transition-colors duration-500">
+            <aside className={`fixed inset-y-0 left-0 transform ${showMobileSidebar ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 w-64 border-r border-black/5 dark:border-white/5 bg-white dark:bg-[#02040a] flex flex-col py-10 px-4 justify-between h-screen z-[70] transition-all duration-300 ease-in-out`}>
                 <div className="w-full flex-1 overflow-y-auto no-scrollbar">
-                    <div className="flex items-center gap-3 mb-12 px-2">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center flex-shrink-0 shadow-2xl">
-                            <Zap className="w-6 h-6 text-white" />
+                    <div className="flex items-center justify-between mb-12 px-2">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center flex-shrink-0 shadow-2xl">
+                                <Zap className="w-6 h-6 text-white" />
+                            </div>
+                            <span className="font-black text-lg tracking-tighter text-gray-900 dark:text-white uppercase">STUDIO</span>
                         </div>
-                        <span className="hidden md:block font-black text-lg tracking-tighter text-gray-900 dark:text-white">STUDIO</span>
+                        <button onClick={() => setShowMobileSidebar(false)} className="md:hidden p-2 text-gray-400">
+                            <X className="w-5 h-5" />
+                        </button>
                     </div>
 
                     <nav className="space-y-2 w-full mb-10">
@@ -769,9 +788,18 @@ export default function Dashboard({ auth, articles: initialArticles, analytics }
             </aside>
 
             {/* Primary Workspace */}
-            <main className="flex-1 flex flex-row overflow-hidden relative">
-                
-                {view === 'wizard' && (
+            <main className="flex-1 flex flex-col overflow-hidden relative">
+                {/* Mobile Header Toggle */}
+                <header className="md:hidden flex items-center justify-between px-6 h-16 border-b border-black/5 dark:border-white/5 bg-white dark:bg-[#02040a] z-40 shrink-0">
+                    <button onClick={() => setShowMobileSidebar(true)} className="p-2 -ml-2 text-gray-600 dark:text-gray-400">
+                        <Home className="w-6 h-6" />
+                    </button>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">{view}</span>
+                    <div className="w-10"></div> {/* Spacer */}
+                </header>
+
+                <div className="flex-1 flex flex-row overflow-hidden relative">
+                    {view === 'wizard' && (
                     <WizardView 
                         onComplete={handleWizardComplete} 
                         onSwitchToEditor={handleWizardToEditor}
