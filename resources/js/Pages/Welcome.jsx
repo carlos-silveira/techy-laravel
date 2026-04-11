@@ -486,16 +486,16 @@ export default function Welcome({ articles, editorsChoice, dailyBrief, trendingA
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-              className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/10 rounded-[3rem] p-14 md:p-20 relative overflow-hidden group shadow-sm dark:shadow-none"
+              className="bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/10 rounded-[3rem] p-8 sm:p-14 md:p-20 relative overflow-hidden group shadow-sm dark:shadow-none"
             >
               <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/10 rounded-full blur-[100px] pointer-events-none transition-transform duration-700 group-hover:scale-125"></div>
               <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-purple-600/10 rounded-full blur-[100px] pointer-events-none"></div>
               <div className="relative z-10 text-center">
                 <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em] block mb-6">{__('AI Weekly Digest')}</span>
-                <h2 className="text-5xl md:text-6xl font-black mb-6 tracking-tighter leading-[0.9] text-black dark:text-white transition-colors">
+                <h2 className="text-4xl sm:text-5xl md:text-6xl font-black mb-6 tracking-tighter leading-[1] text-black dark:text-white transition-colors">
                   {__('Intelligence,')}<br />{__('delivered weekly.')}
                 </h2>
-                <p className="text-gray-500 mb-12 font-light text-lg max-w-lg mx-auto leading-relaxed">
+                <p className="text-gray-500 mb-12 font-light text-base sm:text-lg max-w-lg mx-auto leading-relaxed">
                   {__('Every Friday: AI research breakthroughs, engineering insights, and curated tools — synthesized by machine, filtered by humans.')}
                 </p>
                 <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-xl mx-auto">

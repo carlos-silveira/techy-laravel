@@ -256,7 +256,7 @@ export default function About() {
                     >
                         <h2 className="text-4xl font-black tracking-tight mb-2">{__('Have a radical idea?')}</h2>
                         <p className="text-xl text-gray-400 dark:text-gray-600 mb-8 font-medium max-w-xl text-pretty">{__("Let's build the next era of digital intelligence together. I'm always open to discussing technical challenges and ambitious products.")}</p>
-                        <a href="mailto:hello@carlossilveira.com" className="px-10 py-4 bg-white dark:bg-black text-black dark:text-white rounded-2xl font-black flex items-center gap-3 hover:scale-105 transition-transform text-base shadow-2xl">
+                        <a href="mailto:silveira.alberto24@gmail.com" className="px-10 py-4 bg-white dark:bg-black text-black dark:text-white rounded-2xl font-black flex items-center gap-3 hover:scale-105 transition-transform text-base shadow-2xl">
                             {__('Get in Touch')} <Mail className="w-5 h-5" />
                         </a>
                     </motion.div>

@@ -99,7 +99,7 @@ export default function RagCopilot() {
     };
 
     return (
-        <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end">
+        <div className="fixed bottom-24 sm:bottom-6 right-6 z-[100] flex flex-col items-end">
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
@@ -107,7 +107,7 @@ export default function RagCopilot() {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.95 }}
                         transition={{ duration: 0.2 }}
-                        className="mb-4 w-[350px] sm:w-[400px] h-[550px] max-h-[80vh] flex flex-col bg-white dark:bg-[#0d1117] border border-black/10 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+                        className="mb-4 w-[calc(100vw-3rem)] sm:w-[400px] h-[500px] sm:h-[550px] max-h-[80vh] flex flex-col bg-white dark:bg-[#0d1117] border border-black/10 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden"
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between p-4 border-b border-black/5 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">

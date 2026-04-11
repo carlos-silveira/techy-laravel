@@ -483,7 +483,22 @@ Return exactly a JSON object (no markdown fences):
                 );
 
                 if ($response->successful()) {
-                    return $response->json()['candidates'][0]['content']['parts'][0]['text'] ?? '';
+                    $json = $response->json();
+
+                    // Track API Usage tokens
+                    if (isset($json['usageMetadata'])) {
+                        \Illuminate\Support\Facades\DB::table('gemini_logs')->insert([
+                            'model_name' => $this->model,
+                            'operation_type' => 'conversational',
+                            'prompt_tokens' => $json['usageMetadata']['promptTokenCount'] ?? 0,
+                            'completion_tokens' => $json['usageMetadata']['candidatesTokenCount'] ?? 0,
+                            'total_tokens' => $json['usageMetadata']['totalTokenCount'] ?? 0,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
+
+                    return $json['candidates'][0]['content']['parts'][0]['text'] ?? '';
                 }
 
                 $status = $response->status();
@@ -535,7 +550,22 @@ Return exactly a JSON object (no markdown fences):
                 );
 
                 if ($response->successful()) {
-                    $text = $response->json()['candidates'][0]['content']['parts'][0]['text'] ?? '';
+                    $json = $response->json();
+                    
+                    // Track API Usage tokens
+                    if (isset($json['usageMetadata'])) {
+                        \Illuminate\Support\Facades\DB::table('gemini_logs')->insert([
+                            'model_name' => $this->model,
+                            'operation_type' => 'generateContent',
+                            'prompt_tokens' => $json['usageMetadata']['promptTokenCount'] ?? 0,
+                            'completion_tokens' => $json['usageMetadata']['candidatesTokenCount'] ?? 0,
+                            'total_tokens' => $json['usageMetadata']['totalTokenCount'] ?? 0,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
+
+                    $text = $json['candidates'][0]['content']['parts'][0]['text'] ?? '';
                     return $expectJson ? $this->extractJson($text) : trim($text);
                 }
 
@@ -625,9 +655,9 @@ Return exactly a JSON object (no markdown fences):
 
         try {
             $response = Http::timeout(60)->post(
-                "https://generativelanguage.googleapis.com/v1beta/models/embedding-001:embedContent?key={$this->apiKey}",
+                "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key={$this->apiKey}",
                 [
-                    'model' => 'models/embedding-001',
+                    'model' => 'models/gemini-embedding-001',
                     'content' => [
                         'parts' => [
                             ['text' => $text]
