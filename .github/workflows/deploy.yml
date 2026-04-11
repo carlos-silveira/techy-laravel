@@ -22,7 +22,7 @@ jobs:
           coverage: none
 
       - name: 📦 Install PHP Dependencies
-        run: composer update --no-interaction --prefer-dist --optimize-autoloader
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
@@ -39,7 +39,7 @@ jobs:
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          ARGS: "-avzr --delete"
+          ARGS: "-avzr --delete -e 'ssh -p 21098 -o StrictHostKeyChecking=no'"
           EXCLUDE: "/.git/, /node_modules/, /.env, /storage/, /bootstrap/cache/, /tests/, phpunit.xml, README.md, .github/"
           SOURCE: "./"
           REMOTE_HOST: "66.29.148.140"
@@ -54,16 +54,13 @@ jobs:
           username: "baifywfnnq"
           port: "21098"
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script_stop: true
           script: |
-            cd /home/baifywfnnq/techynews.lat
-            # Reset all dirs to 755 and files to 644 (Safe for LiteSpeed/cPanel)
-            find . -type d -exec chmod 755 {} +
-            find . -type f -exec chmod 644 {} +
-            # Re-ensure Laravel writable perms
-            chmod -R 775 storage bootstrap/cache
-            echo "✅ Global permissions reset"
-            
-            echo "✅ Permissions and directories ensured"
+              cd /home/baifywfnnq/techynews.lat
+              find . -type d -exec chmod 755 {} +
+              find . -type f -exec chmod 644 {} +
+              chmod -R 775 storage bootstrap/cache
+              echo "✅ Global permissions reset"
 
       - name: 🗄️ Run Migrations & Clear Caches on Production
         uses: appleboy/ssh-action@v1.0.3
@@ -72,17 +69,13 @@ jobs:
           username: "baifywfnnq"
           port: "21098"
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script_stop: true
           script: |
-            cd /home/baifywfnnq/techynews.lat
-            /opt/alt/php85/usr/bin/php artisan migrate --force
-            /opt/alt/php85/usr/bin/php artisan db:seed --class=AdminUserSeeder --force
-            /opt/alt/php85/usr/bin/php artisan articles:reset-stats
-            /opt/alt/php85/usr/bin/php artisan storage:fix
-            /opt/alt/php85/usr/bin/php artisan config:clear
-            /opt/alt/php85/usr/bin/php artisan cache:clear
-            /opt/alt/php85/usr/bin/php artisan view:clear
-            /opt/alt/php85/usr/bin/php artisan route:cache
-            echo "✅ Production migrations & cache clear complete"
+              cd /home/baifywfnnq/techynews.lat/
+              /opt/alt/php85/usr/bin/php artisan migrate --force
+              /opt/alt/php85/usr/bin/php artisan storage:fix
+              /opt/alt/php85/usr/bin/php artisan optimize
+              echo "✅ Production migrations & optimization complete"
 
       - name: ⏰ Setup Laravel Scheduler Cron Job
         uses: appleboy/ssh-action@v1.0.3
@@ -92,23 +85,9 @@ jobs:
           port: "21098"
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            # Remove any existing Laravel scheduler cron, then add fresh
-            crontab -l 2>/dev/null | grep -v "artisan schedule:run" | crontab -
-            (crontab -l 2>/dev/null; echo "* * * * * cd /home/baifywfnnq/techynews.lat && /opt/alt/php85/usr/bin/php artisan schedule:run >> /dev/null 2>&1") | crontab -
-            echo "✅ Laravel scheduler cron registered"
-            crontab -l | grep schedule
-
-      - name: 🌐 Check Web Server PHP Version
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: "66.29.148.140"
-          username: "baifywfnnq"
-          port: "21098"
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            echo "<?php echo 'Web PHP: ' . PHP_VERSION;" > /home/baifywfnnq/techynews.lat/public/php_version_test.php
-            curl -s https://techynews.lat/php_version_test.php
-            rm /home/baifywfnnq/techynews.lat/public/php_version_test.php
+              crontab -l 2>/dev/null | grep -v "artisan schedule:run" | crontab -
+              (crontab -l 2>/dev/null; echo "* * * * * cd /home/baifywfnnq/techynews.lat && /opt/alt/php85/usr/bin/php artisan schedule:run >> /dev/null 2>&1") | crontab -
+              echo "✅ Laravel scheduler cron registered"
 
       - name: 🔍 Health Check — Verify Key Pages Return 200
         run: |
@@ -124,7 +103,9 @@ jobs:
           check https://techynews.lat/about
           check https://techynews.lat/archive
           check https://techynews.lat/login
-          check https://techynews.lat/forgot-password
+          check https://techynews.lat/sitemap.xml
+          check https://techynews.lat/feed
+          check https://techynews.lat/llms.txt
 
       - name: 🛠️ Debug Production Error Logs on Failure
         if: failure()
@@ -137,5 +118,5 @@ jobs:
           script: |
             echo "--- last 50 lines of production log ---"
             tail -n 50 /home/baifywfnnq/techynews.lat/storage/logs/laravel.log || echo "log file not found"
-            echo "--- php version ---"
-            php -v
+            /opt/alt/php85/usr/bin/php artisan --version
+

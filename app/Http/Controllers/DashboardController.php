@@ -160,6 +160,12 @@ class DashboardController extends Controller
                     ];
                 }) : collect([]);
 
+        $rawGeminiLogs = \Illuminate\Support\Facades\Schema::hasTable('gemini_logs') ?
+            \Illuminate\Support\Facades\DB::table('gemini_logs')
+                ->orderByDesc('created_at')
+                ->limit(10)
+                ->get() : collect([]);
+
         $totalGeminiTokens7d = \Illuminate\Support\Facades\Schema::hasTable('gemini_logs') ? 
             \Illuminate\Support\Facades\DB::table('gemini_logs')
             ->where('created_at', '>=', now()->subDays(7))
@@ -175,7 +181,8 @@ class DashboardController extends Controller
                 'topPages' => $topPages,
                 'topReferrers' => $topReferrers,
                 'hourlyTraffic' => $hourlyTraffic,
-                'geminiUsage' => $geminiUsagePerDay, // NEW
+                'geminiUsage' => $geminiUsagePerDay,
+                'rawGeminiLogs' => $rawGeminiLogs, // NEW
                 'summary' => [
                     'totalViews7d' => $totalViews7d,
                     'viewsGrowth' => $viewsGrowth,

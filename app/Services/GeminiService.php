@@ -551,7 +551,15 @@ Return exactly a JSON object (no markdown fences):
         $maxRetriesPerModel = 3;
         $lastError = 'Unknown error';
 
-        $payload = ['contents' => [['parts' => [['text' => $prompt]]]]];
+        $payload = [
+            'contents' => [['parts' => [['text' => $prompt]]]],
+            'safetySettings' => [
+                ['category' => 'HARM_CATEGORY_HARASSMENT', 'threshold' => 'BLOCK_ONLY_HIGH'],
+                ['category' => 'HARM_CATEGORY_HATE_SPEECH', 'threshold' => 'BLOCK_ONLY_HIGH'],
+                ['category' => 'HARM_CATEGORY_SEXUALLY_EXPLICIT', 'threshold' => 'BLOCK_ONLY_HIGH'],
+                ['category' => 'HARM_CATEGORY_DANGEROUS_CONTENT', 'threshold' => 'BLOCK_ONLY_HIGH'],
+            ]
+        ];
 
         for ($attempt = 0; $attempt <= $maxRetriesPerModel; $attempt++) {
             if ($this->isQuotaExhausted()) break;
@@ -578,7 +586,14 @@ Return exactly a JSON object (no markdown fences):
                         ]);
                     }
 
-                    $text = $json['candidates'][0]['content']['parts'][0]['text'] ?? '';
+                    // Check for safety blocks
+                    $candidate = $json['candidates'][0] ?? null;
+                    if ($candidate && ($candidate['finishReason'] ?? '') === 'SAFETY') {
+                        Log::warning("Gemini SAFETY BLOCK for prompt: " . Str::limit($prompt, 100));
+                        return $expectJson ? [] : 'Content blocked by safety filters.';
+                    }
+
+                    $text = $candidate['content']['parts'][0]['text'] ?? '';
                     return $expectJson ? $this->extractJson($text) : trim($text);
                 }
 
@@ -629,32 +644,33 @@ Return exactly a JSON object (no markdown fences):
      */
     private function extractJson(string $text): array
     {
-        // Strip markdown code fences if present
-        $text = preg_replace('/^```(?:json)?\s*/i', '', $text);
-        $text = preg_replace('/\s*```\s*$/', '', $text);
-        $text = trim($text);
+        // 1. Remove non-printable characters or Zero Width Spaces that often break JSON
+        $text = str_replace(["\u200b", "\ufeff"], '', $text);
 
-        // Detect outermost JSON structure — prefer [] for arrays over {} for objects
-        $arrayStart = strpos($text, '[');
-        $objectStart = strpos($text, '{');
-
-        // Use whichever appears first ([ for arrays, { for objects)
-        if ($arrayStart !== false && ($objectStart === false || $arrayStart < $objectStart)) {
-            $start = $arrayStart;
-            $end = strrpos($text, ']');
-        } else {
-            $start = $objectStart;
-            $end = strrpos($text, '}');
-        }
-
-        if ($start !== false && $end !== false && $end > $start) {
-            $json = substr($text, $start, $end - $start + 1);
-            $decoded = json_decode($json, true);
+        // 2. Robust balanced extraction for JSON objects {}
+        if (preg_match('/\{(?:[^{}]|(?R))*\}/s', $text, $matches)) {
+            $jsonStr = $matches[0];
+            $decoded = json_decode($jsonStr, true);
             if (is_array($decoded)) return $decoded;
         }
 
-        // If decoding fails, log the raw text for debugging
-        Log::warning("GeminiService: Failed to decode JSON. Raw response was: " . $text);
+        // 3. Robust balanced extraction for JSON arrays []
+        if (preg_match('/\[(?:[^\[\]]|(?R))*\]/s', $text, $matches)) {
+            $jsonStr = $matches[0];
+            $decoded = json_decode($jsonStr, true);
+            if (is_array($decoded)) return $decoded;
+        }
+
+        // 4. Fallback to basic stripping
+        $jsonCandidate = preg_replace('/^```(?:json)?\s*/i', '', $text);
+        $jsonCandidate = preg_replace('/\s*```\s*$/', '', $jsonCandidate);
+        $jsonCandidate = trim($jsonCandidate);
+        $decoded = json_decode($jsonCandidate, true);
+        
+        if (is_array($decoded)) return $decoded;
+
+        // If all decoding fails, log for debugging
+        Log::warning("GeminiService: Failed to decode JSON. Raw response: " . substr($text, 0, 100));
         return [];
     }
 
@@ -668,9 +684,9 @@ Return exactly a JSON object (no markdown fences):
 
         try {
             $response = Http::timeout(60)->post(
-                "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key={$this->apiKey}",
+                "https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key={$this->apiKey}",
                 [
-                    'model' => 'models/gemini-embedding-001',
+                    'model' => 'models/text-embedding-004',
                     'content' => [
                         'parts' => [
                             ['text' => $text]

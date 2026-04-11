@@ -16,6 +16,7 @@ import AnalyticsChart from '@/Components/AnalyticsChart';
 import RichEditor from '@/Components/RichEditor';
 import ThemeToggle from '@/Components/ThemeToggle';
 import RagCopilot from '@/Components/RagCopilot';
+import GeminiUsage from '@/Components/GeminiUsage';
 
 /* ──────────────────────────────────────────────
    WIZARD STEPS COMPONENT — No-code guided flow
@@ -179,8 +180,8 @@ function WizardView({ onComplete, onSwitchToEditor }) {
     return (
         <div className="flex-1 overflow-y-auto">
             {/* Step Progress Bar */}
-            <div className="sticky top-0 z-40 bg-white/80 dark:bg-[#02040a]/90 backdrop-blur-2xl border-b border-black/5 dark:border-white/5 px-10 py-6 transition-colors duration-500">
-                <div className="max-w-3xl mx-auto flex items-center gap-3">
+            <div className="sticky top-0 z-40 bg-white/80 dark:bg-[#02040a]/90 backdrop-blur-2xl border-b border-black/5 dark:border-white/5 px-4 sm:px-10 py-6 transition-colors duration-500">
+                <div className="max-w-3xl mx-auto flex items-center gap-2 sm:gap-3">
                     {WIZARD_STEPS.map((name, i) => (
                         <React.Fragment key={name}>
                             <div className={`flex items-center gap-2 transition-all ${
@@ -206,7 +207,7 @@ function WizardView({ onComplete, onSwitchToEditor }) {
                 </div>
             </div>
 
-            <div className="max-w-3xl mx-auto px-10 py-16">
+            <div className="max-w-3xl mx-auto px-4 sm:px-10 py-10 sm:py-16">
                 <AnimatePresence mode="wait">
                     {/* ─── STEP 1: DISCOVER ─── */}
                     {step === 0 && (
@@ -835,12 +836,13 @@ export default function Dashboard({ auth, articles: initialArticles, analytics }
                 )}
 
                 {view === 'analytics' && (
-                    <div className="flex-1 overflow-y-auto p-10 md:p-24 max-w-6xl mx-auto w-full">
-                        <div className="mb-20">
+                    <div className="flex-1 overflow-y-auto p-4 sm:p-10 md:p-24 max-w-6xl mx-auto w-full">
+                        <div className="mb-10 sm:mb-20">
                             <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-4">Live Metrics</h3>
-                            <h2 className="text-5xl font-black tracking-tighter text-gray-900 dark:text-white">Analytics.</h2>
+                            <h2 className="text-4xl sm:text-5xl font-black tracking-tighter text-gray-900 dark:text-white">Analytics.</h2>
                         </div>
                         <AnalyticsChart analyticsData={analytics} />
+                        <GeminiUsage usageData={analytics.rawGeminiLogs} />
                     </div>
                 )}
 
