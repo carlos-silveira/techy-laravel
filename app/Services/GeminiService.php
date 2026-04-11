@@ -179,9 +179,10 @@ NEWS CONTEXT:
 
 Generate an article as a JSON object. The 'cuerpo_noticia' field MUST contain valid HTML and follow this structural flow:
 
-CRITICAL WRITING RULES (ANTI-SLOP):
+CRITICAL WRITING RULES (ANTI-SLOP & CLICKBAIT):
 - NEVER use generic intros like 'In today's fast-paced digital world', 'In the ever-evolving landscape of', or 'Technology is advancing'.
 - NEVER use buzzwords like 'delve', 'testament', 'tapestry', 'a symphony of', 'navigating the complexities'.
+- The 'titular' (Headline) MUST be extremely catchy, clickbait, intriguing, and ABSOLUTELY MAXIMUM 60 characters long. If it's longer than 60 characters, the UI will break. Be short and punchy.
 - Start immediately with the news hook. Be direct, authoritative, and punchy.
 - Use concrete examples and technical specifics, not vague generalizations.
 - DO NOT summarize everything at the end with 'In conclusion'. End with a forward-looking prediction.
