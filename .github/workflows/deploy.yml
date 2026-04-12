@@ -48,23 +48,16 @@ jobs:
           npm run build
 
 
-      - name: 🚀 Deploy via rsync (Pure Shell)
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: 🔑 Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: 'not-needed-using-keyscan'
+
+      - name: 🚀 Deploy via rsync
         run: |
-          mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" | tr -d '\r' > deploy_key
-          chmod 600 deploy_key
           ssh-keyscan -p 21098 66.29.148.140 >> ~/.ssh/known_hosts
-          echo "--- SSH Key Fingerprint ---"
-          ssh-keygen -l -f deploy_key >> $GITHUB_STEP_SUMMARY || echo "Invalid key format" >> $GITHUB_STEP_SUMMARY
-          echo "--- DEBUG: Attempting handshake ---"
-          ssh -v -p 21098 -i deploy_key -o StrictHostKeyChecking=no -o PubkeyAcceptedAlgorithms=+ssh-rsa -o HostKeyAlgorithms=+ssh-rsa baifywfnnq@66.29.148.140 "exit" > handshake_log.txt 2>&1 || true
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          cat handshake_log.txt >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          echo "--- Starting Rsync ---"
-          rsync -avzr --delete -e "ssh -p 21098 -i deploy_key -o StrictHostKeyChecking=no -o PubkeyAcceptedAlgorithms=+ssh-rsa -o HostKeyAlgorithms=+ssh-rsa" ./ baifywfnnq@66.29.148.140:/home/baifywfnnq/techynews.lat/ \
+          rsync -avzr --delete -e "ssh -p 21098" ./ baifywfnnq@66.29.148.140:/home/baifywfnnq/techynews.lat/ \
             --exclude="/.git/" \
             --exclude="/.github/" \
             --exclude="/node_modules/" \
@@ -79,12 +72,8 @@ jobs:
             --exclude="/public/storage"
 
       - name: 🔐 Comprehensive Permission Reset & Artisan Commands
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
-          echo "$SSH_PRIVATE_KEY" | tr -d '\r' > deploy_key
-          chmod 600 deploy_key
-          ssh -p 21098 -i deploy_key -o StrictHostKeyChecking=no -o PubkeyAcceptedAlgorithms=+ssh-rsa -o HostKeyAlgorithms=+ssh-rsa baifywfnnq@66.29.148.140 << 'EOF'
+          ssh -p 21098 baifywfnnq@66.29.148.140 << 'EOF'
             cd /home/baifywfnnq/techynews.lat
             find . -type d -exec chmod 755 {} +
             find . -type f -exec chmod 644 {} +
