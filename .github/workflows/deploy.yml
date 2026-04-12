@@ -48,31 +48,21 @@ jobs:
           npm run build
 
 
-      - name: 🚀 Deploy via rsync (Pure Shell)
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: 📦 Archive Release
         run: |
-          mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" | tr -d '\r' > deploy_key
-          chmod 600 deploy_key
-          ssh-keyscan -p 21098 66.29.148.140 >> ~/.ssh/known_hosts
-          rsync -avz --delete \
-            -e "ssh -p 21098 -i deploy_key -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=5 -o PubkeyAcceptedAlgorithms=+ssh-rsa -o HostKeyAlgorithms=+ssh-rsa" \
-            ./ baifywfnnq@66.29.148.140:/home/baifywfnnq/techynews.lat/ \
-            --exclude="/.git/" \
-            --exclude="/.github/" \
-            --exclude="/node_modules/" \
-            --exclude="/.env" \
-            --exclude="/storage/" \
-            --exclude="/bootstrap/cache/" \
-            --exclude="/tests/" \
-            --exclude="phpunit.xml" \
-            --exclude="README.md" \
-            --exclude="/.gemini/" \
-            --exclude="/.venv/" \
-            --exclude="/public/storage"
+          zip -r deploy.zip . -x "*.git*" "*/node_modules/*" "*/storage/logs/*" "*.gemini*" ".env" "vendor/*"
 
-      - name: 🔐 Comprehensive Permission Reset & Artisan Commands
+      - name: 🚀 Transfer Artifact
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: "66.29.148.140"
+          username: "baifywfnnq"
+          port: 21098
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "deploy.zip"
+          target: "/home/baifywfnnq/techynews.lat/"
+
+      - name: 🔐 Unpack & Artisan Commands
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: "66.29.148.140"
@@ -81,9 +71,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /home/baifywfnnq/techynews.lat
-            find . -type d -exec chmod 755 {} +
-            find . -type f -exec chmod 644 {} +
-            chmod -R 775 storage bootstrap/cache
+            unzip -o deploy.zip
+            rm deploy.zip
             /opt/alt/php85/usr/bin/php artisan migrate --force
             /opt/alt/php85/usr/bin/php artisan storage:fix
             /opt/alt/php85/usr/bin/php artisan optimize
