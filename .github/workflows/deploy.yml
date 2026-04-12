@@ -23,15 +23,15 @@ jobs:
           php -v
           composer -V
 
-      - name: 🐘 Setup PHP
+      - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
           tools: composer:v2
           coverage: none
 
-      - name: 📦 Install PHP Dependencies
-        run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev --no-scripts --ignore-platform-reqs
+      - name: Install Dependencies
+        run: composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-reqs --no-scripts --no-plugins
 
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
