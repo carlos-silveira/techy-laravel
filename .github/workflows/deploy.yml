@@ -34,7 +34,14 @@ jobs:
       - name: 📦 Install PHP Dependencies
         run: |
           composer config platform-check false
-          composer install --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-reqs --no-dev --no-scripts --no-plugins -vvv > composer_log.txt 2>&1 || (cat composer_log.txt && exit 1)
+          if ! composer install --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-reqs --no-dev --no-scripts --no-plugins -vvv > composer_log.txt 2>&1; then
+            echo "### ❌ Composer Install Failed" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            cat composer_log.txt >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            cat composer_log.txt
+            exit 1
+          fi
 
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
