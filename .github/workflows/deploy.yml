@@ -55,6 +55,12 @@ jobs:
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" | tr -d '\r' > deploy_key
           chmod 600 deploy_key
+          ssh-keyscan -p 21098 66.29.148.140 >> ~/.ssh/known_hosts
+          echo "--- SSH Key Fingerprint ---"
+          ssh-keygen -l -f deploy_key || echo "Invalid key format"
+          echo "--- DEBUG: Attempting handshake ---"
+          ssh -v -p 21098 -i deploy_key -o StrictHostKeyChecking=no -o PubkeyAcceptedAlgorithms=+ssh-rsa -o HostKeyAlgorithms=+ssh-rsa baifywfnnq@66.29.148.140 "exit" || echo "Handshake failed"
+          echo "--- Starting Rsync ---"
           rsync -avzr --delete -e "ssh -p 21098 -i deploy_key -o StrictHostKeyChecking=no -o PubkeyAcceptedAlgorithms=+ssh-rsa -o HostKeyAlgorithms=+ssh-rsa" ./ baifywfnnq@66.29.148.140:/home/baifywfnnq/techynews.lat/ \
             --exclude="/.git/" \
             --exclude="/.github/" \
