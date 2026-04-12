@@ -48,32 +48,40 @@ jobs:
           npm run build
 
 
-      - name: 🔑 Install SSH Key
-        uses: shimataro/ssh-key-action@v2
+      - name: 🚀 Deploy via SCP
+        uses: appleboy/scp-action@v0.1.7
         with:
+          host: "66.29.148.140"
+          username: "baifywfnnq"
+          port: 21098
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          known_hosts: 'not-needed-using-keyscan'
-
-      - name: 🚀 Deploy via rsync
-        run: |
-          ssh-keyscan -p 21098 66.29.148.140 >> ~/.ssh/known_hosts
-          rsync -avzr --delete -e "ssh -p 21098" ./ baifywfnnq@66.29.148.140:/home/baifywfnnq/techynews.lat/ \
-            --exclude="/.git/" \
-            --exclude="/.github/" \
-            --exclude="/node_modules/" \
-            --exclude="/.env" \
-            --exclude="/storage/" \
-            --exclude="/bootstrap/cache/" \
-            --exclude="/tests/" \
-            --exclude="phpunit.xml" \
-            --exclude="README.md" \
-            --exclude="/.gemini/" \
-            --exclude="/.venv/" \
-            --exclude="/public/storage"
+          source: "."
+          target: "/home/baifywfnnq/techynews.lat/"
+          rm: false
+          strip_components: 0
+          overwrite: true
+          exclude: |
+            .git/
+            .github/
+            node_modules/
+            .env
+            storage/
+            bootstrap/cache/
+            tests/
+            phpunit.xml
+            README.md
+            .gemini/
+            .venv/
+            public/storage
 
       - name: 🔐 Comprehensive Permission Reset & Artisan Commands
-        run: |
-          ssh -p 21098 baifywfnnq@66.29.148.140 << 'EOF'
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: "66.29.148.140"
+          username: "baifywfnnq"
+          port: 21098
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
             cd /home/baifywfnnq/techynews.lat
             find . -type d -exec chmod 755 {} +
             find . -type f -exec chmod 644 {} +
@@ -83,7 +91,6 @@ jobs:
             /opt/alt/php85/usr/bin/php artisan optimize
             crontab -l 2>/dev/null | grep -v "artisan schedule:run" | crontab -
             (crontab -l 2>/dev/null; echo "* * * * * cd /home/baifywfnnq/techynews.lat && /opt/alt/php85/usr/bin/php artisan schedule:run >> /dev/null 2>&1") | crontab -
-          EOF
 
       - name: 🔍 Health Check — Verify Key Pages Return 200
         run: |
