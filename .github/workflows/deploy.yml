@@ -27,21 +27,11 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
-          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, libxml, json, phar
           tools: composer:v2
           coverage: none
 
       - name: 📦 Install PHP Dependencies
-        run: |
-          composer config platform-check false
-          if ! composer install --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-reqs --no-dev --no-scripts --no-plugins -vvv > composer_log.txt 2>&1; then
-            echo "### ❌ Composer Install Failed" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            cat composer_log.txt >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            cat composer_log.txt
-            exit 1
-          fi
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev --no-scripts --ignore-platform-reqs
 
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
