@@ -55,7 +55,7 @@ jobs:
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" | tr -d '\r' > deploy_key
           chmod 600 deploy_key
-          rsync -avzr --delete -e "ssh -p 21098 -i deploy_key -o StrictHostKeyChecking=no" ./ baifywfnnq@66.29.148.140:techynews.lat/ \
+          rsync -avzr --delete -e "ssh -p 21098 -i deploy_key -o StrictHostKeyChecking=no -o PubkeyAcceptedAlgorithms=+ssh-rsa -o HostKeyAlgorithms=+ssh-rsa" ./ baifywfnnq@66.29.148.140:/home/baifywfnnq/techynews.lat/ \
             --exclude="/.git/" \
             --exclude="/.github/" \
             --exclude="/node_modules/" \
@@ -75,8 +75,8 @@ jobs:
         run: |
           echo "$SSH_PRIVATE_KEY" | tr -d '\r' > deploy_key
           chmod 600 deploy_key
-          ssh -p 21098 -i deploy_key -o StrictHostKeyChecking=no baifywfnnq@66.29.148.140 << 'EOF'
-            cd techynews.lat
+          ssh -p 21098 -i deploy_key -o StrictHostKeyChecking=no -o PubkeyAcceptedAlgorithms=+ssh-rsa -o HostKeyAlgorithms=+ssh-rsa baifywfnnq@66.29.148.140 << 'EOF'
+            cd /home/baifywfnnq/techynews.lat
             find . -type d -exec chmod 755 {} +
             find . -type f -exec chmod 644 {} +
             chmod -R 775 storage bootstrap/cache
