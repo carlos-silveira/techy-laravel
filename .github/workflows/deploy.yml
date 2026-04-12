@@ -31,7 +31,9 @@ jobs:
           coverage: none
 
       - name: Install Dependencies
-        run: composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-reqs --no-scripts --no-plugins
+        run: |
+          rm -f composer.lock
+          composer update --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-reqs --no-scripts --no-plugins
 
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
