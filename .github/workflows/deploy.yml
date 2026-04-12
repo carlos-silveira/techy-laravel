@@ -48,17 +48,29 @@ jobs:
           npm run build
 
 
-      - name: 🚀 Deploy via rsync
-        uses: easingthemes/ssh-deploy@v5.1.0
-        with:
+      - name: 🚀 Deploy via rsync (Pure Shell)
+        env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          ARGS: "-avzr --delete"
-          SOURCE: "/"
-          REMOTE_HOST: "66.29.148.140"
-          REMOTE_USER: "baifywfnnq"
-          TARGET: "/home/baifywfnnq/techynews.lat/"
-          REMOTE_PORT: 21098
-          EXCLUDE: "/.git/, /.github/, /node_modules/, /.env, /storage/, /bootstrap/cache/, /tests/, phpunit.xml, README.md, /.gemini/, /.venv/, /public/storage"
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' > deploy_key
+          chmod 600 deploy_key
+          ssh-keyscan -p 21098 66.29.148.140 >> ~/.ssh/known_hosts
+          rsync -avz --delete \
+            -e "ssh -p 21098 -i deploy_key -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=5 -o PubkeyAcceptedAlgorithms=+ssh-rsa -o HostKeyAlgorithms=+ssh-rsa" \
+            ./ baifywfnnq@66.29.148.140:/home/baifywfnnq/techynews.lat/ \
+            --exclude="/.git/" \
+            --exclude="/.github/" \
+            --exclude="/node_modules/" \
+            --exclude="/.env" \
+            --exclude="/storage/" \
+            --exclude="/bootstrap/cache/" \
+            --exclude="/tests/" \
+            --exclude="phpunit.xml" \
+            --exclude="README.md" \
+            --exclude="/.gemini/" \
+            --exclude="/.venv/" \
+            --exclude="/public/storage"
 
       - name: 🔐 Comprehensive Permission Reset & Artisan Commands
         uses: appleboy/ssh-action@v1.0.3
