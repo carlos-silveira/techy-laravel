@@ -232,4 +232,16 @@ return [
 
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Admin / Deployment Secret
+    |--------------------------------------------------------------------------
+    |
+    | This secret is used to authenticate internal administrative requests
+    | and automated deployment webhooks.
+    |
+    */
+
+    'admin_secret' => env('ADMIN_SECRET'),
+
 ];
