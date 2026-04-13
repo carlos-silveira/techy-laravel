@@ -23,8 +23,11 @@ jobs:
         run: |
           # Wait for MySQL to be ready
           echo "Waiting for MySQL..."
-          sleep 10
-          docker exec staging-app /usr/bin/composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+          sleep 12
+          # Fix for Git 'safe directory' issue in newer versions
+          docker exec staging-app git config --global --add safe.directory /var/www/html
+          # Install dependencies with platform-reqs ignored to match host configuration
+          docker exec staging-app /usr/bin/composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev --ignore-platform-reqs
           docker exec staging-app php artisan key:generate
           docker exec staging-app php artisan migrate --force
       
@@ -34,7 +37,10 @@ jobs:
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$1")
             if [ "$STATUS" != "200" ]; then
               echo "❌ Staging $1 failed with $STATUS"
+              echo "--- STAGING CONTAINER LOGS ---"
               docker logs staging-app
+              echo "--- LARAVEL ERROR LOGS ---"
+              docker exec staging-app cat storage/logs/laravel.log || echo "No logs found."
               exit 1
             fi
             echo "✅ Staging $1 → $STATUS"
