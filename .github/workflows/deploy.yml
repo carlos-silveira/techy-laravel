@@ -1,4 +1,4 @@
-name: Deploy Laravel to cPanel via FTP
+name: Deploy Laravel to cPanel via SSH
 
 on:
   push:
@@ -14,26 +14,17 @@ jobs:
       - name: 🚚 Get latest code
         uses: actions/checkout@v4
 
-      - name: 🔍 Debug Environment
-        run: |
-          pwd
-          ls -la
-          which php
-          which composer
-          php -v
-          composer -V
-
-      - name: Setup PHP
+      - name: 🐘 Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
           tools: composer:v2
           coverage: none
 
-      - name: Install Dependencies
+      - name: 📦 Install PHP Dependencies
         run: |
           rm -f composer.lock
-          composer update --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-reqs --no-scripts --no-plugins
+          composer update --no-interaction --prefer-dist --optimize-autoloader --no-dev --ignore-platform-reqs
 
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
@@ -47,32 +38,30 @@ jobs:
           npm install --legacy-peer-deps --prefer-offline --no-audit
           npm run build
 
+      - name: 🚀 Deploy via rsync
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          ARGS: "-avzr --delete"
+          EXCLUDE: "/.git/, /.github/, /node_modules/, /.env, /storage/, /bootstrap/cache/, /tests/, phpunit.xml, README.md, /.gemini/, /.venv/, /public/storage"
+          SOURCE: "./"
+          REMOTE_HOST: "66.29.148.140"
+          REMOTE_USER: "baifywfnnq"
+          REMOTE_PORT: "21098"
+          TARGET: "/home/baifywfnnq/techynews.lat/"
 
-      - name: 📦 Archive Release
-        run: |
-          zip -r deploy.zip . -x "*.git*" "*/node_modules/*" "*/storage/logs/*" "*.gemini*" ".env" "vendor/*"
-
-      - name: 🚀 Transfer Artifact
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: "66.29.148.140"
-          username: "baifywfnnq"
-          port: 21098
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "deploy.zip"
-          target: "/home/baifywfnnq/techynews.lat/"
-
-      - name: 🔐 Unpack & Artisan Commands
+      - name: 🔐 Comprehensive Permission Reset & Artisan Commands
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: "66.29.148.140"
           username: "baifywfnnq"
-          port: 21098
+          port: "21098"
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /home/baifywfnnq/techynews.lat
-            unzip -o deploy.zip
-            rm deploy.zip
+            find . -type d -exec chmod 755 {} +
+            find . -type f -exec chmod 644 {} +
+            chmod -R 775 storage bootstrap/cache
             /opt/alt/php85/usr/bin/php artisan migrate --force
             /opt/alt/php85/usr/bin/php artisan storage:fix
             /opt/alt/php85/usr/bin/php artisan optimize
@@ -109,6 +98,3 @@ jobs:
             echo "--- last 50 lines of production log ---"
             tail -n 50 /home/baifywfnnq/techynews.lat/storage/logs/laravel.log || echo "log file not found"
             /opt/alt/php85/usr/bin/php artisan --version
-
-
-# Trigger: Sat Apr 11 00:23:55 CST 2026
