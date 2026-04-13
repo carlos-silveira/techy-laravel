@@ -8,7 +8,7 @@
         "php": "^8.4",
         "abraham/twitteroauth": "*",
         "guzzlehttp/guzzle": "^7.8",
-        "inertiajs/inertia-laravel": "^2.0",
+        "inertiajs/inertia-laravel": "*",
         "laravel/framework": "^13.0",
         "laravel/sanctum": "*",
         "laravel/tinker": "*",
