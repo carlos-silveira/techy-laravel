@@ -5,6 +5,14 @@
     - **Staging Mirror**: Created `Dockerfile` and `docker-compose.staging.yml` mirroring the production environment (PHP 8.4 + Apache + MySQL).
     - **Pipeline Integration**: Modified `.github/workflows/deploy.yml` to include a required `staging-qa` job. This job builds the container, runs migrations, and performs health checks before allowing any production deployment.
     - **Security**: Hardened secrets management and ensured public repository safety. Rotated `ADMIN_SECRET` to `PURGED_SECRET` across Local, GitHub Actions, and Production.
+    - **Content Pipeline Stabilization**: 
+        - Hardened `GeminiService.php` with strict anti-garbage filters (prevented "Failed to generate content" strings from being saved).
+        - Implemented topic deduplication in `NewsAgent.php` and `GenerateDailyNews.php` (checks for similar titles in the last 48h).
+        - Upgraded `Console/Kernel.php` to use the high-quality `yolo:agent` every 2 hours.
+        - Fixed background translation cache-invalidation issue in `TranslateArticle.php`.
+    - **Content Recovery**:
+        - Created `App/Console/Commands/DeepCleanArticles.php` to find/fix failure strings and remove duplicate articles.
+        - Eliminated hardcoded fallback "The State of Developer Tools in 2026" that was causing repetitive articles.
     - **Development Tools**: Created `docker-compose.yml` and `scripts/start-docker.sh` for a seamless local development experience using Docker.
 - **Files Modified**: `Dockerfile`, `docker-compose.staging.yml`, `docker-compose.yml`, `.github/workflows/deploy.yml`, `docs/AI_ACTIVITY.md`, `ai-specs/changes/docker-staging.md`, `scripts/start-docker.sh`.
 

@@ -76,6 +76,11 @@ class TranslateArticle implements ShouldQueue
             
             $this->article->update(['translations' => $translations]);
             
+            // Flush cache for this specific article so the translated version is loaded immediately
+            \Illuminate\Support\Facades\Cache::forget("homepage_editors_choice_{$this->locale}");
+            \Illuminate\Support\Facades\Cache::forget("homepage_articles_{$this->locale}");
+            \Illuminate\Support\Facades\Cache::forget("article_{$this->article->slug}_related_{$this->locale}");
+            
             \Illuminate\Support\Facades\Log::info("Background translation complete for Article #{$this->article->id} -> {$this->locale}");
         } catch (\Exception $e) {
             // Handle specific Quota Exhausted exception from service

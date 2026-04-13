@@ -15,14 +15,12 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // Generate the rolling daily briefing every 4 hours
-        $schedule->command('news:generate-daily')->everyFourHours()->timezone('America/Mexico_City');
+        // Autonomous AI News Agent (YOLO Mode)
+        // Fetches news, critiques drafts, fixes HTML, and auto-publishes
+        $schedule->command('yolo:agent --limit=1')->everyTwoHours()->timezone('America/Mexico_City');
         
-        // Stockpile new AI articles for categories every 4 hours
-        $schedule->command('news:seed-categories')->everyFourHours()->timezone('America/Mexico_City');
-
-        // AI QA Editor: Sweeps through recently published articles to polish them
-        $schedule->command('article:polish')->everyFourHours()->timezone('America/Mexico_City');
+        // Stockpile new AI articles for categories every 6 hours
+        $schedule->command('news:seed-categories')->everySixHours()->timezone('America/Mexico_City');
         
         // Dispatch the queue worker to handle background translations and AI tasks
         $schedule->command('queue:work --stop-when-empty')->everyMinute()->withoutOverlapping();

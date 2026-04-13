@@ -126,7 +126,7 @@ class GeminiService
         if ($this->isQuotaExhausted()) return [];
         
         if (empty($newsItems)) {
-            return [['title' => 'The State of Developer Tools in 2026', 'prompt' => 'Analyze emerging developer tooling trends.']];
+            return [];
         }
 
         $newsContext = "";
@@ -153,9 +153,7 @@ Return ONLY a JSON array, no markdown fences:
 [{\"title\": \"...\", \"prompt\": \"A detailed 2-sentence editorial brief describing the angle, tone, and key arguments\", \"angle\": \"cultural_impact\"}]";
 
         $result = $this->callGemini($prompt, true);
-        return is_array($result) && !empty($result) ? $result : [
-            ['title' => 'The State of Developer Tools in 2026', 'prompt' => 'Analyze emerging developer tooling trends.']
-        ];
+        return is_array($result) && !empty($result) ? $result : [];
     }
 
     /**
@@ -199,18 +197,27 @@ Return ONLY a valid JSON object with these exact keys: \"titular\", \"tldr_twitt
 
         $result = $this->callGemini($prompt, true);
         
-        // --- ADDED VALIDATION ---
-        if (empty($result) || !isset($result['cuerpo_noticia'])) {
-            throw new \App\Exceptions\GenerationException("Gemini returned an empty or invalid JSON structure for '{$title}'.");
-        }
-
         $content = $result['cuerpo_noticia'];
 
-        // Prevent prompt leaking or failure message persistence
-        if (str_contains($content, 'Failed to generate content') || 
-            str_contains($content, 'Rewrite this article') || 
-            strlen(strip_tags($content)) < 300) {
-            throw new \App\Exceptions\GenerationException("Gemini returned low quality or failed content for '{$title}'. Length: " . strlen($content));
+        // --- HARDENED VALIDATION ---
+        $garbagePatterns = [
+            'Failed to generate content',
+            'Rewrite this article',
+            'I cannot fulfill',
+            'As an AI model',
+            'is resting or unavailable',
+            'Quota exhausted',
+            'Internal Server Error'
+        ];
+
+        foreach ($garbagePatterns as $pattern) {
+            if (stripos($content, $pattern) !== false) {
+                throw new \App\Exceptions\GenerationException("Gemini returned garbage/error content ('{$pattern}') for '{$title}'.");
+            }
+        }
+
+        if (strlen(strip_tags($content)) < 400) {
+            throw new \App\Exceptions\GenerationException("Gemini returned insufficient content (too short) for '{$title}'.");
         }
         
         return [
@@ -294,10 +301,14 @@ RETURN ONLY A JSON OBJECT. NO MARKDOWN FENCES.
 }";
 
         $result = $this->callGemini($prompt, true);
-        
+
+        if (empty($result) || empty($result['html_content']) || stripos($result['html_content'], 'Failed to generate') !== false) {
+            throw new \App\Exceptions\GenerationException("Category drafting failed for {$category}.");
+        }
+
         return [
             'title' => $result['title'] ?? "The Future of {$category}",
-            'html_content' => $result['html_content'] ?? "<p>Content generation failed.</p>",
+            'html_content' => $result['html_content'],
             'category' => $result['category'] ?? $category,
             'suggested_cover_query' => $result['suggested_cover_query'] ?? null,
         ];

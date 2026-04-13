@@ -59,6 +59,13 @@ Route::middleware([])->group(function () {
         return "Image updater dispatched.";
     });
 
+    Route::get('/admin/clean', function () use ($gate) {
+        $gate();
+        $command = "cd " . escapeshellarg(base_path()) . " && /usr/local/bin/php artisan articles:deep-clean --fix --dedupe > storage/logs/deep-clean.log 2>&1 &";
+        exec($command);
+        return "Deep cleaning dispatched. Check storage/logs/deep-clean.log for progress.";
+    });
+
     Route::get('/admin/twitter-sync', function () use ($gate) {
         $gate();
         $command = "cd " . escapeshellarg(base_path()) . " && /usr/local/bin/php artisan social:sync-backlog > storage/logs/twitter-sync.log 2>&1 &";

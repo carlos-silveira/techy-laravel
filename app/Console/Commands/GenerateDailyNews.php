@@ -37,8 +37,26 @@ class GenerateDailyNews extends Command
             return 1;
         }
 
-        $idea = $ideas[0];
-        $this->info("💡 Selected angle: {$idea['title']}");
+        $selectedIdea = null;
+        foreach ($ideas as $idea) {
+            $existing = Article::where('title', 'like', '%' . $idea['title'] . '%')
+                ->orWhere('slug', 'like', '%' . Str::slug($idea['title']) . '%')
+                ->where('created_at', '>', now()->subDays(3))
+                ->exists();
+
+            if (!$existing) {
+                $selectedIdea = $idea;
+                break;
+            }
+            $this->warn("⏩ Skipping already published topic: {$idea['title']}");
+        }
+
+        if (!$selectedIdea) {
+            $this->error('No unique news ideas available today. All generated topics were recently published.');
+            return 0; // Exit gracefully but do nothing
+        }
+
+        $this->info("💡 Selected unique angle: {$selectedIdea['title']}");
 
         // Rate limit pause
         $this->info('⏳ Respecting API rate limits (10s pause)...');

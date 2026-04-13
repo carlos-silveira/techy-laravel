@@ -71,8 +71,20 @@ class NewsAgent
         $meta = $this->gemini->generateArticleMeta($title, $polishedHtml);
         
         // 6. PUBLISH
+        // Check for duplication before creating
+        if (Article::where('title', 'like', '%' . $title . '%')
+            ->where('created_at', '>', now()->subDays(2))
+            ->exists()) {
+            Log::warning("NewsAgent: Skipping duplicate topic '{$title}'");
+            return ['title' => $title, 'status' => 'failed', 'reason' => 'Duplicate topic'];
+        }
+
         $slug = Str::slug($title) . '-' . Str::random(6);
         $wordCount = str_word_count(strip_tags($polishedHtml));
+
+        // Attempt image fetch (YOLO Mode)
+        $imageQuery = $meta['tags'][0] ?? $title;
+        $coverImage = $this->fetchCoverImageFallback($imageQuery);
 
         $article = Article::create([
             'title' => $title,
@@ -85,6 +97,7 @@ class NewsAgent
             'meta_description' => $meta['meta_description'] ?? Str::limit(strip_tags($polishedHtml), 160),
             'seo_keywords' => $meta['seo_keywords'] ?? '',
             'tags' => $meta['tags'] ?? [],
+            'cover_image_path' => $coverImage,
         ]);
 
         // --- SYNCHRONOUS TRANSLATIONS FOR YOLO MODE ---
@@ -92,9 +105,9 @@ class NewsAgent
         $translations = [];
         foreach ($languages as $lang) {
             Log::info("NewsAgent: Translating '{$title}' to " . strtoupper($lang));
-            sleep(10); // Respect RPM
+            sleep(12); // Respect RPM + Buffer
             try {
-                $translations[$lang] = $this->gemini->translateArticle($title, $article->ai_summary, $polishedHtml, $lang);
+                $translations[$lang] = $this->gemini->translateArticle($title, (string)$article->ai_summary, $polishedHtml, $lang);
             } catch (\Exception $e) {
                 Log::error("NewsAgent: Translation to {$lang} failed: " . $e->getMessage());
             }
@@ -110,6 +123,58 @@ class NewsAgent
             'id' => $article->id,
             'slug' => $article->slug
         ];
+    /**
+     * Fetch a copyright-free cover image from Unsplash or Wikimedia Commons fallback.
+     */
+    private function fetchCoverImageFallback(string $query): ?string
+    {
+        $accessKey = config('services.unsplash.access_key');
+        if (!empty($accessKey)) {
+            try {
+                $response = \Illuminate\Support\Facades\Http::withHeaders([
+                    'Authorization' => "Client-ID {$accessKey}",
+                ])->get('https://api.unsplash.com/search/photos', [
+                    'query' => $query,
+                    'per_page' => 1,
+                    'orientation' => 'landscape',
+                ]);
+
+                if ($response->successful()) {
+                    $results = $response->json()['results'] ?? [];
+                    if (!empty($results)) {
+                        return $results[0]['urls']['regular'] ?? null;
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::warning('Unsplash API error in NewsAgent: ' . $e->getMessage());
+            }
+        }
+
+        // Wikimedia fallback
+        try {
+            $response = \Illuminate\Support\Facades\Http::get('https://commons.wikimedia.org/w/api.php', [
+                'action' => 'query',
+                'generator' => 'search',
+                'gsrsearch' => "filetype:bitmap " . $query,
+                'gsrnamespace' => 6,
+                'gsrlimit' => 1,
+                'prop' => 'imageinfo',
+                'iiprop' => 'url',
+                'format' => 'json'
+            ]);
+
+            if ($response->successful()) {
+                $pages = $response->json()['query']['pages'] ?? [];
+                if (!empty($pages)) {
+                    $firstPage = reset($pages);
+                    return $firstPage['imageinfo'][0]['url'] ?? null;
+                }
+            }
+        } catch (\Exception $e) {
+             Log::warning('Wikimedia API error in NewsAgent: ' . $e->getMessage());
+        }
+
+        return null;
     }
 }
 
