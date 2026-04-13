@@ -15,8 +15,8 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
-# Enable Apache mod_rewrite
-RUN a2enmod rewrite
+# Enable Apache mod_rewrite and mod_headers
+RUN a2enmod rewrite headers
 
 # Install Node.js (for Vite development)
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
