@@ -39,8 +39,8 @@ Route::post('/set-locale', [LanguageController::class, 'setLocale']);
 
 Route::middleware([])->group(function () {
     $gate = function () {
-        $secret = config('app.admin_secret', env('ADMIN_SECRET', 'PURGED_SECRET'));
-        if (request()->header('X-Deploy-Token') !== $secret) {
+        $secret = config('app.admin_secret', env('ADMIN_SECRET'));
+        if (!$secret || request()->header('X-Deploy-Token') !== $secret) {
             abort(403, 'Unauthorized Deployment');
         }
     };
