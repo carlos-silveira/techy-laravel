@@ -116,6 +116,9 @@ Route::middleware([])->group(function () {
             $output[] = "Unzip: " . implode("\n", $zipOut);
             @unlink($zipPath);
 
+            exec("$php $artisan config:clear 2>&1", $clearOut);
+            $output[] = "Config Clear: " . implode("\n", $clearOut);
+
             exec("$php $artisan migrate --force 2>&1", $migOut);
             $output[] = "Migrate: " . implode("\n", $migOut);
             
