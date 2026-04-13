@@ -38,6 +38,12 @@ jobs:
           npm install --legacy-peer-deps --prefer-offline --no-audit
           npm run build
 
+      - name: 🚀 Debug SSH Key
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > test_key
+          chmod 600 test_key
+          ssh-keygen -l -f test_key || echo "KEY FORMAT IS INVALID"
+
       - name: 🚀 Deploy via rsync
         uses: easingthemes/ssh-deploy@main
         env:
