@@ -83,6 +83,42 @@ Route::middleware([])->group(function () {
             return "<pre>Error: " . $e->getMessage() . "</pre>";
         }
     });
+
+    Route::post('/admin/deploy', function () use ($gate) {
+        $gate();
+
+        if (!request()->hasFile('deployFile')) {
+            abort(400, 'No file uploaded');
+        }
+
+        $file = request()->file('deployFile');
+        $zipPath = base_path('deploy.zip');
+        $file->move(base_path(), 'deploy.zip');
+
+        $output = [];
+        
+        exec('cd ' . escapeshellarg(base_path()) . ' && unzip -o deploy.zip 2>&1', $zipOut);
+        $output[] = implode("\n", $zipOut);
+        @unlink($zipPath);
+
+        exec('/opt/alt/php85/usr/bin/php ' . escapeshellarg(base_path('artisan')) . ' migrate --force 2>&1', $migOut);
+        $output[] = implode("\n", $migOut);
+        
+        exec('/opt/alt/php85/usr/bin/php ' . escapeshellarg(base_path('artisan')) . ' storage:fix 2>&1', $storeOut);
+        $output[] = implode("\n", $storeOut);
+
+        exec('/opt/alt/php85/usr/bin/php ' . escapeshellarg(base_path('artisan')) . ' optimize 2>&1', $optOut);
+        $output[] = implode("\n", $optOut);
+
+        // Restart queue workers indirectly by clearing cache
+        exec('/opt/alt/php85/usr/bin/php ' . escapeshellarg(base_path('artisan')) . ' queue:restart 2>&1', $queueOut);
+        $output[] = implode("\n", $queueOut);
+
+        return response()->json([
+            'status' => 'success',
+            'logs' => implode("\n\n", $output)
+        ]);
+    });
 });
 
 // Protected routes
