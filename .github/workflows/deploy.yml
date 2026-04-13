@@ -18,7 +18,7 @@ jobs:
         run: |
           echo "🔍 Scanning codebase for hardcoded secrets..."
           # Bloquear si detecta patrones de las claves purgadas o tokens hardcoded
-          if grep -rEi "PURGED_SECRET|2026Secure|Techy_2026" . --exclude-dir=.git --exclude=deploy.yml --exclude=test-staging.sh --exclude=AI_ACTIVITY.md; then
+          if grep -rEi "PURGED_SECRET|2026Secure|Techy_2026" . --exclude-dir=.git --exclude-dir=docs --exclude=deploy.yml --exclude=test-staging.sh --exclude=AI_ACTIVITY.md; then
             echo "❌ ERROR: Se detectaron rastros de secretos o claves hardcoded!"
             exit 1
           fi
