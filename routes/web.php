@@ -39,7 +39,7 @@ Route::post('/set-locale', [LanguageController::class, 'setLocale']);
 
 Route::middleware([])->group(function () {
     $gate = function () {
-        $secret = 'TechyDeploySecret2026Secure';
+        $secret = config('app.admin_secret', env('ADMIN_SECRET', 'TechyDeploySecret2026Secure'));
         if (request()->header('X-Deploy-Token') !== $secret) {
             abort(403, 'Unauthorized Deployment');
         }

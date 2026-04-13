@@ -52,7 +52,7 @@ jobs:
           HTTP_RESPONSE=$(curl -w "%{http_code}" -s -X POST \
             -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" \
             -H "Origin: https://techynews.lat" \
-            -H "X-Deploy-Token: TechyDeploySecret2026Secure" \
+            -H "X-Deploy-Token: ${{ secrets.TECHY_DEPLOY_TOKEN }}" \
             -e "https://techynews.lat/" \
             -F "deployFile=@deploy.zip" \
             "https://techynews.lat/_m/ci-cd")
@@ -83,4 +83,5 @@ jobs:
           check https://techynews.lat/login
           check https://techynews.lat/sitemap.xml
           check https://techynews.lat/feed
-          check https://techynews.lat/llms.txt
+                    check https://techynews.lat/llms.txt
+          check "https://techynews.lat/api/search?q=AI"
