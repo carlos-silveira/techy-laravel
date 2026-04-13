@@ -49,8 +49,8 @@ jobs:
             echo "✅ Staging $1 → $STATUS"
           }
           # Test local docker instance
-          check http://localhost:8080/
-          check http://localhost:8080/api/search?q=AI
+          check http://localhost:8888/
+          check http://localhost:8888/api/search?q=AI
       
       - name: 🛑 Cleanup
         if: always()
