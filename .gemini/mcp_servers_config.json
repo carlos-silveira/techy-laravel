@@ -21,12 +21,15 @@
         "UPSTASH_REDIS_REST_TOKEN": "YOUR_REDIS_TOKEN_HERE"
       }
     },
-    "task-master-ai": {
+        "task-master-ai": {
       "command": "npx",
       "args": [
         "-y",
         "claude-task-master"
       ]
+    },
+    "stitch": {
+      "command": "mcp-server-stitch"
     }
   }
 }

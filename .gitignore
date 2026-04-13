@@ -31,3 +31,4 @@ tests.log
 # AI Agent Skills
 /.gemini/skills/*
 !/.gemini/skills/.gitkeep
+!/.gemini/skills/techy-laravel/

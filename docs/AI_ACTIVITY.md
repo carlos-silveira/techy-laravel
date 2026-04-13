@@ -1,3 +1,13 @@
+- **Date**: 2026-04-13
+- **Agent**: Antigravity (Senior Full-Stack Engineer Mode)
+- **Task**: Agent Skills Integration & Deployment Health Hardening.
+- **Summary**:
+    - **Deployment Hardening**: Added a new health check to `.github/workflows/deploy.yml` for the `/api/search` (Vector RAG) endpoint to ensure AI search is functional post-deploy.
+    - **Agent Skills**: Verified and finalized `scripts/setup-agent-skills.sh`. Created a project-specific skill in `.gemini/skills/techy-laravel/SKILL.md` to centralize business rules (HTML-only content, anti-slop, UX constraints).
+    - **MCP Config**: Updated `.gemini/mcp_servers_config.json` with `stitch` integration and standardized formatting.
+    - **Security Hardening**: Migrated the hardcoded deployment token in `.github/workflows/deploy.yml` to a GitHub Secret (`TECHY_DEPLOY_TOKEN`) to protect the public repository from unauthorized triggers.
+- **Files Modified**: `.github/workflows/deploy.yml`, `.gemini/skills/techy-laravel/SKILL.md`, `.gemini/mcp_servers_config.json`, `docs/AGENT_SKILLS_SYSTEM.md`, `docs/AI_ACTIVITY.md`.
+
 - **Date**: 2026-04-10
 - **Agent**: Antigravity (Advanced Agentic Mode - YOLO)
 - **Task**: Implementation of Vector RAG Architecture & Content Deep Polish.
