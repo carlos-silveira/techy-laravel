@@ -14,6 +14,16 @@ jobs:
       - name: 🚚 Get latest code
         uses: actions/checkout@v4
 
+      - name: 🔐 Security Audit (Secret Detection)
+        run: |
+          echo "🔍 Scanning codebase for hardcoded secrets..."
+          # Bloquear si detecta patrones de las claves purgadas o tokens hardcoded
+          if grep -rEi "PURGED_SECRET|2026Secure|Techy_2026" . --exclude-dir=.git --exclude=deploy.yml --exclude=test-staging.sh --exclude=AI_ACTIVITY.md; then
+            echo "❌ ERROR: Se detectaron rastros de secretos o claves hardcoded!"
+            exit 1
+          fi
+          echo "✅ Auditoría de seguridad pasada."
+
       - name: 🏗️ Setup Docker & Build Staging
         run: |
           docker compose -f docker-compose.staging.yml build
