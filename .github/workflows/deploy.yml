@@ -46,6 +46,7 @@ jobs:
         run: |
           # Use curl to upload the zip directly to the Laravel application.
           # Bypasses all cPanel/SSH IP bans by leveraging standard HTTPS web traffic.
+          # The token matches ADMIN_SECRET in the production .env
           HTTP_RESPONSE=$(curl -w "%{http_code}" -s -X POST \
             -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" \
             -H "Origin: https://techynews.lat" \
@@ -53,11 +54,11 @@ jobs:
             -F "deployFile=@deploy.zip" \
             "https://techynews.lat/_m/ci-cd?token=TechyDeploySecret2026Secure")
           
-          # Check if the response ends with 200
+          # The response will be JSON with logs. We check for the 200 status code at the end.
           if [[ "$HTTP_RESPONSE" == *200 ]]; then
             echo "✅ Deployment webhook triggered successfully."
-            # Remove the HTTP status code from the output to show logs
-            echo "${HTTP_RESPONSE%200}"
+            echo "--- REMOTE LOGS ---"
+            echo "${HTTP_RESPONSE%200}" | jq -r '.logs' || echo "${HTTP_RESPONSE%200}"
           else
             echo "❌ Deployment failed! HTTP Status: $HTTP_RESPONSE"
             exit 1
