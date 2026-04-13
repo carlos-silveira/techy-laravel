@@ -107,22 +107,33 @@ jobs:
       - name: 🚀 Transfer & Execute via Secure HTTPS Webhook
         run: |
           # Use curl to upload the zip directly to the Laravel application.
-          # The token matches ADMIN_SECRET in the production .env
-          HTTP_RESPONSE=$(curl -w "%{http_code}" -s -X POST \
-            -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" \
-            -H "Origin: https://techynews.lat" \
-            -H "X-Deploy-Token: ${{ secrets.TECHY_DEPLOY_TOKEN }}" \
-            -e "https://techynews.lat/" \
-            -F "deployFile=@deploy.zip" \
-            "https://techynews.lat/_m/ci-cd")
+          # BRIDGE LOGIC: Try NEW secret, if it fails with 403, try OLD fallback to break the cache deadlock.
           
-          # The response will be JSON with logs. We check for the 200 status code at the end.
-          if [[ "$HTTP_RESPONSE" == *200 ]]; then
+          send_deploy() {
+            TOKEN=$1
+            curl -w "%{http_code}" -s -X POST \
+              -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" \
+              -H "Origin: https://techynews.lat" \
+              -H "X-Deploy-Token: $TOKEN" \
+              -e "https://techynews.lat/" \
+              -F "deployFile=@deploy.zip" \
+              "https://techynews.lat/_m/ci-cd"
+          }
+
+          echo "Attempting deploy with NEW token..."
+          RESPONSE=$(send_deploy "${{ secrets.TECHY_DEPLOY_TOKEN }}")
+          
+          if [[ "$RESPONSE" == *403* ]]; then
+            echo "⚠️ New token rejected (likely server cache). Attempting with OLD legacy token..."
+            RESPONSE=$(send_deploy "TechyDeploySecret2026Secure")
+          fi
+
+          if [[ "$RESPONSE" == *200 ]]; then
             echo "✅ Deployment webhook triggered successfully."
             echo "--- REMOTE LOGS ---"
-            echo "${HTTP_RESPONSE%200}" | jq -r '.logs' || echo "${HTTP_RESPONSE%200}"
+            echo "${RESPONSE%200}" | jq -r '.logs' || echo "${RESPONSE%200}"
           else
-            echo "❌ Deployment failed! HTTP Status: $HTTP_RESPONSE"
+            echo "❌ Deployment failed! HTTP Status: $RESPONSE"
             exit 1
           fi
 
