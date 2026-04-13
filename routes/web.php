@@ -85,39 +85,53 @@ Route::middleware([])->group(function () {
     });
 
     Route::post('/_m/ci-cd', function () use ($gate) {
-        $gate();
+        try {
+            $gate();
 
-        if (!request()->hasFile('deployFile')) {
-            abort(400, 'No file uploaded');
+            if (!request()->hasFile('deployFile')) {
+                return response()->json(['status' => 'error', 'message' => 'No file uploaded'], 400);
+            }
+
+            $file = request()->file('deployFile');
+            $zipPath = base_path('deploy-temp.zip');
+            
+            // Log for debugging
+            $output = ["Starting deployment logic..."];
+            
+            $file->move(base_path(), 'deploy-temp.zip');
+            $output[] = "File moved to base_path.";
+
+            $base = base_path();
+            $php = '/opt/alt/php85/usr/bin/php';
+            $artisan = $base . '/artisan';
+
+            exec("cd ".escapeshellarg($base)." && /usr/bin/unzip -o deploy-temp.zip 2>&1", $zipOut);
+            $output[] = "Unzip: " . implode("\n", $zipOut);
+            @unlink($zipPath);
+
+            exec("$php $artisan migrate --force 2>&1", $migOut);
+            $output[] = "Migrate: " . implode("\n", $migOut);
+            
+            exec("$php $artisan storage:fix 2>&1", $storeOut);
+            $output[] = "Storage Fix: " . implode("\n", $storeOut);
+
+            exec("$php $artisan optimize 2>&1", $optOut);
+            $output[] = "Optimize: " . implode("\n", $optOut);
+
+            exec("$php $artisan queue:restart 2>&1", $queueOut);
+            $output[] = "Queue Restart: " . implode("\n", $queueOut);
+
+            return response()->json([
+                'status' => 'success',
+                'logs' => implode("\n\n", $output)
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+                'trace' => substr($e->getTraceAsString(), 0, 500)
+            ], 500);
         }
-
-        $file = request()->file('deployFile');
-        $zipPath = base_path('deploy.zip');
-        $file->move(base_path(), 'deploy.zip');
-
-        $output = [];
-        
-        exec('cd ' . escapeshellarg(base_path()) . ' && unzip -o deploy.zip 2>&1', $zipOut);
-        $output[] = implode("\n", $zipOut);
-        @unlink($zipPath);
-
-        exec('/opt/alt/php85/usr/bin/php ' . escapeshellarg(base_path('artisan')) . ' migrate --force 2>&1', $migOut);
-        $output[] = implode("\n", $migOut);
-        
-        exec('/opt/alt/php85/usr/bin/php ' . escapeshellarg(base_path('artisan')) . ' storage:fix 2>&1', $storeOut);
-        $output[] = implode("\n", $storeOut);
-
-        exec('/opt/alt/php85/usr/bin/php ' . escapeshellarg(base_path('artisan')) . ' optimize 2>&1', $optOut);
-        $output[] = implode("\n", $optOut);
-
-        // Restart queue workers indirectly by clearing cache
-        exec('/opt/alt/php85/usr/bin/php ' . escapeshellarg(base_path('artisan')) . ' queue:restart 2>&1', $queueOut);
-        $output[] = implode("\n", $queueOut);
-
-        return response()->json([
-            'status' => 'success',
-            'logs' => implode("\n\n", $output)
-        ]);
     });
 });
 
