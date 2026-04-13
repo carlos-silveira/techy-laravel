@@ -140,10 +140,34 @@ class PublicController extends Controller
             return $related->map(fn($a) => $this->translateIfNecessary($a, $locale));
         });
 
+        $article->content = $this->sanitizeHtml($article->content);
+
         return Inertia::render('ArticleShow', [
             'article' => $article,
             'relatedArticles' => $relatedArticles
         ]);
+    }
+
+    /**
+     * Server-side HTML sanitization to prevent XSS.
+     * Allows only safe tags and removes dangerous attributes like onclick/onerror.
+     */
+    private function sanitizeHtml(mixed $content): mixed
+    {
+        if (!is_string($content)) return $content;
+
+        // Whitelist of safe HTML tags
+        $allowedTags = '<div><p><a><br><h1><h2><h3><h4><h5><h6><ul><li><ol><strong><em><code><pre><img><section><article><blockquote>';
+        
+        // Strip unknown tags
+        $content = strip_tags($content, $allowedTags);
+
+        // Remove dangerous attributes (on*, javascript:, etc) using regex
+        $content = preg_replace('/on\w+="[^"]*"/i', '', $content);
+        $content = preg_replace('/on\w+=\'[^\']*\'/i', '', $content);
+        $content = preg_replace('/javascript:[^"]*/i', '', $content);
+
+        return $content;
     }
 
     /**

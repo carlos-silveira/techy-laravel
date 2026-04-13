@@ -48,27 +48,13 @@
 
     <!-- Scripts -->
     @routes
-    @php
-    $manifestPath = public_path('build/manifest.json');
-    if (file_exists($manifestPath)) {
-        $manifest = json_decode(file_get_contents($manifestPath), true);
-        if (isset($manifest['resources/js/app.jsx'])) {
-            $jsFile = 'build/' . $manifest['resources/js/app.jsx']['file'];
-            echo '<script type="module" src="' . asset($jsFile) . '"></script>';
-            
-            if (isset($manifest['resources/js/app.jsx']['css'])) {
-                foreach ($manifest['resources/js/app.jsx']['css'] as $cssFile) {
-                    echo '<link rel="stylesheet" href="' . asset('build/' . $cssFile) . '">';
-                }
-            }
-        }
-    }
-    @endphp
+    @viteReactRefresh
+    @vite(['resources/js/app.jsx', "resources/js/Pages/{$page['component']}.jsx"])
     @inertiaHead
 </head>
 
 <body class="font-sans antialiased">
-    @inertia
+    <div id="app" data-page="{{ json_encode($page) }}"></div>
 </body>
 
 </html>

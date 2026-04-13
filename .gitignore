@@ -32,3 +32,16 @@ tests.log
 /.gemini/skills/*
 !/.gemini/skills/.gitkeep
 !/.gemini/skills/techy-laravel/
+
+# Personal & Sensitive
+.DS_Store
+.github_action_log.txt
+action_logs.txt
+*.key
+deploy_key*
+*.zip
+remote_web.php
+phpinfo.php
+node_modules/
+vendor/
+.env

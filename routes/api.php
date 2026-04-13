@@ -18,21 +18,19 @@ use App\Http\Controllers\NewsletterController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// Protected AI & Studio Routes
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/generate-brief', [AiController::class, 'generateBrief']);
+    Route::post('/generate-seo', [AiController::class, 'generateSeoTags']);
+    Route::post('/generate-image-prompt', [AiController::class, 'generateImagePrompt']);
+    Route::get('/generate-ideas', [AiController::class, 'generateIdeas']);
+    Route::post('/generate-draft', [AiController::class, 'generateDraft']);
+    Route::post('/editor-action', [AiController::class, 'editorAction']);
+    Route::post('/studio-chat', [AiController::class, 'studioChat']);
+    Route::post('/regenerate-draft', [AiController::class, 'regenerateDraft']);
+    Route::post('/generate-article-meta', [AiController::class, 'generateArticleMeta']);
+    Route::post('/ask-llama', [AiController::class, 'askLlama']);
 });
-
-// Public AI API for Editor
-Route::post('/generate-brief', [AiController::class, 'generateBrief']);
-Route::post('/generate-seo', [AiController::class, 'generateSeoTags']);
-Route::post('/generate-image-prompt', [AiController::class, 'generateImagePrompt']);
-
-Route::get('/generate-ideas', [AiController::class, 'generateIdeas']);
-Route::post('/generate-draft', [AiController::class, 'generateDraft']);
-Route::post('/editor-action', [AiController::class, 'editorAction']);
-Route::post('/studio-chat', [AiController::class, 'studioChat']);
-Route::post('/regenerate-draft', [AiController::class, 'regenerateDraft']);
-Route::post('/generate-article-meta', [AiController::class, 'generateArticleMeta']);
 
 // Public Analytics & Engagement
 Route::get('/analytics/dashboard', [AnalyticsController::class, 'dashboardStats']);
@@ -43,8 +41,3 @@ Route::get('/articles/{id}/stats', [AnalyticsController::class, 'articleStats'])
 // Global Discovery
 Route::get('/search', [\App\Http\Controllers\PublicController::class, 'search']);
 Route::post('/rag-chat', [\App\Http\Controllers\ChatController::class, 'ask']);
-
-// Protected API Routes (if any) using Sanctum
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/ask-llama', [AiController::class, 'askLlama']);
-});

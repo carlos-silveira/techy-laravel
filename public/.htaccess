@@ -1,4 +1,9 @@
 <IfModule mod_rewrite.c>
+    # Security Headers
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set X-Content-Type-Options "nosniff"
+
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
     </IfModule>
