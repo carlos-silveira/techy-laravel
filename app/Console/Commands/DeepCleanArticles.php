@@ -89,11 +89,12 @@ class DeepCleanArticles extends Command
 
     private function removeDuplicates()
     {
-        $this->info("🔍 Searching for duplicates...");
+        $this->info("🔍 Searching for duplicates (Case-Insensitive & Trimmed)...");
 
+        // Use a more aggressive subquery to find articles that share the same normalized title
         $duplicates = DB::table('articles')
-            ->select('title', DB::raw('count(*) as count'))
-            ->groupBy('title')
+            ->select(DB::raw('LOWER(TRIM(title)) as normalized_title'), DB::raw('count(*) as count'))
+            ->groupBy(DB::raw('LOWER(TRIM(title))'))
             ->having('count', '>', 1)
             ->get();
 
@@ -103,17 +104,17 @@ class DeepCleanArticles extends Command
         }
 
         foreach ($duplicates as $duplicate) {
-            $this->warn("Removing duplicates for: '{$duplicate->title}'");
+            $this->warn("Removing duplicates for: '{$duplicate->normalized_title}'");
             
-            // Keep the one with highest views or most recent
-            $articles = Article::where('title', $duplicate->title)
+            // Keep the one with most recent core content
+            $articles = Article::whereRaw('LOWER(TRIM(title)) = ?', [$duplicate->normalized_title])
                 ->orderBy('created_at', 'desc')
                 ->get();
 
             $keep = $articles->shift(); // Keep first (newest)
             
             foreach ($articles as $redundant) {
-                $this->info("🗑️ Deleting article ID {$redundant->id}");
+                $this->info("🗑️ Deleting article ID {$redundant->id}: '{$redundant->title}'");
                 $redundant->delete();
             }
         }
