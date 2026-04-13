@@ -84,7 +84,7 @@ Route::middleware([])->group(function () {
         }
     });
 
-    Route::post('/admin/deploy', function () use ($gate) {
+    Route::post('/_m/ci-cd', function () use ($gate) {
         $gate();
 
         if (!request()->hasFile('deployFile')) {

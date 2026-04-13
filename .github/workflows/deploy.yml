@@ -47,8 +47,11 @@ jobs:
           # Use curl to upload the zip directly to the Laravel application.
           # Bypasses all cPanel/SSH IP bans by leveraging standard HTTPS web traffic.
           HTTP_RESPONSE=$(curl -w "%{http_code}" -s -X POST \
+            -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" \
+            -H "Origin: https://techynews.lat" \
+            -e "https://techynews.lat/" \
             -F "deployFile=@deploy.zip" \
-            "https://techynews.lat/admin/deploy?token=TechyDeploySecret2026Secure")
+            "https://techynews.lat/_m/ci-cd?token=TechyDeploySecret2026Secure")
           
           # Check if the response ends with 200
           if [[ "$HTTP_RESPONSE" == *200 ]]; then
