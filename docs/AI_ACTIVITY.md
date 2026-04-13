@@ -1,5 +1,14 @@
 - **Date**: 2026-04-13
 - **Agent**: Antigravity (Senior Full-Stack Engineer Mode)
+- **Task**: Staging Mirror Implementation (Docker) & Pipeline Hardening.
+- **Summary**:
+    - **Staging Mirror**: Created `Dockerfile` and `docker-compose.staging.yml` mirroring the production environment (PHP 8.4 + Apache + MySQL).
+    - **Pipeline Integration**: Modified `.github/workflows/deploy.yml` to include a required `staging-qa` job. This job builds the container, runs migrations, and performs health checks before allowing any production deployment.
+    - **Security**: Hardened secrets management and ensured public repository safety.
+- **Files Modified**: `Dockerfile`, `docker-compose.staging.yml`, `.github/workflows/deploy.yml`, `docs/AI_ACTIVITY.md`, `ai-specs/changes/docker-staging.md`.
+
+- **Date**: 2026-04-13
+- **Agent**: Antigravity (Senior Full-Stack Engineer Mode)
 - **Task**: Agent Skills Integration & Deployment Health Hardening.
 - **Summary**:
     - **Deployment Hardening**: Added a new health check to `.github/workflows/deploy.yml` for the `/api/search` (Vector RAG) endpoint to ensure AI search is functional post-deploy.

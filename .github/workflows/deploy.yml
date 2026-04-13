@@ -7,8 +7,49 @@ on:
   workflow_dispatch:
 
 jobs:
+  staging-qa:
+    name: 🐳 Staging Mirror QA (Docker)
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚚 Get latest code
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Docker & Build Staging
+        run: |
+          docker compose -f docker-compose.staging.yml build
+          docker compose -f docker-compose.staging.yml up -d
+      
+      - name: 🐘 Prepare Staging Environment
+        run: |
+          # Wait for MySQL to be ready
+          echo "Waiting for MySQL..."
+          sleep 10
+          docker exec staging-app /usr/bin/composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+          docker exec staging-app php artisan key:generate
+          docker exec staging-app php artisan migrate --force
+      
+      - name: 🔍 Staging Health Check
+        run: |
+          check() {
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$1")
+            if [ "$STATUS" != "200" ]; then
+              echo "❌ Staging $1 failed with $STATUS"
+              docker logs staging-app
+              exit 1
+            fi
+            echo "✅ Staging $1 → $STATUS"
+          }
+          # Test local docker instance
+          check http://localhost:8080/
+          check http://localhost:8080/api/search?q=AI
+      
+      - name: 🛑 Cleanup
+        if: always()
+        run: docker compose -f docker-compose.staging.yml down
+
   web-deploy:
-    name: 🎉 Deploy
+    name: 🚀 Deploy to Production
+    needs: staging-qa
     runs-on: ubuntu-latest
     steps:
       - name: 🚚 Get latest code

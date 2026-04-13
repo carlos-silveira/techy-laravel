@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  staging-app:
+    container_name: staging-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: techy-laravel-staging
+    ports:
+      - "8080:80"
+    environment:
+      APP_ENV: staging
+      APP_KEY: base64:fH7j8Y8H8Y8H8Y8H8Y8H8Y8H8Y8H8Y8H8Y8H8Y8H8Y8=
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8080
+      DB_CONNECTION: mysql
+      DB_HOST: staging-db
+      DB_PORT: 3306
+      DB_DATABASE: techy_staging
+      DB_USERNAME: staging_user
+      DB_PASSWORD: staging_password
+    depends_on:
+      - staging-db
+    networks:
+      - staging-network
+
+  staging-db:
+    container_name: staging-db
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: techy_staging
+      MYSQL_USER: staging_user
+      MYSQL_PASSWORD: staging_password
+      MYSQL_ROOT_PASSWORD: root_password
+    networks:
+      - staging-network
+
+networks:
+  staging-network:
+    driver: bridge
