@@ -18,6 +18,8 @@ class DeepCleanArticles extends Command
     {
         $this->info("🧹 Article Deep Cleaner activated.");
 
+        $this->scrubInstructionLeaks();
+
         if ($this->option('fix')) {
             $this->fixBrokenArticles($gemini);
         }
@@ -28,6 +30,38 @@ class DeepCleanArticles extends Command
 
         $this->info("🏁 Cleaning complete.");
         return 0;
+    }
+
+    private function scrubInstructionLeaks()
+    {
+        $this->info("🧹 Scrubbing instruction leaks from existing articles...");
+        
+        $patterns = [
+            '/^Rewrite this article to make it infinitely better[^:]+: /i',
+            '/^Rewrite this article to make it infinitely better[^:]+: /i', // Dupe for certainty
+            '/^Here is the refined version of the article[^:]+: /i',
+            '/^Based on the editorial brief[^:]+: /i',
+            '/^Current Summary: /i',
+            '/^Drafting a high-quality journalistic deep-dive[^:]+: /i',
+        ];
+
+        Article::chunk(50, function($articles) use ($patterns) {
+            foreach ($articles as $article) {
+                $originalContent = $article->content;
+                $originalSummary = $article->ai_summary;
+                
+                foreach ($patterns as $pattern) {
+                    $article->content = preg_replace($pattern, '', (string)$article->content);
+                    $article->ai_summary = preg_replace($pattern, '', (string)$article->ai_summary);
+                    $article->title = preg_replace($pattern, '', (string)$article->title);
+                }
+                
+                if ($article->isDirty()) {
+                    $article->save();
+                    $this->info("✨ Scrubbed leaks from ID {$article->id} - '{$article->title}'");
+                }
+            }
+        });
     }
 
     private function fixBrokenArticles(GeminiService $gemini)
