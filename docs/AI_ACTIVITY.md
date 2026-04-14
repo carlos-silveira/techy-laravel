@@ -1,4 +1,27 @@
-# 🚀 AI Agent Activity Log - TechyNews
+## [2026-04-14] - Fix Locale Cache Poisoning, RAG JSON Bug, Cypress E2E (PR #17)
+
+### Fixed
+- **Spanish/PT locale shows English:** `PublicController` was caching English fallback under the `es` cache key for 3600s. Introduced `rememberLocaleAware()` — uses 30s TTL when translations are missing so the page self-heals within seconds after background jobs complete.
+- **LanguageController:** Now flushes all locale-specific caches (`homepage_*`) on language switch to prevent stale cross-locale cache poisoning.
+- **translateIfNecessary():** Now requires both `title` AND `content` to be present before applying a translation (prevents partial data).
+- **RAG returns `{"answer":"..."}`:** `ChatController` was returning JSON on embedding failure; frontend displayed it as raw text. Added keyword-based LIKE fallback and changed all error paths to stream plain text.
+- **RAG API key missing check:** Now validates API key before calling cURL; surfaces errors as readable streamed messages.
+
+### Added
+- **Cypress E2E test suite** targeting Docker staging mirror (`http://localhost:8080`)
+  - `cypress/e2e/locale.cy.js` — 5 tests covering locale switch flow end-to-end
+  - `cypress/e2e/rag-copilot.cy.js` — 7 tests covering backend API + frontend UI widget
+  - `npm run test:e2e` / `npm run cypress:open` scripts added
+- `data-testid="language-switcher"` added to `LanguageSwitcher.jsx`
+
+### Closed GitHub Issues
+- #6 TEST ISSUE
+- #7 Issue 1: News generation quality (resolved Sprint 1)
+- #8 Issue 2: Docker pre-flight testing (resolved Sprint 1)
+- #9 Issue 3: Analytics dashboard polish (resolved PR #16)
+
+---
+
 
 ## [2026-04-14] - Analytics Dashboard Overhaul (PR #16)
 ### Added
