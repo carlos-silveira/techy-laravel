@@ -1,9 +1,10 @@
-# 🚀 TechyNews AI Activity & Roadmap
-
 ## 📅 Last Activity: 2026-04-14
 - **Hardened Deployment**: Fixed SSH port 21098 connection and resolved configuration cache deadlock in production. 🛡️
 - **Deduplication**: Aggressively cleaned quadruple articles using exact hex-match validation via Tinker. 👯
-- **Analytics Refactor**: Normalized page paths to prevent duplicates, improved device detection, and added Gemini model distribution data. 📊
+- **Analytics Overhaul**: 
+    - Fixed **Top Pages** duplication by normalizing paths in SQL.
+    - Integrated **Gemini Model Distribution** (Flash vs Pro) stats.
+    - Restored the **Likes/Engagement** system by moving the route to session-aware middleware. 📊❤️
 
 ## 🛠️ Pending Tasks (The Queue)
 - [ ] **Fix Analytics Front-End**: Update the Dashboard.jsx component to handle the new `percentage` fields and `geminiModelDistribution`.

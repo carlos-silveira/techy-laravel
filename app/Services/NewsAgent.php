@@ -71,20 +71,21 @@ class NewsAgent
         $meta = $this->gemini->generateArticleMeta($title, $polishedHtml);
         
         // 6. PUBLISH
-        // Check for duplication before creating
-        if (Article::where('title', 'like', '%' . $title . '%')
-            ->where('created_at', '>', now()->subDays(2))
+        // Check for duplication before creating - use more robust title check
+        $normalizedTitle = Str::slug($title);
+        if (Article::where('slug', 'like', $normalizedTitle . '%')
+            ->where('created_at', '>', now()->subDays(3))
             ->exists()) {
             Log::warning("NewsAgent: Skipping duplicate topic '{$title}'");
             return ['title' => $title, 'status' => 'failed', 'reason' => 'Duplicate topic'];
         }
 
-        $slug = Str::slug($title) . '-' . Str::random(6);
+        $slug = $normalizedTitle . '-' . Str::random(6);
         $wordCount = str_word_count(strip_tags($polishedHtml));
 
-        // Attempt image fetch (YOLO Mode)
-        $imageQuery = $meta['tags'][0] ?? $title;
-        $coverImage = $this->fetchCoverImageFallback($imageQuery);
+        // Attempt image fetch with improved query from meta if available
+        $imageQuery = $draft['sugerencia_imagen'] ?? ($meta['tags'][0] ?? $title);
+        $coverImage = $this->fetchCoverImageFallback(Str::limit($imageQuery, 50));
 
         $article = Article::create([
             'title' => $title,
@@ -93,8 +94,8 @@ class NewsAgent
             'status' => 'published',
             'is_editors_choice' => true,
             'reading_time_minutes' => max(1, (int) ceil($wordCount / 200)),
-            'ai_summary' => $meta['summary'] ?? Str::limit(strip_tags($polishedHtml), 200),
-            'meta_description' => $meta['meta_description'] ?? Str::limit(strip_tags($polishedHtml), 160),
+            'ai_summary' => $meta['summary'] ?? Str::limit(strip_tags($polishedHtml), 250),
+            'meta_description' => $meta['meta_description'] ?? Str::limit(strip_tags($polishedHtml), 155),
             'seo_keywords' => $meta['seo_keywords'] ?? '',
             'tags' => $meta['tags'] ?? [],
             'cover_image_path' => $coverImage,

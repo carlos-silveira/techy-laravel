@@ -1,1 +1,0 @@
-import{j as s}from"./app-BwidwXse.js";import r from"./TopNav-Ct9-TyOY.js";import{a as e}from"./Footer-DoKJX0lr.js";const x=({children:o})=>s.jsxs("div",{className:"flex flex-col min-h-screen",children:[s.jsx(r,{}),s.jsx("main",{className:"flex-grow",children:o}),s.jsx(e,{})]});export{x as default};

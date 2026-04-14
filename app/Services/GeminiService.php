@@ -141,13 +141,13 @@ You have these trending headlines from today's tech news cycle:
 {$newsContext}
 
 Generate exactly 3 article ideas. Each MUST:
-1. Have a provocative, insightful title that frames a strong thesis.
-2. Target a professional audience of developers, strategists, and investors.
-3. Connect multiple headlines into a single, non-obvious narrative when possible.
-4. Include a developer-action angle or a strategic takeaway.
-5. Include a new 'angle' field suggesting the analytical approach: 'cultural_impact' (analyzing how technology affects users and society) or 'strategic_analysis' (analyzing business models and market shifts).
+1. Have a provocative, insider-style title that frames a strong strategic or cultural thesis.
+2. Target a sophisticated audience of engineers, CTOs, and tech founders.
+3. Connect multiple headlines into a single, cohesive narrative that exposes a market shift or cultural trend.
+4. Include a developer-action angle or a critical strategic takeaway.
+5. Include a new 'angle' field suggesting the analytical approach: 'cultural_impact' (analyzing how technology affects users and society) or 'strategic_market_analysis' (analyzing business models, moats, and industry consolidation).
 
-CRITICAL RECENCY RULE: ONLY focus on actual, confirmed events from the EXACT last 24 to 48 hours. DO NOT output older news or repetitive rumors (such as old Nintendo Switch 2 leaks or stale Apple rumors). If the news isn't happening today, discard it.
+CRITICAL RECENCY RULE: ONLY focus on confirmed tech events from the EXACT last 24 to 48 hours. DO NOT output legacy news, repetitive AI hype, or rumors already covered. If the news is not from today, discard it.
 
 Return ONLY a JSON array, no markdown fences:
 [{\"title\": \"...\", \"prompt\": \"A detailed 2-sentence editorial brief describing the angle, tone, and key arguments\", \"angle\": \"cultural_impact\"}]";
@@ -177,14 +177,14 @@ NEWS CONTEXT:
 
 Generate an article as a JSON object. The 'cuerpo_noticia' field MUST contain valid HTML and follow this structural flow:
 
-CRITICAL WRITING RULES (ANTI-SLOP & CLICKBAIT):
-- NEVER use generic intros like 'In today's fast-paced digital world', 'In the ever-evolving landscape of', or 'Technology is advancing'.
-- NEVER use buzzwords like 'delve', 'testament', 'tapestry', 'a symphony of', 'navigating the complexities'.
-- The 'titular' (Headline) MUST be extremely catchy, clickbait, intriguing, and ABSOLUTELY MAXIMUM 60 characters long. If it's longer than 60 characters, the UI will break. Be short and punchy.
-- Start immediately with the news hook. Be direct, authoritative, and punchy.
-- Use concrete examples and technical specifics, not vague generalizations.
-- DO NOT summarize everything at the end with 'In conclusion'. End with a forward-looking prediction.
-- Keep sentences relatively short and impactful. 
+CRITICAL WRITING RULES (ANTI-SLOP & INVESTIGATIVE DEPTH):
+- NEVER use generic intros like 'In today's fast-paced digital world', 'In the ever-evolving landscape', or 'Technology has changed the way we'.
+- NEVER use AI-typical adjectives: 'dynamic', 'comprehensive', 'transformative', 'seamless', 'revolutionary' (unless describing a literal paradigm shift).
+- NEVER use sludge words: 'delve', 'complexities', 'nuanced', 'testament', 'tapestry', 'a symphony of', 'navigating the'.
+- Headline ('titular'): MUST be extremely punchy, short, and intriguing. ABSOLUTELY MAXIMUM 55 characters. Be a bold curator, not a boring summarizer.
+- Voice: Be direct, slightly opinionated, and highly authoritative. Write as someone who has insider access to the industry.
+- Specificity: Use real data points, architectural details, or market valuation numbers from the context.
+- Prediction: DO NOT summarize. End with a sharp, bold prediction about where this trend goes in the next 12-24 months.
 
 1.  **Thesis**: A single, bold, non-obvious thesis statement. Hook the reader immediately. (HTML: `<p>...</p>`)
 2.  **Why It Matters**: The immediate, concrete impact of this news. (HTML: `<h2>Why It Matters</h2>...`)
