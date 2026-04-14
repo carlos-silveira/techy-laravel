@@ -25,6 +25,12 @@ use App\Http\Controllers\SeoController;
 Route::get('/', [PublicController::class, 'index']);
 Route::get('/article/{slug}', [PublicController::class, 'show']);
 Route::post('/api/articles/{id}/like', [ArticleController::class, 'like']); // Moved from api.php to handle sessions
+Route::get('/sitemap.xml', [SeoController::class, 'sitemap']);
+Route::get('/feed', [SeoController::class, 'rss']);
+
+Route::get('/about', [AboutController::class, 'index']);
+Route::get('/archive', [ArchiveController::class, 'index']);
+
 Route::get('/analytics/dashboard', [AnalyticsController::class, 'dashboardStats']);
 Route::post('/subscribe', [NewsletterController::class, 'store']);
 Route::get('/articles/{id}/stats', [AnalyticsController::class, 'articleStats']);
