@@ -17,7 +17,7 @@ class GeminiService
     public function __construct()
     {
         $this->apiKey = config('services.gemini.api_key', env('GEMINI_API_KEY', ''));
-        $this->model = config('services.gemini.model', env('GEMINI_MODEL', 'gemini-2.5-flash'));
+        $this->model = config('services.gemini.model', env('GEMINI_MODEL', 'gemini-1.5-flash'));
     }
 
     /**
@@ -211,8 +211,8 @@ Return ONLY a valid JSON object with these exact keys: \"titular\", \"tldr_twitt
         ];
 
         foreach ($garbagePatterns as $pattern) {
-            if (stripos($content, $pattern) !== false) {
-                throw new \App\Exceptions\GenerationException("Gemini returned garbage/error content ('{$pattern}') for '{$title}'.");
+            if (stripos($content, $pattern) !== false || stripos($content, 'current summary') !== false) {
+                throw new \App\Exceptions\GenerationException("Gemini returned garbage/error content or prompt leak for '{$title}'.");
             }
         }
 

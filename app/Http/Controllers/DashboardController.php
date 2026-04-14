@@ -191,12 +191,12 @@ class DashboardController extends Controller
         // NEW: Gemini Model Distribution (Pie Chart data)
         $geminiModelDistribution = \Illuminate\Support\Facades\Schema::hasTable('gemini_logs') ?
             \Illuminate\Support\Facades\DB::table('gemini_logs')
-                ->selectRaw('model, SUM(total_tokens) as tokens')
+                ->selectRaw('model_name, SUM(total_tokens) as tokens')
                 ->where('created_at', '>=', now()->subDays(7))
-                ->groupBy('model')
+                ->groupBy('model_name')
                 ->get()
                 ->map(fn($item) => [
-                    'model' => str_replace('models/', '', $item->model),
+                    'model' => str_replace('models/', '', $item->model_name),
                     'tokens' => (int)$item->tokens,
                     'percentage' => $totalGeminiTokens7d > 0 ? round(($item->tokens / $totalGeminiTokens7d) * 100, 1) : 0
                 ]) : collect([]);

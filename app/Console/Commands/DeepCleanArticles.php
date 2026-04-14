@@ -38,7 +38,9 @@ class DeepCleanArticles extends Command
             '%I cannot fulfill%',
             '%As an AI model%',
             '%Gemini API is currently resting%',
-            '%Quota exhausted%'
+            '%Quota exhausted%',
+            '%current summary%',
+            '%editorial brief%'
         ];
 
         $broken = Article::where(function($q) use ($garbage) {
