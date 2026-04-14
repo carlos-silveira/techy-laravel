@@ -123,6 +123,8 @@ class NewsAgent
             'id' => $article->id,
             'slug' => $article->slug
         ];
+    }
+
     /**
      * Fetch a copyright-free cover image from Unsplash or Wikimedia Commons fallback.
      */
