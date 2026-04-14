@@ -61,7 +61,7 @@ class DashboardController extends Controller
             ];
         });
 
-        // Device Breakdown (from user_agent)
+        // Device Breakdown (More robust CASE)
         $deviceBreakdown = \Illuminate\Support\Facades\DB::table('page_views')
             ->selectRaw("
                 CASE 
@@ -75,32 +75,45 @@ class DashboardController extends Controller
             ->where('created_at', '>=', now()->subDays(7))
             ->groupBy('device')
             ->orderByDesc('count')
-            ->get();
+            ->get()
+            ->map(function ($item) use ($totalViews7d) {
+                return [
+                    'device' => $item->device,
+                    'count' => $item->count,
+                    'percentage' => $totalViews7d > 0 ? round(($item->count / $totalViews7d) * 100, 1) : 0
+                ];
+            });
 
-        // Top Pages (non-article routes)
+        // Top Pages (Normalized path grouping)
+        // We strip query parameters to avoid duplicates like / and /?ref=...
         $topPages = \Illuminate\Support\Facades\DB::table('page_views')
-            ->selectRaw('url, COUNT(*) as views')
+            ->selectRaw("
+                CASE 
+                    WHEN url LIKE '%?%' THEN SUBSTR(url, 1, INSTR(url, '?') - 1)
+                    ELSE url
+                END as clean_url,
+                COUNT(*) as views
+            ")
             ->where('created_at', '>=', now()->subDays(7))
-            ->groupBy('url')
+            ->groupBy('clean_url')
             ->orderByDesc('views')
             ->limit(10)
             ->get()
             ->map(function ($item) {
-                // Clean URL for display
-                $parsed = parse_url($item->url);
+                $path = parse_url($item->clean_url, PHP_URL_PATH) ?: '/';
                 return [
-                    'path' => $parsed['path'] ?? '/',
+                    'path' => $path,
                     'views' => $item->views,
                 ];
             });
 
-        // Top Referrers (from referrer and utm_source)
+        // Top Referrers (Compatible parsing)
         $topReferrers = \Illuminate\Support\Facades\DB::table('page_views')
             ->selectRaw("
                 CASE
                     WHEN utm_source IS NOT NULL AND utm_source != '' THEN utm_source
                     WHEN referrer IS NULL OR referrer = '' THEN 'Direct'
-                    ELSE SUBSTRING_INDEX(REPLACE(REPLACE(referrer, 'https://', ''), 'http://', ''), '/', 1)
+                    ELSE 'Reference'
                 END as source,
                 COUNT(*) as views
             ")
@@ -160,16 +173,29 @@ class DashboardController extends Controller
                     ];
                 }) : collect([]);
 
+        $totalGeminiTokens7d = \Illuminate\Support\Facades\Schema::hasTable('gemini_logs') ? 
+            \Illuminate\Support\Facades\DB::table('gemini_logs')
+            ->where('created_at', '>=', now()->subDays(7))
+            ->sum('total_tokens') : 0;
+
         $rawGeminiLogs = \Illuminate\Support\Facades\Schema::hasTable('gemini_logs') ?
             \Illuminate\Support\Facades\DB::table('gemini_logs')
                 ->orderByDesc('created_at')
                 ->limit(10)
                 ->get() : collect([]);
 
-        $totalGeminiTokens7d = \Illuminate\Support\Facades\Schema::hasTable('gemini_logs') ? 
+        // NEW: Gemini Model Distribution (Pie Chart data)
+        $geminiModelDistribution = \Illuminate\Support\Facades\Schema::hasTable('gemini_logs') ?
             \Illuminate\Support\Facades\DB::table('gemini_logs')
-            ->where('created_at', '>=', now()->subDays(7))
-            ->sum('total_tokens') : 0;
+                ->selectRaw('model, SUM(total_tokens) as tokens')
+                ->where('created_at', '>=', now()->subDays(7))
+                ->groupBy('model')
+                ->get()
+                ->map(fn($item) => [
+                    'model' => str_replace('models/', '', $item->model),
+                    'tokens' => (int)$item->tokens,
+                    'percentage' => $totalGeminiTokens7d > 0 ? round(($item->tokens / $totalGeminiTokens7d) * 100, 1) : 0
+                ]) : collect([]);
 
         return Inertia::render('Dashboard', [
             'initialBrief' => 'The AI Daily Brief will appear here.',
@@ -182,7 +208,8 @@ class DashboardController extends Controller
                 'topReferrers' => $topReferrers,
                 'hourlyTraffic' => $hourlyTraffic,
                 'geminiUsage' => $geminiUsagePerDay,
-                'rawGeminiLogs' => $rawGeminiLogs, // NEW
+                'geminiModelDistribution' => $geminiModelDistribution, // NEW
+                'rawGeminiLogs' => $rawGeminiLogs,
                 'summary' => [
                     'totalViews7d' => $totalViews7d,
                     'viewsGrowth' => $viewsGrowth,
@@ -191,7 +218,7 @@ class DashboardController extends Controller
                     'totalLikes' => $totalLikes,
                     'engagementRate' => $engagementRate,
                     'totalViewsAllTime' => $totalViewsAllTime,
-                    'totalGeminiTokens7d' => $totalGeminiTokens7d, // NEW
+                    'totalGeminiTokens7d' => $totalGeminiTokens7d,
                 ],
             ]
         ]);

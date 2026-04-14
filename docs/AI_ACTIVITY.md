@@ -1,60 +1,16 @@
-- **Date**: 2026-04-13
-- **Agent**: Antigravity (Senior Full-Stack Engineer Mode)
-- **Task**: Staging Mirror Implementation (Docker) & Pipeline Hardening.
-- **Summary**:
-    - **Staging Mirror**: Created `Dockerfile` and `docker-compose.staging.yml` mirroring the production environment (PHP 8.4 + Apache + MySQL).
-    - **Pipeline Integration**: Modified `.github/workflows/deploy.yml` to include a required `staging-qa` job. This job builds the container, runs migrations, and performs health checks before allowing any production deployment.
-    - **Security**: Hardened secrets management and ensured public repository safety. Rotated `ADMIN_SECRET` to `PURGED_SECRET` across Local, GitHub Actions, and Production.
-    - **Content Pipeline Stabilization**: 
-        - Hardened `GeminiService.php` with strict anti-garbage filters (prevented "Failed to generate content" strings from being saved).
-        - Implemented topic deduplication in `NewsAgent.php` and `GenerateDailyNews.php` (checks for similar titles in the last 48h).
-        - Upgraded `Console/Kernel.php` to use the high-quality `yolo:agent` every 2 hours.
-        - Fixed background translation cache-invalidation issue in `TranslateArticle.php`.
-    - **Content Recovery**:
-        - Created `App/Console/Commands/DeepCleanArticles.php` to find/fix failure strings and remove duplicate articles.
-        - Eliminated hardcoded fallback "The State of Developer Tools in 2026" that was causing repetitive articles.
-    - **Development Tools**: Created `docker-compose.yml` and `scripts/start-docker.sh` for a seamless local development experience using Docker.
-- **Files Modified**: `Dockerfile`, `docker-compose.staging.yml`, `docker-compose.yml`, `.github/workflows/deploy.yml`, `docs/AI_ACTIVITY.md`, `ai-specs/changes/docker-staging.md`, `scripts/start-docker.sh`.
+# 🚀 TechyNews AI Activity & Roadmap
 
-- **Date**: 2026-04-13
-- **Agent**: Antigravity (Senior Full-Stack Engineer Mode)
-- **Task**: Agent Skills Integration & Deployment Health Hardening.
-- **Summary**:
-    - **Deployment Hardening**: Added a new health check to `.github/workflows/deploy.yml` for the `/api/search` (Vector RAG) endpoint to ensure AI search is functional post-deploy.
-    - **Agent Skills**: Verified and finalized `scripts/setup-agent-skills.sh`. Created a project-specific skill in `.gemini/skills/techy-laravel/SKILL.md` to centralize business rules (HTML-only content, anti-slop, UX constraints).
-    - **MCP Config**: Updated `.gemini/mcp_servers_config.json` with `stitch` integration and standardized formatting.
-    - **Security Hardening**: Migrated the hardcoded deployment token in `.github/workflows/deploy.yml` to a GitHub Secret (`TECHY_DEPLOY_TOKEN`) to protect the public repository from unauthorized triggers.
-- **Files Modified**: `.github/workflows/deploy.yml`, `.gemini/skills/techy-laravel/SKILL.md`, `.gemini/mcp_servers_config.json`, `docs/AGENT_SKILLS_SYSTEM.md`, `docs/AI_ACTIVITY.md`.
+## 📅 Last Activity: 2026-04-14
+- **Hardened Deployment**: Fixed SSH port 21098 connection and resolved configuration cache deadlock in production. 🛡️
+- **Deduplication**: Aggressively cleaned quadruple articles using exact hex-match validation via Tinker. 👯
+- **Analytics Refactor**: Normalized page paths to prevent duplicates, improved device detection, and added Gemini model distribution data. 📊
 
-- **Date**: 2026-04-10
-- **Agent**: Antigravity (Advanced Agentic Mode - YOLO)
-- **Task**: Implementation of Vector RAG Architecture & Content Deep Polish.
-- **Summary**:
-    - **RAG Implementation**: Added JSON embedding column to `articles`, added `text-embedding-004` generation script, created `ChatController` and `RagCopilot` React component for AI search over codebase. Created backfill artisan job `vector:embed`.
-    - **Cron Fix**: Discovered missing Laravel 11/13 scheduler; restored `Schedule::command('news:generate-daily')` in `routes/console.php`.
-    - **Language Render Fix**: Fixed the `Article` model accessors (`title`, `content`) to correctly fallback to the user's `app()->getLocale()`, solving the English-in-Spanish bug.
-    - **Anti-Slop AI Refinements**: Hardened the prompts in `GeminiService.php` to outright ban buzzwords and boilerplate phrases.
-- **Files Modified**: `database/migrations/*`, `app/Models/Article.php`, `app/Services/GeminiService.php`, `app/Console/Commands/EmbedArticles.php`, `app/Console/Commands/GenerateDailyNews.php`, `app/Http/Controllers/ChatController.php`, `routes/api.php`, `routes/console.php`, `resources/js/Components/RagCopilot.jsx`, `resources/js/Pages/Welcome.jsx`, `resources/js/Pages/ArticleShow.jsx`, `package.json`.
+## 🛠️ Pending Tasks (The Queue)
+- [ ] **Fix Analytics Front-End**: Update the Dashboard.jsx component to handle the new `percentage` fields and `geminiModelDistribution`.
+- [ ] **Referrer Parsing**: Implement a cross-database compatible domain extractor for the Referrers list.
+- [ ] **Likes System Audit**: Investigate why Likes are showing as 0 in production despite article generation being active.
+- [ ] **Performance Polish**: Cache common analytics queries for 1 hour to reduce database load.
+- [ ] **SEO Automation**: Add meta-tag generation based on the new `ai_summary` field.
 
-- **Date**: 2026-04-09
-- **Agent**: Antigravity (Advanced Agentic Mode)
-- **Task**: Stabilization of Laravel 13 Upgrade & YOLO mode Autonomous Pipeline.
-- **Summary**:
-    - **Major Upgrade**: Upgraded application to **Laravel 13** and **PHP 8.5** after confirming server support in cPanel.
-    - **Frontend Modernization**: Upgraded to **Inertia 2.0** and **Ziggy 2.0**.
-    - **DevOps**: Updated GitHub Actions to use PHP 8.5 and point to the correct binaries on the host.
-    - Enhanced Analytics Dashboard with real engagement metrics (Likes, Views, Engagement Rate) and fixed SQLite hourly traffic queries.
-    - Integrated AI Daily Briefing into the Archive page as a synthetic narrative.
-    - Synchronized YOLO mode translation pipeline (ES/PT) and implemented automatic cache flushing on article saves to ensure immediate availability of multi-language content.
-    - Toughened translation error handling in GeminiService.
-- **Files Modified**: `app/Http/Controllers/DashboardController.php`, `resources/js/Components/AnalyticsChart.jsx`, `app/Http/Controllers/PublicController.php`, `app/Http/Controllers/ArchiveController.php`, `resources/js/Pages/Archive.jsx`, `app/Models/Article.php`, `app/Services/NewsAgent.php`, `app/Services/GeminiService.php`, `app/Console/Commands/GenerateDailyNews.php`.
-
-- **Date**: 2026-04-08
-- **Agent**: Gemini CLI
-- **Task**: Improve the quality and analytical depth of AI-generated articles.
-- **Summary**:
-    - Collaborated with the user to define a new content strategy based on analyzing high-quality tech publications (The Verge, Stratechery).
-    - Iteratively evolved the prompts in `app/Services/GeminiService.php` instead of starting from scratch.
-    - Modified the `generateIdeas` prompt to include a strategic `angle` for each idea.
-    - Replaced the simple `generateDraft` prompt with a more sophisticated five-part analytical structure (Thesis, Why It Matters, Deeper Analysis, Counter-Argument, Forward Outlook) to foster deeper, more insightful content.
-- **Files Modified**: `app/Services/GeminiService.php`
+---
+*Autonomous Agent Status: Online & Monitoring Production Sync.*
