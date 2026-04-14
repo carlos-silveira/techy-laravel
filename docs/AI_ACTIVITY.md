@@ -1,5 +1,25 @@
 # 🚀 AI Agent Activity Log - TechyNews
 
+## [2026-04-14] - Analytics Dashboard Overhaul (PR #16)
+### Added
+- **Crawler Intelligence**: New dashboard section showing which bots are indexing the site (Googlebot, GPTBot, Bingbot, Ahrefs, etc.) with individual hit counts.
+- **Real Referrer Domains**: Inbound Traffic now shows actual domain names (google.com, reddit.com, t.co) with type classification (search/social/referral) instead of generic "Reference".
+- **Gemini Cost Estimation**: Token usage stat card now shows estimated API cost. Each operation in the log shows its individual cost.
+- **Operation Labels**: Gemini operations display human-readable names (Draft Gen, SEO Meta, Studio Chat) instead of generic "Operation".
+
+### Fixed
+- **Device Breakdown 0.1%/0.0% bug**: Now shows absolute counts alongside correctly calculated percentages.
+- **Gemini column mismatch**: Frontend was reading `log.action`/`log.model` but DB columns are `operation_type`/`model_name` — all mapped correctly now.
+- **Bot traffic silently dropped**: Middleware was filtering out all bots. Now tracks them for analytics while still filtering internal tools (Lighthouse/PageSpeed).
+
+### Changed
+- `DashboardController.php` — Complete rewrite of analytics queries (referrers, devices, crawlers, Gemini logs)
+- `TrackPageView.php` — Removed bot filtering, kept only internal tool filtering
+- `AnalyticsChart.jsx` — Added crawler section, real referrer domains with type badges, fixed device stats
+- `GeminiUsage.jsx` — Fixed column mapping, added operation labels, costs, request counts
+
+---
+
 ## [2026-04-14] - Sprint 1: Stability & Content Excellence
 ### Added
 - **Issue 1 (Quality)**: Upgraded Gemini editorial prompts to prioritize viral, high-authority tech narratives (Wired/Stratechery style).
