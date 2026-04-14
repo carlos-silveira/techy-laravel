@@ -41,13 +41,16 @@ export default function RagCopilot() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'text/event-stream'
+                    'Accept': 'text/plain, text/event-stream'
                 },
                 body: JSON.stringify({ query: userMsg }),
                 signal: abortControllerRef.current.signal
             });
 
-            if (!response.ok) throw new Error('Network response was not ok');
+            if (!response.ok) {
+                const errText = await response.text().catch(() => '');
+                throw new Error(`HTTP ${response.status}: ${errText.slice(0, 200)}`);
+            }
 
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
@@ -68,9 +71,11 @@ export default function RagCopilot() {
             }
         } catch (error) {
             if (error.name !== 'AbortError') {
+                console.error('RAG error:', error);
                 setMessages(prev => {
                     const newMsgs = [...prev];
-                    newMsgs[newMsgs.length - 1].text = "Sorry, I ran into an error connecting to the knowledge base.";
+                    newMsgs[newMsgs.length - 1].text = "Sorry, I couldn't reach the knowledge engine. Please try again.";
+                    newMsgs[newMsgs.length - 1].isStreaming = false;
                     return newMsgs;
                 });
             }
