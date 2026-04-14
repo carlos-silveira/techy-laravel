@@ -39,6 +39,12 @@ class GenerateDailyNews extends Command
 
         $selectedIdea = null;
         foreach ($ideas as $idea) {
+            // Guard: Gemini sometimes returns strings instead of objects
+            if (!is_array($idea) || !isset($idea['title'])) {
+                $this->warn('⚠️ Skipping malformed idea (not an associative array).');
+                continue;
+            }
+
             $existing = Article::where('title', 'like', '%' . $idea['title'] . '%')
                 ->orWhere('slug', 'like', '%' . Str::slug($idea['title']) . '%')
                 ->where('created_at', '>', now()->subDays(3))
@@ -70,7 +76,7 @@ class GenerateDailyNews extends Command
         while ($attempts < 3) {
             $this->info("⏳ Attempt " . ($attempts + 1) . " of 3...");
             try {
-                $draftData = $geminiService->generateDraft($idea['title'], $idea['prompt'], $newsItems);
+                $draftData = $geminiService->generateDraft($selectedIdea['title'], $selectedIdea['prompt'], $newsItems);
                 
                 $content = $draftData['cuerpo_noticia'];
                 if (!empty($draftData['snippet_codigo'])) {
@@ -113,19 +119,20 @@ class GenerateDailyNews extends Command
         $wordCount = str_word_count(strip_tags($content));
 
         $article = Article::create([
-            'title' => $idea['title'],
-            'slug' => $slug,
-            'content' => $content, // Store raw HTML directly — NO json_encode
-            'status' => 'published',
-            'is_editors_choice' => true,
-            'views_count' => 0,
-            'likes_count' => 0,
-            'reading_time_minutes' => max(1, (int) ceil($wordCount / 200)),
-            'ai_summary' => $meta['summary'] ?? Str::limit(strip_tags($content), 200),
-            'meta_description' => $meta['meta_description'] ?? Str::limit(strip_tags($content), 160),
-            'seo_keywords' => $meta['seo_keywords'] ?? '',
-            'tags' => $meta['tags'] ?? [],
-            'cover_image_path' => $coverImageUrl,
+            'title'                 => $selectedIdea['title'],
+            'slug'                  => $slug,
+            'content'               => $content, // Store raw HTML directly — NO json_encode
+            'language'              => 'en',
+            'status'                => 'published',
+            'is_editors_choice'     => true,
+            'views_count'           => 0,
+            'likes_count'           => 0,
+            'reading_time_minutes'  => max(1, (int) ceil($wordCount / 200)),
+            'ai_summary'            => $meta['summary'] ?? Str::limit(strip_tags($content), 200),
+            'meta_description'      => $meta['meta_description'] ?? Str::limit(strip_tags($content), 160),
+            'seo_keywords'          => $meta['seo_keywords'] ?? '',
+            'tags'                  => $meta['tags'] ?? [],
+            'cover_image_path'      => $coverImageUrl,
         ]);
 
         \App\Events\ArticlePublished::dispatch($article);
