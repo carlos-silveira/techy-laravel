@@ -37,6 +37,10 @@ class DashboardController extends Controller
                 ];
             });
 
+        // Summary Stats
+        $totalViews7d = \Illuminate\Support\Facades\DB::table('page_views')
+            ->where('created_at', '>=', now()->subDays(7))->count();
+
         // Top Articles by Views (7 days)
         $topArticles = \Illuminate\Support\Facades\DB::table('page_views')
             ->selectRaw('article_id, COUNT(id) as views, COUNT(DISTINCT ip_address) as unique_views')
