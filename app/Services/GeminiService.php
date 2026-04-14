@@ -544,7 +544,7 @@ Return exactly a JSON object (no markdown fences):
             }
         }
         
-        return 'Gemini API is currently resting or unavailable. Please try again later. Notice: ' . $lastError;
+        throw new \RuntimeException('Gemini API is currently resting or unavailable. Last error: ' . $lastError);
     }
 
     /**

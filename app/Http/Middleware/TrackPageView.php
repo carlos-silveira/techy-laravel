@@ -75,18 +75,21 @@ class TrackPageView
         }
 
         // Ignore utility and admin routes
-        if ($request->is('admin/*') || $request->is('sysinfo') || $request->is('sitemap.xml')) {
+        if ($request->is('sysinfo') || $request->is('sitemap.xml') || $request->is('_m/*')) {
             return true;
         }
 
-        // Ignore extremely simple bots and prefetch requests
+        // Ignore prefetch/lighthouse (internal tools, not real visitors or crawlers)
         $userAgent = strtolower($request->userAgent() ?? '');
-        $botKeywords = ['bot', 'crawler', 'spider', 'slurp', 'inspect', 'lighthouse', 'health'];
-        foreach ($botKeywords as $bot) {
-            if (str_contains($userAgent, $bot)) {
+        $internalTools = ['lighthouse', 'pagespeed', 'headlesschrome/'];
+        foreach ($internalTools as $tool) {
+            if (str_contains($userAgent, $tool)) {
                 return true;
             }
         }
+
+        // NOTE: We do NOT filter out search engine bots (Googlebot, bingbot, etc.)
+        // because we want to track crawler activity in the analytics dashboard.
 
         return false;
     }
