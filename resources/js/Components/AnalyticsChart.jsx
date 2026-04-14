@@ -1,10 +1,13 @@
 import React from 'react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import Skeleton from './Skeleton';
-import { Eye, Users, Newspaper, Heart, TrendingUp, TrendingDown, Monitor, Smartphone, Tablet, Bot, Zap } from 'lucide-react';
+import { Eye, Users, Newspaper, Heart, TrendingUp, TrendingDown, Monitor, Smartphone, Tablet, Bot, Zap, Globe, Search, Share2, Link2, ArrowUpRight, Shield } from 'lucide-react';
 
-const DEVICE_COLORS = { Desktop: '#2b7cee', Mobile: '#8b5cf6', Tablet: '#06b6d4', Bot: '#6b7280' };
-const DEVICE_ICONS = { Desktop: Monitor, Mobile: Smartphone, Tablet: Tablet, Bot: Bot };
+const DEVICE_COLORS = { Desktop: '#2b7cee', Mobile: '#8b5cf6', Tablet: '#06b6d4', 'Bot / Crawler': '#f97316' };
+const DEVICE_ICONS = { Desktop: Monitor, Mobile: Smartphone, Tablet: Tablet, 'Bot / Crawler': Bot };
+
+const REFERRER_ICONS = { search: Search, social: Share2, direct: Globe, internal: ArrowUpRight, referral: Link2 };
+const REFERRER_COLORS = { search: '#22c55e', social: '#8b5cf6', direct: '#6b7280', internal: '#3b82f6', referral: '#f59e0b' };
 
 function StatCard({ icon: Icon, label, value, subValue, trend, color = 'blue' }) {
     const isPositive = trend > 0;
@@ -17,7 +20,6 @@ function StatCard({ icon: Icon, label, value, subValue, trend, color = 'blue' })
         orange: 'text-orange-500 bg-orange-500',
         amber: 'text-amber-500 bg-amber-500',
     };
-    
     const colorClasses = colorMap[color] || colorMap.primary;
 
     return (
@@ -35,9 +37,7 @@ function StatCard({ icon: Icon, label, value, subValue, trend, color = 'blue' })
                         </div>
                     )}
                 </div>
-                <div className="text-2xl font-black text-white tracking-tight">
-                    {value}
-                </div>
+                <div className="text-2xl font-black text-white tracking-tight">{value}</div>
                 <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">{label}</div>
                 {subValue && <div className="text-[9px] text-gray-500 mt-1 font-medium">{subValue}</div>}
             </div>
@@ -58,17 +58,19 @@ export default function AnalyticsChart({ analyticsData }) {
         );
     }
 
-    const { viewsPerDay, topArticles, deviceBreakdown, topPages, topReferrers, hourlyTraffic, summary, geminiUsage } = analyticsData;
+    const { viewsPerDay, topArticles, deviceBreakdown, crawlerDetails, topPages, topReferrers, hourlyTraffic, summary } = analyticsData;
     const stats = summary || {};
 
     const deviceData = (deviceBreakdown || []).map(d => ({ name: d.device, value: d.count }));
     const totalDeviceViews = deviceData.reduce((s, d) => s + d.value, 0);
+    const humanViews = deviceData.filter(d => d.name !== 'Bot / Crawler').reduce((s, d) => s + d.value, 0);
+    const botViews = deviceData.filter(d => d.name === 'Bot / Crawler').reduce((s, d) => s + d.value, 0);
 
     return (
         <div className="space-y-6">
             {/* ═══ STAT CARDS ═══ */}
             <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
-                <StatCard icon={Zap} label="LLM Tokens" value={stats.totalGeminiTokens7d?.toLocaleString() || 0} subValue="Last 7 Days" color="orange" />
+                <StatCard icon={Zap} label="LLM Tokens" value={stats.totalGeminiTokens7d?.toLocaleString() || 0} subValue={`$${stats.totalGeminiCost7d || '0.00'} est.`} color="orange" />
                 <StatCard icon={Eye} label="Views (7d)" value={stats.totalViews7d || 0} trend={stats.viewsGrowth} color="primary" />
                 <StatCard icon={Users} label="Unique" value={stats.uniqueVisitors7d || 0} color="purple" />
                 <StatCard icon={Newspaper} label="Articles" value={stats.totalArticles || 0} color="emerald" />
@@ -76,7 +78,6 @@ export default function AnalyticsChart({ analyticsData }) {
                 <StatCard icon={TrendingUp} label="Engagement" value={`${stats.engagementRate || 0}%`} color="amber" />
                 <StatCard icon={Eye} label="Lifetime" value={stats.totalViewsAllTime || 0} color="blue" />
             </div>
-
 
             {/* ═══ MAIN CHART: VIEWS + VISITORS ═══ */}
             {viewsPerDay && viewsPerDay.length > 0 && (
@@ -119,10 +120,15 @@ export default function AnalyticsChart({ analyticsData }) {
 
             {/* ═══ SECOND ROW: DEVICES + HOURLY ═══ */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Device Breakdown */}
+                {/* Device Breakdown — shows counts and real percentages */}
                 {deviceData.length > 0 && (
                     <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6">
-                        <h3 className="text-xs font-black text-white uppercase tracking-widest mb-6">Device Breakdown</h3>
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-xs font-black text-white uppercase tracking-widest">Device Breakdown</h3>
+                            <span className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">
+                                {totalDeviceViews.toLocaleString()} total hits
+                            </span>
+                        </div>
                         <div className="flex items-center gap-6">
                             <div className="w-32 h-32 flex-shrink-0">
                                 <ResponsiveContainer width="100%" height="100%">
@@ -146,10 +152,11 @@ export default function AnalyticsChart({ analyticsData }) {
                                                 <span className="text-xs text-gray-400 font-medium">{d.name}</span>
                                             </div>
                                             <div className="flex items-center gap-3">
-                                                <div className="w-20 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                                    <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: DEVICE_COLORS[d.name] || '#6b7280' }} />
+                                                <span className="text-[10px] font-black text-gray-300 tabular-nums w-10 text-right">{d.value.toLocaleString()}</span>
+                                                <div className="w-16 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                                    <div className="h-full rounded-full" style={{ width: `${Math.max(pct, 2)}%`, backgroundColor: DEVICE_COLORS[d.name] || '#6b7280' }} />
                                                 </div>
-                                                <span className="text-[10px] font-black text-gray-500 w-10 text-right">{pct}%</span>
+                                                <span className="text-[10px] font-black text-gray-500 w-12 text-right">{pct}%</span>
                                             </div>
                                         </div>
                                     );
@@ -180,6 +187,37 @@ export default function AnalyticsChart({ analyticsData }) {
                 )}
             </div>
 
+            {/* ═══ CRAWLER INTEL ═══ */}
+            {crawlerDetails && crawlerDetails.length > 0 && (
+                <div className="bg-white/[0.02] border border-orange-500/10 rounded-3xl p-8 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-40 h-40 bg-orange-500/5 blur-[80px] rounded-full" />
+                    <div className="flex items-center justify-between mb-8">
+                        <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                                <Shield className="w-4 h-4 text-orange-400" />
+                            </div>
+                            <div>
+                                <h3 className="text-xs font-black text-orange-400 uppercase tracking-[0.2em]">Crawler Intelligence</h3>
+                                <p className="text-[9px] text-gray-600 font-bold mt-0.5">Who's indexing your content (7d)</p>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <div className="text-lg font-black text-orange-400">{botViews.toLocaleString()}</div>
+                            <div className="text-[9px] font-bold text-gray-600 uppercase">Bot Hits</div>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                        {crawlerDetails.map((c, i) => (
+                            <div key={i} className="bg-white/[0.02] border border-white/5 rounded-xl px-4 py-3 hover:border-orange-500/20 transition-colors">
+                                <div className="text-[11px] font-bold text-gray-300 truncate">{c.crawler}</div>
+                                <div className="text-lg font-black text-orange-400 mt-1">{c.hits}</div>
+                                <div className="text-[8px] text-gray-600 font-bold uppercase">hits</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* ═══ TOP ARTICLES ═══ */}
             <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-8">
                 <div className="flex items-center justify-between mb-8">
@@ -194,12 +232,7 @@ export default function AnalyticsChart({ analyticsData }) {
                                 <a href={`/article/${article.slug}`} target="_blank" rel="noreferrer" className="block text-[13px] font-black text-gray-200 group-hover/row:text-primary transition-colors truncate tracking-tight mb-1">
                                     {article.title}
                                 </a>
-                                <div className="flex items-center gap-3">
-                                    <div className="flex -space-x-1 grayscale group-hover/row:grayscale-0 transition-all opacity-30 group-hover/row:opacity-100">
-                                        {[...Array(3)].map((_, j) => <div key={j} className="w-3 h-3 rounded-full border border-black bg-gray-500" />)}
-                                    </div>
-                                    <span className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">Active Engagement</span>
-                                </div>
+                                <span className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">{article.unique_views} unique views</span>
                             </div>
                             <div className="flex items-center gap-4 flex-shrink-0">
                                 <div className="text-right">
@@ -240,23 +273,33 @@ export default function AnalyticsChart({ analyticsData }) {
                         </div>
                     </div>
                 )}
-                
+
+                {/* REFERRERS — Real domain names with type badges */}
                 {topReferrers && topReferrers.length > 0 && (
                     <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-8 relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-[60px] rounded-full" />
-                        <h3 className="text-[10px] font-black text-emerald-400 mb-8 uppercase tracking-[0.3em]">Inbound Traffic</h3>
+                        <h3 className="text-[10px] font-black text-emerald-400 mb-8 uppercase tracking-[0.3em]">Inbound Traffic Sources</h3>
                         <div className="space-y-3">
-                            {topReferrers.map((ref, i) => (
-                                <div key={i} className="flex items-center justify-between py-2 border-b border-white/[0.03] last:border-0 group/ref">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-2 h-2 rounded-full bg-emerald-500/40 group-hover/ref:bg-emerald-400 group-hover/ref:scale-125 transition-all" />
-                                        <span className="text-[11px] text-gray-300 font-bold tracking-tight capitalize">
-                                            {ref.source === 'Direct' ? <span className="text-gray-600 italic">Direct / Private</span> : ref.source}
-                                        </span>
+                            {topReferrers.map((ref, i) => {
+                                const RefIcon = REFERRER_ICONS[ref.type] || Globe;
+                                const refColor = REFERRER_COLORS[ref.type] || '#6b7280';
+                                return (
+                                    <div key={i} className="flex items-center justify-between py-2 border-b border-white/[0.03] last:border-0 group/ref">
+                                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                                            <div className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${refColor}15` }}>
+                                                <RefIcon className="w-3 h-3" style={{ color: refColor }} />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <span className="text-[11px] text-gray-300 font-bold tracking-tight block truncate">
+                                                    {ref.source}
+                                                </span>
+                                                <span className="text-[8px] font-black uppercase tracking-widest" style={{ color: refColor }}>{ref.type}</span>
+                                            </div>
+                                        </div>
+                                        <span className="text-[11px] font-black text-emerald-500 tabular-nums flex-shrink-0 ml-3">{ref.views}</span>
                                     </div>
-                                    <span className="text-[11px] font-black text-emerald-500 tabular-nums">{ref.views}</span>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
                 )}
