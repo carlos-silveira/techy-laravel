@@ -24,11 +24,10 @@ use App\Http\Controllers\SeoController;
 
 Route::get('/', [PublicController::class, 'index']);
 Route::get('/article/{slug}', [PublicController::class, 'show']);
-Route::get('/sitemap.xml', [SeoController::class, 'sitemap']);
-Route::get('/feed', [SeoController::class, 'rss']);
-
-Route::get('/about', [AboutController::class, 'index']);
-Route::get('/archive', [ArchiveController::class, 'index']);
+Route::post('/api/articles/{id}/like', [ArticleController::class, 'like']); // Moved from api.php to handle sessions
+Route::get('/analytics/dashboard', [AnalyticsController::class, 'dashboardStats']);
+Route::post('/subscribe', [NewsletterController::class, 'store']);
+Route::get('/articles/{id}/stats', [AnalyticsController::class, 'articleStats']);
 Route::get('/terms', function () { return inertia('Terms'); });
 Route::get('/privacy', function () { return inertia('Privacy'); });
 Route::post('/set-locale', [LanguageController::class, 'setLocale']);

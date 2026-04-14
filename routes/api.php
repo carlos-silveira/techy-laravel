@@ -35,7 +35,6 @@ Route::middleware('auth:sanctum')->group(function () {
 // Public Analytics & Engagement
 Route::get('/analytics/dashboard', [AnalyticsController::class, 'dashboardStats']);
 Route::post('/subscribe', [NewsletterController::class, 'store']);
-Route::post('/articles/{id}/like', [ArticleController::class, 'like']);
 Route::get('/articles/{id}/stats', [AnalyticsController::class, 'articleStats']);
 
 // Global Discovery

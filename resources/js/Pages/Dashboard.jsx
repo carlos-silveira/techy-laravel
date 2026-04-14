@@ -842,7 +842,10 @@ export default function Dashboard({ auth, articles: initialArticles, analytics }
                             <h2 className="text-4xl sm:text-5xl font-black tracking-tighter text-gray-900 dark:text-white">Analytics.</h2>
                         </div>
                         <AnalyticsChart analyticsData={analytics} />
-                        <GeminiUsage usageData={analytics.rawGeminiLogs} />
+                        <GeminiUsage 
+                            usageData={analytics.rawGeminiLogs} 
+                            modelDistribution={analytics.geminiModelDistribution} 
+                        />
                     </div>
                 )}
 

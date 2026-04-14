@@ -2,7 +2,7 @@ import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Cpu, Zap, Activity, Clock, ShieldCheck } from 'lucide-react';
 
-export default function GeminiUsage({ usageData }) {
+export default function GeminiUsage({ usageData, modelDistribution }) {
     if (!usageData || usageData.length === 0) {
         return (
             <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-10 text-center">
@@ -13,16 +13,7 @@ export default function GeminiUsage({ usageData }) {
         );
     }
 
-    // Process data for the chart: group by model
-    const modelUsage = usageData.reduce((acc, log) => {
-        const model = log.model || 'Unknown';
-        if (!acc[model]) acc[model] = { name: model, tokens: 0, count: 0 };
-        acc[model].tokens += (log.total_tokens || 0);
-        acc[model].count += 1;
-        return acc;
-    }, {});
-
-    const chartData = Object.values(modelUsage).sort((a, b) => b.tokens - a.tokens);
+    const chartData = (modelDistribution || []).sort((a, b) => b.tokens - a.tokens);
 
     return (
         <div className="space-y-6 mt-12">
@@ -48,7 +39,7 @@ export default function GeminiUsage({ usageData }) {
                                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" horizontal={false} />
                                 <XAxis type="number" hide />
                                 <YAxis 
-                                    dataKey="name" 
+                                    dataKey="model" 
                                     type="category" 
                                     stroke="rgba(255,255,255,0.4)" 
                                     fontSize={10} 
