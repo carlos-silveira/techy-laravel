@@ -181,42 +181,60 @@ export default function AnalyticsChart({ analyticsData }) {
             </div>
 
             {/* ═══ TOP ARTICLES ═══ */}
-            <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6">
-                <h3 className="text-xs font-black text-white mb-5 uppercase tracking-widest">Top Articles (7 Days)</h3>
-                <div className="space-y-3">
+            <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-8">
+                <div className="flex items-center justify-between mb-8">
+                    <h3 className="text-[10px] font-black text-white uppercase tracking-[0.3em]">Viral Content</h3>
+                    <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Efficiency Ranking</div>
+                </div>
+                <div className="space-y-4">
                     {topArticles && topArticles.length > 0 ? topArticles.map((article, i) => (
-                        <div key={article.id} className="flex items-center gap-4 group/row hover:bg-white/[0.02] -mx-3 px-3 py-2 rounded-xl transition-colors">
-                            <span className="text-lg font-black text-white/10 w-6 text-center font-mono">{i + 1}</span>
-                            <a href={`/article/${article.slug}`} target="_blank" rel="noreferrer" className="flex-1 text-sm text-gray-300 group-hover/row:text-primary transition-colors truncate font-medium">
-                                {article.title}
-                            </a>
-                            <div className="flex items-center gap-3 flex-shrink-0">
-                                <span className="text-[10px] font-black text-primary/80 bg-primary/10 px-2.5 py-1 rounded-lg">
-                                    {article.views} views
-                                </span>
-                                {article.unique_views && (
-                                    <span className="text-[10px] font-bold text-gray-600 bg-white/5 px-2 py-1 rounded-lg">
-                                        {article.unique_views} unique
-                                    </span>
-                                )}
+                        <div key={article.id} className="flex items-center gap-6 group/row hover:bg-white/[0.01] -mx-4 px-4 py-3 rounded-2xl transition-all">
+                            <span className="text-xl font-black text-white/5 w-8 text-center font-mono group-hover/row:text-primary/20 transition-colors">{String(i + 1).padStart(2, '0')}</span>
+                            <div className="flex-1 min-w-0">
+                                <a href={`/article/${article.slug}`} target="_blank" rel="noreferrer" className="block text-[13px] font-black text-gray-200 group-hover/row:text-primary transition-colors truncate tracking-tight mb-1">
+                                    {article.title}
+                                </a>
+                                <div className="flex items-center gap-3">
+                                    <div className="flex -space-x-1 grayscale group-hover/row:grayscale-0 transition-all opacity-30 group-hover/row:opacity-100">
+                                        {[...Array(3)].map((_, j) => <div key={j} className="w-3 h-3 rounded-full border border-black bg-gray-500" />)}
+                                    </div>
+                                    <span className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">Active Engagement</span>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-4 flex-shrink-0">
+                                <div className="text-right">
+                                    <div className="text-xs font-black text-white">{article.views?.toLocaleString()}</div>
+                                    <div className="text-[9px] font-black text-gray-700 uppercase">Hits</div>
+                                </div>
+                                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/5 group-hover/row:border-primary/20 transition-colors">
+                                    <TrendingUp className="w-4 h-4 text-gray-600 group-hover/row:text-primary transition-colors" />
+                                </div>
                             </div>
                         </div>
                     )) : (
-                        <p className="text-sm text-gray-500">No article views recorded yet.</p>
+                        <div className="py-10 text-center">
+                            <Newspaper className="w-8 h-8 text-gray-800 mx-auto mb-2 opacity-20" />
+                            <p className="text-[11px] font-black text-gray-700 uppercase tracking-widest">No signals detected yet</p>
+                        </div>
                     )}
                 </div>
             </div>
 
             {/* ═══ TOP PAGES & REFERRERS ═══ */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-20">
                 {topPages && topPages.length > 0 && (
-                    <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6">
-                        <h3 className="text-xs font-black text-white mb-5 uppercase tracking-widest">Top Pages (7 Days)</h3>
-                        <div className="space-y-2">
+                    <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-8">
+                        <h3 className="text-[10px] font-black text-white mb-8 uppercase tracking-[0.3em]">Entry Points</h3>
+                        <div className="space-y-3">
                             {topPages.map((page, i) => (
-                                <div key={i} className="flex items-center justify-between py-1.5">
-                                    <span className="text-xs text-gray-400 font-mono truncate max-w-[70%]">{page.path}</span>
-                                    <span className="text-[10px] font-black text-gray-500">{page.views}</span>
+                                <div key={i} className="flex items-center justify-between py-2 border-b border-white/[0.03] last:border-0 group/page">
+                                    <span className="text-[11px] text-gray-500 font-mono truncate max-w-[70%] group-hover/page:text-gray-300 transition-colors">{page.path}</span>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-12 h-1 bg-white/5 rounded-full overflow-hidden">
+                                            <div className="h-full bg-blue-500/30" style={{ width: `${Math.min(100, (page.views / (topPages[0].views || 1)) * 100)}%` }} />
+                                        </div>
+                                        <span className="text-[11px] font-black text-gray-400 w-8 text-right">{page.views}</span>
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -224,15 +242,19 @@ export default function AnalyticsChart({ analyticsData }) {
                 )}
                 
                 {topReferrers && topReferrers.length > 0 && (
-                    <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6">
-                        <h3 className="text-xs font-black text-emerald-400 mb-5 uppercase tracking-widest">Traffic Sources (7 Days)</h3>
-                        <div className="space-y-2">
+                    <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-8 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-[60px] rounded-full" />
+                        <h3 className="text-[10px] font-black text-emerald-400 mb-8 uppercase tracking-[0.3em]">Inbound Traffic</h3>
+                        <div className="space-y-3">
                             {topReferrers.map((ref, i) => (
-                                <div key={i} className="flex items-center justify-between py-1.5">
-                                    <span className="text-xs text-gray-300 font-medium truncate max-w-[70%] capitalize">
-                                        {ref.source === 'Direct' ? <span className="text-gray-500 italic">Direct / Unknown</span> : ref.source}
-                                    </span>
-                                    <span className="text-[10px] font-black text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-lg">{ref.views}</span>
+                                <div key={i} className="flex items-center justify-between py-2 border-b border-white/[0.03] last:border-0 group/ref">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-2 h-2 rounded-full bg-emerald-500/40 group-hover/ref:bg-emerald-400 group-hover/ref:scale-125 transition-all" />
+                                        <span className="text-[11px] text-gray-300 font-bold tracking-tight capitalize">
+                                            {ref.source === 'Direct' ? <span className="text-gray-600 italic">Direct / Private</span> : ref.source}
+                                        </span>
+                                    </div>
+                                    <span className="text-[11px] font-black text-emerald-500 tabular-nums">{ref.views}</span>
                                 </div>
                             ))}
                         </div>
