@@ -200,21 +200,11 @@ Return ONLY a valid JSON object with these exact keys: \"titular\", \"tldr_twitt
         $content = $result['cuerpo_noticia'];
 
         // --- HARDENED VALIDATION ---
-        $garbagePatterns = [
-            'Failed to generate content',
-            'Rewrite this article',
-            'I cannot fulfill',
-            'As an AI model',
-            'is resting or unavailable',
-            'Quota exhausted',
-            'Internal Server Error'
-        ];
-
-        foreach ($garbagePatterns as $pattern) {
-            if (stripos($content, $pattern) !== false || stripos($content, 'current summary') !== false) {
-                throw new \App\Exceptions\GenerationException("Gemini returned garbage/error content or prompt leak for '{$title}'.");
-            }
-        }
+        $this->validateGeneratedContent([
+            'titular' => $result['titular'] ?? '',
+            'tldr_twitter' => $result['tldr_twitter'] ?? '',
+            'cuerpo_noticia' => $content,
+        ], $title);
 
         if (strlen(strip_tags($content)) < 400) {
             throw new \App\Exceptions\GenerationException("Gemini returned insufficient content (too short) for '{$title}'.");
@@ -302,9 +292,10 @@ RETURN ONLY A JSON OBJECT. NO MARKDOWN FENCES.
 
         $result = $this->callGemini($prompt, true);
 
-        if (empty($result) || empty($result['html_content']) || stripos($result['html_content'], 'Failed to generate') !== false) {
-            throw new \App\Exceptions\GenerationException("Category drafting failed for {$category}.");
-        }
+        $this->validateGeneratedContent([
+            'title' => $result['title'] ?? '',
+            'html_content' => $result['html_content'],
+        ], $category);
 
         return [
             'title' => $result['title'] ?? "The Future of {$category}",
@@ -365,6 +356,11 @@ Generate metadata as a JSON object (no markdown fences):
 Make the summary intriguing — it will be shown as a preview. Tags should be developer-relevant topics.";
 
         $result = $this->callGemini($prompt, true);
+
+        $this->validateGeneratedContent([
+            'summary' => $result['summary'] ?? '',
+            'meta_description' => $result['meta_description'] ?? '',
+        ], $title);
 
         return [
             'summary' => $result['summary'] ?? '',
@@ -715,6 +711,36 @@ Return exactly a JSON object (no markdown fences):
         } catch (\Exception $e) {
             Log::error("Gemini Embedding Connection Error: " . $e->getMessage());
             return [];
+        }
+    }
+
+    /**
+     * Check multiple fields for common AI failure patterns and prompt leaks.
+     */
+    private function validateGeneratedContent(array $fields, string $context = ''): void
+    {
+        $garbagePatterns = [
+            'Failed to generate content',
+            'Rewrite this article',
+            'original topic but enforcing strict rules',
+            'current summary',
+            'editorial brief',
+            'I cannot fulfill',
+            'As an AI model',
+            'is resting or unavailable',
+            'Quota exhausted',
+            'Internal Server Error'
+        ];
+
+        foreach ($fields as $key => $value) {
+            if (!is_string($value)) continue;
+
+            foreach ($garbagePatterns as $pattern) {
+                if (stripos($value, $pattern) !== false) {
+                    Log::warning("Gemini Integrity Warning: Pattern '{$pattern}' found in field '{$key}' for context '{$context}'.");
+                    throw new \App\Exceptions\GenerationException("Gemini returned garbage/error content or prompt leak in field '{$key}'.");
+                }
+            }
         }
     }
 
