@@ -49,41 +49,9 @@ class Article extends Model
         return $this->status === 'published';
     }
 
-    /**
-     * Dynamically translate title if a translation exists.
-     */
-    public function getTitleAttribute($value)
-    {
-        $locale = app()->getLocale();
-        if ($locale !== 'en' && !empty($this->translations[$locale]['title'])) {
-            return $this->translations[$locale]['title'];
-        }
-        return $value;
-    }
-
-    /**
-     * Dynamically translate content if a translation exists.
-     */
-    public function getContentAttribute($value)
-    {
-        $locale = app()->getLocale();
-        if ($locale !== 'en' && !empty($this->translations[$locale]['content'])) {
-            return $this->translations[$locale]['content'];
-        }
-        return $value;
-    }
-
-    /**
-     * Dynamically translate summary if a translation exists.
-     */
-    public function getAiSummaryAttribute($value)
-    {
-        $locale = app()->getLocale();
-        if ($locale !== 'en' && !empty($this->translations[$locale]['summary'])) {
-            return $this->translations[$locale]['summary'];
-        }
-        return $value;
-    }
+    // NOTE: Translation is handled explicitly by PublicController::translateIfNecessary().
+    // Do NOT add model accessors for auto-translation — they conflict with caching
+    // and cause double-translation / mixed-language bugs.
 
     /**
      * The "booted" method of the model.

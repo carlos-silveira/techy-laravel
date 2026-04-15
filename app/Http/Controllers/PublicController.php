@@ -104,21 +104,14 @@ class PublicController extends Controller
     /**
      * Cache article collections with locale-aware TTL.
      *
-     * If locale != 'en' and any article has no stored translation yet,
+     * If any article needs translation and doesn't have one stored yet,
      * cache only for 30 seconds so the user gets translated content quickly
      * after the TranslateArticle background job finishes.
      * Once all articles are translated, the full 3600s TTL kicks in.
      */
     private function rememberLocaleAware(string $key, string $locale, callable $query): \Illuminate\Support\Collection
     {
-        // For English, always use long cache
-        if ($locale === 'en') {
-            return Cache::remember($key, 3600, function () use ($query, $locale) {
-                return $query()->map(fn($a) => $this->translateIfNecessary($a, $locale));
-            });
-        }
-
-        // For non-English locales, check if cache already has fully-translated content
+        // Check if cache already has content
         if (Cache::has($key)) {
             return Cache::get($key);
         }
@@ -127,14 +120,14 @@ class PublicController extends Controller
         $rawArticles = $query();
         $allTranslated = true;
         $translated = $rawArticles->map(function ($article) use ($locale, &$allTranslated) {
-            $hasTranslation = !empty($article->translations[$locale]['title']);
-            if (!$hasTranslation) {
+            $articleLang = $article->language ?? 'en';
+            if ($articleLang !== $locale && empty($article->translations[$locale]['title'])) {
                 $allTranslated = false;
             }
             return $this->translateIfNecessary($article, $locale);
         });
 
-        // Use a short TTL if any article fell back to English
+        // Use a short TTL if any article still needs translation
         $ttl = $allTranslated ? 3600 : 30;
         Cache::put($key, $translated, $ttl);
 
@@ -179,7 +172,9 @@ class PublicController extends Controller
             ->where('status', 'published')
             ->firstOrFail();
 
-        $article = $this->translateIfNecessary($article, $locale);
+        $article = Cache::remember("article_{$slug}_{$locale}", 3600, function () use ($article, $locale) {
+            return $this->translateIfNecessary($article, $locale);
+        });
 
         // Increment views_count for analytics (bypassing cache for this write)
         Article::where('id', $article->id)->increment('views_count');
@@ -227,27 +222,37 @@ class PublicController extends Controller
 
     /**
      * Helper to translate an article if the requested locale differs from source.
-     * Falls back to the original English content and dispatches a background
+     * Falls back to the original content and dispatches a background
      * translation job if the requested locale's translation is not yet available.
      */
     public function translateIfNecessary(Article $article, string $locale): Article
     {
-        // 1. If English is requested or article is already in the target locale, return as-is.
-        if ($locale === 'en' || $article->language === $locale) {
+        // If the article is already in the target locale, return as-is.
+        $articleLang = $article->language ?? 'en';
+        if ($articleLang === $locale) {
             return $article;
         }
 
         $translations = $article->translations ?? [];
 
-        // 2. If a full translation (title + content) exists, apply it.
+        // If a full translation (title + content) exists, apply it.
         if (!empty($translations[$locale]['title']) && !empty($translations[$locale]['content'])) {
             $article->title      = $translations[$locale]['title'];
-            $article->ai_summary = $translations[$locale]['summary'] ?? $article->ai_summary;
             $article->content    = $translations[$locale]['content'];
+            
+            // If we have a translated summary, use it. 
+            // If not, clear the summary if it was originally in a different language 
+            // to avoid "mixed language" artifacts (English summary with Spanish content).
+            if (!empty($translations[$locale]['summary'])) {
+                $article->ai_summary = $translations[$locale]['summary'];
+            } else {
+                $article->ai_summary = null;
+            }
+            
             return $article;
         }
 
-        // 3. No translation available yet — dispatch background job and return original.
+        // No translation available yet — dispatch background job and return original.
         // The rememberLocaleAware() method will cache this with a 30s TTL so it retries soon.
         \App\Jobs\TranslateArticle::dispatch($article, $locale);
 
@@ -284,16 +289,19 @@ class PublicController extends Controller
             return response()->json([]);
         }
 
+        $locale = App::getLocale();
+
         $results = Article::where('status', 'published')
             ->where(function ($q) use ($query) {
                 $q->where('title', 'like', "%{$query}%")
                     ->orWhere('ai_summary', 'like', "%{$query}%")
                     ->orWhere('tags', 'like', "%{$query}%");
             })
-            ->select('id', 'title', 'slug', 'ai_summary', 'updated_at', 'cover_image_path')
+            ->select('id', 'title', 'slug', 'ai_summary', 'updated_at', 'cover_image_path', 'language', 'translations')
             ->orderBy('updated_at', 'desc')
             ->limit(8)
-            ->get();
+            ->get()
+            ->map(fn($a) => $this->translateIfNecessary($a, $locale));
 
         return response()->json($results);
     }

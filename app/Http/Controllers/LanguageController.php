@@ -25,15 +25,11 @@ class LanguageController extends Controller
         $old = Session::get('locale', 'en');
         Session::put('locale', $locale);
 
-        // Bust all locale-specific homepage/article page caches
-        // so that fresh translated content is served immediately.
+        // Flush ALL caches when locale changes so every page serves
+        // freshly-translated content. This covers homepage, article pages,
+        // related-article caches, and daily brief caches.
         if ($old !== $locale) {
-            foreach (['en', 'es', 'pt'] as $lang) {
-                Cache::forget("homepage_articles_{$lang}");
-                Cache::forget("homepage_editors_choice_{$lang}");
-                Cache::forget("homepage_trending_{$lang}");
-                Cache::forget("homepage_daily_brief_{$lang}");
-            }
+            Cache::flush();
         }
 
         return response()->json(['success' => true, 'locale' => $locale])

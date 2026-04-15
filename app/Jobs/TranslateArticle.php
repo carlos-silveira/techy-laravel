@@ -67,11 +67,12 @@ class TranslateArticle implements ShouldQueue
                 throw new \RuntimeException("Translation failed or returned original text for Article #{$this->article->id} ({$this->locale})");
             }
 
-            // Save results
+            // Save results - Don't fall back to original English if we are translating!
+            // This avoids "mixed language" content in the database.
             $translations[$this->locale] = [
                 'title' => $result['title'],
-                'summary' => $result['summary'] ?? $this->article->ai_summary,
-                'content' => $result['content'] ?? $this->article->content,
+                'summary' => $result['summary'] ?? null,
+                'content' => $result['content'] ?? null,
             ];
             
             $this->article->update(['translations' => $translations]);

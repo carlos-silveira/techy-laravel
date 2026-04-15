@@ -1,4 +1,19 @@
-## [2026-04-14] - Fix Locale Cache Poisoning, RAG JSON Bug, Cypress E2E (PR #17)
+## [2026-04-14] - Production Launch Prep: Critical Bug Fixes (direct push to main)
+
+### Fixed
+- **`news:generate-daily` TypeError crash** (`GenerateDailyNews.php:42`): Gemini's `generateIdeas()` sometimes returns a flat string array instead of associative objects. Added `is_array($idea) && isset($idea['title'])` guard to skip malformed entries gracefully.
+- **Wrong variable in draft generation**: `generateDraft()` was called with `$idea` (loop variable, now undefined after loop) instead of `$selectedIdea`. Fixed to use `$selectedIdea` throughout.
+- **Missing `language` field on `Article::create()`**: New articles were saved without `language => 'en'`, causing locale routing issues. Now always set to `'en'`.
+
+### Prod Actions Triggered
+- `GET /admin/migrate` — confirmed nothing to migrate
+- `GET /admin/seed` — news generation dispatched (background)
+- `GET /admin/images` — image update pass dispatched
+- `GET /admin/clean` — deep clean + dedupe dispatched
+- Second news generation will be triggered after CI deploy of the fix
+
+---
+
 
 ### Fixed
 - **Spanish/PT locale shows English:** `PublicController` was caching English fallback under the `es` cache key for 3600s. Introduced `rememberLocaleAware()` — uses 30s TTL when translations are missing so the page self-heals within seconds after background jobs complete.

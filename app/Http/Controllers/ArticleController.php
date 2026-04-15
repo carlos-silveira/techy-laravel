@@ -36,6 +36,7 @@ class ArticleController extends Controller
             'tags' => 'nullable|array',
             'meta_description' => 'nullable|string|max:500',
             'seo_keywords' => 'nullable|string',
+            'ai_summary' => 'nullable|string',
         ]);
 
         $title = $validated['title'] ?: 'Untitled Story';
@@ -69,6 +70,7 @@ class ArticleController extends Controller
             'tags' => 'nullable|array',
             'meta_description' => 'nullable|string|max:500',
             'seo_keywords' => 'nullable|string',
+            'ai_summary' => 'nullable|string',
         ]);
 
         $article = Article::findOrFail($id);
@@ -130,6 +132,7 @@ class ArticleController extends Controller
         $article->tags = $validated['tags'] ?? [];
         $article->meta_description = $validated['meta_description'] ?? null;
         $article->seo_keywords = $validated['seo_keywords'] ?? null;
+        $article->ai_summary = $validated['ai_summary'] ?? $article->ai_summary;
     }
 
     /**

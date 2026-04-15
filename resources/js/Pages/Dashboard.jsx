@@ -157,6 +157,7 @@ function WizardView({ onComplete, onSwitchToEditor }) {
                 is_editors_choice: true,
                 meta_description: meta.meta_description,
                 seo_keywords: meta.seo_keywords,
+                ai_summary: meta.summary,
                 tags: meta.tags || [],
             });
             toast.success('🚀 Published! Your article is now live.');
@@ -470,6 +471,7 @@ export default function Dashboard({ auth, articles: initialArticles, analytics }
     const [imagePrompt, setImagePrompt] = useState('');
     const [metaDescription, setMetaDescription] = useState('');
     const [seoKeywords, setSeoKeywords] = useState('');
+    const [aiSummary, setAiSummary] = useState('');
     const [tags, setTags] = useState([]);
     const [tagInput, setTagInput] = useState('');
     const [isUploading, setIsUploading] = useState(false);
@@ -513,6 +515,7 @@ export default function Dashboard({ auth, articles: initialArticles, analytics }
                 image_prompt: imagePrompt,
                 meta_description: metaDescription,
                 seo_keywords: seoKeywords,
+                ai_summary: aiSummary,
                 tags: tags
             };
             let res;
@@ -608,6 +611,7 @@ export default function Dashboard({ auth, articles: initialArticles, analytics }
         setImagePrompt(article.image_prompt || '');
         setMetaDescription(article.meta_description || '');
         setSeoKeywords(article.seo_keywords || '');
+        setAiSummary(article.ai_summary || '');
         setTags(article.tags || []);
         setEditorResetKey(prev => prev + 1);
         setView('editor');
@@ -636,6 +640,7 @@ export default function Dashboard({ auth, articles: initialArticles, analytics }
         setIsEditorsChoice(false);
         setMetaDescription('');
         setSeoKeywords('');
+        setAiSummary('');
         setEditorResetKey(prev => prev + 1);
     };
 
