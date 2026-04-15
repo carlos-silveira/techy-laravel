@@ -1,3 +1,20 @@
+## [2026-04-15] - Hardening Multi-Language Pipeline & Studio Restoration
+### Fixed
+- **Missing "Executive Summary" (TLDR) block**: Root cause identified as a data sync hole in the Studio. Added `aiSummary` state to `Dashboard.jsx` and updated `ArticleController` to persist `ai_summary` during auto-saves and manual edits.
+- **Mixed-Language Content**: Updated `TranslateArticle` job to eliminate English fallbacks. We now store `null` instead of leaking source English into translated records if a specific field translation fails.
+- **Leaky Translation Logic**: `PublicController::translateIfNecessary` now explicitly clears the `ai_summary` if a translation for the selected locale is missing, preventing "English TLDR on Spanish article" artifacts.
+- **Broken Language Switcher**: Replaced granular cache removal with `Cache::flush()` in `LanguageController` to ensure total consistency across locales.
+
+### Added
+- **Self-Healing Command**: `php artisan articles:heal-summaries` created to recover missing summaries for articles that were nulled out by previous Studio bugs.
+- **Heal Validation**: Verified code integrity locally via PHPUnit (internal) before push.
+
+### Prod Actions
+- **Triggered CI/CD**: Pushed fixes to `main` (build in progress).
+- **Pending**: Run `articles:heal-summaries` on production once build completes.
+
+---
+
 ## [2026-04-14] - Production Launch Prep: Critical Bug Fixes (direct push to main)
 
 ### Fixed

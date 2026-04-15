@@ -130,6 +130,9 @@ Route::middleware([])->group(function () {
             exec("$php $artisan storage:fix 2>&1", $storeOut);
             $output[] = "Storage Fix: " . implode("\n", $storeOut);
 
+            exec("$php $artisan articles:heal-summaries 2>&1", $healOut);
+            $output[] = "Heal Summaries: " . implode("\n", $healOut);
+
             exec("$php $artisan optimize 2>&1", $optOut);
             $output[] = "Optimize: " . implode("\n", $optOut);
 
