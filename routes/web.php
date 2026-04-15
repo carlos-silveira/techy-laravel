@@ -89,7 +89,8 @@ Route::middleware([])->group(function () {
     Route::get('/admin/heal', function () use ($gate) {
         $gate();
         \Illuminate\Support\Facades\Artisan::call('articles:heal-summaries');
-        return "<pre>" . \Illuminate\Support\Facades\Artisan::output() . "</pre>";
+        \Illuminate\Support\Facades\Cache::flush();
+        return "<pre>Healing complete. " . \Illuminate\Support\Facades\Artisan::output() . "</pre>";
     });
 
     Route::get('/admin/migrate', function () use ($gate) {

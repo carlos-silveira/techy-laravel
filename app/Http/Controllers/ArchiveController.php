@@ -48,15 +48,29 @@ class ArchiveController extends Controller
             return $paginator;
         });
 
-        // Fetch top tags for the UI, prioritizing official categories
-        $officialTags = [
-            'Artificial Intelligence', 'Gadgets & Hardware', 'Software & Apps', 
-            'Cybersecurity & Privacy', 'Business Tech', 'Gaming', 
-            'Mobility & Transport', 'Science & Space', 'Culture & Social Media', 
-            'Crypto & Web3', 'Reviews', 'Tutorials & Guides', 'Deals', 'Opinion'
+        // Fetch top tags for the UI, prioritizing official categories translated
+        $tagTranslations = [
+            'en' => [
+                'Artificial Intelligence', 'Gadgets & Hardware', 'Software & Apps', 
+                'Cybersecurity & Privacy', 'Business Tech', 'Gaming', 
+                'Mobility & Transport', 'Science & Space', 'Culture & Social Media', 
+                'Crypto & Web3', 'Reviews', 'Tutorials & Guides', 'Deals', 'Opinion'
+            ],
+            'es' => [
+                'Inteligencia Artificial', 'Gadgets y Hardware', 'Software y Apps', 
+                'Ciberseguridad y Privacidad', 'Tecnología Empresarial', 'Gaming', 
+                'Movilidad y Transporte', 'Ciencia y Espacio', 'Cultura y Redes Sociales', 
+                'Cripto y Web3', 'Reseñas', 'Tutoriales y Guías', 'Ofertas', 'Opinión'
+            ],
+            'pt' => [
+                'Inteligência Artificial', 'Gadgets e Hardware', 'Software e Apps', 
+                'Cibersegurança e Privacidade', 'Tecnologia Empresarial', 'Gaming', 
+                'Mobilidade e Transporte', 'Ciência e Espaço', 'Cultura e Redes Sociais', 
+                'Análises', 'Tutoriais e Guias', 'Ofertas', 'Opinião'
+            ]
         ];
         
-        $popularTags = collect($officialTags);
+        $popularTags = collect($tagTranslations[$locale] ?? $tagTranslations['en']);
 
         if ($request->wantsJson()) {
             return response()->json($articles);
