@@ -22,12 +22,23 @@ class SetLocale
 
         App::setLocale($locale);
         
-        // Ensure the locale is stored in session if it's the first time
-        if (!Session::has('locale')) {
+        // Ensure the locale is stored in session and cookie for persistence and cache vary
+        if ($request->cookie('locale') !== $locale) {
+             \Illuminate\Support\Facades\Cookie::queue('locale', $locale, 60 * 24 * 30); // 30 days
+        }
+        
+        if (Session::get('locale') !== $locale) {
             Session::put('locale', $locale);
         }
 
-        return $next($request);
+        $response = $next($request);
+        
+        // Add Vary header to tell LiteSpeed/Varnish to cache by locale cookie
+        if (method_exists($response, 'header')) {
+            $response->header('Vary', 'Cookie');
+        }
+        
+        return $response;
     }
 
     /**

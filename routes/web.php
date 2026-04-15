@@ -86,6 +86,12 @@ Route::middleware([])->group(function () {
         return "<pre>" . htmlspecialchars($output ?? '') . "</pre>";
     });
 
+    Route::get('/admin/heal', function () use ($gate) {
+        $gate();
+        \Illuminate\Support\Facades\Artisan::call('articles:heal-summaries');
+        return "<pre>" . \Illuminate\Support\Facades\Artisan::output() . "</pre>";
+    });
+
     Route::get('/admin/migrate', function () use ($gate) {
         $gate();
         try {
