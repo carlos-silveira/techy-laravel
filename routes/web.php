@@ -195,6 +195,11 @@ Route::middleware(['auth'])->group(function () {
 
     // Media Uploads
     Route::post('/upload-image', [ImageUploadController::class, 'store'])->name('image.upload');
+
+    // Scouted Editorial Queue
+    Route::get('/api/scouted-queue', [App\Http\Controllers\ScoutQueueController::class, 'index'])->name('scouted.index');
+    Route::post('/api/scouted-queue/{id}/approve', [App\Http\Controllers\ScoutQueueController::class, 'approve'])->name('scouted.approve');
+    Route::delete('/api/scouted-queue/{id}', [App\Http\Controllers\ScoutQueueController::class, 'destroy'])->name('scouted.destroy');
 });
 
 require __DIR__ . '/auth.php';

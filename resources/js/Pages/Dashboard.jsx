@@ -17,6 +17,7 @@ import RichEditor from '@/Components/RichEditor';
 import ThemeToggle from '@/Components/ThemeToggle';
 import RagCopilot from '@/Components/RagCopilot';
 import GeminiUsage from '@/Components/GeminiUsage';
+import ScoutedQueue from '@/Components/ScoutedQueue';
 
 /* ──────────────────────────────────────────────
    WIZARD STEPS COMPONENT — No-code guided flow
@@ -770,6 +771,10 @@ export default function Dashboard({ auth, articles: initialArticles, analytics }
                             <Wand2 className="w-5 h-5" />
                             <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Quick Create</span>
                         </button>
+                        <button onClick={() => setView('scout')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'scout' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white'}`}>
+                            <Globe className="w-5 h-5" />
+                            <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Scout Queue</span>
+                        </button>
                         <button onClick={() => setView('list')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'list' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white'}`}>
                             <Layout className="w-5 h-5" />
                             <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Archives</span>
@@ -805,6 +810,8 @@ export default function Dashboard({ auth, articles: initialArticles, analytics }
                 </header>
 
                 <div className="flex-1 flex flex-row overflow-hidden relative">
+                    {view === 'scout' && <ScoutedQueue />}
+                    
                     {view === 'wizard' && (
                     <WizardView 
                         onComplete={handleWizardComplete} 
