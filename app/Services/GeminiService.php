@@ -168,7 +168,7 @@ Return ONLY a JSON array, no markdown fences:
             return "- [{$source}] {$n['title']}";
         }, $newsItems));
 
-        $prompt = "Act as a senior tech analyst and investigative journalist for a site like The Verge or Stratechery.
+        $prompt = "Act as a senior tech analyst and investigative journalist for a premium tech news site with a strong global and Latin American focus (techynews.lat).
 
 ARTICLE TOPIC: {$title}
 EDITORIAL BRIEF: {$ideaPrompt}
@@ -184,6 +184,7 @@ CRITICAL WRITING RULES (ANTI-SLOP & INVESTIGATIVE DEPTH):
 - Headline ('titular'): MUST be extremely punchy, short, and intriguing. ABSOLUTELY MAXIMUM 55 characters. Be a bold curator, not a boring summarizer.
 - Voice: Be direct, slightly opinionated, and highly authoritative. Write as someone who has insider access to the industry.
 - Specificity: Use real data points, architectural details, or market valuation numbers from the context.
+- Latin American Angle: Always include a paragraph connecting the global news to the LATAM market (e.g., impact on remote work, nearshoring, local startup ecosystem, or global disparity). Keep it natural.
 - Prediction: DO NOT summarize. End with a sharp, bold prediction about where this trend goes in the next 12-24 months.
 
 1.  **Thesis**: A single, bold, non-obvious thesis statement. Hook the reader immediately. (HTML: `<p>...</p>`)
