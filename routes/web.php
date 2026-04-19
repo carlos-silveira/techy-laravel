@@ -93,6 +93,18 @@ Route::middleware([])->group(function () {
         return "<pre>Healing complete. " . \Illuminate\Support\Facades\Artisan::output() . "</pre>";
     });
 
+    Route::get('/admin/force-news', function () use ($gate) {
+        $gate();
+        $output = "";
+        try {
+            \Illuminate\Support\Facades\Artisan::call('yolo:agent', ['--limit' => 1]);
+            $output = \Illuminate\Support\Facades\Artisan::output();
+        } catch (\Exception $e) {
+            $output = $e->getMessage();
+        }
+        return "<pre>Manual News Agent Triggered:\n" . htmlspecialchars($output) . "</pre>";
+    });
+
     Route::get('/admin/migrate', function () use ($gate) {
         $gate();
         try {
