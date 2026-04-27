@@ -667,7 +667,7 @@ Return exactly a JSON object (no markdown fences):
     private function callOpenRouterFallback($promptOrMessages, bool $expectJson = false)
     {
         $apiKey = config('services.openrouter.api_key');
-        $model = config('services.openrouter.model', 'google/gemma-2-9b-it:free');
+        $model = config('services.openrouter.model', 'google/gemma-3-27b-it:free');
 
         if (is_string($promptOrMessages)) {
             $messages = [['role' => 'user', 'content' => $promptOrMessages]];
@@ -694,7 +694,13 @@ Return exactly a JSON object (no markdown fences):
         if ($response->successful()) {
             $json = $response->json();
             $text = $json['choices'][0]['message']['content'] ?? '';
-            return $expectJson ? $this->extractJson($text) : trim($text);
+            $result = $expectJson ? $this->extractJson($text) : trim($text);
+            
+            // Normalize single object responses to an array of objects
+            if ($expectJson && is_array($result) && isset($result['title']) && isset($result['prompt'])) {
+                return [$result];
+            }
+            return $result;
         }
 
         throw new \RuntimeException("OpenRouter API Error: " . $response->body());
