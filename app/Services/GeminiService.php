@@ -545,6 +545,17 @@ Return exactly a JSON object (no markdown fences):
             }
         }
         
+        // --- NEW FALLBACK LOGIC ---
+        $openRouterKey = config('services.openrouter.api_key');
+        if (!empty($openRouterKey)) {
+            Log::info("Gemini API exhausted or failed in conversational mode. Falling back to OpenRouter...");
+            try {
+                return $this->callOpenRouterFallback($messages, false);
+            } catch (\Exception $e) {
+                Log::error("OpenRouter conversational fallback also failed: " . $e->getMessage());
+            }
+        }
+
         throw new \RuntimeException('Gemini API is currently resting or unavailable. Last error: ' . $lastError);
     }
 
@@ -629,12 +640,64 @@ Return exactly a JSON object (no markdown fences):
             }
         }
 
+        // --- NEW FALLBACK LOGIC ---
+        // If Gemini failed completely, attempt to use OpenRouter as fallback
+        $openRouterKey = config('services.openrouter.api_key');
+        if (!empty($openRouterKey)) {
+            Log::info("Gemini API exhausted or failed. Falling back to OpenRouter...");
+            try {
+                return $this->callOpenRouterFallback($prompt, $expectJson);
+            } catch (\Exception $e) {
+                Log::error("OpenRouter fallback also failed: " . $e->getMessage());
+                // Fall through to original exception if fallback fails
+            }
+        }
+
         if ($this->isQuotaExhausted()) {
             throw new \RuntimeException("QUOTA_EXHAUSTED: Gemini API quota paused.");
         }
 
         if ($expectJson) return [];
         throw new \RuntimeException("All retries exhausted for model {$this->model}. Last error: " . $lastError);
+    }
+
+    /**
+     * Fallback method using OpenRouter API
+     */
+    private function callOpenRouterFallback($promptOrMessages, bool $expectJson = false)
+    {
+        $apiKey = config('services.openrouter.api_key');
+        $model = config('services.openrouter.model', 'google/gemma-2-9b-it:free');
+
+        if (is_string($promptOrMessages)) {
+            $messages = [['role' => 'user', 'content' => $promptOrMessages]];
+        } else {
+            $messages = [];
+            foreach ($promptOrMessages as $msg) {
+                $role = (isset($msg['role']) && $msg['role'] === 'model') ? 'assistant' : 'user';
+                $content = $msg['parts'][0]['text'] ?? '';
+                $messages[] = ['role' => $role, 'content' => $content];
+            }
+        }
+
+        $response = Http::timeout(120)
+            ->withHeaders([
+                'Authorization' => "Bearer {$apiKey}",
+                'HTTP-Referer' => config('app.url'),
+                'X-Title' => config('app.name'),
+            ])
+            ->post('https://openrouter.ai/api/v1/chat/completions', [
+                'model' => $model,
+                'messages' => $messages,
+            ]);
+
+        if ($response->successful()) {
+            $json = $response->json();
+            $text = $json['choices'][0]['message']['content'] ?? '';
+            return $expectJson ? $this->extractJson($text) : trim($text);
+        }
+
+        throw new \RuntimeException("OpenRouter API Error: " . $response->body());
     }
 
     /**

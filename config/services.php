@@ -35,6 +35,11 @@ return [
         'model' => env('GEMINI_MODEL', 'gemini-2.5-flash'),
     ],
 
+    'openrouter' => [
+        'api_key' => env('OPEN_ROUTER_API_KEY', ''),
+        'model' => env('OPEN_ROUTER_MODEL', 'google/gemma-2-9b-it:free'),
+    ],
+
     'unsplash' => [
         'access_key' => env('UNSPLASH_ACCESS_KEY', ''),
     ],
