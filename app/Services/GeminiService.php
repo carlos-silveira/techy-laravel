@@ -699,6 +699,19 @@ Return exactly a JSON object (no markdown fences):
             $json = $response->json();
             $text = $json['choices'][0]['message']['content'] ?? '';
             $result = $expectJson ? $this->extractJson($text) : trim($text);
+
+            // Track OpenRouter API Usage tokens
+            if (isset($json['usage'])) {
+                \Illuminate\Support\Facades\DB::table('gemini_logs')->insert([
+                    'model_name' => $model,
+                    'operation_type' => 'openrouter_fallback',
+                    'prompt_tokens' => $json['usage']['prompt_tokens'] ?? 0,
+                    'completion_tokens' => $json['usage']['completion_tokens'] ?? 0,
+                    'total_tokens' => $json['usage']['total_tokens'] ?? 0,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
             
             // Normalize single object responses to an array of objects
             if ($expectJson && is_array($result) && isset($result['title']) && isset($result['prompt'])) {
