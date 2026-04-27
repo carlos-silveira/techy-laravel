@@ -613,7 +613,11 @@ Return exactly a JSON object (no markdown fences):
                     }
 
                     $text = $candidate['content']['parts'][0]['text'] ?? '';
-                    return $expectJson ? $this->extractJson($text) : trim($text);
+                    $result = $expectJson ? $this->extractJson($text) : trim($text);
+                    if ($expectJson && is_array($result) && isset($result['title']) && isset($result['prompt'])) {
+                        return [$result];
+                    }
+                    return $result;
                 }
 
                 $status = $response->status();
