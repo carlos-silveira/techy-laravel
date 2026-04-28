@@ -93,6 +93,18 @@ Route::middleware([])->group(function () {
         return "<pre>Healing complete. " . \Illuminate\Support\Facades\Artisan::output() . "</pre>";
     });
 
+    Route::get('/admin/force-news', function () use ($gate) {
+        $gate();
+        $output = "";
+        try {
+            \Illuminate\Support\Facades\Artisan::call('yolo:agent', ['--limit' => 1]);
+            $output = \Illuminate\Support\Facades\Artisan::output();
+        } catch (\Exception $e) {
+            $output = $e->getMessage();
+        }
+        return "<pre>Manual News Agent Triggered:\n" . htmlspecialchars($output) . "</pre>";
+    });
+
     Route::get('/admin/migrate', function () use ($gate) {
         $gate();
         try {
@@ -183,6 +195,11 @@ Route::middleware(['auth'])->group(function () {
 
     // Media Uploads
     Route::post('/upload-image', [ImageUploadController::class, 'store'])->name('image.upload');
+
+    // Scouted Editorial Queue
+    Route::get('/api/scouted-queue', [App\Http\Controllers\ScoutQueueController::class, 'index'])->name('scouted.index');
+    Route::post('/api/scouted-queue/{id}/approve', [App\Http\Controllers\ScoutQueueController::class, 'approve'])->name('scouted.approve');
+    Route::delete('/api/scouted-queue/{id}', [App\Http\Controllers\ScoutQueueController::class, 'destroy'])->name('scouted.destroy');
 });
 
 require __DIR__ . '/auth.php';

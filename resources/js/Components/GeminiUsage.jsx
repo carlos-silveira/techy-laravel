@@ -14,6 +14,7 @@ const OP_LABELS = {
     'improve_content': 'Content Polish',
     'studio_chat': 'Studio Chat',
     'translate': 'Translation',
+    'openrouter_fallback': 'OpenRouter Fallback',
     'unknown': 'API Call',
 };
 
@@ -25,6 +26,7 @@ const OP_COLORS = {
     'generate_article_meta': '#eab308',
     'studio_chat': '#ec4899',
     'translate': '#3b82f6',
+    'openrouter_fallback': '#f43f5e',
 };
 
 export default function GeminiUsage({ usageData, modelDistribution }) {
@@ -33,7 +35,7 @@ export default function GeminiUsage({ usageData, modelDistribution }) {
             <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-10 text-center">
                 <Cpu className="w-12 h-12 text-gray-700 mx-auto mb-4" />
                 <h3 className="text-xl font-black text-white">No API Logs Yet</h3>
-                <p className="text-sm text-gray-500 mt-2">Gemini usage metrics will appear here once stories are generated.</p>
+                <p className="text-sm text-gray-500 mt-2">AI usage metrics will appear here once stories are generated.</p>
             </div>
         );
     }
@@ -48,7 +50,7 @@ export default function GeminiUsage({ usageData, modelDistribution }) {
             <div className="flex items-center justify-between">
                 <div>
                     <h3 className="text-[10px] font-black text-orange-400 uppercase tracking-[0.3em] mb-2">Compute Consumption</h3>
-                    <h2 className="text-3xl font-black tracking-tighter text-white">Gemini Engine.</h2>
+                    <h2 className="text-3xl font-black tracking-tighter text-white">AI Engine.</h2>
                 </div>
                 <div className="flex items-center gap-3">
                     <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl">
@@ -92,9 +94,10 @@ export default function GeminiUsage({ usageData, modelDistribution }) {
                                         formatter={(value, name) => [value.toLocaleString(), name === 'tokens' ? 'Tokens' : name]}
                                     />
                                     <Bar dataKey="tokens" radius={[0, 6, 6, 0]} barSize={30}>
-                                        {chartData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={index === 0 ? '#f97316' : index === 1 ? '#fdba74' : '#fed7aa'} />
-                                        ))}
+                                        {chartData.map((entry, index) => {
+                                            const colors = ['#f97316', '#8b5cf6', '#06b6d4', '#ec4899', '#22c55e', '#eab308'];
+                                            return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />;
+                                        })}
                                     </Bar>
                                 </BarChart>
                             </ResponsiveContainer>
@@ -105,10 +108,12 @@ export default function GeminiUsage({ usageData, modelDistribution }) {
                     {/* Model legend with requests + cost */}
                     {chartData.length > 0 && (
                         <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            {chartData.map((m, i) => (
+                            {chartData.map((m, i) => {
+                                const colors = ['#f97316', '#8b5cf6', '#06b6d4', '#ec4899', '#22c55e', '#eab308'];
+                                return (
                                 <div key={i} className="flex items-center justify-between bg-white/[0.02] rounded-xl px-4 py-2 border border-white/5">
                                     <div className="flex items-center gap-2">
-                                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: i === 0 ? '#f97316' : '#fdba74' }} />
+                                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: colors[i % colors.length] }} />
                                         <span className="text-[10px] font-bold text-gray-400 truncate">{m.model}</span>
                                     </div>
                                     <div className="flex items-center gap-3 text-[9px] font-black">
@@ -116,7 +121,8 @@ export default function GeminiUsage({ usageData, modelDistribution }) {
                                         <span className="text-orange-400">{m.percentage}%</span>
                                     </div>
                                 </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
                 </div>

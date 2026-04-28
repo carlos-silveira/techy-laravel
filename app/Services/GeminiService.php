@@ -168,7 +168,7 @@ Return ONLY a JSON array, no markdown fences:
             return "- [{$source}] {$n['title']}";
         }, $newsItems));
 
-        $prompt = "Act as a senior tech analyst and investigative journalist for a site like The Verge or Stratechery.
+        $prompt = "Act as a senior tech analyst and investigative journalist for a premium tech news site with a strong global and Latin American focus (techynews.lat).
 
 ARTICLE TOPIC: {$title}
 EDITORIAL BRIEF: {$ideaPrompt}
@@ -184,6 +184,7 @@ CRITICAL WRITING RULES (ANTI-SLOP & INVESTIGATIVE DEPTH):
 - Headline ('titular'): MUST be extremely punchy, short, and intriguing. ABSOLUTELY MAXIMUM 55 characters. Be a bold curator, not a boring summarizer.
 - Voice: Be direct, slightly opinionated, and highly authoritative. Write as someone who has insider access to the industry.
 - Specificity: Use real data points, architectural details, or market valuation numbers from the context.
+- Latin American Angle: Always include a paragraph connecting the global news to the LATAM market (e.g., impact on remote work, nearshoring, local startup ecosystem, or global disparity). Keep it natural.
 - Prediction: DO NOT summarize. End with a sharp, bold prediction about where this trend goes in the next 12-24 months.
 
 1.  **Thesis**: A single, bold, non-obvious thesis statement. Hook the reader immediately. (HTML: `<p>...</p>`)
@@ -544,6 +545,17 @@ Return exactly a JSON object (no markdown fences):
             }
         }
         
+        // --- NEW FALLBACK LOGIC ---
+        $openRouterKey = config('services.openrouter.api_key');
+        if (!empty($openRouterKey)) {
+            Log::info("Gemini API exhausted or failed in conversational mode. Falling back to OpenRouter...");
+            try {
+                return $this->callOpenRouterFallback($messages, false);
+            } catch (\Exception $e) {
+                Log::error("OpenRouter conversational fallback also failed: " . $e->getMessage());
+            }
+        }
+
         throw new \RuntimeException('Gemini API is currently resting or unavailable. Last error: ' . $lastError);
     }
 
@@ -601,7 +613,11 @@ Return exactly a JSON object (no markdown fences):
                     }
 
                     $text = $candidate['content']['parts'][0]['text'] ?? '';
-                    return $expectJson ? $this->extractJson($text) : trim($text);
+                    $result = $expectJson ? $this->extractJson($text) : trim($text);
+                    if ($expectJson && is_array($result) && isset($result['title']) && isset($result['prompt'])) {
+                        return [$result];
+                    }
+                    return $result;
                 }
 
                 $status = $response->status();
@@ -628,12 +644,83 @@ Return exactly a JSON object (no markdown fences):
             }
         }
 
+        // --- NEW FALLBACK LOGIC ---
+        // If Gemini failed completely, attempt to use OpenRouter as fallback
+        $openRouterKey = config('services.openrouter.api_key');
+        if (!empty($openRouterKey)) {
+            Log::info("Gemini API exhausted or failed. Falling back to OpenRouter...");
+            try {
+                return $this->callOpenRouterFallback($prompt, $expectJson);
+            } catch (\Exception $e) {
+                Log::error("OpenRouter fallback also failed: " . $e->getMessage());
+                // Fall through to original exception if fallback fails
+            }
+        }
+
         if ($this->isQuotaExhausted()) {
             throw new \RuntimeException("QUOTA_EXHAUSTED: Gemini API quota paused.");
         }
 
         if ($expectJson) return [];
         throw new \RuntimeException("All retries exhausted for model {$this->model}. Last error: " . $lastError);
+    }
+
+    /**
+     * Fallback method using OpenRouter API
+     */
+    private function callOpenRouterFallback($promptOrMessages, bool $expectJson = false)
+    {
+        $apiKey = config('services.openrouter.api_key');
+        $model = config('services.openrouter.model', 'google/gemma-3-27b-it:free');
+
+        if (is_string($promptOrMessages)) {
+            $messages = [['role' => 'user', 'content' => $promptOrMessages]];
+        } else {
+            $messages = [];
+            foreach ($promptOrMessages as $msg) {
+                $role = (isset($msg['role']) && $msg['role'] === 'model') ? 'assistant' : 'user';
+                $content = $msg['parts'][0]['text'] ?? '';
+                $messages[] = ['role' => $role, 'content' => $content];
+            }
+        }
+
+        $response = Http::timeout(120)
+            ->withHeaders([
+                'Authorization' => "Bearer {$apiKey}",
+                'HTTP-Referer' => config('app.url'),
+                'X-Title' => config('app.name'),
+            ])
+            ->post('https://openrouter.ai/api/v1/chat/completions', [
+                'model' => $model,
+                'messages' => $messages,
+            ]);
+
+        if ($response->successful()) {
+            $json = $response->json();
+            $text = $json['choices'][0]['message']['content'] ?? '';
+            $result = $expectJson ? $this->extractJson($text) : trim($text);
+
+            // Track OpenRouter API Usage tokens
+            if (isset($json['usage'])) {
+                \Illuminate\Support\Facades\DB::table('gemini_logs')->insert([
+                    'model_name' => $model,
+                    'operation_type' => 'openrouter_fallback',
+                    'prompt_tokens' => $json['usage']['prompt_tokens'] ?? 0,
+                    'completion_tokens' => $json['usage']['completion_tokens'] ?? 0,
+                    'total_tokens' => $json['usage']['total_tokens'] ?? 0,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+            
+            // Normalize single object responses to an array of objects
+            if ($expectJson && is_array($result) && isset($result['title']) && isset($result['prompt'])) {
+                return [$result];
+            }
+            return $result;
+        }
+
+        throw new \RuntimeException("OpenRouter API Error: " . $response->body());
     }
 
     /**

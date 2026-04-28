@@ -10,12 +10,14 @@ use Illuminate\Support\Facades\Log;
 class NewsService
 {
     /**
-     * RSS sources for trending developer news.
+     * RSS sources for trending developer and tech news (Global + LatAm).
      */
     private array $feeds = [
-        'TechCrunch' => 'https://techcrunch.com/feed/',
-        'The Verge'  => 'https://www.theverge.com/rss/index.xml',
-        'Ars Technica' => 'https://feeds.arstechnica.com/arstechnica/index',
+        'TechCrunch'   => 'https://techcrunch.com/feed/',
+        'Wired'        => 'https://www.wired.com/feed/rss',
+        'Xataka'       => 'https://www.xataka.com/feed.xml',
+        'TechTudo'     => 'https://www.techtudo.com.br/feed',
+        'Contxto'      => 'https://contxto.com/feed/',
     ];
 
     /**
