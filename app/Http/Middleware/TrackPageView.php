@@ -64,6 +64,12 @@ class TrackPageView
 
     private function shouldIgnore(Request $request): bool
     {
+        // Ignore Admin IP addresses
+        $adminIps = array_filter(array_map('trim', explode(',', env('ADMIN_IPS', ''))));
+        if (!empty($adminIps) && in_array($request->ip(), $adminIps)) {
+            return true;
+        }
+
         // Ignore auth/admin panel routes
         if ($request->is('dashboard*') || $request->is('admin*') || $request->is('login') || $request->is('register')) {
             return true;
