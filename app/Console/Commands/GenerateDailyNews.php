@@ -78,11 +78,7 @@ class GenerateDailyNews extends Command
             try {
                 $draftData = $geminiService->generateDraft($selectedIdea['title'], $selectedIdea['prompt'], $newsItems);
                 
-                $content = $draftData['cuerpo_noticia'];
-                if (!empty($draftData['snippet_codigo'])) {
-                    $lang = $draftData['lenguaje_snippet'] ?? '';
-                    $content .= "\n<pre><code class=\"language-{$lang}\">\n" . htmlspecialchars($draftData['snippet_codigo']) . "\n</code></pre>";
-                }
+                $content = $draftData['article_body'] ?? '';
                 break;
             } catch (\App\Exceptions\GenerationException $e) {
                 $this->warn("⚠️ Attempt failed: " . $e->getMessage());

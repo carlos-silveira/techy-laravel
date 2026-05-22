@@ -19,7 +19,7 @@ class LanguageController extends Controller
         $locale = $request->input('locale');
 
         if (!in_array($locale, ['en', 'es', 'pt'])) {
-            return response()->json(['error' => 'Unsupported locale'], 400);
+            return back()->withErrors(['locale' => 'Unsupported locale']);
         }
 
         $old = Session::get('locale', 'en');
@@ -32,7 +32,6 @@ class LanguageController extends Controller
             Cache::flush();
         }
 
-        return response()->json(['success' => true, 'locale' => $locale])
-            ->withCookie(cookie()->forever('locale', $locale));
+        return back()->withCookie(cookie()->forever('locale', $locale));
     }
 }

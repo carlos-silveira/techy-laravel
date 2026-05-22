@@ -130,7 +130,8 @@ class NewsAgent
             $draft = $this->gemini->generateDraft($title, $scouted->prompt, $contextNews);
             
             // 2. CRITIQUE & POLISH
-            $polishedHtml = $this->gemini->polishArticleHtml($draft['cuerpo_noticia']);
+            $polishedHtml = $this->gemini->polishArticleHtml($draft['article_body'] ?? '');
+            $polishedHtml = $this->resolveImagePlaceholders($polishedHtml, $title);
             
             // 3. METADATA & FINALIZE
             $meta = $this->gemini->generateArticleMeta($title, $polishedHtml);
@@ -140,13 +141,17 @@ class NewsAgent
             $slug = $normalizedTitle . '-' . Str::random(6);
             $wordCount = str_word_count(strip_tags($polishedHtml));
 
-            $imageQuery = $draft['sugerencia_imagen'] ?? ($meta['tags'][0] ?? $title);
+            $imageQuery = $draft['suggested_image'] ?? ($meta['tags'][0] ?? $title);
             $coverImage = $this->fetchCoverImageFallback(Str::limit($imageQuery, 50));
+            if (empty($coverImage)) {
+                $coverImage = 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=1200&q=80';
+            }
 
             $article = Article::create([
                 'title' => $title,
                 'slug' => $slug,
                 'content' => $polishedHtml,
+                'language' => 'en',
                 'status' => 'published',
                 'is_editors_choice' => true,
                 'reading_time_minutes' => max(1, (int) ceil($wordCount / 200)),
@@ -198,7 +203,8 @@ class NewsAgent
 
         // 4. CRITIQUE & POLISH
         // We use the new polishArticleHtml method for a second AI pass (Editorial Critique)
-        $polishedHtml = $this->gemini->polishArticleHtml($draft['cuerpo_noticia']);
+        $polishedHtml = $this->gemini->polishArticleHtml($draft['article_body'] ?? '');
+        $polishedHtml = $this->resolveImagePlaceholders($polishedHtml, $title);
         
         // 5. METADATA & FINALIZE
         $meta = $this->gemini->generateArticleMeta($title, $polishedHtml);
@@ -217,13 +223,17 @@ class NewsAgent
         $wordCount = str_word_count(strip_tags($polishedHtml));
 
         // Attempt image fetch with improved query from meta if available
-        $imageQuery = $draft['sugerencia_imagen'] ?? ($meta['tags'][0] ?? $title);
+        $imageQuery = $draft['suggested_image'] ?? ($meta['tags'][0] ?? $title);
         $coverImage = $this->fetchCoverImageFallback(Str::limit($imageQuery, 50));
+        if (empty($coverImage)) {
+            $coverImage = 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=1200&q=80';
+        }
 
         $article = Article::create([
             'title' => $title,
             'slug' => $slug,
             'content' => $polishedHtml,
+            'language' => 'en',
             'status' => 'published',
             'is_editors_choice' => true,
             'reading_time_minutes' => max(1, (int) ceil($wordCount / 200)),
@@ -257,6 +267,30 @@ class NewsAgent
             'id' => $article->id,
             'slug' => $article->slug
         ];
+    }
+
+    /**
+     * Resolve <img src="PLACEHOLDER_IMAGE" alt="..."> tags by fetching relative images from Unsplash.
+     */
+    private function resolveImagePlaceholders(string $content, string $fallbackQuery): string
+    {
+        $pattern = '/<img\s+[^>]*src=["\']PLACEHOLDER_IMAGE["\'][^>]*alt=["\']([^"\']*)["\'][^>]*>|<img\s+[^>]*alt=["\']([^"\']*)["\'][^>]*src=["\']PLACEHOLDER_IMAGE["\'][^>]*>/i';
+        
+        return preg_replace_callback($pattern, function ($matches) use ($fallbackQuery) {
+            $alt = !empty($matches[1]) ? $matches[1] : (!empty($matches[2]) ? $matches[2] : '');
+            $alt = trim($alt);
+            if (empty($alt)) {
+                $alt = $fallbackQuery;
+            }
+            
+            Log::info("NewsAgent: Resolving inline placeholder image for: {$alt}");
+            sleep(2); 
+            
+            $url = $this->fetchCoverImageFallback(Str::limit($alt, 50));
+            $fallbackUrl = 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=1200&q=80';
+            
+            return '<img src="' . ($url ?? $fallbackUrl) . '" alt="' . e($alt) . '" class="w-full h-auto rounded-xl my-6 shadow-md object-cover max-h-[450px]">';
+        }, $content);
     }
 
     /**

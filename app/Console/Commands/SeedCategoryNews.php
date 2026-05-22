@@ -15,21 +15,27 @@ class SeedCategoryNews extends Command
     /**
      * The name and signature of the console command.
      */
-    protected $signature = 'news:seed-categories';
+    protected $signature = 'news:seed-categories {--limit=10 : Total number of articles to generate} {--clear : Clear all old articles before running}';
 
     /**
      * The console command description.
      */
-    protected $description = 'Seed the database with 1 AI-generated news article for each core category.';
+    protected $description = 'Seed the database with a high-volume set of category-specific news articles.';
 
     /**
      * Execute the console command.
      */
     public function handle(GeminiService $geminiService, NewsService $newsService)
     {
-        $this->info('🗑  Skipping cleanup: Accumulating volume for AdSense...');
-        // \App\Models\Article::where('created_at', '<', now()->subDays(3))->delete();
-        // \Illuminate\Support\Facades\Artisan::call('cache:clear');
+        if ($this->option('clear')) {
+            $this->warn('🗑  Clearing all existing articles and scouted articles...');
+            // Temporarily disable foreign key checks to safely truncate
+            \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
+            \App\Models\Article::truncate();
+            \App\Models\ScoutedArticle::truncate();
+            \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
+            $this->info('✅ Database cleaned successfully.');
+        }
 
         $this->info('📰 Fetching real news context...');
         $newsItems = $newsService->fetchTodayTechNews();
@@ -43,8 +49,24 @@ class SeedCategoryNews extends Command
             'Cybersecurity & Privacy'
         ];
 
-        foreach ($categories as $category) {
-            $this->info("🚀 Generating article for category: {$category}");
+        $limit = (int) $this->option('limit');
+        $this->info("🚀 Generating {$limit} articles across categories...");
+
+        // Fetch recently created titles (last 2 days) to avoid duplicates
+        $recentlyCreatedTitles = Article::where('created_at', '>', now()->subDays(2))
+            ->pluck('title')
+            ->toArray();
+            
+        $excludeTitles = array_values(array_filter($recentlyCreatedTitles));
+        
+        $generatedCount = 0;
+        $categoryIndex = 0;
+
+        while ($generatedCount < $limit) {
+            $category = $categories[$categoryIndex % count($categories)];
+            $categoryIndex++;
+
+            $this->info("🚀 [" . ($generatedCount + 1) . " / {$limit}] Generating article for category: {$category}");
             
             $draftData = null;
             $attempts = 0;
@@ -54,7 +76,7 @@ class SeedCategoryNews extends Command
                 sleep(10); // Mandatory 10s API delay
                 
                 try {
-                    $draftData = $geminiService->generateCategoryDraft($category, $newsItems);
+                    $draftData = $geminiService->generateCategoryDraft($category, $newsItems, $excludeTitles);
                     if (!empty($draftData['html_content']) && strpos($draftData['html_content'], 'Content missing.') === false && strpos($draftData['html_content'], 'Content generation failed.') === false) {
                         break;
                     }
@@ -79,6 +101,9 @@ class SeedCategoryNews extends Command
             
             $this->info("💡 Generated Title: {$title}");
             
+            // Track title to prevent duplicates in subsequent category generation runs in the same cycle
+            $excludeTitles[] = $title;
+            
             // Clean markdown fences if any
             $htmlContent = preg_replace('/^```(?:html)?\s*/i', '', $htmlContent);
             $htmlContent = preg_replace('/\s*```\s*$/', '', $htmlContent);
@@ -98,6 +123,9 @@ class SeedCategoryNews extends Command
             
             // Fetch cover image
             $coverImageUrl = $this->fetchCoverImage($title, [$draftData['suggested_cover_query'] ?? ''], $category);
+            if (empty($coverImageUrl)) {
+                $coverImageUrl = 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=1200&q=80';
+            }
             
             $slug = Str::slug($title) . '-' . Str::random(6);
             $wordCount = str_word_count(strip_tags($htmlContent));
@@ -106,6 +134,7 @@ class SeedCategoryNews extends Command
                 'title' => $title,
                 'slug' => $slug,
                 'content' => trim($htmlContent),
+                'language' => 'en',
                 'status' => 'published',
                 'is_editors_choice' => false,
                 'views_count' => rand(10, 500),
@@ -140,6 +169,7 @@ class SeedCategoryNews extends Command
                 $article->update(['translations' => $translations]);
             }
             
+            $generatedCount++;
             $this->info("--------------------------------------------------");
         }
         
@@ -219,11 +249,20 @@ class SeedCategoryNews extends Command
 
     private function resolveImagePlaceholders(string $content, string $fallbackQuery): string
     {
-        return preg_replace_callback('/<img src="PLACEHOLDER_IMAGE" alt="([^"]+)">/i', function ($matches) use ($fallbackQuery) {
-            $alt = $matches[1] ?: $fallbackQuery;
+        $pattern = '/<img\s+[^>]*src=["\']PLACEHOLDER_IMAGE["\'][^>]*alt=["\']([^"\']*)["\'][^>]*>|<img\s+[^>]*alt=["\']([^"\']*)["\'][^>]*src=["\']PLACEHOLDER_IMAGE["\'][^>]*>/i';
+        
+        return preg_replace_callback($pattern, function ($matches) use ($fallbackQuery) {
+            $alt = !empty($matches[1]) ? $matches[1] : (!empty($matches[2]) ? $matches[2] : '');
+            $alt = trim($alt);
+            if (empty($alt)) {
+                $alt = $fallbackQuery;
+            }
+            
             sleep(2); 
             $url = $this->fetchCoverImage($alt, [$fallbackQuery]);
-            return '<img src="' . ($url ?? 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=1200&q=80') . '" alt="' . $alt . '">';
+            $fallbackUrl = 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=1200&q=80';
+            
+            return '<img src="' . ($url ?? $fallbackUrl) . '" alt="' . e($alt) . '" class="w-full h-auto rounded-xl my-6 shadow-md object-cover max-h-[450px]">';
         }, $content);
     }
 }

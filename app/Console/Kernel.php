@@ -19,8 +19,8 @@ class Kernel extends ConsoleKernel
         // Fetches news, critiques drafts, fixes HTML, and auto-publishes
         $schedule->command('yolo:agent --limit=1')->everyTwoHours()->timezone('America/Mexico_City');
         
-        // Stockpile new AI articles for categories every 6 hours
-        $schedule->command('news:seed-categories')->everySixHours()->timezone('America/Mexico_City');
+        // Stockpile 10 new AI articles for categories daily at 8:00 AM
+        $schedule->command('news:seed-categories --limit=10')->dailyAt('08:00')->timezone('America/Mexico_City');
         
         // Dispatch the queue worker to handle background translations and AI tasks
         $schedule->command('queue:work --stop-when-empty')->everyMinute()->withoutOverlapping();

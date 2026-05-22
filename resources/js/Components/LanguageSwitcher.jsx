@@ -18,17 +18,17 @@ export default function LanguageSwitcher() {
 
     const currentLanguage = languages.find(l => l.code === activeLocale) || languages[0];
 
-    const changeLanguage = async (langCode) => {
+    const changeLanguage = (langCode) => {
         setIsOpen(false);
-        try {
-            await axios.post('/set-locale', { locale: langCode });
-            toast.success(`Language changed to ${languages.find(l => l.code === langCode).name}`);
-            
-            // Reload the page to apply changes and fetch translated content
-            window.location.reload();
-        } catch (error) {
-            toast.error('Failed to change language.');
-        }
+        router.post('/set-locale', { locale: langCode }, {
+            preserveScroll: true,
+            onSuccess: () => {
+                toast.success(`Language changed to ${languages.find(l => l.code === langCode).name}`);
+            },
+            onError: () => {
+                toast.error('Failed to change language.');
+            }
+        });
     };
 
     return (

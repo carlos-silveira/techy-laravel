@@ -10,7 +10,7 @@ use App\Services\GeminiService;
 
 class NewsYoloAgent extends Command
 {
-    protected $signature = 'yolo:agent {--limit=1 : Number of articles to generate} {--scout : Only scout and rank trends}';
+    protected $signature = 'yolo:agent {--limit=10 : Number of articles to generate} {--scout : Only scout and rank trends}';
     protected $description = 'Run the autonomous high-quality tech news AI agent (YOLO Mode)';
 
     public function handle(NewsAgent $agent, GeminiService $gemini)
@@ -28,8 +28,8 @@ class NewsYoloAgent extends Command
             $this->info("🔍 Scouting top trends (Manual Flag)...");
             $results = $agent->scoutOnly($limit);
         } else {
-            $this->info("🔍 Scouting top trends (Queue Mode Default)...");
-            $results = $agent->scoutOnly($limit);
+            $this->info("🤖 Autonomous cycle initiated...");
+            $results = $agent->runAutonomousCycle($limit);
         }
 
         foreach ($results as $res) {

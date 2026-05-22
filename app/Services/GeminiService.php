@@ -135,22 +135,23 @@ class GeminiService
             $newsContext .= "- [{$source}] {$item['title']}: {$item['description']}\n";
         }
 
-        $prompt = "You are a senior editor at a top-tier tech publication, synthesizing insights from sources like The Verge and Stratechery.
-You have these trending headlines from today's tech news cycle:
+        $prompt = "You are the Editor-in-Chief of techynews.lat. You have these trending headlines from today's tech news cycle:
 
 {$newsContext}
 
-Generate exactly 3 article ideas. Each MUST:
-1. Have a provocative, insider-style title that frames a strong strategic or cultural thesis.
-2. Target a sophisticated audience of engineers, CTOs, and tech founders.
-3. Connect multiple headlines into a single, cohesive narrative that exposes a market shift or cultural trend.
-4. Include a developer-action angle or a critical strategic takeaway.
-5. Include a new 'angle' field suggesting the analytical approach: 'cultural_impact' (analyzing how technology affects users and society) or 'strategic_market_analysis' (analyzing business models, moats, and industry consolidation).
+Your job is to select the 5 to 10 MOST IMPORTANT, exciting, and concrete individual tech news stories from the list above. DO NOT combine unrelated stories. Pick actual, factual events (e.g., a new product launch, a major lawsuit, an AI breakthrough).
 
-CRITICAL RECENCY RULE: ONLY focus on confirmed tech events from the EXACT last 24 to 48 hours. DO NOT output legacy news, repetitive AI hype, or rumors already covered. If the news is not from today, discard it.
+Generate between 5 and 10 article ideas. Each MUST:
+1. Focus on ONE specific news event. DO NOT try to connect unrelated headlines or invent 'cultural trends'.
+2. Have a clear, catchy, and factual title.
+3. Include a 'prompt' field: a 2-sentence brief explaining exactly what the article should be about in plain, simple English. What happened and why is it important?
+4. Include an 'angle' field, which should be a simple category like 'product_launch', 'business', or 'ai_breakthrough'.
+
+CRITICAL RECENCY RULE: ONLY focus on confirmed tech events from the EXACT last 24 to 48 hours. DO NOT output legacy news. If the news is not from today, discard it.
+CRITICAL TOPIC RULE: ABSOLUTELY DO NOT write meta-commentary about AI generating articles. Focus on actual tech industry news.
 
 Return ONLY a JSON array, no markdown fences:
-[{\"title\": \"...\", \"prompt\": \"A detailed 2-sentence editorial brief describing the angle, tone, and key arguments\", \"angle\": \"cultural_impact\"}]";
+[{\"title\": \"...\", \"prompt\": \"A simple 2-sentence explanation of the news.\", \"angle\": \"product_launch\"}]";
 
         $result = $this->callGemini($prompt, true);
         return is_array($result) && !empty($result) ? $result : [];
@@ -161,64 +162,63 @@ Return ONLY a JSON array, no markdown fences:
      */
     public function generateDraft(string $title, string $ideaPrompt, array $newsItems): array
     {
-        if ($this->isQuotaExhausted()) return ['cuerpo_noticia' => 'Quota exhausted. Check back tomorrow.'];
+        if ($this->isQuotaExhausted()) return ['article_body' => 'Quota exhausted. Check back tomorrow.'];
 
         $context = implode("\n", array_map(function ($n) {
             $source = $n['source'] ?? 'News';
             return "- [{$source}] {$n['title']}";
         }, $newsItems));
 
-        $prompt = "Act as a senior tech analyst and investigative journalist for a premium tech news site with a strong global and Latin American focus (techynews.lat).
+        $prompt = "You are a tech journalist for techynews.lat. Your absolute priority is CLARITY. You must write articles that are extremely easy to understand, avoiding all complicated jargon, 'verbal vomit', and overly academic language.
 
 ARTICLE TOPIC: {$title}
 EDITORIAL BRIEF: {$ideaPrompt}
 NEWS CONTEXT:
 {$context}
 
-Generate an article as a JSON object. The 'cuerpo_noticia' field MUST contain valid HTML and follow this structural flow:
+Generate an article as a JSON object. The 'article_body' field MUST contain valid HTML.
 
-CRITICAL WRITING RULES (ANTI-SLOP & INVESTIGATIVE DEPTH):
-- NEVER use generic intros like 'In today's fast-paced digital world', 'In the ever-evolving landscape', or 'Technology has changed the way we'.
-- NEVER use AI-typical adjectives: 'dynamic', 'comprehensive', 'transformative', 'seamless', 'revolutionary' (unless describing a literal paradigm shift).
-- NEVER use sludge words: 'delve', 'complexities', 'nuanced', 'testament', 'tapestry', 'a symphony of', 'navigating the'.
-- Headline ('titular'): MUST be extremely punchy, short, and intriguing. ABSOLUTELY MAXIMUM 55 characters. Be a bold curator, not a boring summarizer.
-- Voice: Be direct, slightly opinionated, and highly authoritative. Write as someone who has insider access to the industry.
-- Specificity: Use real data points, architectural details, or market valuation numbers from the context.
-- Latin American Angle: Always include a paragraph connecting the global news to the LATAM market (e.g., impact on remote work, nearshoring, local startup ecosystem, or global disparity). Keep it natural.
-- Prediction: DO NOT summarize. End with a sharp, bold prediction about where this trend goes in the next 12-24 months.
+CRITICAL WRITING RULES (FOR EXTREME CLARITY):
+- CRITICAL LANGUAGE RULE: The output MUST be entirely in English.
+- EXTREME SIMPLICITY: Write at a very basic reading level. Use everyday vocabulary.
+- FACTUAL AND DIRECT: No 'fluff', no 'insider' voice. Just report the facts clearly like a bulleted summary.
+- NO CODE BLOCKS: DO NOT include any code snippets, python code, or programming examples.
+- NO AI CLICHES: NEVER use words like 'delve', 'complexities', 'nuanced', 'testament', 'tapestry', 'landscape', 'revolutionary', 'transformative'.
+- MAXIMUM LENGTH: 450 words (typically target between 350 and 450 words for complete coverage).
 
-1.  **Thesis**: A single, bold, non-obvious thesis statement. Hook the reader immediately. (HTML: `<p>...</p>`)
-2.  **Why It Matters**: The immediate, concrete impact of this news. (HTML: `<h2>Why It Matters</h2>...`)
-3.  **Deeper Analysis**: The strategic, non-obvious implications. (HTML: `<h2>The Deeper Analysis</h2>...`)
-4.  **Counter-Argument**: Risks, downsides, or why this might fail. (HTML: `<h2>The Counter-Argument</h2>...`)
-5.  **Forward Outlook**: Strategic takeaways for builders and investors. (HTML: `<h2>Forward Outlook</h2>...`)
+ARTICLE STRUCTURE (HTML):
+- BANNED HEADINGS: You are strictly FORBIDDEN from using generic, repetitive, or filler subheadings such as 'Why It's Important', 'Why It Matters', 'Deeper Analysis', 'Deep Dive', 'Conclusion', or their exact translations or equivalents.
+- DO NOT divide the article into multiple rigid analytical sections that repeat the same information. Every single sentence and bullet point must add NEW, distinct information.
+- Write the article so it is incredibly easy to scan, using this exact layout:
+  1. **Intro**: A direct, punchy 1-2 sentence paragraph explaining exactly *what* happened, *who* is involved, and *when*. Start directly with the breaking news. Do NOT use any heading for this paragraph.
+  2. **Details (Bulleted List)**: A bulleted list (`<ul>` containing 4 to 6 `<li>` elements) breaking down the key specs, facts, numbers, or timeline of the event. Bold the first 2-3 words of each bullet point to make it highly scannable. Each bullet point should be highly informative, containing 1 to 2 detailed sentences of distinct facts.
+  3. **Consequence/Next Steps**: A final short paragraph (2-3 sentences max) explaining the immediate consequence or what happens next. Do NOT use any subheading for this final paragraph.
+- Under NO circumstances should you use more than one `<h2>` heading in the entire article, and only use it if it describes a highly specific, contextual aspect of the details (e.g., `<h2>Specs and Pricing</h2>`). Never use generic headings.
 
-Return ONLY a valid JSON object with these exact keys: \"titular\", \"tldr_twitter\", \"cuerpo_noticia\", \"snippet_codigo\", \"lenguaje_snippet\", \"sugerencia_imagen\", \"categoria_principal\". Ensure the 'cuerpo_noticia' includes an unsplash image placeholder.
+Return ONLY a valid JSON object with these exact keys: \"title\", \"twitter_tldr\", \"article_body\", \"suggested_image\", \"main_category\". Ensure the 'article_body' includes an unsplash image placeholder like <img src=\"PLACEHOLDER_IMAGE\" alt=\"description\">.
 ";
 
         $result = $this->callGemini($prompt, true);
         
-        $content = $result['cuerpo_noticia'];
+        $content = $result['article_body'] ?? '';
 
         // --- HARDENED VALIDATION ---
         $this->validateGeneratedContent([
-            'titular' => $result['titular'] ?? '',
-            'tldr_twitter' => $result['tldr_twitter'] ?? '',
-            'cuerpo_noticia' => $content,
+            'title' => $result['title'] ?? '',
+            'twitter_tldr' => $result['twitter_tldr'] ?? '',
+            'article_body' => $content,
         ], $title);
 
-        if (strlen(strip_tags($content)) < 400) {
+        if (strlen(strip_tags($content)) < 200) {
             throw new \App\Exceptions\GenerationException("Gemini returned insufficient content (too short) for '{$title}'.");
         }
         
         return [
-            'titular' => $result['titular'] ?? $title,
-            'tldr_twitter' => $result['tldr_twitter'] ?? $ideaPrompt,
-            'cuerpo_noticia' => $content,
-            'snippet_codigo' => $result['snippet_codigo'] ?? null,
-            'lenguaje_snippet' => $result['lenguaje_snippet'] ?? null,
-            'sugerencia_imagen' => $result['sugerencia_imagen'] ?? '',
-            'categoria_principal' => $result['categoria_principal'] ?? 'Business Tech',
+            'title' => $result['title'] ?? $title,
+            'twitter_tldr' => $result['twitter_tldr'] ?? $ideaPrompt,
+            'article_body' => $content,
+            'suggested_image' => $result['suggested_image'] ?? '',
+            'main_category' => $result['main_category'] ?? 'Business Tech',
         ];
     }
 
@@ -242,13 +242,16 @@ Based on our site's latest published articles below:
 {$context}
 
 Write a punchy, engaging 'Daily Brief' summarizing these exact articles. 
-Keep it to exactly 2 short paragraphs. 
-Tone: Professional, investigative, and objective. No jokes, no sarcasm, pure journalistic integrity.
+FORMATTING RULES:
+1. Start with a short 1-2 sentence introduction about the day's news.
+2. Group the articles into logical categories using <h2> headers (e.g., '<h2>Inteligencia Artificial</h2>', '<h2>Hardware y Cómputo</h2>').
+3. For each article, create a bullet point (<ul><li>) that summarizes the article's main point.
+4. Bold the first few words of the bullet point as a mini-title.
 
-CRITICAL RULE: You MUST create inline HTML hyperlinks to the articles you mention.
-Use this format: <a href=\"/article/THE-SLUG-HERE\" class=\"font-bold text-primary hover:text-purple-500 underline transition-colors decoration-primary/30 underline-offset-4\">The Article Title or relevant text</a>
+CRITICAL RULE: You MUST create inline HTML hyperlinks to the articles you mention using their Slug.
+Use this format: <li><strong><a href=\"/article/THE-SLUG-HERE\" class=\"font-bold text-primary hover:text-purple-500 underline transition-colors decoration-primary/30 underline-offset-4\">Mini Title:</a></strong> The summary of the article.</li>
 
-Do NOT use markdown code fences. Output ONLY the raw HTML string for the paragraphs. Do NOT hallucinate any news outside of the provided articles.";
+Do NOT use markdown code fences. Output ONLY the raw HTML string. Do NOT hallucinate any news outside of the provided articles. Do NOT include any code blocks.";
 
         return $this->callGemini($prompt, false);
     }
@@ -256,7 +259,7 @@ Do NOT use markdown code fences. Output ONLY the raw HTML string for the paragra
     /**
      * Generate a long-form article for a specific category.
      */
-    public function generateCategoryDraft(string $category, array $newsItems = []): array
+    public function generateCategoryDraft(string $category, array $newsItems = [], array $excludeTitles = []): array
     {
         if ($this->isQuotaExhausted()) return ['html_content' => '<p>Quota exhausted.</p>'];
 
@@ -267,28 +270,46 @@ Do NOT use markdown code fences. Output ONLY the raw HTML string for the paragra
             }, array_slice($newsItems, 0, 10))) . "\n\n";
         }
 
-        $prompt = "Act as an Editor-in-Chief for a cutting-edge tech news site designed for 'people in a hurry'. 
-Generate a highly engaging, unique, and slightly opinionated tech news article specifically for the category: {$category}.
+        $excludePrompt = "";
+        if (!empty($excludeTitles)) {
+            $excludePrompt = "CRITICAL EXCLUSION RULE: You ABSOLUTELY MUST NOT generate an article about any of the following topics, stories, or titles:\n" . implode("\n", array_map(fn($t) => "- {$t}", $excludeTitles)) . "\n\n";
+        }
 
+        $prompt = "Act as a tech journalist for a mainstream tech news site. Your absolute priority is CLARITY. You must write articles that are extremely easy to understand, avoiding complicated jargon and 'verbal vomit'.
+
+CATEGORY: {$category}
+TODAY'S NEWS CONTEXT:
 {$context}
-CRITICAL RECENCY RULE: ONLY focus on actual, confirmed events from the EXACT last 24 to 48 hours. DO NOT output older news or repetitive rumors (such as old Nintendo Switch 2 leaks). If there is no real breaking news for this category in the context, synthesize the most recent trend.
+{$excludePrompt}CRITICAL RECENCY RULE: ONLY focus on actual, confirmed events from the EXACT last 24 to 48 hours. DO NOT output older news or repetitive rumors. If there is no real breaking news for this category in the context, synthesize the most recent trend simply.
 
-CRITICAL EDITORIAL RULE: You MUST strictly write about pure {$category} topics. UNLESS the category is exactly 'Artificial Intelligence', you ABSOLUTELY MUST NOT mention Artificial Intelligence, OpenAI, ChatGPT, LLMs, or Machine Learning. Force topic diversity and strict adherence to the non-AI classical nature of the category.
+CRITICAL EDITORIAL RULE: You MUST strictly write about {$category} topics. UNLESS the category is exactly 'Artificial Intelligence', you ABSOLUTELY MUST NOT mention Artificial Intelligence, OpenAI, ChatGPT, LLMs, or Machine Learning.
 
-TONE & STYLE:
-1. Start with a punchy, controversial, or highly engaging HOOK. No boring introductions.
-2. Focus heavily on 'Why this actually matters' and the human/industry impact, not just dry specifications.
-3. Use a serious, authoritative, and deeply investigative journalistic tone (similar to Reuters or Bloomberg). Absolutely NO jokes, NO sarcasm, and NO informal filler.
-4. Use high-impact HTML formatting: <h2> for subheaders, <strong> for dramatic emphasis, and <ul>/<li> for scannable bullet points.
+CRITICAL WRITING RULES:
+- SIMPLE WORDS ONLY: Write at an 8th-grade reading level. Use everyday vocabulary.
+- FACTUAL AND DIRECT: No 'fluff', no 'insider' voice. Just report the facts clearly like a bulleted summary.
+- NO CODE BLOCKS: DO NOT include any code snippets or programming examples.
+- NO AI CLICHES: NEVER use words like 'delve', 'complexities', 'nuanced', 'testament', 'tapestry', 'landscape', 'revolutionary', 'transformative', 'realm'.
+- SHORT SENTENCES: Keep your sentences short and punchy. Active voice only.
+- GET TO THE POINT: Start directly with the hook. No long, generic introductions.
+- MAXIMUM LENGTH: 450 words (typically target between 350 and 450 words for complete coverage).
 
-Write 4 to 6 paragraphs. YOU MUST include an inline image placeholder like <img src=\"PLACEHOLDER_IMAGE\" alt=\"relevant description\"> inside the content where appropriate.
+ARTICLE STRUCTURE (HTML):
+- BANNED HEADINGS: You are strictly FORBIDDEN from using generic, repetitive, or filler subheadings such as 'Why It's Important', 'Why It Matters', 'Deeper Analysis', 'Deep Dive', 'Conclusion', or their exact translations or equivalents.
+- DO NOT divide the article into multiple rigid analytical sections that repeat the same information. Every single sentence and bullet point must add NEW, distinct information.
+- Write the article so it is incredibly easy to scan, using this exact layout:
+  1. **Intro**: A direct, punchy 1-2 sentence paragraph explaining exactly *what* happened, *who* is involved, and *when*. Start directly with the breaking news. Do NOT use any heading for this paragraph.
+  2. **Details (Bulleted List)**: A bulleted list (`<ul>` containing 4 to 6 `<li>` elements) breaking down the key specs, facts, numbers, or timeline of the event. Bold the first 2-3 words of each bullet point to make it highly scannable. Each bullet point should be highly informative, containing 1 to 2 detailed sentences of distinct facts.
+  3. **Consequence/Next Steps**: A final short paragraph (2-3 sentences max) explaining the immediate consequence or what happens next. Do NOT use any subheading for this final paragraph.
+- Under NO circumstances should you use more than one `<h2>` heading in the entire article, and only use it if it describes a highly specific, contextual aspect of the details (e.g., `<h2>Specs and Pricing</h2>`). Never use generic headings.
+
+Write the article so it's incredibly easy to read. YOU MUST include an inline image placeholder like <img src=\"PLACEHOLDER_IMAGE\" alt=\"relevant description\"> inside the content where appropriate.
 
 RETURN ONLY A JSON OBJECT. NO MARKDOWN FENCES.
 {
-  \"title\": \"A catchy, direct headline. Max 12 words.\",
+  \"title\": \"A clear, catchy headline. Max 10 words.\",
   \"html_content\": \"The full article content in raw HTML. Do NOT use markdown. Ensure it is clean, valid HTML.\",
   \"category\": \"{$category}\",
-  \"suggested_cover_query\": \"1 to 3 short concrete English words for Unsplash image search (e.g., 'spacex', 'smartphone lab', 'electric car', 'robot arm'). NO abstract concepts, NO 'neon', NO 'technology'.\"
+  \"suggested_cover_query\": \"1 to 3 short concrete English words for Unsplash image search.\"
 }";
 
         $result = $this->callGemini($prompt, true);
@@ -387,11 +408,17 @@ EDITOR FEEDBACK: {$feedback}
 THE PREVIOUS DRAFT (excerpt):
 {$excerpt}
 
-Rewrite the article incorporating the editor's feedback. Follow the same HTML formatting rules:
-- Use <h2> for section headers, <p> for paragraphs, <strong> for emphasis
-- Keep it 800-1200 words, punchy and opinionated like daily.dev
-- Address the editor's feedback directly in your rewrite
-- Output ONLY raw HTML, no markdown fences
+Rewrite the article incorporating the editor's feedback. Follow the same HTML formatting rules and strict guidelines:
+- BANNED HEADINGS: You are strictly FORBIDDEN from using generic, repetitive, or filler subheadings such as 'Why It's Important', 'Why It Matters', 'Deeper Analysis', 'Deep Dive', 'Conclusion', or their exact translations or equivalents.
+- DO NOT divide the article into multiple rigid analytical sections that repeat the same information. Every single sentence and bullet point must add NEW, distinct information.
+- Write the article so it is incredibly easy to scan, using this exact layout:
+  1. **Intro**: A direct, punchy 1-2 sentence paragraph explaining exactly *what* happened, *who* is involved, and *when*. Start directly with the breaking news. Do NOT use any heading for this paragraph.
+  2. **Details (Bulleted List)**: A bulleted list (`<ul>` containing 3 to 5 `<li>` elements) breaking down the key specs, facts, numbers, or timeline of the event. Bold the first 2-3 words of each bullet point to make it highly scannable.
+  3. **Consequence/Next Steps**: A final short paragraph (2-3 sentences max) explaining the immediate consequence or what happens next. Do NOT use any subheading for this final paragraph.
+- Under NO circumstances should you use more than one `<h2>` heading in the entire article, and only use it if it describes a highly specific, contextual aspect of the details (e.g., `<h2>Specs and Pricing</h2>`). Never use generic headings.
+- MAXIMUM LENGTH: 300 words.
+- Address the editor's feedback directly in your rewrite.
+- Output ONLY raw HTML, no markdown fences.
 
 Output ONLY the HTML content.";
 
@@ -465,14 +492,15 @@ Return exactly a JSON object (no markdown fences):
      */
     public function polishArticleHtml(string $currentHtml): string
     {
-        $prompt = "Act as the Editor-in-Chief for a high-end tech news site.
-        I am giving you an article represented in HTML. It was previously generated by an AI and might have formatting errors, markdown fences inside the HTML, or awkward phrasing.
+        $prompt = "Act as the final copy editor for a mainstream tech news site.
+        I am giving you an article represented in HTML. It was previously generated by an AI and might have formatting errors, markdown fences inside the HTML, or overly complex vocabulary.
         
         YOUR JOB:
         1. Fix any broken HTML tags.
         2. Remove any markdown code fences (like ```html) from the output.
-        3. Polish the writing style to sound like a native-English TechCrunch journalist. Make it punchy and engaging.
-        4. NEVER change the core facts or the narrative. Just improve the flow and fix syntax.
+        3. SIMPLIFY THE WRITING: Ensure the text uses extremely simple, everyday English. Remove any 'verbal vomit', corporate jargon, or complicated words. If a sentence is too long or complex, break it down. It should be easy for anyone to understand.
+        4. NEVER change the core facts. Just make it clearer, simpler, and more natural.
+        5. STRICTLY REMOVE GENERIC/REPETITIVE SECTIONS & HEADINGS: Scan for and completely strip out any generic analysis headings like 'Why It's Important', 'Why It Matters', 'Deeper Analysis', 'Deep Dive', 'Conclusion' (or their exact translations/synonyms like 'Por qué es Importante', 'El Análisis Más Profundo', 'Conclusión'). Remove these headings, and merge their paragraph content smoothly into the rest of the text as simple, clean paragraphs or bullet points to avoid repetitive AI slop.
         
         ARTICLE HTML:
         {$currentHtml}
@@ -671,7 +699,7 @@ Return exactly a JSON object (no markdown fences):
     private function callOpenRouterFallback($promptOrMessages, bool $expectJson = false)
     {
         $apiKey = config('services.openrouter.api_key');
-        $model = config('services.openrouter.model', 'google/gemma-3-27b-it:free');
+        $model = config('services.openrouter.model', 'mistralai/mistral-7b-instruct:free');
 
         if (is_string($promptOrMessages)) {
             $messages = [['role' => 'user', 'content' => $promptOrMessages]];

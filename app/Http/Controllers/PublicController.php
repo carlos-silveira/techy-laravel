@@ -190,6 +190,7 @@ class PublicController extends Controller
             return $related->map(fn($a) => $this->translateIfNecessary($a, $locale));
         });
 
+        $article->content = $this->recursivelyUnwrap($article->content);
         $article->content = $this->sanitizeHtml($article->content);
 
         return Inertia::render('ArticleShow', [
@@ -237,14 +238,14 @@ class PublicController extends Controller
 
         // If a full translation (title + content) exists, apply it.
         if (!empty($translations[$locale]['title']) && !empty($translations[$locale]['content'])) {
-            $article->title      = $translations[$locale]['title'];
-            $article->content    = $translations[$locale]['content'];
+            $article->title      = $this->recursivelyUnwrap($translations[$locale]['title']);
+            $article->content    = $this->recursivelyUnwrap($translations[$locale]['content']);
             
             // If we have a translated summary, use it. 
             // If not, clear the summary if it was originally in a different language 
             // to avoid "mixed language" artifacts (English summary with Spanish content).
             if (!empty($translations[$locale]['summary'])) {
-                $article->ai_summary = $translations[$locale]['summary'];
+                $article->ai_summary = $this->recursivelyUnwrap($translations[$locale]['summary']);
             } else {
                 $article->ai_summary = null;
             }
@@ -268,13 +269,28 @@ class PublicController extends Controller
             return $value;
         }
 
-        $decoded = json_decode($value, true);
-        if (json_last_error() === JSON_ERROR_NONE && (is_array($decoded) || is_string($decoded))) {
-            return $this->recursivelyUnwrap($decoded);
+        $trimmed = trim($value);
+        if (empty($trimmed)) {
+            return $value;
+        }
+
+        if (($trimmed[0] === '"' && $trimmed[strlen($trimmed)-1] === '"') || 
+            ($trimmed[0] === '{' && $trimmed[strlen($trimmed)-1] === '}') ||
+            ($trimmed[0] === '[' && $trimmed[strlen($trimmed)-1] === ']')) {
+            
+            $decoded = json_decode($value, true);
+            if (json_last_error() === JSON_ERROR_NONE && (is_array($decoded) || is_string($decoded))) {
+                return $this->recursivelyUnwrap($decoded);
+            }
         }
 
         // Clean up escaped slashes and wrapping quotes that might remain
         $value = stripslashes($value);
+        $value = str_replace(['\n', '\r', '\t'], ["\n", "\r", "\t"], $value);
+        
+        // Decode HTML entities that Gemini might have mistakenly escaped
+        $value = html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
         return trim($value, '"');
     }
 
