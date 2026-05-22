@@ -15,8 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
             '_m/ci-cd'
         ]);
         $middleware->web(append: [
-            \App\Http\Middleware\HandleInertiaRequests::class,
             \App\Http\Middleware\SetLocale::class,
+            \App\Http\Middleware\HandleInertiaRequests::class,
             \App\Http\Middleware\TrackPageView::class,
         ]);
         

@@ -61,10 +61,9 @@ class TranslateArticle implements ShouldQueue
                 $this->locale
             );
 
-            // VALIDATION: Only save if we got a real title that is different from original
-            // If it is the same, it likely failed or Gemini returned original text
-            if (empty($result['title']) || $result['title'] === $this->article->title) {
-                throw new \RuntimeException("Translation failed or returned original text for Article #{$this->article->id} ({$this->locale})");
+            // VALIDATION: Only save if we got a real title
+            if (empty($result['title'])) {
+                throw new \RuntimeException("Translation failed or returned empty title for Article #{$this->article->id} ({$this->locale})");
             }
 
             // Save results - Don't fall back to original English if we are translating!

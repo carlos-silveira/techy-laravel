@@ -56,7 +56,7 @@ export default function LanguageSwitcher() {
                                     key={lang.code}
                                     onClick={() => changeLanguage(lang.code)}
                                     className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                                        locale === lang.code 
+                                        activeLocale === lang.code 
                                         ? 'bg-primary/10 text-primary' 
                                         : 'text-gray-400 hover:text-white hover:bg-white/5'
                                     }`}
@@ -65,7 +65,7 @@ export default function LanguageSwitcher() {
                                         <span className="text-lg">{lang.flag}</span>
                                         <span>{lang.name}</span>
                                     </div>
-                                    {locale === lang.code && <Check className="w-4 h-4" />}
+                                    {activeLocale === lang.code && <Check className="w-4 h-4" />}
                                 </button>
                             ))}
                         </div>

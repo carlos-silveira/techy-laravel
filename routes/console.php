@@ -27,4 +27,4 @@ Schedule::command('news:generate-daily')->cron('0 */4 * * *')->withoutOverlappin
 Schedule::command('news:update-images')->dailyAt('02:00')->withoutOverlapping();
 
 // Run queue worker via cron for cPanel shared hosting
-Schedule::command('queue:work --stop-when-empty --tries=3 --timeout=120')->everyMinute()->withoutOverlapping();
+Schedule::command('queue:work --stop-when-empty --max-jobs=2 --max-time=30 --tries=3')->everyMinute()->withoutOverlapping();

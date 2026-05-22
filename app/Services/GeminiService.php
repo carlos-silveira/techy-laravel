@@ -480,8 +480,8 @@ Return exactly a JSON object (no markdown fences):
 
         $result = $this->callGemini($prompt, true);
 
-        if (empty($result) || empty($result['title']) || $result['title'] === $title) {
-             throw new \RuntimeException("Translation to {$targetLanguage} failed: Invalid response or returned original text.");
+        if (empty($result) || empty($result['title'])) {
+             throw new \RuntimeException("Translation to {$targetLanguage} failed: Invalid response or empty title.");
         }
 
         return [

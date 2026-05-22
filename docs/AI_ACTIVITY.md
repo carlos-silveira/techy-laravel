@@ -1,3 +1,13 @@
+## [2026-05-22] - Fix Language Switcher and Mixed-Language Content
+### Fixed
+- **Middleware Execution Bug**: Corrected the middleware execution order in `bootstrap/app.php` by placing `SetLocale` *before* `HandleInertiaRequests`. This resolves the core issue where the Inertia shared props were evaluated and cached with a stale/default `'en'` locale before the preferred user locale was resolved from the session or cookies.
+- **Cookie Decryption Excluded**: Added the `'locale'` cookie to the `$except` array in `app/Http/Middleware/EncryptCookies.php`. This stores the locale cookie in plain text, ensuring seamless integration between PHP sessions, Inertia redirects, and client-side requests without decryption mismatches.
+- **Language Switcher Selection highlighting**: Updated `LanguageSwitcher.jsx` to use `activeLocale` instead of `locale` for applying button active styles and checkmark rendering, making it robust against transient state changes.
+- **Strict Translation Constraint Relaxed**: Removed the strict `$result['title'] === $title` checks in both `GeminiService.php` and `TranslateArticle.php`. This allows articles containing proper nouns and brand names (e.g. "Oura Smart Ring", "Nintendo Switch Pro", "LG OLED TV") to successfully save their translations even if the AI decides the title should remain unchanged, preventing incomplete or failed background translations from rendering mixed-language content.
+- **Graceful Scheduled Queue Worker**: Reconfigured the scheduled `queue:work` command in `routes/console.php` with limits (`--max-jobs=2 --max-time=30`) and eliminated the duplicate schedule in `Kernel.php` to prevent cPanel's watchdog from forcefully killing background processes (SIGKILL 137).
+
+---
+
 ## [2026-05-22] - Dynamic Inline Image Resolution & High-Volume Category Seeding
 ### Added
 - **Dynamic Inline Image Replacement**: Upgraded `NewsAgent.php` and `SeedCategoryNews.php` to parse article content and replace static `PLACEHOLDER_IMAGE` image tags with beautiful, context-aware, responsive Unsplash/Wikimedia images using a bulletproof case-insensitive regex. All resolved images now receive Tailwind/CSS classes (`w-full h-auto rounded-xl my-6 shadow-md object-cover max-h-[450px]`) for a stunning visual appearance.
