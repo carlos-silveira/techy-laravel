@@ -314,6 +314,10 @@ RETURN ONLY A JSON OBJECT. NO MARKDOWN FENCES.
 
         $result = $this->callGemini($prompt, true);
 
+        if (empty($result) || !isset($result['html_content'])) {
+            throw new \App\Exceptions\GenerationException("Gemini / OpenRouter fallback returned empty or invalid JSON structure.");
+        }
+
         $this->validateGeneratedContent([
             'title' => $result['title'] ?? '',
             'html_content' => $result['html_content'],

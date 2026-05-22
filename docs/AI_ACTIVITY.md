@@ -3,9 +3,11 @@
 - **Dynamic Inline Image Replacement**: Upgraded `NewsAgent.php` and `SeedCategoryNews.php` to parse article content and replace static `PLACEHOLDER_IMAGE` image tags with beautiful, context-aware, responsive Unsplash/Wikimedia images using a bulletproof case-insensitive regex. All resolved images now receive Tailwind/CSS classes (`w-full h-auto rounded-xl my-6 shadow-md object-cover max-h-[450px]`) for a stunning visual appearance.
 - **Expanded Category News Seeder**: Added `--limit=10` and `--clear` options to `SeedCategoryNews.php` command. If `--clear` is specified, it truncates the database safely (handling constraints) to start fresh. It implements round-robin category selection and a duplicate topic check across generated category queues during the seeding cycle to prevent repeating stories.
 - **Enhanced Content Narrative Guidelines**: Upgraded `GeminiService.php` category prompts to support `350 to 450 words` and `4 to 6 scannable bullet points` for richer information density.
+- **Structured OpenRouter Fallback**: Upgraded fallback model in `.env` to `openrouter/free` to automatically utilize active, high-capability free models supporting structured outputs.
 
 ### Fixed
 - **Placeholder Regex Robustness**: Hardcoded exact matching failed due to quote styles or attribute ordering from Gemini. Created a comprehensive regex: `/<img\s+[^>]*src=["\']PLACEHOLDER_IMAGE["\'][^>]*alt=["\']([^"\']*)["\'][^>]*>|<img\s+[^>]*alt=["\']([^"\']*)["\'][^>]*src=["\']PLACEHOLDER_IMAGE["\'][^>]*>/i` that works flawlessly.
+- **Fallback Structure Safeguard**: Prevented modern PHP notices/crashes by throwing a clean `GenerationException` inside `GeminiService::generateCategoryDraft()` when both Gemini and OpenRouter return empty or invalid JSON responses.
 - **Remote Seeding Pipeline Configured**: Standardized production cron execution.
 
 ---
