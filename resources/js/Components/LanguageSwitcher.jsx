@@ -23,7 +23,7 @@ export default function LanguageSwitcher() {
         router.post('/set-locale', { locale: langCode }, {
             preserveScroll: true,
             onSuccess: () => {
-                toast.success(`Language changed to ${languages.find(l => l.code === langCode).name}`);
+                window.location.reload();
             },
             onError: () => {
                 toast.error('Failed to change language.');

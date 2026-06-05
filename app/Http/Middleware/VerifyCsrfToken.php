@@ -15,5 +15,6 @@ class VerifyCsrfToken extends Middleware
         '/articles',
         '/articles/*',
         '/api/*',
+        '/set-locale',
     ];
 }

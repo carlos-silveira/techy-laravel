@@ -22,7 +22,7 @@ class LanguageController extends Controller
             return back()->withErrors(['locale' => 'Unsupported locale']);
         }
 
-        $old = Session::get('locale', 'en');
+        $old = $request->cookie('locale', 'en');
         Session::put('locale', $locale);
 
         // Flush ALL caches when locale changes so every page serves
