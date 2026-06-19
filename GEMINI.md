@@ -27,4 +27,5 @@ For new features, follow the ai-specs command workflow:
 - **ALWAYS** add 10s delay between Gemini API calls
 - **ALWAYS** run `npm run build` before pushing to verify no frontend errors
 - **ALWAYS** document AI agent activity in `docs/AI_ACTIVITY.md` after completing a task.
+- **CRITICAL**: All changes MUST pass unit testing and/or component testing depending on what applies. DO NOT push or release unusable, broken, or untested code.
 ---

@@ -17,6 +17,7 @@ globs: "**/*.{php,jsx,js,css}"
 3. **English only** — All code, comments, documentation in English
 4. **Descriptive naming** — `generateDraft()` not `gd()`
 5. **Service layer** — Business logic lives in `app/Services/`, not controllers
+6. **Strict Testing** — All changes MUST pass unit testing and/or component testing depending on what applies. Do not release unusable code.
 
 ## Content Pipeline
 ```
