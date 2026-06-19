@@ -13,7 +13,7 @@ const languages = [
 
 export default function LanguageSwitcher() {
     const { locale, __ } = useLanguage();
-    const activeLocale = locale || (typeof document !== 'undefined' ? document.documentElement.lang : 'en') || 'en';
+    const activeLocale = (typeof document !== 'undefined' ? document.documentElement.lang : locale) || 'en';
     const [isOpen, setIsOpen] = useState(false);
 
     const currentLanguage = languages.find(l => l.code.toLowerCase() === activeLocale?.toLowerCase()) || languages[0];
