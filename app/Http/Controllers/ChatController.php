@@ -92,10 +92,10 @@ USER QUESTION:
 {$userQuery}
 PROMPT;
 
-        // 4. Stream the response as plain text (NOT JSON)
+        // 4. Stream the response using OpenRouter
         return response()->stream(function () use ($prompt) {
-            $apiKey = config('services.gemini.api_key', env('GEMINI_API_KEY'));
-            $model  = config('services.gemini.model', env('GEMINI_MODEL', 'gemini-2.5-flash'));
+            $apiKey = config('services.openrouter.api_key', env('OPEN_ROUTER_API_KEY'));
+            $model  = config('services.openrouter.model', env('OPEN_ROUTER_MODEL', 'google/gemma-2-9b-it:free'));
 
             if (empty($apiKey)) {
                 echo "I'm unable to connect to my knowledge engine right now. Please try again in a moment.";
@@ -104,15 +104,23 @@ PROMPT;
             }
 
             $payload = [
-                'contents'         => [['parts' => [['text' => $prompt]]]],
-                'generationConfig' => ['temperature' => 0.3, 'maxOutputTokens' => 1024],
+                'model' => $model,
+                'messages' => [['role' => 'user', 'content' => $prompt]],
+                'temperature' => 0.3,
+                'max_tokens' => 1024,
+                'stream' => true
             ];
 
-            $ch = curl_init("https://generativelanguage.googleapis.com/v1beta/models/{$model}:streamGenerateContent?alt=sse&key={$apiKey}");
+            $ch = curl_init("https://openrouter.ai/api/v1/chat/completions");
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
             curl_setopt($ch, CURLOPT_POST, 1);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $apiKey,
+                'HTTP-Referer: ' . config('app.url'),
+                'X-Title: TechyNews'
+            ]);
             curl_setopt($ch, CURLOPT_TIMEOUT, 60);
 
             $gotContent = false;
@@ -121,29 +129,23 @@ PROMPT;
             curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $chunk) use (&$gotContent, &$rawErrorChunks) {
                 $lines = explode("\n", $chunk);
                 foreach ($lines as $line) {
+                    $line = trim($line);
+                    if (empty($line)) continue;
+                    
                     if (!str_starts_with($line, 'data: ')) {
                         $rawErrorChunks .= $line;
                         continue;
                     }
-                    $jsonString = substr($line, 6);
+                    
+                    $jsonString = trim(substr($line, 5));
                     if ($jsonString === '[DONE]') continue;
 
                     $data = json_decode($jsonString, true);
-                    if (isset($data['candidates'][0]['content']['parts'][0]['text'])) {
-                        $text = $data['candidates'][0]['content']['parts'][0]['text'];
+                    if (isset($data['choices'][0]['delta']['content'])) {
+                        $text = $data['choices'][0]['delta']['content'];
                         echo $text;
                         flush();
                         $gotContent = true;
-                    }
-
-                    // Surface any API error messages as plain text (not silent JSON)
-                    if (isset($data['error']['message'])) {
-                        $errMsg = $data['error']['message'];
-                        Log::error("RAG stream API error: {$errMsg}");
-                        if (!$gotContent) {
-                            echo "\n\n*My knowledge engine encountered an error. Please try again in a moment.*";
-                            flush();
-                        }
                     }
                 }
                 return strlen($chunk);
