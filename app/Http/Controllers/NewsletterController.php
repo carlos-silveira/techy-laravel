@@ -7,7 +7,7 @@ use App\Models\Subscriber;
 
 class NewsletterController extends Controller
 {
-    public function subscribe(Request $request)
+    public function store(Request $request)
     {
         $request->validate(['email' => 'required|email']);
 

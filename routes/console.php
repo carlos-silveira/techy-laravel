@@ -23,6 +23,9 @@ use Illuminate\Support\Facades\Schedule;
 // Generate AI-powered news every 4 hours
 Schedule::command('news:generate-daily')->cron('0 */4 * * *')->withoutOverlapping();
 
+// Schedule weekly newsletter
+Schedule::command('newsletter:send-weekly')->weeklyOn(5, '09:00');
+
 // Auto-seed missing images (if unsplash limits were hit previously)
 Schedule::command('news:update-images')->dailyAt('02:00')->withoutOverlapping();
 

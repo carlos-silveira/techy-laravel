@@ -89,17 +89,17 @@ class SocialMediaService
     private function formatPostText(Article $article): string
     {
         $text = $article->ai_summary ?: $article->title;
-        $url = url('/article/' . $article->slug);
         
+        $callToAction = "\n\nLee la nota completa en nuestra web de TechyNews";
         $hashtags = "\n\n#TechNews #Techy #AI";
         
-        // Truncate logic if needed, Twitter max is 280, URL is ~23 chars format
-        $maxChars = 280 - strlen($url) - strlen($hashtags) - 10;
+        // Truncate logic if needed, Twitter max is 280
+        $maxChars = 280 - strlen($callToAction) - strlen($hashtags) - 5;
         
         if (strlen($text) > $maxChars) {
             $text = substr($text, 0, $maxChars - 3) . '...';
         }
 
-        return "{$text}\n\nRead more: {$url}{$hashtags}";
+        return "{$text}{$callToAction}{$hashtags}";
     }
 }

@@ -13,10 +13,10 @@ const languages = [
 
 export default function LanguageSwitcher() {
     const { locale, __ } = useLanguage();
-    const activeLocale = locale || document.documentElement.lang || 'en';
+    const activeLocale = locale || (typeof document !== 'undefined' ? document.documentElement.lang : 'en') || 'en';
     const [isOpen, setIsOpen] = useState(false);
 
-    const currentLanguage = languages.find(l => l.code === activeLocale) || languages[0];
+    const currentLanguage = languages.find(l => l.code.toLowerCase() === activeLocale?.toLowerCase()) || languages[0];
 
     const changeLanguage = (langCode) => {
         setIsOpen(false);

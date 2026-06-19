@@ -95,7 +95,7 @@ PROMPT;
         // 4. Stream the response as plain text (NOT JSON)
         return response()->stream(function () use ($prompt) {
             $apiKey = config('services.gemini.api_key', env('GEMINI_API_KEY'));
-            $model  = 'gemini-1.5-flash';
+            $model  = config('services.gemini.model', env('GEMINI_MODEL', 'gemini-2.5-flash'));
 
             if (empty($apiKey)) {
                 echo "I'm unable to connect to my knowledge engine right now. Please try again in a moment.";
@@ -116,10 +116,15 @@ PROMPT;
             curl_setopt($ch, CURLOPT_TIMEOUT, 60);
 
             $gotContent = false;
-            curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $chunk) use (&$gotContent) {
+            $rawErrorChunks = '';
+            
+            curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $chunk) use (&$gotContent, &$rawErrorChunks) {
                 $lines = explode("\n", $chunk);
                 foreach ($lines as $line) {
-                    if (!str_starts_with($line, 'data: ')) continue;
+                    if (!str_starts_with($line, 'data: ')) {
+                        $rawErrorChunks .= $line;
+                        continue;
+                    }
                     $jsonString = substr($line, 6);
                     if ($jsonString === '[DONE]') continue;
 
@@ -145,15 +150,18 @@ PROMPT;
             });
 
             $curlResult = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             $curlError  = curl_error($ch);
             curl_close($ch);
 
             if ($curlError) {
                 Log::error("RAG cURL error: {$curlError}");
-                if (!$gotContent) {
-                    echo "I'm having trouble connecting to my knowledge engine right now. Please try again.";
-                    flush();
-                }
+            }
+            
+            if (!$gotContent) {
+                Log::error("RAG empty response. HTTP: {$httpCode}. Raw: {$rawErrorChunks}");
+                echo "I'm having trouble connecting to my knowledge engine right now (HTTP {$httpCode}). Please try again.";
+                flush();
             }
         }, 200, [
             'Content-Type'     => 'text/plain; charset=UTF-8',

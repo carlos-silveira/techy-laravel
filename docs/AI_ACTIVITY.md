@@ -204,3 +204,14 @@
 ### Changed
 - **Build Pipeline**: Updated `package.json` build script to explicitly trigger `vite build && vite build --ssr` for deterministic CI/CD deployments.
 - **Walkthrough Created**: Documented requirements for running `php artisan inertia:start-ssr` in production and restarting it during deployments.
+
+---
+
+## [2026-06-19] - Inertia SSR Implementation for SEO
+### Added
+- **Language Switcher Bugfix**: Fixed a React 18 hydration mismatch caused by `createRoot` being used over server-rendered HTML. Conditionally applied `hydrateRoot` in `app.jsx` and added `<Toaster />` to `ssr.jsx` to perfectly match the client UI structure.
+- **Article Deduplication**: Enhanced `DeepCleanArticles.php` to identify semantic duplicates by matching identical `cover_image_path` signatures (as identical AI topics produce identical Unsplash image queries). Deployed and triggered the cleanup script on production.ceives fully pre-rendered HTML instead of an empty client-side React shell.
+- **Ziggy SSR Integration**: Enabled `ziggy-js` within the SSR context to ensure `route()` helpers function correctly during backend rendering.
+### Changed
+- **Build Pipeline**: Updated `package.json` build script to explicitly trigger `vite build && vite build --ssr` for deterministic CI/CD deployments.
+- **Walkthrough Created**: Documented requirements for running `php artisan inertia:start-ssr` in production and restarting it during deployments.
