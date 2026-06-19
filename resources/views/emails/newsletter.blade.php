@@ -110,7 +110,7 @@
                                         @if($article->cover_image_path)
                                         <tr>
                                             <td align="center" style="padding-bottom: 25px;">
-                                                <a href="{{ url('/article/' . $article->slug) }}" target="_blank">
+                                                <a href="{{ url('/article/' . $article->slug) }}?utm_source=newsletter&utm_medium=email&utm_campaign=weekly_newsletter" target="_blank">
                                                     <img src="{{ url(str_starts_with($article->cover_image_path, 'http') ? $article->cover_image_path : '/storage/' . $article->cover_image_path) }}" alt="{{ $article->title }}" width="520" style="display: block; width: 100%; max-width: 520px; height: auto; border-radius: 16px; border: 1px solid #1f2937;" />
                                                 </a>
                                             </td>
@@ -119,7 +119,7 @@
                                         <tr>
                                             <td align="left">
                                                 <h2 class="text-main article-title" style="margin: 0 0 15px 0; font-size: 28px; font-weight: 800; line-height: 34px; letter-spacing: -0.5px;">
-                                                    <a href="{{ url('/article/' . $article->slug) }}" style="color: #ffffff; text-decoration: none;">{{ $article->title }}</a>
+                                                    <a href="{{ url('/article/' . $article->slug) }}?utm_source=newsletter&utm_medium=email&utm_campaign=weekly_newsletter" style="color: #ffffff; text-decoration: none;">{{ $article->title }}</a>
                                                 </h2>
                                                 <p class="text-main" style="margin: 0 0 25px 0; color: #9ca3af; font-size: 16px; line-height: 26px;">
                                                     {{ $article->ai_summary ?? Str::limit(strip_tags($article->content), 200) }}
@@ -132,7 +132,7 @@
                                                 <table border="0" cellspacing="0" cellpadding="0">
                                                     <tr>
                                                         <td align="center" style="border-radius: 8px;" bgcolor="#ffffff">
-                                                            <a href="{{ url('/article/' . $article->slug) }}" target="_blank" class="text-main btn-hover" style="font-size: 14px; font-weight: 800; color: #02040a; text-decoration: none; padding: 14px 28px; border-radius: 8px; display: inline-block; text-transform: uppercase; letter-spacing: 1px;">
+                                                            <a href="{{ url('/article/' . $article->slug) }}?utm_source=newsletter&utm_medium=email&utm_campaign=weekly_newsletter" target="_blank" class="text-main btn-hover" style="font-size: 14px; font-weight: 800; color: #02040a; text-decoration: none; padding: 14px 28px; border-radius: 8px; display: inline-block; text-transform: uppercase; letter-spacing: 1px;">
                                                                 Read Full Signal &rarr;
                                                             </a>
                                                         </td>
@@ -151,7 +151,7 @@
                                                     <tr>
                                                         <td align="center">
                                                             @if($article->cover_image_path)
-                                                            <a href="{{ url('/article/' . $article->slug) }}" target="_blank">
+                                                            <a href="{{ url('/article/' . $article->slug) }}?utm_source=newsletter&utm_medium=email&utm_campaign=weekly_newsletter" target="_blank">
                                                                 <img class="stack-img" src="{{ url(str_starts_with($article->cover_image_path, 'http') ? $article->cover_image_path : '/storage/' . $article->cover_image_path) }}" alt="{{ $article->title }}" width="220" style="display: block; width: 100%; max-width: 220px; height: auto; border-radius: 12px; border: 1px solid #1f2937;" />
                                                             </a>
                                                             @endif
@@ -170,12 +170,12 @@
                                                         <td align="left">
                                                             <span class="text-main" style="color: #6b7280; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">LATEST INTEL</span>
                                                             <h2 class="text-main" style="margin: 8px 0 10px 0; font-size: 18px; font-weight: 800; line-height: 24px; letter-spacing: -0.3px;">
-                                                                <a href="{{ url('/article/' . $article->slug) }}" style="color: #ffffff; text-decoration: none;">{{ $article->title }}</a>
+                                                                <a href="{{ url('/article/' . $article->slug) }}?utm_source=newsletter&utm_medium=email&utm_campaign=weekly_newsletter" style="color: #ffffff; text-decoration: none;">{{ $article->title }}</a>
                                                             </h2>
                                                             <p class="text-main" style="margin: 0 0 15px 0; color: #9ca3af; font-size: 14px; line-height: 22px;">
                                                                 {{ Str::limit($article->ai_summary ?? strip_tags($article->content), 90) }}
                                                             </p>
-                                                            <a href="{{ url('/article/' . $article->slug) }}" target="_blank" class="text-main" style="color: #60a5fa; font-size: 13px; font-weight: 700; text-decoration: none;">
+                                                            <a href="{{ url('/article/' . $article->slug) }}?utm_source=newsletter&utm_medium=email&utm_campaign=weekly_newsletter" target="_blank" class="text-main" style="color: #60a5fa; font-size: 13px; font-weight: 700; text-decoration: none;">
                                                                 Dive deeper &rarr;
                                                             </a>
                                                         </td>
