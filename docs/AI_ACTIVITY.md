@@ -209,8 +209,15 @@
 
 ## [2026-06-19] - Inertia SSR Implementation for SEO
 ### Added
+- **Weekly Newsletter Feature**:
+  - Fixed a routing method mismatch where the frontend called `/api/subscribe` expecting the `store` method but the controller had `subscribe`.
+  - Created `WeeklyNewsletter` Mailable class and `newsletter.blade.php` template with a beautiful, modern, dark-mode design.
+  - Created `SendWeeklyNewsletter` console command to fetch top articles from the past 7 days and send them via Mail facade.
+  - Scheduled the command to run every Friday at 09:00 AM in `routes/console.php`.
+  - Updated local `.env` with Resend SMTP credentials.
+  - Created a temporary `/preview-newsletter` route for the email developer to preview the design.
 - **Language Switcher Bugfix**: Fixed a React 18 hydration mismatch caused by `createRoot` being used over server-rendered HTML. Conditionally applied `hydrateRoot` in `app.jsx` and added `<Toaster />` to `ssr.jsx` to perfectly match the client UI structure.
-- **Article Deduplication**: Enhanced `DeepCleanArticles.php` to identify semantic duplicates by matching identical `cover_image_path` signatures (as identical AI topics produce identical Unsplash image queries). Deployed and triggered the cleanup script on production.ceives fully pre-rendered HTML instead of an empty client-side React shell.
+- **Article Deduplication**: Enhanced `DeepCleanArticles.php` to identify semantic duplicates by matching identical `cover_image_path` signatures (as identical AI topics produce identical Unsplash image queries). Deployed and triggered the cleanup script on production.
 - **Ziggy SSR Integration**: Enabled `ziggy-js` within the SSR context to ensure `route()` helpers function correctly during backend rendering.
 ### Changed
 - **Build Pipeline**: Updated `package.json` build script to explicitly trigger `vite build && vite build --ssr` for deterministic CI/CD deployments.
