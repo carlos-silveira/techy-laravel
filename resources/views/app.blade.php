@@ -8,6 +8,15 @@
     <title inertia>{{ config('app.name', 'Laravel') }}</title>
     <meta name="google-site-verification" content="COpjFK5aGPvLfkTW5lZCSaAtmjDfxJMEsLS3XcwMYw8" />
 
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PJF86HK6PG"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-PJF86HK6PG');
+    </script>
     <!-- Favicons & App Icons -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
