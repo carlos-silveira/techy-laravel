@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <title inertia>{{ config('app.name', 'Laravel') }}</title>
+    <meta name="google-site-verification" content="COpjFK5aGPvLfkTW5lZCSaAtmjDfxJMEsLS3XcwMYw8" />
 
     <!-- Favicons & App Icons -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
