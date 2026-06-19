@@ -5,7 +5,7 @@
     "keywords": ["framework", "laravel"],
     "license": "MIT",
     "require": {
-        "php": "^8.4",
+        "php": "^8.3",
         "abraham/twitteroauth": "*",
         "guzzlehttp/guzzle": "^7.8",
         "inertiajs/inertia-laravel": "*",
@@ -62,7 +62,7 @@
         "sort-packages": true,
         "platform-check": false,
         "platform": {
-            "php": "8.5.0"
+            "php": "8.3.22"
         },
         "allow-plugins": {
             "pestphp/pest-plugin": true,
