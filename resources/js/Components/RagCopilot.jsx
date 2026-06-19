@@ -105,7 +105,6 @@ export default function RagCopilot() {
     };
 
     return (
-    return (
         <>
             {/* Overlay for mobile to close when clicking outside */}
             <AnimatePresence>
