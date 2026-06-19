@@ -189,3 +189,18 @@
 - Explicitly banned code blocks in all generateDraft instructions.
 - Updated generateIdeas prompt to request 5-10 article ideas instead of exactly 3.
 - Updated NewsYoloAgent default limit from 1 to 10 to allow 5-10 news to flow into the Daily Brief.
+
+## [2026-06-19] - Twitter Integration Cost Optimization
+### Changed
+- **Social Media Service**: Updated `formatPostText` in `app/Services/SocialMediaService.php` to completely remove URLs from tweets. Instead of including the article link (which triggers Twitter's $0.20 API fee per request), tweets now append the static text "Lee la nota completa en nuestra web de TechyNews". This forces Twitter to bill the API request at the standard text-only rate ($0.015).
+- Tested integration manually via `php artisan test:social-post` which succeeded after user added API credits.
+
+---
+
+## [2026-06-19] - Inertia SSR Implementation for SEO
+### Added
+- **Server-Side Rendering (SSR)**: Configured Inertia SSR by creating `resources/js/ssr.jsx` and updating `vite.config.mjs` to include the SSR entry point. This solves SEO indexing issues by ensuring Googlebot receives fully pre-rendered HTML instead of an empty client-side React shell.
+- **Ziggy SSR Integration**: Enabled `ziggy-js` within the SSR context to ensure `route()` helpers function correctly during backend rendering.
+### Changed
+- **Build Pipeline**: Updated `package.json` build script to explicitly trigger `vite build && vite build --ssr` for deterministic CI/CD deployments.
+- **Walkthrough Created**: Documented requirements for running `php artisan inertia:start-ssr` in production and restarting it during deployments.

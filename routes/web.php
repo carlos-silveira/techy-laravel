@@ -158,6 +158,12 @@ Route::middleware([])->group(function () {
             exec("$php $artisan queue:restart 2>&1", $queueOut);
             $output[] = "Queue Restart: " . implode("\n", $queueOut);
 
+            // Restart SSR Process
+            exec("$php $artisan inertia:stop-ssr 2>&1", $ssrStopOut);
+            $output[] = "SSR Stop: " . implode("\n", $ssrStopOut);
+            exec("cd ".escapeshellarg($base)." && $php $artisan inertia:start-ssr > /dev/null 2>&1 &");
+            $output[] = "SSR Started in background.";
+
             return response()->json([
                 'status' => 'success',
                 'logs' => implode("\n\n", $output)
