@@ -14,19 +14,26 @@ createInertiaApp({
     title: (title) => `${title} - ${appName}`,
     resolve: (name) => resolvePageComponent(`./Pages/${name}.jsx`, import.meta.glob('./Pages/**/*.jsx')),
     setup({ el, App, props }) {
-        // Make route() available globally from Ziggy
         window.route = (name, params, absolute) =>
             route(name, params, absolute, props.initialPage.props.ziggy);
 
-        const root = createRoot(el);
+        const appElement = (
+            <>
+                <App {...props} />
+                <Toaster theme="dark" position="bottom-right" />
+            </>
+        );
+
         try {
-            root.render(
-                <>
-                    <App {...props} />
-                    <Toaster theme="dark" position="bottom-right" />
-                </>
-            );
-            console.log("React Mounted Successfully");
+            if (el.hasChildNodes()) {
+                import('react-dom/client').then(({ hydrateRoot }) => {
+                    hydrateRoot(el, appElement);
+                });
+            } else {
+                import('react-dom/client').then(({ createRoot }) => {
+                    createRoot(el).render(appElement);
+                });
+            }
         } catch (e) {
             console.error("REACT MOUNT ERROR:", e);
             document.body.innerHTML += `<div style="color:red; background:white; padding:20px; z-index:9999; position:fixed; top:0; left:0;"><h1>Mount Error</h1><pre>${e.stack}</pre></div>`;
