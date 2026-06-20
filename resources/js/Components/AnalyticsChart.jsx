@@ -287,6 +287,60 @@ export default function AnalyticsChart({ analyticsData }) {
                 </motion.div>
             )}
 
+            {/* ═══ TOP SOURCES & TOP PAGES ═══ */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {topReferrers && topReferrers.length > 0 && (
+                    <motion.div variants={itemVariants} className="bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-8 backdrop-blur-md">
+                        <div className="flex items-center justify-between mb-8">
+                            <h3 className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-[0.3em]">Traffic Sources</h3>
+                            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-lg">Last 7 Days</div>
+                        </div>
+                        <div className="space-y-4">
+                            {topReferrers.map((ref, i) => {
+                                const Icon = REFERRER_ICONS[ref.type] || Globe;
+                                const color = REFERRER_COLORS[ref.type] || '#6b7280';
+                                return (
+                                    <div key={i} className="flex items-center justify-between group">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-8 h-8 rounded-xl flex items-center justify-center transition-colors" style={{ backgroundColor: `${color}15` }}>
+                                                <Icon className="w-4 h-4" style={{ color }} />
+                                            </div>
+                                            <span className="text-sm font-bold text-gray-800 dark:text-gray-200 capitalize">{ref.source}</span>
+                                        </div>
+                                        <div className="flex items-center gap-4">
+                                            <span className="text-xs font-black text-gray-500 bg-black/5 dark:bg-white/5 px-2 py-1 rounded-md">{ref.type}</span>
+                                            <div className="w-12 text-right text-sm font-black text-gray-900 dark:text-white">{ref.views.toLocaleString()}</div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </motion.div>
+                )}
+
+                {topPages && topPages.length > 0 && (
+                    <motion.div variants={itemVariants} className="bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-8 backdrop-blur-md">
+                        <div className="flex items-center justify-between mb-8">
+                            <h3 className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-[0.3em]">Top Entry Pages</h3>
+                            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-lg">Last 7 Days</div>
+                        </div>
+                        <div className="space-y-4">
+                            {topPages.map((page, i) => (
+                                <div key={i} className="flex items-center justify-between group hover:bg-black/5 dark:hover:bg-white/5 -mx-4 px-4 py-2 rounded-xl transition-colors cursor-pointer">
+                                    <div className="flex items-center gap-4 min-w-0">
+                                        <span className="text-xs font-black text-gray-300 dark:text-white/20 w-4 font-mono">{i + 1}</span>
+                                        <a href={page.path} target="_blank" rel="noreferrer" className="text-sm font-bold text-gray-600 dark:text-gray-300 truncate hover:text-primary transition-colors">
+                                            {page.path === '/' ? '/ (Home)' : page.path}
+                                        </a>
+                                    </div>
+                                    <div className="text-sm font-black text-gray-900 dark:text-white flex-shrink-0 ml-4">{page.views.toLocaleString()}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
+            </div>
+
             {/* ═══ TOP ARTICLES ═══ */}
             <motion.div variants={itemVariants} className="bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-8 backdrop-blur-md">
                 <div className="flex items-center justify-between mb-8">

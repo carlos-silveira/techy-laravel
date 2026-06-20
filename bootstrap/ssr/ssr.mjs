@@ -33,7 +33,7 @@ createServer((page) => createInertiaApp({
 		"./Pages/Auth/ResetPassword.jsx": () => import("./assets/ResetPassword-CI0HZQiM.mjs"),
 		"./Pages/Auth/VerifyEmail.jsx": () => import("./assets/VerifyEmail-zOrUgP5E.mjs"),
 		"./Pages/Contact.jsx": () => import("./assets/Contact-DTHBIfAR.mjs"),
-		"./Pages/Dashboard.jsx": () => import("./assets/Dashboard-sQ354r9_.mjs"),
+		"./Pages/Dashboard.jsx": () => import("./assets/Dashboard-C9QAD3Tx.mjs"),
 		"./Pages/Error.jsx": () => import("./assets/Error-DJWnPDBW.mjs"),
 		"./Pages/Footer.jsx": () => import("./assets/Footer-BNnC3ML4.mjs").then((n) => n.n),
 		"./Pages/Layout.jsx": () => import("./assets/Layout-Boew9BvM.mjs"),
