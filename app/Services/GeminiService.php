@@ -59,6 +59,11 @@ class GeminiService
             return;
         }
 
+        if (!app()->runningInConsole()) {
+            Log::warning("Gemini RPM/TPM rate limit hit during HTTP request. Failing fast to trigger fallback.");
+            throw new \RuntimeException("Rate limit hit during web request.");
+        }
+
         Log::warning("Gemini RPM/TPM rate limit hit — Sleeping 45s (Attempt " . (string)$attempt . ").");
         sleep(45);
     }

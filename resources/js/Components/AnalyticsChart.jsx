@@ -2,6 +2,7 @@ import React from 'react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import Skeleton from './Skeleton';
 import { Eye, Users, Newspaper, Heart, TrendingUp, TrendingDown, Monitor, Smartphone, Tablet, Bot, Zap, Globe, Search, Share2, Link2, ArrowUpRight, Shield } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const DEVICE_COLORS = { Desktop: '#2b7cee', Mobile: '#8b5cf6', Tablet: '#06b6d4', 'Bot / Crawler': '#f97316' };
 const DEVICE_ICONS = { Desktop: Monitor, Mobile: Smartphone, Tablet: Tablet, 'Bot / Crawler': Bot };
@@ -23,38 +24,67 @@ function StatCard({ icon: Icon, label, value, subValue, trend, color = 'blue' })
     const colorClasses = colorMap[color] || colorMap.primary;
 
     return (
-        <div className="bg-white/[0.03] border border-white/5 rounded-2xl p-5 hover:border-white/10 transition-colors group relative overflow-hidden">
-            <div className={`absolute top-0 right-0 w-24 h-24 blur-[40px] rounded-full -mr-10 -mt-10 opacity-10 group-hover:opacity-20 transition-all ${colorClasses.split(' ')[1]}`} />
+        <motion.div 
+            whileHover={{ scale: 1.05, y: -5 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+            className="bg-black/[0.03] dark:bg-white/[0.03] border border-black/5 dark:border-white/5 rounded-2xl p-5 hover:border-black/10 dark:hover:border-white/10 transition-colors group relative overflow-hidden backdrop-blur-md"
+        >
+            <div className={`absolute top-0 right-0 w-24 h-24 blur-[40px] rounded-full -mr-10 -mt-10 opacity-10 group-hover:opacity-30 transition-all duration-500 ${colorClasses.split(' ')[1]}`} />
             <div className="relative z-10">
                 <div className="flex items-center justify-between mb-3">
-                    <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
                         <Icon className={`w-4 h-4 ${colorClasses.split(' ')[0]}`} />
                     </div>
                     {trend !== undefined && trend !== null && (
-                        <div className={`flex items-center gap-1 text-[10px] font-black uppercase tracking-widest ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
-                            {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                        <div className={`flex items-center gap-1 text-[10px] font-black uppercase tracking-widest ${isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>
+                            {isPositive ? <TrendingUp className="w-3 h-3 group-hover:animate-bounce" /> : <TrendingDown className="w-3 h-3" />}
                             {Math.abs(trend)}%
                         </div>
                     )}
                 </div>
-                <div className="text-2xl font-black text-white tracking-tight">{value}</div>
-                <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">{label}</div>
-                {subValue && <div className="text-[9px] text-gray-500 mt-1 font-medium">{subValue}</div>}
+                <div className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">{value}</div>
+                <div className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">{label}</div>
+                {subValue && <div className="text-[9px] text-gray-400 dark:text-gray-500 mt-1 font-medium">{subValue}</div>}
             </div>
-        </div>
+        </motion.div>
     );
 }
+
+const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+        return (
+            <div className="bg-white/90 dark:bg-black/90 border border-gray-200 dark:border-white/10 p-4 rounded-2xl shadow-xl backdrop-blur-xl">
+                <p className="text-xs font-black text-gray-900 dark:text-white mb-2 tracking-widest uppercase">{label}</p>
+                {payload.map((entry, index) => (
+                    <div key={index} className="flex items-center gap-3 mt-1">
+                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }}></span>
+                        <span className="text-xs text-gray-600 dark:text-gray-400 font-bold uppercase">{entry.name}:</span>
+                        <span className="text-xs font-black text-gray-900 dark:text-white tabular-nums">{entry.value.toLocaleString()}</span>
+                    </div>
+                ))}
+            </div>
+        );
+    }
+    return null;
+};
 
 
 export default function AnalyticsChart({ analyticsData }) {
     if (!analyticsData) {
         return (
-            <div className="space-y-6">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-28 rounded-2xl" />)}
+                    {[...Array(4)].map((_, i) => (
+                        <div key={i} className="h-28 rounded-2xl bg-gray-200 dark:bg-white/5 animate-pulse relative overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 dark:via-white/5 to-transparent -translate-x-full animate-[shimmer_1.5s_infinite]" />
+                        </div>
+                    ))}
                 </div>
-                <Skeleton className="h-72 rounded-2xl" />
-            </div>
+                <div className="h-72 rounded-2xl bg-gray-200 dark:bg-white/5 animate-pulse relative overflow-hidden">
+                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(var(--color-primary),0.05)_0%,transparent_70%)]"></div>
+                    <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(0deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:20px_20px]"></div>
+                </div>
+            </motion.div>
         );
     }
 
@@ -63,77 +93,91 @@ export default function AnalyticsChart({ analyticsData }) {
 
     const deviceData = (deviceBreakdown || []).map(d => ({ name: d.device, value: d.count }));
     const totalDeviceViews = deviceData.reduce((s, d) => s + d.value, 0);
-    const humanViews = deviceData.filter(d => d.name !== 'Bot / Crawler').reduce((s, d) => s + d.value, 0);
     const botViews = deviceData.filter(d => d.name === 'Bot / Crawler').reduce((s, d) => s + d.value, 0);
 
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        show: {
+            opacity: 1,
+            transition: { staggerChildren: 0.05 }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 20 },
+        show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+    };
+
     return (
-        <div className="space-y-6">
+        <motion.div variants={containerVariants} initial="hidden" animate="show" className="space-y-6">
             {/* ═══ STAT CARDS ═══ */}
             <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
-                <StatCard icon={Zap} label="LLM Tokens" value={stats.totalGeminiTokens7d?.toLocaleString() || 0} subValue={`$${stats.totalGeminiCost7d || '0.00'} est.`} color="orange" />
-                <StatCard icon={Eye} label="Views (7d)" value={stats.totalViews7d || 0} trend={stats.viewsGrowth} color="primary" />
-                <StatCard icon={Users} label="Unique" value={stats.uniqueVisitors7d || 0} color="purple" />
-                <StatCard icon={Newspaper} label="Articles" value={stats.totalArticles || 0} color="emerald" />
-                <StatCard icon={Heart} label="Likes" value={stats.totalLikes || 0} color="pink" />
-                <StatCard icon={TrendingUp} label="Engagement" value={`${stats.engagementRate || 0}%`} color="amber" />
-                <StatCard icon={Eye} label="Lifetime" value={stats.totalViewsAllTime || 0} color="blue" />
+                {[
+                    { icon: Zap, label: "LLM Tokens", value: stats.totalGeminiTokens7d?.toLocaleString() || 0, subValue: `$${stats.totalGeminiCost7d || '0.00'} est.`, color: "orange" },
+                    { icon: Eye, label: "Views (7d)", value: stats.totalViews7d || 0, trend: stats.viewsGrowth, color: "primary" },
+                    { icon: Users, label: "Unique", value: stats.uniqueVisitors7d || 0, color: "purple" },
+                    { icon: Newspaper, label: "Articles", value: stats.totalArticles || 0, color: "emerald" },
+                    { icon: Heart, label: "Likes", value: stats.totalLikes || 0, color: "pink" },
+                    { icon: TrendingUp, label: "Engagement", value: `${stats.engagementRate || 0}%`, color: "amber" },
+                    { icon: Eye, label: "Lifetime", value: stats.totalViewsAllTime || 0, color: "blue" },
+                ].map((stat, i) => (
+                    <motion.div key={i} variants={itemVariants}>
+                        <StatCard {...stat} />
+                    </motion.div>
+                ))}
             </div>
 
             {/* ═══ MAIN CHART: VIEWS + VISITORS ═══ */}
             {viewsPerDay && viewsPerDay.length > 0 && (
-                <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 relative overflow-hidden group hover:border-primary/20 transition-colors">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[100px] rounded-full pointer-events-none opacity-30 group-hover:opacity-60 transition-opacity" />
+                <motion.div variants={itemVariants} className="bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-6 relative overflow-hidden group hover:border-primary/20 transition-colors backdrop-blur-md">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[100px] rounded-full pointer-events-none opacity-30 group-hover:opacity-60 transition-opacity duration-1000" />
                     <div className="flex justify-between items-center mb-6 relative z-10">
-                        <h3 className="text-xs font-black text-white uppercase tracking-widest">Traffic Overview (14 Days)</h3>
-                        <div className="flex items-center gap-4 text-[10px] font-bold">
-                            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-primary" /> Views</span>
-                            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-purple-500" /> Unique</span>
+                        <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest">Traffic Overview (14 Days)</h3>
+                        <div className="flex items-center gap-4 text-[10px] font-bold text-gray-500">
+                            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-primary" /> Views</span>
+                            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-purple-500" /> Unique</span>
                         </div>
                     </div>
-                    <div className="h-56 w-full relative z-10">
+                    <div className="h-64 w-full relative z-10">
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={viewsPerDay} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                                 <defs>
                                     <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#2b7cee" stopOpacity={0.4} />
-                                        <stop offset="95%" stopColor="#2b7cee" stopOpacity={0} />
+                                        <stop offset="5%" stopColor="rgb(var(--color-primary))" stopOpacity={0.6} />
+                                        <stop offset="95%" stopColor="rgb(var(--color-primary))" stopOpacity={0} />
                                     </linearGradient>
                                     <linearGradient id="colorVisitors" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
+                                        <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.5} />
                                         <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
-                                <XAxis dataKey="date" stroke="rgba(255,255,255,0.2)" fontSize={10} tickMargin={10} />
-                                <YAxis stroke="rgba(255,255,255,0.2)" fontSize={10} axisLine={false} tickLine={false} />
-                                <Tooltip
-                                    contentStyle={{ backgroundColor: 'rgba(2, 4, 10, 0.95)', borderColor: 'rgba(43,124,238,0.2)', borderRadius: '12px', color: '#fff', fontSize: 12 }}
-                                    itemStyle={{ color: '#8b5cf6' }}
-                                />
-                                <Area type="monotone" dataKey="views" stroke="#2b7cee" strokeWidth={2} fillOpacity={1} fill="url(#colorViews)" />
-                                <Area type="monotone" dataKey="visitors" stroke="#8b5cf6" strokeWidth={2} fillOpacity={1} fill="url(#colorVisitors)" />
+                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(128,128,128,0.1)" vertical={false} />
+                                <XAxis dataKey="date" stroke="rgba(128,128,128,0.5)" fontSize={10} tickMargin={10} />
+                                <YAxis stroke="rgba(128,128,128,0.5)" fontSize={10} axisLine={false} tickLine={false} />
+                                <Tooltip content={<CustomTooltip />} />
+                                <Area type="monotone" dataKey="views" stroke="rgb(var(--color-primary))" strokeWidth={3} fillOpacity={1} fill="url(#colorViews)" animationDuration={1500} />
+                                <Area type="monotone" dataKey="visitors" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorVisitors)" animationDuration={1500} />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
-                </div>
+                </motion.div>
             )}
 
             {/* ═══ SECOND ROW: DEVICES + HOURLY ═══ */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Device Breakdown — shows counts and real percentages */}
                 {deviceData.length > 0 && (
-                    <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6">
-                        <div className="flex items-center justify-between mb-6">
-                            <h3 className="text-xs font-black text-white uppercase tracking-widest">Device Breakdown</h3>
-                            <span className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">
-                                {totalDeviceViews.toLocaleString()} total hits
+                    <motion.div variants={itemVariants} className="bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-6 backdrop-blur-md">
+                        <div className="flex items-center justify-between mb-8">
+                            <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest">Device Breakdown</h3>
+                            <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest bg-black/5 dark:bg-white/5 px-2 py-1 rounded-md">
+                                {totalDeviceViews.toLocaleString()} hits
                             </span>
                         </div>
-                        <div className="flex items-center gap-6">
+                        <div className="flex items-center gap-8">
                             <div className="w-32 h-32 flex-shrink-0">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>
-                                        <Pie data={deviceData} cx="50%" cy="50%" innerRadius={30} outerRadius={55} paddingAngle={3} dataKey="value">
+                                        <Pie data={deviceData} cx="50%" cy="50%" innerRadius={35} outerRadius={60} paddingAngle={4} dataKey="value" animationDuration={1000}>
                                             {deviceData.map((entry) => (
                                                 <Cell key={entry.name} fill={DEVICE_COLORS[entry.name] || '#6b7280'} />
                                             ))}
@@ -141,169 +185,115 @@ export default function AnalyticsChart({ analyticsData }) {
                                     </PieChart>
                                 </ResponsiveContainer>
                             </div>
-                            <div className="flex-1 space-y-3">
+                            <div className="flex-1 space-y-4">
                                 {deviceData.map(d => {
                                     const Icon = DEVICE_ICONS[d.name] || Monitor;
                                     const pct = totalDeviceViews > 0 ? ((d.value / totalDeviceViews) * 100).toFixed(1) : 0;
                                     return (
-                                        <div key={d.name} className="flex items-center justify-between">
-                                            <div className="flex items-center gap-2">
-                                                <Icon className="w-3.5 h-3.5" style={{ color: DEVICE_COLORS[d.name] || '#6b7280' }} />
-                                                <span className="text-xs text-gray-400 font-medium">{d.name}</span>
+                                        <div key={d.name} className="flex items-center justify-between group">
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-1.5 rounded-lg bg-black/5 dark:bg-white/5 group-hover:scale-110 transition-transform" style={{ color: DEVICE_COLORS[d.name] || '#6b7280' }}>
+                                                    <Icon className="w-4 h-4" />
+                                                </div>
+                                                <span className="text-xs text-gray-600 dark:text-gray-400 font-bold">{d.name}</span>
                                             </div>
                                             <div className="flex items-center gap-3">
-                                                <span className="text-[10px] font-black text-gray-300 tabular-nums w-10 text-right">{d.value.toLocaleString()}</span>
-                                                <div className="w-16 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                                    <div className="h-full rounded-full" style={{ width: `${Math.max(pct, 2)}%`, backgroundColor: DEVICE_COLORS[d.name] || '#6b7280' }} />
+                                                <div className="w-16 h-1.5 bg-black/5 dark:bg-white/5 rounded-full overflow-hidden">
+                                                    <motion.div initial={{ width: 0 }} animate={{ width: `${Math.max(pct, 2)}%` }} transition={{ duration: 1, delay: 0.5 }} className="h-full rounded-full" style={{ backgroundColor: DEVICE_COLORS[d.name] || '#6b7280' }} />
                                                 </div>
-                                                <span className="text-[10px] font-black text-gray-500 w-12 text-right">{pct}%</span>
+                                                <span className="text-[10px] font-black text-gray-500 w-8 text-right">{pct}%</span>
                                             </div>
                                         </div>
                                     );
                                 })}
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
                 )}
 
-                {/* Hourly Traffic */}
                 {hourlyTraffic && hourlyTraffic.length > 0 && (
-                    <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6">
-                        <h3 className="text-xs font-black text-white uppercase tracking-widest mb-6">Traffic by Hour (24h)</h3>
-                        <div className="h-36">
+                    <motion.div variants={itemVariants} className="bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-6 backdrop-blur-md">
+                        <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest mb-6">Traffic by Hour (24h)</h3>
+                        <div className="h-44">
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={hourlyTraffic} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
-                                    <XAxis dataKey="hour" stroke="rgba(255,255,255,0.2)" fontSize={9} tickMargin={5} interval={2} />
-                                    <YAxis stroke="rgba(255,255,255,0.15)" fontSize={9} axisLine={false} tickLine={false} />
-                                    <Tooltip
-                                        contentStyle={{ backgroundColor: 'rgba(2, 4, 10, 0.95)', borderColor: 'rgba(43,124,238,0.2)', borderRadius: '12px', color: '#fff', fontSize: 11 }}
-                                    />
-                                    <Bar dataKey="views" fill="#2b7cee" radius={[4, 4, 0, 0]} />
+                                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(128,128,128,0.05)" vertical={false} />
+                                    <XAxis dataKey="hour" stroke="rgba(128,128,128,0.4)" fontSize={9} tickMargin={8} interval={2} />
+                                    <YAxis stroke="rgba(128,128,128,0.4)" fontSize={9} axisLine={false} tickLine={false} />
+                                    <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(128,128,128,0.1)' }} />
+                                    <Bar dataKey="views" fill="rgb(var(--color-primary))" radius={[4, 4, 0, 0]} animationDuration={1000} />
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>
-                    </div>
+                    </motion.div>
                 )}
             </div>
 
             {/* ═══ CRAWLER INTEL ═══ */}
             {crawlerDetails && crawlerDetails.length > 0 && (
-                <div className="bg-white/[0.02] border border-orange-500/10 rounded-3xl p-8 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-40 h-40 bg-orange-500/5 blur-[80px] rounded-full" />
+                <motion.div variants={itemVariants} className="bg-orange-500/5 border border-orange-500/20 rounded-3xl p-8 relative overflow-hidden backdrop-blur-md">
+                    <div className="absolute top-0 right-0 w-40 h-40 bg-orange-500/10 blur-[80px] rounded-full animate-pulse" />
                     <div className="flex items-center justify-between mb-8">
-                        <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
-                                <Shield className="w-4 h-4 text-orange-400" />
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center">
+                                <Shield className="w-5 h-5 text-orange-500" />
                             </div>
                             <div>
-                                <h3 className="text-xs font-black text-orange-400 uppercase tracking-[0.2em]">Crawler Intelligence</h3>
-                                <p className="text-[9px] text-gray-600 font-bold mt-0.5">Who's indexing your content (7d)</p>
+                                <h3 className="text-xs font-black text-orange-500 uppercase tracking-[0.2em]">Crawler Intelligence</h3>
+                                <p className="text-[10px] text-orange-500/70 font-bold mt-1">Who's indexing your content (7d)</p>
                             </div>
                         </div>
                         <div className="text-right">
-                            <div className="text-lg font-black text-orange-400">{botViews.toLocaleString()}</div>
-                            <div className="text-[9px] font-bold text-gray-600 uppercase">Bot Hits</div>
+                            <div className="text-2xl font-black text-orange-500">{botViews.toLocaleString()}</div>
+                            <div className="text-[9px] font-bold text-orange-500/70 uppercase tracking-widest mt-1">Bot Hits</div>
                         </div>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                         {crawlerDetails.map((c, i) => (
-                            <div key={i} className="bg-white/[0.02] border border-white/5 rounded-xl px-4 py-3 hover:border-orange-500/20 transition-colors">
-                                <div className="text-[11px] font-bold text-gray-300 truncate">{c.crawler}</div>
-                                <div className="text-lg font-black text-orange-400 mt-1">{c.hits}</div>
-                                <div className="text-[8px] text-gray-600 font-bold uppercase">hits</div>
-                            </div>
+                            <motion.div whileHover={{ scale: 1.05 }} key={i} className="bg-orange-500/10 border border-orange-500/20 rounded-2xl px-5 py-4 hover:border-orange-500/40 transition-colors">
+                                <div className="text-[11px] font-bold text-orange-500/80 truncate">{c.crawler}</div>
+                                <div className="text-xl font-black text-orange-500 mt-2">{c.hits}</div>
+                                <div className="text-[8px] text-orange-500/60 font-bold uppercase tracking-widest mt-1">hits</div>
+                            </motion.div>
                         ))}
                     </div>
-                </div>
+                </motion.div>
             )}
 
             {/* ═══ TOP ARTICLES ═══ */}
-            <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-8">
+            <motion.div variants={itemVariants} className="bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-8 backdrop-blur-md">
                 <div className="flex items-center justify-between mb-8">
-                    <h3 className="text-[10px] font-black text-white uppercase tracking-[0.3em]">Viral Content</h3>
-                    <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Efficiency Ranking</div>
+                    <h3 className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-[0.3em]">Viral Content</h3>
+                    <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-lg">Efficiency Ranking</div>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-2">
                     {topArticles && topArticles.length > 0 ? topArticles.map((article, i) => (
-                        <div key={article.id} className="flex items-center gap-6 group/row hover:bg-white/[0.01] -mx-4 px-4 py-3 rounded-2xl transition-all">
-                            <span className="text-xl font-black text-white/5 w-8 text-center font-mono group-hover/row:text-primary/20 transition-colors">{String(i + 1).padStart(2, '0')}</span>
+                        <motion.div whileHover={{ scale: 1.01, x: 5 }} key={article.id} className="flex items-center gap-6 group/row hover:bg-black/5 dark:hover:bg-white/5 -mx-4 px-4 py-4 rounded-2xl transition-all cursor-pointer">
+                            <span className="text-xl font-black text-gray-300 dark:text-white/10 w-8 text-center font-mono group-hover/row:text-primary transition-colors">{String(i + 1).padStart(2, '0')}</span>
                             <div className="flex-1 min-w-0">
-                                <a href={`/article/${article.slug}`} target="_blank" rel="noreferrer" className="block text-[13px] font-black text-gray-200 group-hover/row:text-primary transition-colors truncate tracking-tight mb-1">
+                                <a href={`/article/${article.slug}`} target="_blank" rel="noreferrer" className="block text-sm font-black text-gray-900 dark:text-white group-hover/row:text-primary transition-colors truncate tracking-tight mb-1">
                                     {article.title}
                                 </a>
-                                <span className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">{article.unique_views} unique views</span>
+                                <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">{article.unique_views} unique views</span>
                             </div>
-                            <div className="flex items-center gap-4 flex-shrink-0">
+                            <div className="flex items-center gap-5 flex-shrink-0">
                                 <div className="text-right">
-                                    <div className="text-xs font-black text-white">{article.views?.toLocaleString()}</div>
-                                    <div className="text-[9px] font-black text-gray-700 uppercase">Hits</div>
+                                    <div className="text-sm font-black text-gray-900 dark:text-white">{article.views?.toLocaleString()}</div>
+                                    <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-0.5">Hits</div>
                                 </div>
-                                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/5 group-hover/row:border-primary/20 transition-colors">
-                                    <TrendingUp className="w-4 h-4 text-gray-600 group-hover/row:text-primary transition-colors" />
+                                <div className="w-10 h-10 rounded-xl bg-black/5 dark:bg-white/5 flex items-center justify-center border border-transparent group-hover/row:border-primary/20 group-hover/row:bg-primary/10 transition-colors">
+                                    <TrendingUp className="w-4 h-4 text-gray-400 group-hover/row:text-primary transition-colors" />
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
                     )) : (
-                        <div className="py-10 text-center">
-                            <Newspaper className="w-8 h-8 text-gray-800 mx-auto mb-2 opacity-20" />
-                            <p className="text-[11px] font-black text-gray-700 uppercase tracking-widest">No signals detected yet</p>
+                        <div className="py-16 text-center">
+                            <Newspaper className="w-10 h-10 text-gray-300 dark:text-gray-700 mx-auto mb-4" />
+                            <p className="text-[11px] font-black text-gray-500 uppercase tracking-widest">No signals detected yet</p>
                         </div>
                     )}
                 </div>
-            </div>
-
-            {/* ═══ TOP PAGES & REFERRERS ═══ */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-20">
-                {topPages && topPages.length > 0 && (
-                    <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-8">
-                        <h3 className="text-[10px] font-black text-white mb-8 uppercase tracking-[0.3em]">Entry Points</h3>
-                        <div className="space-y-3">
-                            {topPages.map((page, i) => (
-                                <div key={i} className="flex items-center justify-between py-2 border-b border-white/[0.03] last:border-0 group/page">
-                                    <span className="text-[11px] text-gray-500 font-mono truncate max-w-[70%] group-hover/page:text-gray-300 transition-colors">{page.path}</span>
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-12 h-1 bg-white/5 rounded-full overflow-hidden">
-                                            <div className="h-full bg-blue-500/30" style={{ width: `${Math.min(100, (page.views / (topPages[0].views || 1)) * 100)}%` }} />
-                                        </div>
-                                        <span className="text-[11px] font-black text-gray-400 w-8 text-right">{page.views}</span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* REFERRERS — Real domain names with type badges */}
-                {topReferrers && topReferrers.length > 0 && (
-                    <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-8 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-[60px] rounded-full" />
-                        <h3 className="text-[10px] font-black text-emerald-400 mb-8 uppercase tracking-[0.3em]">Inbound Traffic Sources</h3>
-                        <div className="space-y-3">
-                            {topReferrers.map((ref, i) => {
-                                const RefIcon = REFERRER_ICONS[ref.type] || Globe;
-                                const refColor = REFERRER_COLORS[ref.type] || '#6b7280';
-                                return (
-                                    <div key={i} className="flex items-center justify-between py-2 border-b border-white/[0.03] last:border-0 group/ref">
-                                        <div className="flex items-center gap-3 min-w-0 flex-1">
-                                            <div className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${refColor}15` }}>
-                                                <RefIcon className="w-3 h-3" style={{ color: refColor }} />
-                                            </div>
-                                            <div className="min-w-0">
-                                                <span className="text-[11px] text-gray-300 font-bold tracking-tight block truncate">
-                                                    {ref.source}
-                                                </span>
-                                                <span className="text-[8px] font-black uppercase tracking-widest" style={{ color: refColor }}>{ref.type}</span>
-                                            </div>
-                                        </div>
-                                        <span className="text-[11px] font-black text-emerald-500 tabular-nums flex-shrink-0 ml-3">{ref.views}</span>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                )}
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
     );
 }

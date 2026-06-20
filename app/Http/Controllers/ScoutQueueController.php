@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\ScoutedArticle;
 use App\Jobs\GenerateDraftJob;
+use Illuminate\Support\Facades\Artisan;
 
 class ScoutQueueController extends Controller
 {
@@ -64,6 +65,20 @@ class ScoutQueueController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Idea dismissed.',
+        ]);
+    }
+
+    /**
+     * Trigger the background scout agent manually.
+     */
+    public function trigger()
+    {
+        // Enqueue the artisan command to run the news scout
+        Artisan::queue('yolo:agent', ['--scout' => true]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Scout agent deployed successfully. Finding new stories now!',
         ]);
     }
 }

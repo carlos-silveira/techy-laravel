@@ -7,7 +7,7 @@
     "/build/assets/AdSlot-y4X_2aTT.mjs"
   ],
   "resources/js/Components/AnalyticsChart.jsx": [
-    "/build/assets/Dashboard-59zHQWxs.mjs"
+    "/build/assets/Dashboard-CMpC1YZl.mjs"
   ],
   "resources/js/Components/ApplicationLogo.jsx": [
     "/build/assets/Guest-BiagxEC5.mjs"
@@ -19,7 +19,7 @@
     "/build/assets/CommandPalette-C0WOoolx.mjs"
   ],
   "resources/js/Components/GeminiUsage.jsx": [
-    "/build/assets/Dashboard-59zHQWxs.mjs"
+    "/build/assets/Dashboard-CMpC1YZl.mjs"
   ],
   "resources/js/Components/Input.jsx": [
     "/build/assets/ValidationErrors-DbFdy9K0.mjs"
@@ -40,13 +40,13 @@
     "/build/assets/RagCopilot-CsH8uUGU.mjs"
   ],
   "resources/js/Components/RichEditor.jsx": [
-    "/build/assets/Dashboard-59zHQWxs.mjs"
+    "/build/assets/Dashboard-CMpC1YZl.mjs"
   ],
   "resources/js/Components/ScoutedQueue.jsx": [
-    "/build/assets/Dashboard-59zHQWxs.mjs"
+    "/build/assets/Dashboard-CMpC1YZl.mjs"
   ],
   "resources/js/Components/Skeleton.jsx": [
-    "/build/assets/Dashboard-59zHQWxs.mjs"
+    "/build/assets/Dashboard-CMpC1YZl.mjs"
   ],
   "resources/js/Components/ThemeToggle.jsx": [
     "/build/assets/ThemeToggle-z5uN9EoT.mjs"
@@ -94,7 +94,7 @@
     "/build/assets/Contact-DTHBIfAR.mjs"
   ],
   "resources/js/Pages/Dashboard.jsx": [
-    "/build/assets/Dashboard-59zHQWxs.mjs"
+    "/build/assets/Dashboard-CMpC1YZl.mjs"
   ],
   "resources/js/Pages/Error.jsx": [
     "/build/assets/Error-DJWnPDBW.mjs"

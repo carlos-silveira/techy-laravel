@@ -20,6 +20,15 @@ use App\Http\Controllers\NewsletterController;
 
 // Protected AI & Studio Routes
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+
+    Route::get('/scouted-queue', [ScoutQueueController::class, 'index']);
+    Route::post('/scouted-queue/{id}/approve', [ScoutQueueController::class, 'approve']);
+    Route::delete('/scouted-queue/{id}', [ScoutQueueController::class, 'destroy']);
+    Route::post('/scouted-queue/trigger', [ScoutQueueController::class, 'trigger']);
+
     Route::post('/generate-brief', [AiController::class, 'generateBrief']);
     Route::post('/generate-seo', [AiController::class, 'generateSeoTags']);
     Route::post('/generate-image-prompt', [AiController::class, 'generateImagePrompt']);
