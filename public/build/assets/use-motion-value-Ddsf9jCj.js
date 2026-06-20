@@ -1,0 +1,1 @@
+import{a as e}from"./chunk-Cyuzqnbw.js";import{t}from"./react-LFYPmC-E.js";import{C as n,s as r,x as i}from"./createLucideIcon-BWLYwpEU.js";var a=e(t(),1);function o(e){let t=n(()=>r(e)),{isStatic:o}=(0,a.useContext)(i);if(o){let[,n]=(0,a.useState)(e);(0,a.useEffect)(()=>t.on(`change`,n),[])}return t}export{o as t};

@@ -38,6 +38,16 @@ Route::get('/terms', function () { return inertia('Terms'); });
 Route::get('/privacy', function () { return inertia('Privacy'); });
 Route::post('/set-locale', [LanguageController::class, 'setLocale']);
 
+// Preview Newsletter (development only)
+Route::get('/preview-newsletter', function () {
+    if (!app()->environment('local')) abort(404);
+    $articles = \App\Models\Article::where('status', 'published')
+        ->orderBy('created_at', 'desc')
+        ->take(4)
+        ->get();
+    return new \App\Mail\WeeklyNewsletter($articles);
+});
+
 // ─── ADMIN ROUTES (Token-Gated) ────────────────────────────────────────────
 // All admin routes require ?token=<ADMIN_SECRET> to prevent unauthorized access.
 // Set ADMIN_SECRET in your .env (defaults to a hash of APP_KEY for zero-config security).

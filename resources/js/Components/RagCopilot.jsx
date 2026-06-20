@@ -44,7 +44,10 @@ export default function RagCopilot() {
                     'Content-Type': 'application/json',
                     'Accept': 'text/plain, text/event-stream'
                 },
-                body: JSON.stringify({ query: userMsg }),
+                body: JSON.stringify({ 
+                    query: userMsg,
+                    locale: document.documentElement.lang || 'es'
+                }),
                 signal: abortControllerRef.current.signal
             });
 
@@ -140,7 +143,7 @@ export default function RagCopilot() {
                                         <span className="shrink-0 px-1.5 py-0.5 rounded text-[9px] bg-primary/10 text-primary uppercase tracking-wider font-black border border-primary/20">Beta</span>
                                     </h3>
                                     <p className="text-[10px] text-gray-500 uppercase tracking-widest flex items-center gap-1 font-semibold mt-0.5 truncate">
-                                        <Database className="w-3 h-3 shrink-0" /> Chat with our data
+                                        <Database className="w-3 h-3 shrink-0" /> {__('Chat with our data')}
                                     </p>
                                 </div>
                             </div>
