@@ -102,7 +102,7 @@ jobs:
         run: |
           # Only zip essential production files and directories. 
           # Excludes public/storage (symlink) and storage logs to keep it lightweight (~20MB).
-          zip -r deploy.zip app config database public resources routes vendor bootstrap artisan composer.json composer.lock .htaccess -x "public/storage" "storage/logs/*"
+          zip -r deploy.zip app config database public resources routes scripts vendor bootstrap artisan composer.json composer.lock .htaccess -x "public/storage" "storage/logs/*"
 
       - name: 🚀 Transfer & Execute via Secure HTTPS Webhook
         run: |
