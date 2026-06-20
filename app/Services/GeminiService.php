@@ -151,7 +151,8 @@ class GeminiService
             $newsContext .= "- [{$source}] {$item['title']}: {$item['description']}\n";
         }
 
-        $prompt = "You are the Editor-in-Chief of techynews.lat. You have these trending headlines from today's tech news cycle:
+        $date = now()->format('l, F j, Y');
+        $prompt = "You are the Editor-in-Chief of techynews.lat. Today is {$date}. You have these trending headlines from today's tech news cycle:
 
 {$newsContext}
 
@@ -163,7 +164,7 @@ Generate between 5 and 10 article ideas. Each MUST:
 3. Include a 'prompt' field: a 2-sentence brief explaining exactly what the article should be about in plain, simple English. What happened and why is it important?
 4. Include an 'angle' field, which should be a simple category like 'product_launch', 'business', or 'ai_breakthrough'.
 
-CRITICAL RECENCY RULE: ONLY focus on confirmed tech events from the EXACT last 24 to 48 hours. DO NOT output legacy news. If the news is not from today, discard it.
+CRITICAL RECENCY RULE: Today is {$date}. ONLY focus on confirmed tech events from the EXACT last 24 to 48 hours. DO NOT output legacy news or events from previous years (e.g. do not act like it is 2021). If the news is not from today or yesterday, discard it.
 CRITICAL TOPIC RULE: ABSOLUTELY DO NOT write meta-commentary about AI generating articles. Focus on actual tech industry news.
 
 Return ONLY a JSON array, no markdown fences:
@@ -185,7 +186,8 @@ Return ONLY a JSON array, no markdown fences:
             return "- [{$source}] {$n['title']}";
         }, $newsItems));
 
-        $prompt = "You are a tech journalist for techynews.lat. Your absolute priority is CLARITY. You must write articles that are extremely easy to understand, avoiding all complicated jargon, 'verbal vomit', and overly academic language.
+        $date = now()->format('l, F j, Y');
+        $prompt = "You are a tech journalist for techynews.lat. Today is {$date}. Your absolute priority is CLARITY. You must write articles that are extremely easy to understand, avoiding all complicated jargon, 'verbal vomit', and overly academic language. DO NOT report on events from previous years as if they were new today.
 
 ARTICLE TOPIC: {$title}
 EDITORIAL BRIEF: {$ideaPrompt}
@@ -533,195 +535,31 @@ Return exactly a JSON object (no markdown fences):
     }
 
     /**
-     * Call Gemini API for conversational messages.
+     * Call AI API for conversational messages (via OpenRouter).
      * Returns the text response or a user-friendly error.
      */
     private function callGeminiConversational(array $messages): string
     {
-        $this->ensureApiKey();
-
-        $maxRetriesPerModel = 5;
-        $lastError = 'Unknown error';
-
-        for ($attempt = 0; $attempt <= $maxRetriesPerModel; $attempt++) {
-            if ($this->isQuotaExhausted()) break;
-
-            try {
-                $response = Http::timeout(60)->post(
-                    "https://generativelanguage.googleapis.com/v1beta/models/{$this->model}:generateContent?key={$this->apiKey}",
-                    ['contents' => $messages]
-                );
-
-                if ($response->successful()) {
-                    $json = $response->json();
-
-                    // Track API Usage tokens
-                    if (isset($json['usageMetadata'])) {
-                        \Illuminate\Support\Facades\DB::table('gemini_logs')->insert([
-                            'model_name' => $this->model,
-                            'operation_type' => 'conversational',
-                            'prompt_tokens' => $json['usageMetadata']['promptTokenCount'] ?? 0,
-                            'completion_tokens' => $json['usageMetadata']['candidatesTokenCount'] ?? 0,
-                            'total_tokens' => $json['usageMetadata']['totalTokenCount'] ?? 0,
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ]);
-                    }
-
-                    return $json['candidates'][0]['content']['parts'][0]['text'] ?? '';
-                }
-
-                $status = $response->status();
-                if ($status === 429) {
-                    $this->handle429($response, $attempt);
-                    if ($this->isQuotaExhausted()) break;
-                    continue;
-                }
-
-                $errorBody = substr($response->body(), 0, 500);
-                $lastError = "API Error ({$status}): {$errorBody}";
-
-                if ($attempt < $maxRetriesPerModel) {
-                    sleep(15);
-                    continue;
-                }
-            } catch (\Exception $e) {
-                $lastError = "Connection Error: " . $e->getMessage();
-                if ($attempt < $maxRetriesPerModel) {
-                    sleep(15);
-                    continue;
-                }
-            }
+        try {
+            return $this->callOpenRouterFallback($messages, false);
+        } catch (\Exception $e) {
+            Log::error("OpenRouter conversational failed: " . $e->getMessage());
+            throw new \RuntimeException('AI API is currently resting or unavailable. Last error: ' . $e->getMessage());
         }
-        
-        // --- NEW FALLBACK LOGIC ---
-        $openRouterKey = config('services.openrouter.api_key');
-        if (!empty($openRouterKey)) {
-            Log::info("Gemini API exhausted or failed in conversational mode. Falling back to OpenRouter...");
-            try {
-                return $this->callOpenRouterFallback($messages, false);
-            } catch (\Exception $e) {
-                Log::error("OpenRouter conversational fallback also failed: " . $e->getMessage());
-            }
-        }
-
-        throw new \RuntimeException('Gemini API is currently resting or unavailable. Last error: ' . $lastError);
     }
 
     /**
-     * Call Gemini API for single-prompt requests.
+     * Call AI API for single-prompt requests (via OpenRouter).
      */
     private function callGemini(string $prompt, bool $expectJson = false)
     {
-        $this->ensureApiKey();
-        $this->ensureQuotaNotExhausted();
-
-        $lastError = 'Unknown error';
-
-        $payload = [
-            'contents' => [['parts' => [['text' => $prompt]]]],
-            'safetySettings' => [
-                ['category' => 'HARM_CATEGORY_HARASSMENT', 'threshold' => 'BLOCK_ONLY_HIGH'],
-                ['category' => 'HARM_CATEGORY_HATE_SPEECH', 'threshold' => 'BLOCK_ONLY_HIGH'],
-                ['category' => 'HARM_CATEGORY_SEXUALLY_EXPLICIT', 'threshold' => 'BLOCK_ONLY_HIGH'],
-                ['category' => 'HARM_CATEGORY_DANGEROUS_CONTENT', 'threshold' => 'BLOCK_ONLY_HIGH'],
-            ]
-        ];
-
-        // Build the ordered list: configured model first, then the rest of the chain
-        $modelsToTry = array_unique(array_merge([$this->model], $this->modelFallbackChain));
-
-        foreach ($modelsToTry as $currentModel) {
-            if ($this->isQuotaExhausted()) break;
-
-            try {
-                Log::info("Gemini: Trying model '{$currentModel}'...");
-
-                $response = Http::timeout(120)->post(
-                    "https://generativelanguage.googleapis.com/v1beta/models/{$currentModel}:generateContent?key={$this->apiKey}",
-                    $payload
-                );
-
-                if ($response->successful()) {
-                    $json = $response->json();
-                    
-                    // Track API Usage tokens
-                    if (isset($json['usageMetadata'])) {
-                        \Illuminate\Support\Facades\DB::table('gemini_logs')->insert([
-                            'model_name' => $json['modelVersion'] ?? $currentModel,
-                            'operation_type' => 'generateContent',
-                            'prompt_tokens' => $json['usageMetadata']['promptTokenCount'] ?? 0,
-                            'completion_tokens' => $json['usageMetadata']['candidatesTokenCount'] ?? 0,
-                            'total_tokens' => $json['usageMetadata']['totalTokenCount'] ?? 0,
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ]);
-                    }
-
-                    // Check for safety blocks
-                    $candidate = $json['candidates'][0] ?? null;
-                    if ($candidate && ($candidate['finishReason'] ?? '') === 'SAFETY') {
-                        Log::warning("Gemini SAFETY BLOCK on model '{$currentModel}' for prompt: " . Str::limit($prompt, 100));
-                        return $expectJson ? [] : 'Content blocked by safety filters.';
-                    }
-
-                    $text = $candidate['content']['parts'][0]['text'] ?? '';
-                    Log::info("Gemini: Success with model '{$currentModel}'.");
-                    $result = $expectJson ? $this->extractJson($text) : trim($text);
-                    if ($expectJson && is_array($result) && isset($result['title']) && isset($result['prompt'])) {
-                        return [$result];
-                    }
-                    return $result;
-                }
-
-                $status = $response->status();
-
-                if ($status === 429) {
-                    Log::warning("Gemini: Model '{$currentModel}' returned 429 (rate limited). Trying next model...");
-                    // Check if it's a daily quota exhaustion
-                    if (str_contains($response->body(), 'exhausted') && str_contains($response->body(), 'limit: 0')) {
-                        Log::warning("Gemini: Model '{$currentModel}' daily quota exhausted. Cascading to next model.");
-                        continue; // Try next model in chain
-                    }
-                    $this->handle429($response, 0);
-                    if ($this->isQuotaExhausted()) break;
-                    continue;
-                }
-
-                $errorBody = substr($response->body(), 0, 500);
-                $lastError = "Gemini API error on model '{$currentModel}' ({$status}): {$errorBody}";
-                Log::error($lastError);
-                // Try next model
-                continue;
-
-            } catch (\Exception $e) {
-                $lastError = "Gemini connection error on model '{$currentModel}': " . $e->getMessage();
-                Log::warning($lastError);
-                if (!app()->runningInConsole() && str_contains($e->getMessage(), 'Rate limit hit')) {
-                    continue; // Try next model
-                }
-                continue;
-            }
+        try {
+            return $this->callOpenRouterFallback($prompt, $expectJson);
+        } catch (\Exception $e) {
+            Log::error("OpenRouter API failed: " . $e->getMessage());
+            if ($expectJson) return [];
+            throw new \RuntimeException('AI API is currently resting or unavailable. Last error: ' . $e->getMessage());
         }
-
-        // --- OPENROUTER FALLBACK ---
-        // All Gemini models failed, attempt OpenRouter
-        $openRouterKey = config('services.openrouter.api_key');
-        if (!empty($openRouterKey)) {
-            Log::info("All Gemini models exhausted. Falling back to OpenRouter...");
-            try {
-                return $this->callOpenRouterFallback($prompt, $expectJson);
-            } catch (\Exception $e) {
-                Log::error("OpenRouter fallback also failed: " . $e->getMessage());
-            }
-        }
-
-        if ($this->isQuotaExhausted()) {
-            throw new \RuntimeException("QUOTA_EXHAUSTED: Gemini API quota paused.");
-        }
-
-        if ($expectJson) return [];
-        throw new \RuntimeException("All Gemini models and OpenRouter exhausted. Last error: " . $lastError);
     }
 
     /**
@@ -730,7 +568,9 @@ Return exactly a JSON object (no markdown fences):
     private function callOpenRouterFallback($promptOrMessages, bool $expectJson = false)
     {
         $apiKey = config('services.openrouter.api_key');
-        $model = config('services.openrouter.model', 'mistralai/mistral-7b-instruct:free');
+        $modelsConfig = config('services.openrouter.models', 'google/gemini-2.5-pro,anthropic/claude-3.5-sonnet,google/gemini-2.5-flash,meta-llama/llama-3.3-70b-instruct:free,qwen/qwen-2.5-72b-instruct:free,mistralai/mistral-nemo:free');
+        
+        $modelsArray = array_values(array_filter(array_map('trim', explode(',', $modelsConfig))));
 
         if (is_string($promptOrMessages)) {
             $messages = [['role' => 'user', 'content' => $promptOrMessages]];
@@ -743,16 +583,22 @@ Return exactly a JSON object (no markdown fences):
             }
         }
 
-        $response = Http::timeout(120)
+        $payload = [
+            'models' => $modelsArray,
+            'messages' => $messages,
+        ];
+
+        if ($expectJson) {
+            $payload['response_format'] = ['type' => 'json_object'];
+        }
+
+        $response = Http::timeout(180)
             ->withHeaders([
                 'Authorization' => "Bearer {$apiKey}",
                 'HTTP-Referer' => config('app.url'),
                 'X-Title' => config('app.name'),
             ])
-            ->post('https://openrouter.ai/api/v1/chat/completions', [
-                'model' => $model,
-                'messages' => $messages,
-            ]);
+            ->post('https://openrouter.ai/api/v1/chat/completions', $payload);
 
         if ($response->successful()) {
             $json = $response->json();
@@ -761,10 +607,10 @@ Return exactly a JSON object (no markdown fences):
 
             // Track OpenRouter API Usage tokens
             if (isset($json['usage'])) {
-                $actualModel = $json['model'] ?? $model;
+                $actualModel = $json['model'] ?? 'openrouter';
                 \Illuminate\Support\Facades\DB::table('gemini_logs')->insert([
                     'model_name' => $actualModel,
-                    'operation_type' => 'openrouter_fallback',
+                    'operation_type' => 'openrouter',
                     'prompt_tokens' => $json['usage']['prompt_tokens'] ?? 0,
                     'completion_tokens' => $json['usage']['completion_tokens'] ?? 0,
                     'total_tokens' => $json['usage']['total_tokens'] ?? 0,
