@@ -48,8 +48,8 @@ class TestSocialPost extends Command
 
         // 1. Twitter
         $this->line("-> Pinging Twitter API v2...");
-        if (!env('TWITTER_BEARER_TOKEN')) {
-            $this->warn("   [!] Missing Twitter Keys in .env (TWITTER_BEARER_TOKEN).");
+        if (!config('services.twitter.access_token') || !config('services.twitter.consumer_key')) {
+            $this->warn("   [!] Missing Twitter Keys in config.");
         } else {
             $tw = $service->postToTwitter($article);
             if ($tw) $this->info("   [✓] Twitter Post Success!");
@@ -58,8 +58,8 @@ class TestSocialPost extends Command
 
         // 2. Facebook
         $this->line("-> Pinging Facebook Graph API...");
-        if (!env('FACEBOOK_PAGE_ID') || !env('FACEBOOK_PAGE_ACCESS_TOKEN')) {
-            $this->warn("   [!] Missing Facebook Keys in .env.");
+        if (!config('services.facebook.page_id') || !config('services.facebook.page_access_token')) {
+            $this->warn("   [!] Missing Facebook Keys in config.");
         } else {
             $fb = $service->postToFacebook($article);
             if ($fb) $this->info("   [✓] Facebook Post Success!");

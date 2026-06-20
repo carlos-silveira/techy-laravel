@@ -16,13 +16,13 @@ class SocialMediaService
      */
     public function postToTwitter(Article $article)
     {
-        $consumerKey = env('TWITTER_CONSUMER_KEY');
-        $consumerSecret = env('TWITTER_CONSUMER_SECRET');
-        $accessToken = env('TWITTER_ACCESS_TOKEN');
-        $accessTokenSecret = env('TWITTER_ACCESS_TOKEN_SECRET');
+        $consumerKey = config('services.twitter.consumer_key');
+        $consumerSecret = config('services.twitter.consumer_secret');
+        $accessToken = config('services.twitter.access_token');
+        $accessTokenSecret = config('services.twitter.access_token_secret');
 
         if (!$consumerKey || !$consumerSecret || !$accessToken || !$accessTokenSecret) {
-            Log::warning('Twitter post skipped. OAuth 1.0a API Keys missing in .env.');
+            Log::warning('Twitter post skipped. OAuth 1.0a API Keys missing in config.');
             return false;
         }
 
@@ -57,8 +57,8 @@ class SocialMediaService
      */
     public function postToFacebook(Article $article)
     {
-        if (!env('FACEBOOK_PAGE_ID') || !env('FACEBOOK_PAGE_ACCESS_TOKEN')) {
-            Log::warning('Facebook post skipped. API Keys missing in .env.');
+        if (!config('services.facebook.page_id') || !config('services.facebook.page_access_token')) {
+            Log::warning('Facebook post skipped. API Keys missing in config.');
             return false;
         }
 
@@ -81,8 +81,8 @@ class SocialMediaService
                 $postText = mb_substr($postText, 0, 247, 'UTF-8') . '...';
             }
 
-            $pageId = env('FACEBOOK_PAGE_ID');
-            $accessToken = env('FACEBOOK_PAGE_ACCESS_TOKEN');
+            $pageId = config('services.facebook.page_id');
+            $accessToken = config('services.facebook.page_access_token');
             $link = url('/article/' . $article->slug);
 
             // POST ONLY the summary, no title, no hashtags.
@@ -133,7 +133,7 @@ class SocialMediaService
         }
         
         // 3. Build Footer
-        $link = rtrim(env('APP_URL', 'https://techynews.lat'), '/') . '/article/' . $article->slug;
+        $link = rtrim(config('app.url', 'https://techynews.lat'), '/') . '/article/' . $article->slug;
         
         // Twitter counts ALL URLs as exactly 23 characters regardless of actual length.
         $footerTextForTwitterCount = "\n\nLee la nota completa: [23_CHAR_URL_PLACEHOLDER]\n\n{$dynamicHashtags}";
