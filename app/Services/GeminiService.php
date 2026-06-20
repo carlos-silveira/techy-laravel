@@ -586,6 +586,7 @@ Return exactly a JSON object (no markdown fences):
         $payload = [
             'models' => $modelsArray,
             'messages' => $messages,
+            'max_tokens' => 2500,
         ];
 
         if ($expectJson) {
