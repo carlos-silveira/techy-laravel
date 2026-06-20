@@ -10,7 +10,7 @@ const DEVICE_ICONS = { Desktop: Monitor, Mobile: Smartphone, Tablet: Tablet, 'Bo
 const REFERRER_ICONS = { search: Search, social: Share2, direct: Globe, internal: ArrowUpRight, referral: Link2 };
 const REFERRER_COLORS = { search: '#22c55e', social: '#8b5cf6', direct: '#6b7280', internal: '#3b82f6', referral: '#f59e0b' };
 
-function StatCard({ icon: Icon, label, value, subValue, trend, color = 'blue' }) {
+function StatCard({ icon: Icon, label, value, subValue, trend, color = 'blue', tooltipContent }) {
     const isPositive = trend > 0;
     const colorMap = {
         primary: 'text-primary bg-primary',
@@ -46,6 +46,15 @@ function StatCard({ icon: Icon, label, value, subValue, trend, color = 'blue' })
                 <div className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">{label}</div>
                 {subValue && <div className="text-[9px] text-gray-400 dark:text-gray-500 mt-1 font-medium">{subValue}</div>}
             </div>
+
+            {/* Custom Tooltip */}
+            {tooltipContent && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-50">
+                    <div className="bg-black/90 dark:bg-white/90 text-white dark:text-black text-xs p-3 rounded-xl shadow-xl backdrop-blur-md border border-white/10 dark:border-black/10">
+                        {tooltipContent}
+                    </div>
+                </div>
+            )}
         </motion.div>
     );
 }
@@ -117,7 +126,25 @@ export default function AnalyticsChart({ analyticsData }) {
                     { icon: Eye, label: "Views (7d)", value: stats.totalViews7d || 0, trend: stats.viewsGrowth, color: "primary" },
                     { icon: Users, label: "Unique", value: stats.uniqueVisitors7d || 0, color: "purple" },
                     { icon: Newspaper, label: "Articles", value: stats.totalArticles || 0, color: "emerald" },
-                    { icon: Heart, label: "Likes", value: stats.totalLikes || 0, color: "pink" },
+                    { 
+                        icon: Heart, 
+                        label: "Likes (All Time)", 
+                        value: stats.totalLikes || 0, 
+                        color: "pink",
+                        tooltipContent: stats.topLikedArticles?.length > 0 ? (
+                            <div>
+                                <div className="font-black uppercase tracking-widest text-[9px] text-pink-400 dark:text-pink-600 mb-2">Most Liked</div>
+                                <div className="space-y-2">
+                                    {stats.topLikedArticles.map((art, idx) => (
+                                        <div key={idx} className="flex justify-between items-start gap-2">
+                                            <span className="truncate flex-1">{art.title}</span>
+                                            <span className="font-bold text-pink-400 dark:text-pink-600">{art.likes}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : "No likes yet"
+                    },
                     { icon: TrendingUp, label: "Engagement", value: `${stats.engagementRate || 0}%`, color: "amber" },
                     { icon: Eye, label: "Lifetime", value: stats.totalViewsAllTime || 0, color: "blue" },
                 ].map((stat, i) => (
@@ -263,8 +290,8 @@ export default function AnalyticsChart({ analyticsData }) {
             {/* ═══ TOP ARTICLES ═══ */}
             <motion.div variants={itemVariants} className="bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-8 backdrop-blur-md">
                 <div className="flex items-center justify-between mb-8">
-                    <h3 className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-[0.3em]">Viral Content</h3>
-                    <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-lg">Efficiency Ranking</div>
+                    <h3 className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-[0.3em]">Viral Content (Last 7 Days)</h3>
+                    <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-lg">By Total Hits</div>
                 </div>
                 <div className="space-y-2">
                     {topArticles && topArticles.length > 0 ? topArticles.map((article, i) => (

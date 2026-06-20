@@ -742,8 +742,9 @@ Return exactly a JSON object (no markdown fences):
 
             // Track OpenRouter API Usage tokens
             if (isset($json['usage'])) {
+                $actualModel = $json['model'] ?? $model;
                 \Illuminate\Support\Facades\DB::table('gemini_logs')->insert([
-                    'model_name' => $model,
+                    'model_name' => $actualModel,
                     'operation_type' => 'openrouter_fallback',
                     'prompt_tokens' => $json['usage']['prompt_tokens'] ?? 0,
                     'completion_tokens' => $json['usage']['completion_tokens'] ?? 0,

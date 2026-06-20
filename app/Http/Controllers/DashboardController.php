@@ -69,6 +69,13 @@ class DashboardController extends Controller
             'unique_views' => $item->unique_views,
         ]);
 
+        // ─── TOP LIKED (All Time) ───
+        $topLikedArticles = \App\Models\Article::where('likes_count', '>', 0)
+            ->orderByDesc('likes_count')
+            ->limit(3)
+            ->get(['title', 'likes_count'])
+            ->map(fn($item) => ['title' => $item->title, 'likes' => $item->likes_count]);
+
         // ─── DEVICE BREAKDOWN (includes bots from user_agent) ───
         $deviceBreakdown = DB::table('page_views')
             ->selectRaw("
@@ -292,6 +299,7 @@ class DashboardController extends Controller
                     'uniqueVisitors7d' => $uniqueVisitors7d,
                     'totalArticles' => $totalArticles,
                     'totalLikes' => $totalLikes,
+                    'topLikedArticles' => $topLikedArticles,
                     'engagementRate' => $engagementRate,
                     'totalViewsAllTime' => $totalViewsAllTime,
                     'totalGeminiTokens7d' => $totalGeminiTokens7d,
