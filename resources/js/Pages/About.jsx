@@ -118,9 +118,10 @@ export default function About() {
         <div className="min-h-screen bg-[#f8f6f6] dark:bg-[#02040a] text-gray-900 dark:text-white font-sans selection:bg-primary/30 overflow-x-hidden relative transition-colors duration-500">
             <Head title={`${__('Carlos Silveira')} | ${__('Full-Stack & AI Engineer')}`} />
 
-            {/* Glowing Background */}
-            <div className="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-primary/8 rounded-full blur-[120px] pointer-events-none mix-blend-screen overflow-hidden"></div>
-            <div className="fixed bottom-[-10%] right-[-10%] w-[40vw] h-[40vw] bg-purple-600/8 rounded-full blur-[100px] pointer-events-none mix-blend-screen overflow-hidden"></div>
+            {/* Glowing Background & Noise */}
+            <div className="fixed inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] dark:opacity-[0.05] pointer-events-none mix-blend-overlay z-0"></div>
+            <div className="fixed top-[-20%] left-[-10%] w-[60vw] h-[60vw] bg-primary/10 rounded-full blur-[150px] pointer-events-none mix-blend-screen z-0"></div>
+            <div className="fixed bottom-[-20%] right-[-10%] w-[50vw] h-[50vw] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none mix-blend-screen z-0"></div>
 
             <Navbar />
 
@@ -131,7 +132,7 @@ export default function About() {
                     {/* Intro Block */}
                     <motion.div
                         {...fadeIn}
-                        className="md:col-span-3 bg-white/[0.6] dark:bg-white/[0.03] border border-black/5 dark:border-white/10 rounded-[2.5rem] p-10 flex flex-col justify-center relative overflow-hidden group shadow-sm dark:shadow-none transition-all duration-500"
+                        className="md:col-span-3 bg-white/70 dark:bg-[#0c0f1a]/70 backdrop-blur-3xl border border-gray-200/50 dark:border-white/[0.05] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] rounded-[2rem] md:rounded-[2.5rem] p-10 flex flex-col justify-center relative overflow-hidden group transition-all duration-500 hover:border-gray-300/50 dark:hover:border-white/[0.1]"
                     >
                         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[60px] -mr-32 -mt-32 transition-transform duration-700 group-hover:scale-110"></div>
                         <div className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-4">{__('Portfolio')}</div>
@@ -147,7 +148,7 @@ export default function About() {
                     <motion.div
                         {...fadeIn}
                         transition={{ delay: 0.1 }}
-                        className="md:col-span-1 bg-white/[0.6] dark:bg-white/[0.03] border border-black/5 dark:border-white/10 rounded-[2.5rem] p-8 flex flex-col justify-between shadow-sm dark:shadow-none transition-all duration-500"
+                        className="md:col-span-1 bg-white/70 dark:bg-[#0c0f1a]/70 backdrop-blur-3xl border border-gray-200/50 dark:border-white/[0.05] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] rounded-[2rem] md:rounded-[2.5rem] p-8 flex flex-col justify-between transition-all duration-500 hover:border-gray-300/50 dark:hover:border-white/[0.1]"
                     >
                         <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.25em] mb-6">{__('Connect')}</h3>
                         <div className="grid grid-cols-1 gap-3">
@@ -168,7 +169,7 @@ export default function About() {
                     <motion.div
                         {...fadeIn}
                         transition={{ delay: 0.2 }}
-                        className="md:col-span-2 bg-white/[0.6] dark:bg-white/[0.02] border border-black/5 dark:border-white/10 rounded-[2.5rem] p-10 relative overflow-hidden group shadow-sm dark:shadow-none transition-all duration-500"
+                        className="md:col-span-2 bg-white/70 dark:bg-[#0c0f1a]/70 backdrop-blur-3xl border border-gray-200/50 dark:border-white/[0.05] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] rounded-[2rem] md:rounded-[2.5rem] p-10 relative overflow-hidden group transition-all duration-500 hover:border-gray-300/50 dark:hover:border-white/[0.1]"
                     >
                         <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-primary/5 to-transparent pointer-events-none"></div>
                         <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.25em] mb-8 flex items-center gap-2 relative z-10">
@@ -185,7 +186,7 @@ export default function About() {
                     <motion.div
                         {...fadeIn}
                         transition={{ delay: 0.25 }}
-                        className="md:col-span-2 bg-white/[0.6] dark:bg-white/[0.03] border border-black/5 dark:border-white/10 rounded-[2.5rem] p-10 relative overflow-hidden group flex flex-col justify-center shadow-sm dark:shadow-none transition-all duration-500"
+                        className="md:col-span-2 bg-white/70 dark:bg-[#0c0f1a]/70 backdrop-blur-3xl border border-gray-200/50 dark:border-white/[0.05] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] rounded-[2rem] md:rounded-[2.5rem] p-10 relative overflow-hidden group flex flex-col justify-center transition-all duration-500 hover:border-gray-300/50 dark:hover:border-white/[0.1]"
                     >
                         <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-colors"></div>
                         <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.25em] mb-6">{__('The Concept')}</h3>
@@ -199,7 +200,7 @@ export default function About() {
                     <motion.div
                         {...fadeIn}
                         transition={{ delay: 0.3 }}
-                        className="md:col-span-2 bg-white/[0.6] dark:bg-white/[0.03] border border-black/5 dark:border-white/10 rounded-[2.5rem] p-10 relative overflow-hidden group shadow-sm dark:shadow-none transition-all duration-500"
+                        className="md:col-span-2 bg-white/70 dark:bg-[#0c0f1a]/70 backdrop-blur-3xl border border-gray-200/50 dark:border-white/[0.05] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] rounded-[2rem] md:rounded-[2.5rem] p-10 relative overflow-hidden group transition-all duration-500 hover:border-gray-300/50 dark:hover:border-white/[0.1]"
                     >
                         <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.25em] mb-8">{__('Experience')}</h3>
                         <div className="space-y-4">
@@ -232,7 +233,7 @@ export default function About() {
                     <motion.div
                         {...fadeIn}
                         transition={{ delay: 0.35 }}
-                        className="md:col-span-2 bg-white/[0.6] dark:bg-white/[0.03] border border-black/5 dark:border-white/10 rounded-[2.5rem] p-10 flex items-center gap-8 group shadow-sm dark:shadow-none transition-all duration-500"
+                        className="md:col-span-2 bg-white/70 dark:bg-[#0c0f1a]/70 backdrop-blur-3xl border border-gray-200/50 dark:border-white/[0.05] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] rounded-[2rem] md:rounded-[2.5rem] p-10 flex items-center gap-8 group transition-all duration-500 hover:border-gray-300/50 dark:hover:border-white/[0.1]"
                     >
                         <div className="w-20 h-20 shrink-0 rounded-2xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-2xl group-hover:rotate-6 transition-transform duration-500">
                             <img src="/img/logo_wbc.png" alt="Techy News" className="w-14 h-14 object-contain dark:brightness-100 brightness-0" />
@@ -368,7 +369,7 @@ function InteractiveCard({ tech }) {
             style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
             onMouseMove={handleMouseMove}
             onMouseLeave={() => { x.set(0); y.set(0); }}
-            className="flex items-center gap-3 p-4 bg-white/[0.6] dark:bg-white/[0.03] border border-black/5 dark:border-white/5 rounded-2xl hover:border-black/10 dark:hover:border-white/15 transition-all cursor-default shadow-sm dark:shadow-none"
+            className="flex items-center gap-3 p-4 bg-white/40 dark:bg-white/[0.02] border border-gray-200/40 dark:border-white/[0.04] rounded-2xl hover:bg-white/80 dark:hover:bg-white/[0.05] hover:border-gray-300/60 dark:hover:border-white/[0.1] transition-all duration-300 cursor-default shadow-sm dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.02)]"
         >
             <div
                 style={{ transform: "translateZ(30px)" }}
