@@ -8,6 +8,21 @@
     <title inertia>{{ config('app.name', 'Laravel') }}</title>
     <meta name="google-site-verification" content="COpjFK5aGPvLfkTW5lZCSaAtmjDfxJMEsLS3XcwMYw8" />
 
+    @if(isset($meta))
+        <meta property="og:title" content="{{ $meta['title'] }}">
+        <meta property="og:description" content="{{ $meta['description'] }}">
+        <meta property="og:url" content="{{ $meta['url'] }}">
+        <meta property="og:type" content="article">
+        <meta name="twitter:card" content="summary_large_image">
+        @if(!empty($meta['image']))
+            <meta property="og:image" content="{{ $meta['image'] }}">
+        @endif
+    @else
+        <meta property="og:title" content="TechyNews">
+        <meta property="og:description" content="AI-Powered Tech News">
+        <meta property="og:type" content="website">
+    @endif
+
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-PJF86HK6PG"></script>
     <script>

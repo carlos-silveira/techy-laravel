@@ -196,6 +196,13 @@ class PublicController extends Controller
         return Inertia::render('ArticleShow', [
             'article' => $article,
             'relatedArticles' => $relatedArticles
+        ])->withViewData([
+            'meta' => [
+                'title' => $article->title,
+                'description' => $article->ai_summary,
+                'image' => $article->cover_image_path ? asset('storage/' . $article->cover_image_path) : null,
+                'url' => url()->current(),
+            ]
         ]);
     }
 
