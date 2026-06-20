@@ -1,0 +1,3 @@
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: 127.0.0.1:9003 (through xdebug.client_host/xdebug.client_port).
+Starting SSR server on port 13714...
+Inertia SSR server started.

@@ -1,1 +1,0 @@
-import"./chunk-Cyuzqnbw.js";import{n as e,u as t}from"./app-Bkiv7OGs.js";import{t as n}from"./TopNav-B745zbCx.js";import{t as r}from"./Footer-0kC-JSJP.js";t();var i=e(),a=({children:e})=>(0,i.jsxs)(`div`,{className:`flex flex-col min-h-screen`,children:[(0,i.jsx)(n,{}),(0,i.jsx)(`main`,{className:`flex-grow`,children:e}),(0,i.jsx)(r,{})]});export{a as default};

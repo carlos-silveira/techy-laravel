@@ -1,0 +1,8 @@
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: 127.0.0.1:9003 (through xdebug.client_host/xdebug.client_port).
+
+   INFO  Server running on [http://127.0.0.1:8080].  
+
+  Press Ctrl+C to stop the server
+
+  Xdebug: [Step Debug] Could not connect to debugging client. Tried: 127.0.0.1:9003 (through xdebug.client_host/xdebug.client_port).
+  2026-06-20 13:27:55 ............................................ ~ 254.00ms
