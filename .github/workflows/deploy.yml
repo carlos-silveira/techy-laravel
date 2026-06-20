@@ -71,7 +71,7 @@ jobs:
         run: npm install --legacy-peer-deps --no-audit
 
       - name: 🧪 Run Cypress E2E Smoke Tests
-        run: echo "Cypress tests temporarily disabled to unblock production deployment" # npm run test:e2e -- --spec "cypress/e2e/smoke.cy.js"
+        run: npm run test:e2e -- --spec "cypress/e2e/smoke.cy.js"
       
       - name: 🛑 Cleanup & Fix Permissions
         if: always()
