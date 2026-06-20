@@ -14,10 +14,21 @@ class GeminiService
     private string $model;
     private const QUOTA_CACHE_KEY = 'gemini_quota_exhausted';
 
+    /**
+     * Ordered list of Gemini models to try, from best to most affordable.
+     * If the primary model fails (429/quota/error), we cascade to the next.
+     */
+    private array $modelFallbackChain = [
+        'gemini-2.5-pro',
+        'gemini-2.5-flash',
+        'gemini-2.0-flash',
+        'gemini-2.0-flash-lite',
+    ];
+
     public function __construct()
     {
         $this->apiKey = config('services.gemini.api_key', env('GEMINI_API_KEY', ''));
-        $this->model = config('services.gemini.model', env('GEMINI_MODEL', 'gemini-1.5-flash'));
+        $this->model = config('services.gemini.model', env('GEMINI_MODEL', 'gemini-2.5-flash'));
     }
 
     /**
@@ -604,7 +615,6 @@ Return exactly a JSON object (no markdown fences):
         $this->ensureApiKey();
         $this->ensureQuotaNotExhausted();
 
-        $maxRetriesPerModel = 3;
         $lastError = 'Unknown error';
 
         $payload = [
@@ -617,12 +627,17 @@ Return exactly a JSON object (no markdown fences):
             ]
         ];
 
-        for ($attempt = 0; $attempt <= $maxRetriesPerModel; $attempt++) {
+        // Build the ordered list: configured model first, then the rest of the chain
+        $modelsToTry = array_unique(array_merge([$this->model], $this->modelFallbackChain));
+
+        foreach ($modelsToTry as $currentModel) {
             if ($this->isQuotaExhausted()) break;
 
             try {
+                Log::info("Gemini: Trying model '{$currentModel}'...");
+
                 $response = Http::timeout(120)->post(
-                    "https://generativelanguage.googleapis.com/v1beta/models/{$this->model}:generateContent?key={$this->apiKey}",
+                    "https://generativelanguage.googleapis.com/v1beta/models/{$currentModel}:generateContent?key={$this->apiKey}",
                     $payload
                 );
 
@@ -632,7 +647,7 @@ Return exactly a JSON object (no markdown fences):
                     // Track API Usage tokens
                     if (isset($json['usageMetadata'])) {
                         \Illuminate\Support\Facades\DB::table('gemini_logs')->insert([
-                            'model_name' => $this->model,
+                            'model_name' => $json['modelVersion'] ?? $currentModel,
                             'operation_type' => 'generateContent',
                             'prompt_tokens' => $json['usageMetadata']['promptTokenCount'] ?? 0,
                             'completion_tokens' => $json['usageMetadata']['candidatesTokenCount'] ?? 0,
@@ -645,11 +660,12 @@ Return exactly a JSON object (no markdown fences):
                     // Check for safety blocks
                     $candidate = $json['candidates'][0] ?? null;
                     if ($candidate && ($candidate['finishReason'] ?? '') === 'SAFETY') {
-                        Log::warning("Gemini SAFETY BLOCK for prompt: " . Str::limit($prompt, 100));
+                        Log::warning("Gemini SAFETY BLOCK on model '{$currentModel}' for prompt: " . Str::limit($prompt, 100));
                         return $expectJson ? [] : 'Content blocked by safety filters.';
                     }
 
                     $text = $candidate['content']['parts'][0]['text'] ?? '';
+                    Log::info("Gemini: Success with model '{$currentModel}'.");
                     $result = $expectJson ? $this->extractJson($text) : trim($text);
                     if ($expectJson && is_array($result) && isset($result['title']) && isset($result['prompt'])) {
                         return [$result];
@@ -658,42 +674,44 @@ Return exactly a JSON object (no markdown fences):
                 }
 
                 $status = $response->status();
+
                 if ($status === 429) {
-                    $this->handle429($response, $attempt);
+                    Log::warning("Gemini: Model '{$currentModel}' returned 429 (rate limited). Trying next model...");
+                    // Check if it's a daily quota exhaustion
+                    if (str_contains($response->body(), 'exhausted') && str_contains($response->body(), 'limit: 0')) {
+                        Log::warning("Gemini: Model '{$currentModel}' daily quota exhausted. Cascading to next model.");
+                        continue; // Try next model in chain
+                    }
+                    $this->handle429($response, 0);
                     if ($this->isQuotaExhausted()) break;
                     continue;
                 }
 
                 $errorBody = substr($response->body(), 0, 500);
-                $lastError = "Gemini API error ({$status}): {$errorBody}";
+                $lastError = "Gemini API error on model '{$currentModel}' ({$status}): {$errorBody}";
                 Log::error($lastError);
+                // Try next model
+                continue;
 
-                if ($attempt < $maxRetriesPerModel) {
-                    sleep(10);
-                    continue;
-                }
             } catch (\Exception $e) {
-                $lastError = "Gemini connection error: " . $e->getMessage();
+                $lastError = "Gemini connection error on model '{$currentModel}': " . $e->getMessage();
+                Log::warning($lastError);
                 if (!app()->runningInConsole() && str_contains($e->getMessage(), 'Rate limit hit')) {
-                    break; // Fail fast and go to OpenRouter fallback
+                    continue; // Try next model
                 }
-                if ($attempt < $maxRetriesPerModel) {
-                    sleep(10);
-                    continue;
-                }
+                continue;
             }
         }
 
-        // --- NEW FALLBACK LOGIC ---
-        // If Gemini failed completely, attempt to use OpenRouter as fallback
+        // --- OPENROUTER FALLBACK ---
+        // All Gemini models failed, attempt OpenRouter
         $openRouterKey = config('services.openrouter.api_key');
         if (!empty($openRouterKey)) {
-            Log::info("Gemini API exhausted or failed. Falling back to OpenRouter...");
+            Log::info("All Gemini models exhausted. Falling back to OpenRouter...");
             try {
                 return $this->callOpenRouterFallback($prompt, $expectJson);
             } catch (\Exception $e) {
                 Log::error("OpenRouter fallback also failed: " . $e->getMessage());
-                // Fall through to original exception if fallback fails
             }
         }
 
@@ -702,7 +720,7 @@ Return exactly a JSON object (no markdown fences):
         }
 
         if ($expectJson) return [];
-        throw new \RuntimeException("All retries exhausted for model {$this->model}. Last error: " . $lastError);
+        throw new \RuntimeException("All Gemini models and OpenRouter exhausted. Last error: " . $lastError);
     }
 
     /**
