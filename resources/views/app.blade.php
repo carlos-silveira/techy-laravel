@@ -82,7 +82,7 @@
 </head>
 
 <body class="font-sans antialiased">
-    <div id="app" data-page="{{ json_encode($page) }}"></div>
+    @inertia
 </body>
 
 </html>
