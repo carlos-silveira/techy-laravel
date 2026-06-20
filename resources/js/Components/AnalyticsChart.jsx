@@ -97,7 +97,7 @@ export default function AnalyticsChart({ analyticsData }) {
         );
     }
 
-    const { viewsPerDay, topArticles, deviceBreakdown, crawlerDetails, topPages, topReferrers, hourlyTraffic, summary, adsenseProjection, topLikedArticles } = analyticsData;
+    const { viewsPerDay, topArticles, deviceBreakdown, crawlerDetails, topPages, topReferrers, hourlyTraffic, summary } = analyticsData;
     const stats = summary || {};
 
     const deviceData = (deviceBreakdown || []).map(d => ({ name: d.device, value: d.count }));
@@ -377,7 +377,7 @@ export default function AnalyticsChart({ analyticsData }) {
             </motion.div>
 
             {/* ═══ MOST LIKED CONTENT ═══ */}
-            {topLikedArticles && topLikedArticles.length > 0 && (
+            {stats.topLikedArticles && stats.topLikedArticles.length > 0 && (
                 <motion.div variants={itemVariants} className="bg-white/50 dark:bg-black/20 border border-pink-500/10 dark:border-pink-500/20 rounded-3xl p-8 backdrop-blur-md relative overflow-hidden group">
                     <div className="absolute -top-40 -right-40 w-80 h-80 bg-pink-500/10 rounded-full blur-[80px] pointer-events-none group-hover:bg-pink-500/20 transition-all duration-700" />
                     
@@ -392,7 +392,7 @@ export default function AnalyticsChart({ analyticsData }) {
                     </div>
 
                     <div className="space-y-2 relative z-10">
-                        {topLikedArticles.map((article, i) => (
+                        {stats.topLikedArticles.map((article, i) => (
                             <motion.div whileHover={{ scale: 1.01, x: 5 }} key={i} className="flex items-center gap-6 group/row hover:bg-pink-500/10 -mx-4 px-4 py-4 rounded-2xl transition-all cursor-pointer">
                                 <span className="text-xl font-black text-pink-500/30 w-8 text-center font-mono group-hover/row:text-pink-500 transition-colors">{String(i + 1).padStart(2, '0')}</span>
                                 <div className="flex-1 min-w-0">
@@ -413,7 +413,7 @@ export default function AnalyticsChart({ analyticsData }) {
             )}
 
             {/* ═══ MONETIZATION PROJECTIONS ═══ */}
-            {adsenseProjection && (
+            {stats.adsenseProjection && (
                 <motion.div variants={itemVariants} className="bg-emerald-500/5 border border-emerald-500/10 dark:border-emerald-500/20 rounded-3xl p-8 backdrop-blur-md mt-6">
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
@@ -425,22 +425,22 @@ export default function AnalyticsChart({ analyticsData }) {
                                 <p className="text-[9px] font-bold text-emerald-500/70 uppercase tracking-widest mt-0.5">Google AdSense Projections (30 Days)</p>
                             </div>
                         </div>
-                        <div className="text-[10px] font-bold text-emerald-500/70 uppercase tracking-widest bg-emerald-500/10 px-3 py-1.5 rounded-lg">Based on {adsenseProjection.views30d.toLocaleString()} views</div>
+                        <div className="text-[10px] font-bold text-emerald-500/70 uppercase tracking-widest bg-emerald-500/10 px-3 py-1.5 rounded-lg">Based on {stats.adsenseProjection.views30d.toLocaleString()} views</div>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
                         <div className="bg-white/50 dark:bg-black/20 border border-emerald-500/10 rounded-2xl p-5">
                             <div className="text-[10px] font-black text-emerald-500/60 uppercase tracking-widest mb-1">Low Estimate (RPM $1.50)</div>
-                            <div className="text-2xl font-black text-gray-900 dark:text-white">${adsenseProjection.low.toFixed(2)}</div>
+                            <div className="text-2xl font-black text-gray-900 dark:text-white">${stats.adsenseProjection.low.toFixed(2)}</div>
                         </div>
                         <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-5 relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/20 blur-[30px] rounded-full pointer-events-none -mr-10 -mt-10" />
                             <div className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1 relative z-10">Avg Estimate (RPM $2.75)</div>
-                            <div className="text-3xl font-black text-emerald-600 dark:text-emerald-400 relative z-10">${((adsenseProjection.low + adsenseProjection.high) / 2).toFixed(2)}</div>
+                            <div className="text-3xl font-black text-emerald-600 dark:text-emerald-400 relative z-10">${((stats.adsenseProjection.low + stats.adsenseProjection.high) / 2).toFixed(2)}</div>
                         </div>
                         <div className="bg-white/50 dark:bg-black/20 border border-emerald-500/10 rounded-2xl p-5">
                             <div className="text-[10px] font-black text-emerald-500/60 uppercase tracking-widest mb-1">High Estimate (RPM $4.00)</div>
-                            <div className="text-2xl font-black text-gray-900 dark:text-white">${adsenseProjection.high.toFixed(2)}</div>
+                            <div className="text-2xl font-black text-gray-900 dark:text-white">${stats.adsenseProjection.high.toFixed(2)}</div>
                         </div>
                     </div>
                     <p className="text-[10px] font-medium text-gray-500 mt-6 max-w-2xl">
