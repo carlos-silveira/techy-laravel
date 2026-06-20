@@ -22,10 +22,10 @@ createServer((page) => createInertiaApp({
 	render: ReactDOMServer.renderToString,
 	title: (title) => `${title} - ${appName}`,
 	resolve: (name) => resolvePageComponent(`./Pages/${name}.jsx`, /* #__PURE__ */ Object.assign({
-		"./Pages/About.jsx": () => import("./assets/About-CrfY-SvR.mjs"),
+		"./Pages/About.jsx": () => import("./assets/About-y-1B08Sm.mjs"),
 		"./Pages/AboutUs.jsx": () => import("./assets/AboutUs-dttcHBnJ.mjs"),
-		"./Pages/Archive.jsx": () => import("./assets/Archive-gXN0l5r6.mjs"),
-		"./Pages/ArticleShow.jsx": () => import("./assets/ArticleShow-dKbdNZ9X.mjs"),
+		"./Pages/Archive.jsx": () => import("./assets/Archive-Ch3ae12z.mjs"),
+		"./Pages/ArticleShow.jsx": () => import("./assets/ArticleShow-DGQ64Ipm.mjs"),
 		"./Pages/Auth/ConfirmPassword.jsx": () => import("./assets/ConfirmPassword-rhVogesD.mjs"),
 		"./Pages/Auth/ForgotPassword.jsx": () => import("./assets/ForgotPassword-C6p1OChC.mjs"),
 		"./Pages/Auth/Login.jsx": () => import("./assets/Login-B4hr0W_3.mjs"),
@@ -33,15 +33,16 @@ createServer((page) => createInertiaApp({
 		"./Pages/Auth/ResetPassword.jsx": () => import("./assets/ResetPassword-CI0HZQiM.mjs"),
 		"./Pages/Auth/VerifyEmail.jsx": () => import("./assets/VerifyEmail-zOrUgP5E.mjs"),
 		"./Pages/Contact.jsx": () => import("./assets/Contact-DTHBIfAR.mjs"),
-		"./Pages/Dashboard.jsx": () => import("./assets/Dashboard-Dl7iQxPg.mjs"),
-		"./Pages/Error.jsx": () => import("./assets/Error-DJWnPDBW.mjs"),
+		"./Pages/Dashboard.jsx": () => import("./assets/Dashboard-Jh_YQ7m7.mjs"),
+		"./Pages/Error.jsx": () => import("./assets/Error-CyBjdGbK.mjs"),
 		"./Pages/Footer.jsx": () => import("./assets/Footer-BNnC3ML4.mjs").then((n) => n.n),
 		"./Pages/Layout.jsx": () => import("./assets/Layout-Boew9BvM.mjs"),
+		"./Pages/NewsletterArchive.jsx": () => import("./assets/NewsletterArchive-BE2foDjO.mjs"),
 		"./Pages/Post.jsx": () => import("./assets/Post-Dx0Qsqq-.mjs"),
-		"./Pages/Privacy.jsx": () => import("./assets/Privacy-CjOOzQWA.mjs"),
-		"./Pages/Terms.jsx": () => import("./assets/Terms-Cdqk_m9S.mjs"),
+		"./Pages/Privacy.jsx": () => import("./assets/Privacy-CBK3nvYg.mjs"),
+		"./Pages/Terms.jsx": () => import("./assets/Terms-BlAq18kz.mjs"),
 		"./Pages/TopNav.jsx": () => import("./assets/TopNav-X8GB84N3.mjs").then((n) => n.n),
-		"./Pages/Welcome.jsx": () => import("./assets/Welcome-CuPC5Juj.mjs")
+		"./Pages/Welcome.jsx": () => import("./assets/Welcome-CKoDrF5-.mjs")
 	})),
 	setup({ App, props }) {
 		global.route = (name, params, absolute) => route(name, params, absolute, {

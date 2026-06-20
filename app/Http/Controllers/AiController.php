@@ -54,29 +54,15 @@ class AiController extends Controller
                 $news
             );
 
-            // Build HTML from result
-            $html = "";
-            $paragraphs = explode("\n", $result['cuerpo_noticia']);
-            foreach ($paragraphs as $p) {
-                $p = trim($p);
-                if (empty($p)) continue;
-                // simple bold replace
-                $p = preg_replace('/\*\*(.*?)\*\*/', '<strong>$1</strong>', $p);
-                $html .= "<p>{$p}</p>";
-            }
-            
-            if (!empty($result['snippet_codigo'])) {
-                $lang = $result['lenguaje_snippet'] ?? 'javascript';
-                // HTML special chars to prevent syntax breaking the editor
-                $html .= "<pre><code class=\"language-{$lang}\">" . htmlspecialchars($result['snippet_codigo']) . "</code></pre>";
-            }
+            // The result is already formatted HTML from GeminiService
+            $html = $result['article_body'] ?? '';
 
             return response()->json([
                 'draft' => $html,
-                'title' => $result['titular'],
-                'summary' => $result['tldr_twitter'],
-                'image_prompt' => $result['sugerencia_imagen'],
-                'category' => $result['categoria_principal']
+                'title' => $result['title'] ?? '',
+                'summary' => $result['twitter_tldr'] ?? '',
+                'image_prompt' => $result['suggested_image'] ?? '',
+                'category' => $result['main_category'] ?? ''
             ]);
         } catch (\RuntimeException $e) {
             return response()->json(['error' => $e->getMessage()], 503);

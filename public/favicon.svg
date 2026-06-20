@@ -10,14 +10,8 @@
     </linearGradient>
   </defs>
   
-  <rect width="512" height="512" rx="120" fill="#02040a" />
-  
-  <!-- Left short bar -->
-  <rect x="144" y="240" width="48" height="128" rx="24" fill="url(#primaryGrad)" />
-  
-  <!-- Middle tall bar -->
-  <rect x="232" y="144" width="48" height="224" rx="24" fill="url(#purpleGrad)" />
-  
-  <!-- Right medium bar -->
-  <rect x="320" y="192" width="48" height="176" rx="24" fill="url(#primaryGrad)" />
+  <!-- Scaled up bars for better visibility as a favicon without background -->
+  <rect x="96" y="212" width="72" height="180" rx="36" fill="url(#primaryGrad)" />
+  <rect x="220" y="104" width="72" height="288" rx="36" fill="url(#purpleGrad)" />
+  <rect x="344" y="158" width="72" height="234" rx="36" fill="url(#primaryGrad)" />
 </svg>

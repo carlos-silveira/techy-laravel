@@ -1,3 +1,57 @@
+## [2026-06-20] - About Page CV Bento Box Grid
+### Added
+- **Hero Section Right Column**: Implemented a highly premium, Dala-style "Bento Box" grid on the right side of the Hero section. This utilizes the empty space efficiently while displaying critical CV data.
+- **CV Data Widgets**: Added interactive glassmorphism cards highlighting "6+ Years Experience", "C1 Advanced English", and "Saltillo, Mexico" operations base with glowing hover states.
+
+## [2026-06-20] - About Page Tech Logos & Content Restoration
+### Changed
+- **Content Restoration**: Restored the highly detailed, professional multi-sentence descriptions for each Experience item.
+- **Translation Keys**: Appended the new UI strings (`Developer Portfolio`, `Featured Project`, etc.) and the long Experience strings to `resources/lang/es.json` and `resources/lang/pt.json` to guarantee the language toggle works flawlessly.
+- **Tech Stack Logos**: Swapped out the generic Lucide icons for official brand logos (Laravel, React, Tailwind, Docker, MySQL, Framer, Git, Google) using `react-icons/si`.
+
+## [2026-06-20] - About Page Scroll Animations & Localization
+### Changed
+- **Apple-like Scroll Animations**: Implemented heavy `framer-motion` `useScroll` and `useTransform` effects. The Hero section now scales down and fades out cleanly as the user scrolls, while the background geometric shapes parallax rotate and translate in the opposite direction.
+- **Interactive Experience Accordion**: Replaced static Experience cards with an interactive `<AnimatePresence>` accordion that expands smoothly to reveal job descriptions upon click.
+- **Localization Integration**: Wrapped all static text across the About page with the `useLanguage` `__()` translation helper to ensure seamless compatibility with the Navbar language switcher. Simplified copy back to professional phrasing.
+- **Contact Info**: Updated mailto links to the correct address (silveira.alberto24@gmail.com).
+
+## [2026-06-20] - About Page Cohesive Dala Redesign
+### Changed
+- **Design System Integration**: Integrated the Dala minimalist typography (extreme thin weights, negative tracking) with TechyNews' global premium glassmorphism and gradient language.
+- **Layout Consistency**: Re-added global `<Navbar />`, `<PublicFooter />`, `<CommandPalette />`, and `<RagCopilot />` to ensure seamless navigation consistency across the entire site. Included full light/dark mode support (`dark:bg-[#02040a]`).
+- **Interactive Cosmic Elements**: Replaced the basic 2D canvas with an interactive framer-motion based geometric floating layout that reacts to scroll (`useScroll`). Added a global interactive cursor spotlight (`useMotionTemplate`) that acts as a "flashlight" to reveal subtle tech grids and glows.
+- **Glassmorphic Arsenal**: Updated the tool cards and experience list to use `backdrop-blur-md`, subtle `bg-white/40` to `dark:bg-black/20`, and dynamic `hover:border-[#00b4ff]/40` states for a premium, connected feel.
+
+## [2026-06-20] - About Page Dala Minimalist Redesign
+### Changed
+- **Dala Aesthetic Pivot**: Completely rewrote `About.jsx` to adopt the true "Dala" style from the Refero reference provided by the user. Removed all blocky neo-brutalist elements, thick borders, and hard shadows.
+- **Cosmic UI Elements**: Implemented a lightweight `<ParticleConstellation />` canvas to act as the cosmic void background.
+- **Typography & Details**: Adapted the "Acronym" type system by using Inter with extreme `font-extralight` weights, negative tracking (`-0.04em`) on display text, and positive tracking on body text. Used hairline `border-white/10` borders to define structure without adding weight.
+
+## [2026-06-20] - About Page Brutalist Redesign
+### Changed
+- **Brutalist Overhaul**: Completely rewrote `About.jsx` to adopt a true Brutalist / Neo-brutalist aesthetic based on the user's Refero style reference. Removed all glassmorphic effects, gradients, glowing background blurs, and framer-motion 3D tilts.
+- **Hard Styling**: Implemented thick solid borders (`border-[3px] border-black`), stark offset drop shadows (`shadow-[6px_6px_0px_0px_currentColor]`), high-contrast colors, and rigid CSS translation hovers to replace the previous soft design.
+- **Typography & Structural Detail**: Upscaled headings (`text-8xl`), applied tracking and uppercase transforms to enforce the typography-heavy neo-brutalist layout. Transformed the experience modal into a classic OS window style.
+
+## [2026-06-20] - About Page Premium Redesign
+### Changed
+- **Premium About Page Overhaul**: Rewrote `About.jsx` to replace the flat brutalist design with a high-end, responsive glassmorphic Bento grid layout using the site's dark/light color language.
+- **Interactive Spotlights & Textures**: Integrated a grainy noise backdrop overlay and a mouse-tracking radial spotlight glow (using Framer Motion springs and motion values) to create visual depth.
+- **3D Tilt Cards & Custom Modals**: Re-implemented 3D interactive tilt cards for the "Tech Arsenal" grid and an animated pop-up detail modal (`AnimatePresence`) for exploring job details.
+- **Local Dev Server**: Configured and ran the local Vite server (`npm run dev`) alongside the PHP web server to verify HMR and local page rendering.
+- **Build Validation**: Verified production building (`npm run build`) succeeded with zero errors.
+
+## [2026-06-19] - Dashboard & Analytics Crash Fix
+### Fixed
+- **Dashboard React Crash**: Fixed a `ReferenceError: Activity is not defined` in `AnalyticsChart.jsx` by correctly importing the `Activity` icon from `lucide-react`.
+- **API 500 Errors**: Fixed the "Could not fetch trending stories" and "Failed to trigger scout agent" errors. The API endpoints were crashing with a `CollisionServiceProvider not found` error due to an incomplete `rsync` deployment that corrupted the server's `vendor/` directory cache. Resolved by syncing `vendor/` with `--delete` and regenerating Laravel's bootstrap cache on the production server.
+
+## [2026-06-19] - Radical Redesign of About Page
+### Changed
+- **About Page Redesign**: Completely overhauled `About.jsx` into a radical, brutalist-elegance "museum placard" design inspired by Refero Styles. Removed glassmorphism, glowing orbs, and gradients. Implemented high-contrast `font-black` typography, extreme letter spacing (`tracking-[-0.04em]`), solid black/white division lines, and minimalist accent pills using the primary brand color (`#00b4ff`).
+
 ## [2026-06-19] - API Key Fix & Analytics Redesign
 ### Fixed
 - **Gemini API Key Burned**: Diagnosed and fixed broken `Quick Create` and `Scout Agent` caused by Google revoking the previous Gemini API Key. The key was replaced locally and in production, restoring the `text-embedding-004` capability.

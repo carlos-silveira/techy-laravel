@@ -30,6 +30,7 @@ export default function Navbar() {
 
     const navLinks = [
         { href: '/archive', label: __('Archive') },
+        { href: '/newsletter', label: __('Newsletter') },
         { href: '/about', label: __('About') },
     ];
 

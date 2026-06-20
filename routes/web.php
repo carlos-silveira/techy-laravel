@@ -28,8 +28,13 @@ Route::post('/api/articles/{id}/like', [ArticleController::class, 'like']); // M
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap']);
 Route::get('/feed', [SeoController::class, 'rss']);
 
+use App\Http\Controllers\NewsletterArchiveController;
+use App\Http\Controllers\NewsletterController;
+use App\Http\Controllers\AnalyticsController;
+
 Route::get('/about', [AboutController::class, 'index']);
 Route::get('/archive', [ArchiveController::class, 'index']);
+Route::get('/newsletter', [NewsletterArchiveController::class, 'index']);
 
 Route::get('/analytics/dashboard', [AnalyticsController::class, 'dashboardStats']);
 Route::post('/subscribe', [NewsletterController::class, 'store']);

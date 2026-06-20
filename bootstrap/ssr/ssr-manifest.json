@@ -7,7 +7,7 @@
     "/build/assets/AdSlot-y4X_2aTT.mjs"
   ],
   "resources/js/Components/AnalyticsChart.jsx": [
-    "/build/assets/Dashboard-Dl7iQxPg.mjs"
+    "/build/assets/Dashboard-Jh_YQ7m7.mjs"
   ],
   "resources/js/Components/ApplicationLogo.jsx": [
     "/build/assets/Guest-BiagxEC5.mjs"
@@ -19,7 +19,7 @@
     "/build/assets/CommandPalette-C0WOoolx.mjs"
   ],
   "resources/js/Components/GeminiUsage.jsx": [
-    "/build/assets/Dashboard-Dl7iQxPg.mjs"
+    "/build/assets/Dashboard-Jh_YQ7m7.mjs"
   ],
   "resources/js/Components/Input.jsx": [
     "/build/assets/ValidationErrors-DbFdy9K0.mjs"
@@ -28,25 +28,25 @@
     "/build/assets/ValidationErrors-DbFdy9K0.mjs"
   ],
   "resources/js/Components/LanguageSwitcher.jsx": [
-    "/build/assets/PublicFooter-N9CdGiZK.mjs"
+    "/build/assets/PublicFooter-sNtPJ36C.mjs"
   ],
   "resources/js/Components/Navbar.jsx": [
-    "/build/assets/PublicFooter-N9CdGiZK.mjs"
+    "/build/assets/PublicFooter-sNtPJ36C.mjs"
   ],
   "resources/js/Components/PublicFooter.jsx": [
-    "/build/assets/PublicFooter-N9CdGiZK.mjs"
+    "/build/assets/PublicFooter-sNtPJ36C.mjs"
   ],
   "resources/js/Components/RagCopilot.jsx": [
     "/build/assets/RagCopilot-CsH8uUGU.mjs"
   ],
   "resources/js/Components/RichEditor.jsx": [
-    "/build/assets/Dashboard-Dl7iQxPg.mjs"
+    "/build/assets/Dashboard-Jh_YQ7m7.mjs"
   ],
   "resources/js/Components/ScoutedQueue.jsx": [
-    "/build/assets/Dashboard-Dl7iQxPg.mjs"
+    "/build/assets/Dashboard-Jh_YQ7m7.mjs"
   ],
   "resources/js/Components/Skeleton.jsx": [
-    "/build/assets/Dashboard-Dl7iQxPg.mjs"
+    "/build/assets/Dashboard-Jh_YQ7m7.mjs"
   ],
   "resources/js/Components/ThemeToggle.jsx": [
     "/build/assets/ThemeToggle-z5uN9EoT.mjs"
@@ -61,16 +61,16 @@
     "/build/assets/Guest-BiagxEC5.mjs"
   ],
   "resources/js/Pages/About.jsx": [
-    "/build/assets/About-CrfY-SvR.mjs"
+    "/build/assets/About-y-1B08Sm.mjs"
   ],
   "resources/js/Pages/AboutUs.jsx": [
     "/build/assets/AboutUs-dttcHBnJ.mjs"
   ],
   "resources/js/Pages/Archive.jsx": [
-    "/build/assets/Archive-gXN0l5r6.mjs"
+    "/build/assets/Archive-Ch3ae12z.mjs"
   ],
   "resources/js/Pages/ArticleShow.jsx": [
-    "/build/assets/ArticleShow-dKbdNZ9X.mjs"
+    "/build/assets/ArticleShow-DGQ64Ipm.mjs"
   ],
   "resources/js/Pages/Auth/ConfirmPassword.jsx": [
     "/build/assets/ConfirmPassword-rhVogesD.mjs"
@@ -94,10 +94,10 @@
     "/build/assets/Contact-DTHBIfAR.mjs"
   ],
   "resources/js/Pages/Dashboard.jsx": [
-    "/build/assets/Dashboard-Dl7iQxPg.mjs"
+    "/build/assets/Dashboard-Jh_YQ7m7.mjs"
   ],
   "resources/js/Pages/Error.jsx": [
-    "/build/assets/Error-DJWnPDBW.mjs"
+    "/build/assets/Error-CyBjdGbK.mjs"
   ],
   "resources/js/Pages/Footer.jsx": [
     "/build/assets/Footer-BNnC3ML4.mjs"
@@ -105,20 +105,23 @@
   "resources/js/Pages/Layout.jsx": [
     "/build/assets/Layout-Boew9BvM.mjs"
   ],
+  "resources/js/Pages/NewsletterArchive.jsx": [
+    "/build/assets/NewsletterArchive-BE2foDjO.mjs"
+  ],
   "resources/js/Pages/Post.jsx": [
     "/build/assets/Post-Dx0Qsqq-.mjs"
   ],
   "resources/js/Pages/Privacy.jsx": [
-    "/build/assets/Privacy-CjOOzQWA.mjs"
+    "/build/assets/Privacy-CBK3nvYg.mjs"
   ],
   "resources/js/Pages/Terms.jsx": [
-    "/build/assets/Terms-Cdqk_m9S.mjs"
+    "/build/assets/Terms-BlAq18kz.mjs"
   ],
   "resources/js/Pages/TopNav.jsx": [
     "/build/assets/TopNav-X8GB84N3.mjs"
   ],
   "resources/js/Pages/Welcome.jsx": [
-    "/build/assets/Welcome-CuPC5Juj.mjs"
+    "/build/assets/Welcome-CKoDrF5-.mjs"
   ],
   "resources/js/ssr.jsx": []
 }

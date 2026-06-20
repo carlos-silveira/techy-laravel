@@ -1,13 +1,14 @@
-# ⚡️ Techy News — The Intelligence Pipeline
+# ⚡️ TechyNews — The Intelligence Pipeline
 
 [![Laravel 13](https://img.shields.io/badge/Laravel-13-FF2D20?style=for-the-badge&logo=laravel)](https://laravel.com)
 [![React 18](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Gemini 2.0](https://img.shields.io/badge/AI-Gemini%202.0-4285F4?style=for-the-badge&logo=google-gemini)](https://deepmind.google/technologies/gemini/)
 [![Vite](https://img.shields.io/badge/Vite-6.0-646CFF?style=for-the-badge&logo=vite)](https://vitejs.dev)
 
-> A cutting-edge, AI-powered journalism platform prototype that redefines information consumption through deep technical research and automated synthesis.
+> A cutting-edge, AI-powered journalism platform prototype that redefines information consumption through deep technical research, automated synthesis, and interactive modern UI design.
 
-**[Explore the Live Platform →](https://techynews.lat)**
+**[Explore the Live Platform →](https://techynews.lat)** | **[View the Developer Portfolio →](https://techynews.lat/about)**
 
 ---
 

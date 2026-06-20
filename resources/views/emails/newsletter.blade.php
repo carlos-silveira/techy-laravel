@@ -195,13 +195,9 @@
                                 <table border="0" cellpadding="0" cellspacing="0" width="100%">
                                     <tr>
                                         <td align="center" style="padding-bottom: 20px;">
-                                            <a href="{{ config('app.url') }}" target="_blank" style="display: inline-block; margin: 0 10px;">
+                                            <a href="https://x.com/techynewslat" target="_blank" style="display: inline-block; margin: 0 10px;">
                                                 <!-- X / Twitter Icon -->
                                                 <img src="https://img.icons8.com/ios-filled/50/ffffff/twitterx--v1.png" width="24" height="24" alt="X" style="opacity: 0.6;" />
-                                            </a>
-                                            <a href="{{ config('app.url') }}" target="_blank" style="display: inline-block; margin: 0 10px;">
-                                                <!-- LinkedIn Icon -->
-                                                <img src="https://img.icons8.com/ios-filled/50/ffffff/linkedin.png" width="24" height="24" alt="LinkedIn" style="opacity: 0.6;" />
                                             </a>
                                         </td>
                                     </tr>
