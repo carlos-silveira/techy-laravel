@@ -19,9 +19,15 @@
             <meta property="og:image" content="{{ $meta['image'] }}">
         @endif
     @else
-        <meta property="og:title" content="TechyNews">
-        <meta property="og:description" content="AI-Powered Tech News">
+        <meta property="og:title" content="TechyNews — Noticias de Tecnología con IA">
+        <meta property="og:description" content="Plataforma líder en periodismo tecnológico impulsado por Inteligencia Artificial. IA, startups, ciberseguridad y el futuro de la tecnología.">
         <meta property="og:type" content="website">
+        <meta property="og:image" content="https://techynews.lat/img/logo_wbc.png">
+        <meta property="og:site_name" content="TechyNews">
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:site" content="@TechyNewsLat">
+        <meta name="twitter:title" content="TechyNews — Noticias de Tecnología con IA">
+        <meta name="twitter:description" content="Plataforma líder en periodismo tecnológico impulsado por Inteligencia Artificial.">
     @endif
 
     <!-- Google tag (gtag.js) -->
