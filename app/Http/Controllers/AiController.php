@@ -25,6 +25,7 @@ class AiController extends Controller
      */
     public function generateIdeas(): JsonResponse
     {
+        set_time_limit(180); // Prevent 30s timeout on shared hosting
         try {
             $news = $this->newsService->fetchTodayTechNews();
             $ideas = $this->geminiService->generateIdeas($news);
@@ -39,6 +40,7 @@ class AiController extends Controller
      */
     public function generateDraft(Request $request): JsonResponse
     {
+        set_time_limit(180); // Prevent 30s timeout on shared hosting
         $request->validate([
             'title' => 'required|string',
             'prompt' => 'required|string'

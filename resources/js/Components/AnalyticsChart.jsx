@@ -378,33 +378,35 @@ export default function AnalyticsChart({ analyticsData }) {
 
             {/* ═══ MOST LIKED CONTENT ═══ */}
             {stats.topLikedArticles && stats.topLikedArticles.length > 0 && (
-                <motion.div variants={itemVariants} className="bg-white/50 dark:bg-black/20 border border-pink-500/10 dark:border-pink-500/20 rounded-3xl p-8 backdrop-blur-md relative overflow-hidden group">
-                    <div className="absolute -top-40 -right-40 w-80 h-80 bg-pink-500/10 rounded-full blur-[80px] pointer-events-none group-hover:bg-pink-500/20 transition-all duration-700" />
+                <motion.div variants={itemVariants} className="bg-gradient-to-br from-pink-500/5 to-rose-500/5 border border-pink-500/20 dark:border-pink-500/30 rounded-3xl p-8 backdrop-blur-xl relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,rgba(236,72,153,0.15),transparent_50%)] pointer-events-none transition-opacity duration-700 group-hover:opacity-100 opacity-50" />
                     
-                    <div className="flex items-center gap-3 mb-8 relative z-10">
-                        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-pink-500/20 to-rose-500/10 flex items-center justify-center border border-pink-500/20 shadow-[0_0_15px_rgba(236,72,153,0.15)]">
-                            <Heart className="w-5 h-5 text-pink-500" />
-                        </div>
-                        <div>
-                            <h3 className="text-[11px] font-black text-pink-500 uppercase tracking-[0.25em]">Most Liked Content</h3>
-                            <p className="text-[9px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-0.5">All Time Reader Favorites</p>
+                    <div className="flex items-center justify-between mb-8 relative z-10">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center shadow-[0_0_20px_rgba(236,72,153,0.4)]">
+                                <Heart className="w-6 h-6 text-white drop-shadow-md" />
+                            </div>
+                            <div>
+                                <h3 className="text-[13px] font-black text-pink-500 uppercase tracking-[0.25em]">Reader Favorites</h3>
+                                <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">All-time highest engagement</p>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="space-y-2 relative z-10">
+                    <div className="space-y-3 relative z-10">
                         {stats.topLikedArticles.map((article, i) => (
-                            <motion.div whileHover={{ scale: 1.01, x: 5 }} key={i} className="flex items-center gap-6 group/row hover:bg-pink-500/10 -mx-4 px-4 py-4 rounded-2xl transition-all cursor-pointer">
-                                <span className="text-xl font-black text-pink-500/30 w-8 text-center font-mono group-hover/row:text-pink-500 transition-colors">{String(i + 1).padStart(2, '0')}</span>
+                            <motion.div whileHover={{ scale: 1.02, x: 5 }} key={i} className="flex items-center gap-5 group/row hover:bg-white/60 dark:hover:bg-pink-500/10 p-4 rounded-2xl transition-all cursor-pointer border border-transparent hover:border-pink-500/20 shadow-sm hover:shadow-md">
+                                <div className="w-8 h-8 rounded-full bg-pink-500/10 flex items-center justify-center text-pink-500 font-black text-xs font-mono group-hover/row:bg-pink-500 group-hover/row:text-white transition-colors">
+                                    {i + 1}
+                                </div>
                                 <div className="flex-1 min-w-0">
-                                    <a href={`/article/${article.slug}`} target="_blank" rel="noreferrer" className="block text-sm font-black text-gray-900 dark:text-white group-hover/row:text-pink-500 transition-colors truncate tracking-tight mb-1">
+                                    <a href={`/article/${article.slug}`} target="_blank" rel="noreferrer" className="block text-sm font-bold text-gray-800 dark:text-white group-hover/row:text-pink-600 dark:group-hover/row:text-pink-400 transition-colors truncate">
                                         {article.title}
                                     </a>
                                 </div>
-                                <div className="flex items-center gap-5 flex-shrink-0">
-                                    <div className="text-right">
-                                        <div className="text-sm font-black text-pink-500">{article.likes?.toLocaleString()}</div>
-                                        <div className="text-[9px] font-black text-pink-500/50 uppercase tracking-widest mt-0.5">Likes</div>
-                                    </div>
+                                <div className="flex items-center gap-2 bg-pink-500/5 px-3 py-1.5 rounded-lg border border-pink-500/10">
+                                    <Heart className="w-3.5 h-3.5 text-pink-500 fill-pink-500" />
+                                    <span className="text-sm font-black text-pink-600 dark:text-pink-400">{article.likes?.toLocaleString()}</span>
                                 </div>
                             </motion.div>
                         ))}
@@ -414,38 +416,57 @@ export default function AnalyticsChart({ analyticsData }) {
 
             {/* ═══ MONETIZATION PROJECTIONS ═══ */}
             {stats.adsenseProjection && (
-                <motion.div variants={itemVariants} className="bg-emerald-500/5 border border-emerald-500/10 dark:border-emerald-500/20 rounded-3xl p-8 backdrop-blur-md mt-6">
-                    <div className="flex items-center justify-between mb-6">
-                        <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-                                <DollarSign className="w-4 h-4 text-emerald-500" />
+                <motion.div variants={itemVariants} className="bg-gradient-to-br from-emerald-500/5 to-teal-500/5 border border-emerald-500/20 dark:border-emerald-500/30 rounded-3xl p-8 backdrop-blur-xl mt-6 relative overflow-hidden group/monetization">
+                    <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,rgba(16,185,129,0.15),transparent_50%)] pointer-events-none transition-opacity duration-700 group-hover/monetization:opacity-100 opacity-50" />
+                    
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 relative z-10">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.4)]">
+                                <DollarSign className="w-6 h-6 text-white drop-shadow-md" />
                             </div>
                             <div>
-                                <h3 className="text-[10px] font-black text-emerald-600 dark:text-emerald-500 uppercase tracking-[0.3em]">Monetization Forecast</h3>
-                                <p className="text-[9px] font-bold text-emerald-500/70 uppercase tracking-widest mt-0.5">Google AdSense Projections (30 Days)</p>
+                                <h3 className="text-[13px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.3em]">Revenue Forecast</h3>
+                                <p className="text-[10px] font-bold text-emerald-500/70 uppercase tracking-widest mt-1">Google AdSense (30 Days)</p>
                             </div>
                         </div>
-                        <div className="text-[10px] font-bold text-emerald-500/70 uppercase tracking-widest bg-emerald-500/10 px-3 py-1.5 rounded-lg">Based on {stats.adsenseProjection.views30d.toLocaleString()} views</div>
+                        <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-xl text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">
+                            <Activity className="w-3.5 h-3.5" />
+                            Volume: {stats.adsenseProjection.views30d.toLocaleString()}
+                        </div>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                        <div className="bg-white/50 dark:bg-black/20 border border-emerald-500/10 rounded-2xl p-5">
-                            <div className="text-[10px] font-black text-emerald-500/60 uppercase tracking-widest mb-1">Low Estimate (RPM $1.50)</div>
-                            <div className="text-2xl font-black text-gray-900 dark:text-white">${stats.adsenseProjection.low.toFixed(2)}</div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+                        <div className="bg-white/60 dark:bg-black/40 border border-emerald-500/10 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-emerald-500/30 transition-all">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="w-2 h-2 rounded-full bg-gray-400" />
+                                <div className="text-[10px] font-black text-emerald-600/70 dark:text-emerald-500/60 uppercase tracking-widest">Pessimistic</div>
+                            </div>
+                            <div className="text-3xl font-black text-gray-800 dark:text-gray-200">${stats.adsenseProjection.low.toFixed(2)}</div>
+                            <div className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-2">RPM $1.50</div>
                         </div>
-                        <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-5 relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/20 blur-[30px] rounded-full pointer-events-none -mr-10 -mt-10" />
-                            <div className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1 relative z-10">Avg Estimate (RPM $2.75)</div>
-                            <div className="text-3xl font-black text-emerald-600 dark:text-emerald-400 relative z-10">${((stats.adsenseProjection.low + stats.adsenseProjection.high) / 2).toFixed(2)}</div>
+
+                        <div className="bg-gradient-to-b from-emerald-500/10 to-teal-500/5 border border-emerald-500/30 rounded-2xl p-6 relative overflow-hidden shadow-[0_8px_30px_rgba(16,185,129,0.1)] transform md:-translate-y-2 hover:-translate-y-3 transition-transform duration-300">
+                            <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/20 blur-[50px] rounded-full pointer-events-none -mr-16 -mt-16" />
+                            <div className="flex items-center justify-between mb-3 relative z-10">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                    <div className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Expected</div>
+                                </div>
+                                <Zap className="w-4 h-4 text-emerald-500" />
+                            </div>
+                            <div className="text-4xl font-black text-emerald-700 dark:text-emerald-300 relative z-10">${((stats.adsenseProjection.low + stats.adsenseProjection.high) / 2).toFixed(2)}</div>
+                            <div className="text-[9px] font-bold text-emerald-600/60 dark:text-emerald-400/60 uppercase tracking-widest mt-2 relative z-10">Avg RPM $2.75</div>
                         </div>
-                        <div className="bg-white/50 dark:bg-black/20 border border-emerald-500/10 rounded-2xl p-5">
-                            <div className="text-[10px] font-black text-emerald-500/60 uppercase tracking-widest mb-1">High Estimate (RPM $4.00)</div>
-                            <div className="text-2xl font-black text-gray-900 dark:text-white">${stats.adsenseProjection.high.toFixed(2)}</div>
+
+                        <div className="bg-white/60 dark:bg-black/40 border border-emerald-500/10 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-emerald-500/30 transition-all">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="w-2 h-2 rounded-full bg-teal-400" />
+                                <div className="text-[10px] font-black text-emerald-600/70 dark:text-emerald-500/60 uppercase tracking-widest">Optimistic</div>
+                            </div>
+                            <div className="text-3xl font-black text-gray-800 dark:text-gray-200">${stats.adsenseProjection.high.toFixed(2)}</div>
+                            <div className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-2">RPM $4.00</div>
                         </div>
                     </div>
-                    <p className="text-[10px] font-medium text-gray-500 mt-6 max-w-2xl">
-                        * Estimates assume standard tech-niche RPMs (Revenue Per Mille) ranging from $1.50 to $4.00. Actual AdSense revenue varies heavily based on traffic geography (e.g. US traffic pays significantly more than LATAM), ad placement density, and user engagement.
-                    </p>
                 </motion.div>
             )}
         </motion.div>

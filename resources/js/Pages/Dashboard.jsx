@@ -791,9 +791,24 @@ export default function Dashboard({ auth, articles: initialArticles, analytics }
                 </div>
 
                 <div className="px-4 py-6 border-t border-black/5 dark:border-white/5">
-                    <div className="flex items-center gap-3 text-gray-400 dark:text-gray-600">
-                        <Cpu className="w-4 h-4" />
-                        <span className="text-[9px] font-black uppercase tracking-[0.2em]">Gemini 2.0 Flash</span>
+                    <div className="bg-gradient-to-br from-blue-500/5 to-indigo-500/5 border border-blue-500/10 dark:border-blue-500/20 rounded-2xl p-4 relative overflow-hidden group cursor-default">
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full blur-[20px] -mr-10 -mt-10 group-hover:bg-blue-500/20 transition-all duration-500"></div>
+                        <div className="flex items-center justify-between mb-3 relative z-10">
+                            <div className="flex items-center gap-2">
+                                <div className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                                </div>
+                                <span className="text-[8px] font-black text-blue-500 uppercase tracking-[0.2em]">Engine Online</span>
+                            </div>
+                            <Cpu className="w-3.5 h-3.5 text-blue-500/50" />
+                        </div>
+                        <div className="relative z-10">
+                            <p className="text-[8px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-0.5">Primary Inference Model</p>
+                            <h4 className="text-[11px] font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 truncate tracking-widest uppercase">
+                                Gemini 2.0 Flash
+                            </h4>
+                        </div>
                     </div>
                 </div>
             </aside>
