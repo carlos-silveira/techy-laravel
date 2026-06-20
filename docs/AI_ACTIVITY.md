@@ -313,6 +313,16 @@
 - **Result**: Production news generation is now using the resilient OpenRouter fallback chain, generating fresh content without 429 timeouts.
 
 ## 2026-06-20
+- **Changed**: Completely overhauled the SEO and Metadata architecture across the app to fix indexing issues.
+- **Changed**: Standardized `<Head>` title rendering in `app.jsx` and `ssr.jsx` to prevent the `- Laravel` trailing suffix bug and ensure clean titles.
+- **Added**: Comprehensive `<meta name="description">` tags in `Welcome.jsx` and `ArticleShow.jsx`.
+- **Added**: JSON-LD `NewsArticle` schema injected correctly into `ArticleShow.jsx` and `WebSite` schema in `Welcome.jsx` to drastically improve Google News indexing and rich snippets.
+- **Added**: Canonical links (`<link rel="canonical">`) to all main views.
+- **Added**: Created `scripts/start-ssr.sh` to reliably manage and restart the `inertia:start-ssr` node process using `nohup` on cPanel.
+- **Changed**: Modified `routes/web.php` CI/CD webhook endpoint (`/_m/ci-cd`) to execute the new `start-ssr.sh` script to ensure SSR is always available after deployments, crucial for SEO.
+- **Tested**: Verified local build and pushed to trigger the automated CI/CD pipeline, guaranteeing server-rendered HTML payload for search engine bots.
+
+## 2026-06-20
 - **Changed**: Enforced "ALWAYS SPANISH" for Social Media posts. Updated `SocialMediaService.php` to post only the clean Spanish summary to Facebook without titles or hashtags (to prevent "See more" truncation). Ensured Twitter formatting strictly uses the Spanish title and summary, gracefully falling back if unavailable.
 - **Changed**: Moved `ArticlePublished::dispatch` in `GenerateDailyNews.php` and `SeedCategoryNews.php` to execute *after* translations are saved to the database, ensuring social media listeners have access to the Spanish texts.
 - **Changed**: Updated `PublicController.php` to force Open Graph (`og:`) meta tags to translate to Spanish `es` by default for the `ArticleShow` view. This ensures Facebook and Twitter URL scrapers capture the Spanish title and cover image metadata correctly for preview cards.
