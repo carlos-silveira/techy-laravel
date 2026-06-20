@@ -37,7 +37,7 @@ return [
 
     'openrouter' => [
         'api_key' => env('OPEN_ROUTER_API_KEY', ''),
-        'model' => env('OPEN_ROUTER_MODEL', 'mistralai/mistral-7b-instruct:free'),
+        'model' => env('OPEN_ROUTER_MODEL', 'meta-llama/llama-3.3-70b-instruct:free'),
     ],
 
     'unsplash' => [
