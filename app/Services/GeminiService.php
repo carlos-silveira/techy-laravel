@@ -674,6 +674,9 @@ Return exactly a JSON object (no markdown fences):
                 }
             } catch (\Exception $e) {
                 $lastError = "Gemini connection error: " . $e->getMessage();
+                if (!app()->runningInConsole() && str_contains($e->getMessage(), 'Rate limit hit')) {
+                    break; // Fail fast and go to OpenRouter fallback
+                }
                 if ($attempt < $maxRetriesPerModel) {
                     sleep(10);
                     continue;

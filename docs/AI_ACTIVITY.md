@@ -1,3 +1,15 @@
+## [2026-06-19] - UI Redesign & AI Rate Limit Fixes
+### Added
+- **Premium Dashboard Analytics**: Redesigned `AnalyticsChart.jsx` with `framer-motion` for staggered entrance animations. Stat cards and charts now utilize `backdrop-blur-md` glassmorphism and subtle glowing backgrounds. Upgraded hover effects and custom frosted tooltips.
+- **Scout Action Queue Redesign**: Redesigned `ScoutedQueue.jsx` into an Editorial Desk view with `framer-motion` layout animations and `AnimatePresence`. Added a functional "Scan the Web Now" button.
+- **Backend Scout Trigger**: Added `Route::post('/scouted-queue/trigger')` and `ScoutQueueController@trigger` to actually dispatch `yolo:agent --scout` to the background queue directly from the UI.
+
+### Fixed
+- **Dashboard 504 Gateway Timeout (`Could not fetch trending stories`)**: Investigated a hanging HTTP request on `/api/generate-ideas`. Found that `GeminiService::handle429` was forcing a 45-second sleep multiple times when quota was exhausted, which is acceptable in queue workers but breaks synchronous HTTP requests. Added a check `app()->runningInConsole()` to fail fast and instantly switch to OpenRouter fallback in web contexts.
+- **Corrupted Article Cleanup**: Manually removed the broken "título traducido" article via Tinker on production.
+
+---
+
 ## [2026-05-22] - Fix Language Switcher and Mixed-Language Content
 ### Fixed
 - **Middleware Execution Bug**: Corrected the middleware execution order in `bootstrap/app.php` by placing `SetLocale` *before* `HandleInertiaRequests`. This resolves the core issue where the Inertia shared props were evaluated and cached with a stale/default `'en'` locale before the preferred user locale was resolved from the session or cookies.
