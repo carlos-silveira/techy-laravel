@@ -39,6 +39,8 @@ jobs:
           # Install dependencies with platform-reqs ignored to match host configuration
           # Install dependencies with platform-reqs ignored to match host configuration
           docker exec staging-app /usr/bin/composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev --ignore-platform-reqs
+          docker exec staging-app php artisan view:clear
+          docker exec staging-app php artisan optimize:clear
           # Create .env from example if not exists (required for key:generate)
           docker exec staging-app cp .env.example .env
           docker exec staging-app php artisan key:generate
