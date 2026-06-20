@@ -828,7 +828,7 @@ Return exactly a JSON object (no markdown fences):
     }
 
     /**
-     * Generate an embedding vector for the given text using text-embedding-004.
+     * Generate an embedding vector for the given text using gemini-embedding-2.
      * Returns an array of floats (typically 768 dimensions for Gemini).
      */
     public function embedText(string $text): array
@@ -837,9 +837,9 @@ Return exactly a JSON object (no markdown fences):
 
         try {
             $response = Http::timeout(60)->post(
-                "https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key={$this->apiKey}",
+                "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2:embedContent?key={$this->apiKey}",
                 [
-                    'model' => 'models/text-embedding-004',
+                    'model' => 'models/gemini-embedding-2',
                     'content' => [
                         'parts' => [
                             ['text' => $text]
