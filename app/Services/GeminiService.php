@@ -211,7 +211,8 @@ ARTICLE STRUCTURE (HTML):
   3. **Consequence/Next Steps**: A final short paragraph (2-3 sentences max) explaining the immediate consequence or what happens next. Do NOT use any subheading for this final paragraph.
 - Under NO circumstances should you use more than one `<h2>` heading in the entire article, and only use it if it describes a highly specific, contextual aspect of the details (e.g., `<h2>Specs and Pricing</h2>`). Never use generic headings.
 
-Return ONLY a valid JSON object with these exact keys: \"title\", \"twitter_tldr\", \"article_body\", \"suggested_image\", \"main_category\". Ensure the 'article_body' includes an unsplash image placeholder like <img src=\"PLACEHOLDER_IMAGE\" alt=\"description\">.
+Return ONLY a valid JSON object with these exact keys: \"title\", \"twitter_tldr\", \"article_body\", \"suggested_image\", \"main_category\".
+CRITICAL RULE FOR X (TWITTER): The 'twitter_tldr' field MUST be written entirely in SPANISH (Español). All other fields MUST remain in English. Ensure the 'article_body' includes an unsplash image placeholder like <img src=\"PLACEHOLDER_IMAGE\" alt=\"description\">.
 ";
 
         $result = $this->callGemini($prompt, true);
