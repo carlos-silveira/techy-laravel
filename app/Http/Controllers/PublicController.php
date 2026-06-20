@@ -193,14 +193,18 @@ class PublicController extends Controller
         $article->content = $this->recursivelyUnwrap($article->content);
         $article->content = $this->sanitizeHtml($article->content);
 
+        // ALWAYS SPANISH for Social Media Previews (Open Graph)
+        // We force translation to 'es' just for the meta tags so Facebook/Twitter scrapers see Spanish
+        $metaArticle = $this->translateIfNecessary((clone $article), 'es');
+
         return Inertia::render('ArticleShow', [
             'article' => $article,
             'relatedArticles' => $relatedArticles
         ])->withViewData([
             'meta' => [
-                'title' => $article->title,
-                'description' => $article->ai_summary,
-                'image' => $article->cover_image_path ? (str_starts_with($article->cover_image_path, 'http') ? $article->cover_image_path : asset('storage/' . $article->cover_image_path)) : null,
+                'title' => $metaArticle->title,
+                'description' => $metaArticle->ai_summary,
+                'image' => $metaArticle->cover_image_path ? (str_starts_with($metaArticle->cover_image_path, 'http') ? $metaArticle->cover_image_path : asset('storage/' . $metaArticle->cover_image_path)) : null,
                 'url' => url()->current(),
             ]
         ]);

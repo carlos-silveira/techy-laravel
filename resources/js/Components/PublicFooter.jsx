@@ -15,6 +15,7 @@ export default function PublicFooter({ className = '' }) {
                     <Link href="/archive" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors">{__('Archive')}</Link>
                     <a href="https://github.com/carlos-silveira" target="_blank" rel="noopener noreferrer" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors">GitHub</a>
                     <a href="https://x.com/TechyNewsLat" target="_blank" rel="noopener noreferrer" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors">𝕏 Twitter</a>
+                    <a href="https://www.facebook.com/techynews" target="_blank" rel="noopener noreferrer" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors">Facebook</a>
                     <Link href="/terms" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors">{__('Terms of Use')}</Link>
                     <Link href="/privacy" className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors">{__('Privacy Policy')}</Link>
                 </div>

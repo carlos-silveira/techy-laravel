@@ -29,6 +29,10 @@ class SocialMediaService
         try {
             $tweetText = $this->formatPostText($article);
             
+            if (!$tweetText) {
+                return false;
+            }
+            
             // Twitter requires OAuth 1.0a to post tweets; Bearer tokens are read-only.
             $connection = new TwitterOAuth($consumerKey, $consumerSecret, $accessToken, $accessTokenSecret);
             $connection->setApiVersion('2');
@@ -60,11 +64,28 @@ class SocialMediaService
 
         try {
             $translations = is_string($article->translations) ? json_decode($article->translations, true) : $article->translations;
-            $postText = $translations['es']['summary'] ?? $article->ai_summary;
+            
+            // ALWAYS SPANISH: Get the Spanish summary, or if unavailable, fallback to translating it on the fly or just use the English summary but ideally Spanish. 
+            // Since we will move the dispatch AFTER translation, it should be available.
+            $summaryEs = $translations['es']['summary'] ?? null;
+            
+            if (!$summaryEs) {
+                // If translation somehow failed, we could log and abort to respect ALWAYS SPANISH.
+                Log::warning("Facebook post skipped. Spanish translation unavailable for article: {$article->slug}");
+                return false;
+            }
+
+            // Clean the summary to avoid "See more" - max ~250 chars
+            $postText = $summaryEs;
+            if (mb_strlen($postText, 'UTF-8') > 250) {
+                $postText = mb_substr($postText, 0, 247, 'UTF-8') . '...';
+            }
+
             $pageId = env('FACEBOOK_PAGE_ID');
             $accessToken = env('FACEBOOK_PAGE_ACCESS_TOKEN');
             $link = url('/article/' . $article->slug);
 
+            // POST ONLY the summary, no title, no hashtags.
             $response = Http::post("https://graph.facebook.com/v19.0/{$pageId}/feed", [
                 'message' => $postText,
                 'link' => $link,
@@ -87,13 +108,18 @@ class SocialMediaService
     /**
      * Helper to format the final string going to the social networks.
      */
-    private function formatPostText(Article $article): string
+    private function formatPostText(Article $article): ?string
     {
         // 1. Get Spanish Translations
         $translations = is_string($article->translations) ? json_decode($article->translations, true) : $article->translations;
         
-        $title = $translations['es']['title'] ?? $article->title;
-        $summary = $translations['es']['summary'] ?? $article->ai_summary;
+        $title = $translations['es']['title'] ?? null;
+        $summary = $translations['es']['summary'] ?? null;
+        
+        if (!$title || !$summary) {
+            Log::warning("Twitter post skipped. Spanish translation unavailable for article: {$article->slug}");
+            return null;
+        }
         
         // 2. Generate Dynamic Hashtags from Article tags
         $tags = is_string($article->tags) ? json_decode($article->tags, true) : $article->tags;

@@ -147,8 +147,6 @@ class SeedCategoryNews extends Command
                 'cover_image_path' => $coverImageUrl,
             ]);
 
-            \App\Events\ArticlePublished::dispatch($article);
-
             $this->info("✅ Saved article: '{$title}'");
             
             // Translation
@@ -168,6 +166,9 @@ class SeedCategoryNews extends Command
             if (!empty($translations)) {
                 $article->update(['translations' => $translations]);
             }
+
+            // Dispatch social posts ONLY after translations are stored to ensure SPANISH
+            \App\Events\ArticlePublished::dispatch($article);
             
             $generatedCount++;
             $this->info("--------------------------------------------------");

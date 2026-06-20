@@ -131,8 +131,6 @@ class GenerateDailyNews extends Command
             'cover_image_path'      => $coverImageUrl,
         ]);
 
-        \App\Events\ArticlePublished::dispatch($article);
-
         $this->info('✅ Article published: "' . $idea['title'] . '"');
 
         $this->info('🧠 Generating embedding for RAG...');
@@ -163,6 +161,9 @@ class GenerateDailyNews extends Command
         if (!empty($translations)) {
             $article->update(['translations' => $translations]);
         }
+
+        // Dispatch social posts ONLY after translations are stored to ensure SPANISH
+        \App\Events\ArticlePublished::dispatch($article);
 
         if ($coverImageUrl) {
             $this->info("🖼️  Cover image: {$coverImageUrl}");
