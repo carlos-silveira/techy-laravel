@@ -257,7 +257,7 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
                             onClick={handleLike}
                             className="group flex flex-col items-center gap-1 transition-transform active:scale-95"
                         >
-                            <Heart className={`w-6 h-6 transition-colors ${likes > 0 ? 'fill-red-500 text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.3)]' : 'text-gray-500 group-hover:text-black dark:group-hover:text-white'}`} />
+                            <Heart className={`w-6 h-6 transition-colors ${likes > 0 ? 'fill-red-500 text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'text-gray-500 group-hover:text-black dark:group-hover:text-white'}`} />
                             {likes > 0 && <span className="text-[10px] font-black text-gray-500 dark:text-gray-400">{likes}</span>}
                         </button>
                         <div className="w-[1px] h-6 md:w-6 md:h-[1px] bg-black/5 dark:bg-white/10"></div>

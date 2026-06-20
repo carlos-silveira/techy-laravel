@@ -835,29 +835,47 @@ Return exactly a JSON object (no markdown fences):
     {
         $this->ensureApiKey();
 
-        try {
-            $response = Http::timeout(60)->post(
-                "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2:embedContent?key={$this->apiKey}",
-                [
-                    'model' => 'models/gemini-embedding-2',
-                    'content' => [
-                        'parts' => [
-                            ['text' => $text]
+        // Models to try in order of preference
+        $embeddingModels = [
+            'gemini-embedding-2',
+            'text-embedding-004',
+            'gemini-embedding-001'
+        ];
+
+        foreach ($embeddingModels as $model) {
+            try {
+                $response = Http::timeout(60)->post(
+                    "https://generativelanguage.googleapis.com/v1beta/models/{$model}:embedContent?key={$this->apiKey}",
+                    [
+                        'model' => "models/{$model}",
+                        'content' => [
+                            'parts' => [
+                                ['text' => $text]
+                            ]
                         ]
                     ]
-                ]
-            );
+                );
 
-            if ($response->successful()) {
-                return $response->json()['embedding']['values'] ?? [];
+                if ($response->successful()) {
+                    return $response->json()['embedding']['values'] ?? [];
+                }
+
+                $status = $response->status();
+                if ($status === 404 || $status === 400 || $status === 429) {
+                    Log::warning("Gemini Embedding: Model '{$model}' failed ({$status}). Cascading to next model.");
+                    continue;
+                }
+
+                Log::error("Gemini Embedding Error on model '{$model}': " . $response->body());
+                // For other errors, we still try the next model just in case it's a model-specific outage
+            } catch (\Exception $e) {
+                Log::warning("Gemini Embedding Connection Error on model '{$model}': " . $e->getMessage());
+                // Try next model
             }
-
-            Log::error("Gemini Embedding Error: " . $response->body());
-            return [];
-        } catch (\Exception $e) {
-            Log::error("Gemini Embedding Connection Error: " . $e->getMessage());
-            return [];
         }
+
+        Log::error("All Gemini embedding models failed.");
+        return [];
     }
 
     /**
