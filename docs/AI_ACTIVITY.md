@@ -1,4 +1,13 @@
-## [2026-06-19] - UI Redesign & AI Rate Limit Fixes
+## [2026-06-19] - API Key Fix & Analytics Redesign
+### Fixed
+- **Gemini API Key Burned**: Diagnosed and fixed broken `Quick Create` and `Scout Agent` caused by Google revoking the previous Gemini API Key. The key was replaced locally and in production, restoring the `text-embedding-004` capability.
+
+### Added
+- **Analytics Most Liked**: Added a dedicated "Most Liked Content" (All Time) neon table section directly below the Viral Content panel.
+- **Analytics Viral Content**: Clarified the timeframe by renaming to "Viral Content (Last 7 Days)".
+- **OpenRouter Model Tracking**: Extracted the real model alias from the API response (`$json['model']`) so that `GeminiUsage.jsx` shows the actual open source model used instead of the generic `openrouter/free` fallback alias.
+
+
 ### Added
 - **Premium Dashboard Analytics**: Redesigned `AnalyticsChart.jsx` with `framer-motion` for staggered entrance animations. Stat cards and charts now utilize `backdrop-blur-md` glassmorphism and subtle glowing backgrounds. Upgraded hover effects and custom frosted tooltips.
 - **Scout Action Queue Redesign**: Redesigned `ScoutedQueue.jsx` into an Editorial Desk view with `framer-motion` layout animations and `AnimatePresence`. Added a functional "Scan the Web Now" button.
