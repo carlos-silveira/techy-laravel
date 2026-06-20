@@ -2,7 +2,7 @@ import './bootstrap';
 import '../css/app.css';
 
 import React from 'react';
-import { createRoot } from 'react-dom/client';
+import { createRoot, hydrateRoot } from 'react-dom/client';
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { Toaster } from 'sonner';
@@ -26,17 +26,14 @@ createInertiaApp({
 
         try {
             if (el.hasChildNodes()) {
-                import('react-dom/client').then(({ hydrateRoot }) => {
-                    hydrateRoot(el, appElement);
-                });
+                hydrateRoot(el, appElement);
             } else {
-                import('react-dom/client').then(({ createRoot }) => {
-                    createRoot(el).render(appElement);
-                });
+                createRoot(el).render(appElement);
             }
         } catch (e) {
-            console.error("REACT MOUNT ERROR:", e);
-            document.body.innerHTML += `<div style="color:red; background:white; padding:20px; z-index:9999; position:fixed; top:0; left:0;"><h1>Mount Error</h1><pre>${e.stack}</pre></div>`;
+            console.error("REACT HYDRATION/MOUNT ERROR:", e);
+            // Fallback to standard render if hydration fails
+            createRoot(el).render(appElement);
         }
     },
     progress: {
