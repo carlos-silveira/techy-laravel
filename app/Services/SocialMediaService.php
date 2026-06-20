@@ -88,18 +88,45 @@ class SocialMediaService
      */
     private function formatPostText(Article $article): string
     {
-        $text = $article->ai_summary ?: $article->title;
+        // 1. Get Spanish Translations
+        $translations = is_string($article->translations) ? json_decode($article->translations, true) : $article->translations;
         
-        $callToAction = "\n\nLee la nota completa en nuestra web de TechyNews";
-        $hashtags = "\n\n#TechNews #Techy #AI";
+        $title = $translations['es']['title'] ?? $article->title;
+        $summary = $translations['es']['summary'] ?? $article->ai_summary;
         
-        // Truncate logic if needed, Twitter max is 280
-        $maxChars = 280 - strlen($callToAction) - strlen($hashtags) - 5;
+        // 2. Generate Dynamic Hashtags from Article tags
+        $tags = is_string($article->tags) ? json_decode($article->tags, true) : $article->tags;
+        if (is_array($tags) && count($tags) > 0) {
+            $hashtagsList = array_map(function($tag) {
+                return '#' . str_replace([' ', '-', '_'], '', ucwords($tag));
+            }, array_slice($tags, 0, 3));
+            $dynamicHashtags = implode(' ', $hashtagsList);
+        } else {
+            $dynamicHashtags = "#TechNews #Tecnología";
+        }
         
-        if (strlen($text) > $maxChars) {
-            $text = substr($text, 0, $maxChars - 3) . '...';
+        // 3. Build Footer
+        $link = rtrim(env('APP_URL', 'https://techynews.lat'), '/') . '/article/' . $article->slug;
+        
+        // Twitter counts ALL URLs as exactly 23 characters regardless of actual length.
+        $footerTextForTwitterCount = "\n\nLee la nota completa: [23_CHAR_URL_PLACEHOLDER]\n\n{$dynamicHashtags}";
+        $footerLen = mb_strlen($footerTextForTwitterCount, 'UTF-8');
+        
+        // Max space for summary
+        $maxSummaryChars = 280 - mb_strlen($title, 'UTF-8') - 4 - $footerLen;
+        
+        // 4. Clean Truncation (no '...')
+        if (mb_strlen($summary, 'UTF-8') > $maxSummaryChars) {
+            $summary = mb_substr($summary, 0, $maxSummaryChars, 'UTF-8');
+            // Cut at the last space to avoid broken words
+            $lastSpace = mb_strrpos($summary, ' ', 0, 'UTF-8');
+            if ($lastSpace !== false) {
+                $summary = mb_substr($summary, 0, $lastSpace, 'UTF-8');
+            }
+            // Strip trailing punctuation and finish with a dot
+            $summary = rtrim($summary, '.,;:!?-') . '.';
         }
 
-        return "{$text}{$callToAction}{$hashtags}";
+        return "{$title}\n\n{$summary}\n\nLee la nota completa: {$link}\n\n{$dynamicHashtags}";
     }
 }
