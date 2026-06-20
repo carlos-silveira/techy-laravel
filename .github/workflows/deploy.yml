@@ -58,13 +58,27 @@ jobs:
             fi
             echo "✅ Staging $1 → $STATUS"
           }
-          # Test local docker instance
+          # Test local docker instance via basic curl first
           check http://localhost:8888/
           check http://localhost:8888/api/search?q=AI
       
-      - name: 🛑 Cleanup
+      - name: 🟢 Setup Node.js for E2E Tests
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          
+      - name: 🏗️ Install Cypress
+        run: npm ci
+
+      - name: 🧪 Run Cypress E2E Smoke Tests
+        run: npm run test:e2e -- --spec "cypress/e2e/smoke.cy.js"
+      
+      - name: 🛑 Cleanup & Fix Permissions
         if: always()
-        run: docker compose -f docker-compose.staging.yml down
+        run: |
+          docker compose -f docker-compose.staging.yml down
+          # Fix permissions so the actions/checkout post-run step doesn't fail with git error 128
+          sudo chown -R $USER:$USER .
 
   web-deploy:
     name: 🚀 Deploy to Production
@@ -89,7 +103,7 @@ jobs:
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: 🏗️ Install NPM Dependencies & Build
         env:

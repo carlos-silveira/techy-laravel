@@ -6,6 +6,9 @@ echo "Killing existing SSR process..."
 pkill -f "inertia:start-ssr" || true
 pkill -f "ssr.mjs" || true
 
+# Add Node.js 22 to PATH for cPanel CloudLinux environment
+export PATH=/opt/alt/alt-nodejs22/root/usr/bin:$PATH
+
 # Give it a second to clean up
 sleep 2
 

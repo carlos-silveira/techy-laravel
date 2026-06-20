@@ -7,6 +7,7 @@ import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { Toaster } from 'sonner';
 import { route } from 'ziggy-js';
+import ErrorBoundary from './Components/ErrorBoundary';
 
 const appName = 'TechyNews';
 
@@ -27,10 +28,10 @@ createInertiaApp({
             route(name, params, absolute, props.initialPage.props.ziggy);
 
         const appElement = (
-            <>
+            <ErrorBoundary>
                 <App {...props} />
                 <Toaster theme="dark" position="bottom-right" />
-            </>
+            </ErrorBoundary>
         );
 
         try {

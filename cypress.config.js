@@ -3,7 +3,7 @@ import { defineConfig } from 'cypress';
 export default defineConfig({
     e2e: {
         // Points to the local Docker staging mirror
-        baseUrl: 'http://localhost:8080',
+        baseUrl: 'http://localhost:8888',
         specPattern: 'cypress/e2e/**/*.cy.js',
         supportFile: 'cypress/support/e2e.js',
         video: true,
