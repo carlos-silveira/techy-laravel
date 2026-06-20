@@ -8,16 +8,26 @@ globs: "resources/js/**/*.{jsx,js,css}"
 ## Stack
 - React 18 + Inertia.js (server-driven routing, no SPA client router)
 - Vite for bundling
-- Framer Motion for animations
+- Framer Motion for animations (staggered entrance, layout animations)
 - Lucide React for icons
 - Sonner for toast notifications
 - dayjs for date formatting
+- Recharts for data visualization
+- TailwindCSS for styling
 
 ## Page Components (`resources/js/Pages/`)
 - `Welcome.jsx` — Public homepage (Editor's Choice + article grid)  
 - `ArticleShow.jsx` — Single article view with sanitizeContent()  
 - `Dashboard.jsx` — Studio with 3 views: **wizard** (default), **list**, **editor**  
 - `Archive.jsx`, `AboutUs.jsx`, `Contact.jsx` — Static pages
+
+## Reusable Components (`resources/js/Components/`)
+- `AnalyticsChart.jsx` — Full analytics dashboard with stat cards, charts, tables
+- `ScoutedQueue.jsx` — Editorial desk for scout agent queue
+- `GeminiUsage.jsx` — AI usage tracking panel
+- `RagCopilot.jsx` — RAG-powered chat assistant
+- `AdSlot.jsx` — Google AdSense ad placement
+- `CommandPalette.jsx` — Keyboard shortcut command palette
 
 ## Content Rendering
 Article content is stored as raw HTML. The frontend handles edge cases:
@@ -39,6 +49,8 @@ Always use `dangerouslySetInnerHTML={{ __html: cleanHtml }}` for article body.
 - Glass cards: `bg-white/[0.03] border border-white/10 rounded-[2.5rem]`
 - Font: system sans-serif, `font-black` for headings
 - Prose styling: Tailwind `prose prose-invert` for article content
+- Animations: Use Framer Motion `variants` with staggered children
+- Glassmorphism: `backdrop-blur-md` on panels
 
 ## Studio Wizard (Dashboard.jsx)
 The wizard is the default view for non-technical users:
@@ -48,3 +60,19 @@ The wizard is the default view for non-technical users:
 4. **Publish** — Review metadata → one-click publish
 
 Power users can switch to "Advanced Editor" for full rich-text editing + chat assistant.
+
+## Mobile Responsiveness (Mandatory)
+- Wrap all tables in `overflow-x-auto` containers
+- Use `calc(100vw - ...)` or `max-w-[90vw]` for floating elements
+- Test that no horizontal scrollbar appears on mobile viewports
+- Use responsive grid: `grid-cols-1 md:grid-cols-2 lg:grid-cols-3`
+
+## Error UX Patterns
+- **Loading**: Show skeleton loaders or animated spinners, never blank screens
+- **Errors**: Use `toast.error()` with a specific, actionable message
+- **Empty states**: Show a helpful message with a call-to-action, never a blank area
+- **Optimistic UI**: Use Framer Motion `AnimatePresence` for smooth add/remove transitions
+
+## Build Verification
+- `npm run build` MUST pass with zero errors before any commit
+- Check the browser console for React warnings after deploy

@@ -7,20 +7,32 @@ globs: "app/**/*.php"
 
 ## Service Layer Pattern
 All business logic lives in `app/Services/`:
-- `GeminiService` — AI text generation (Gemini API calls)
+- `GeminiService` — AI text generation (Gemini API calls, with OpenRouter fallback)
 - `NewsService` — RSS feed aggregation (TechCrunch, The Verge, Ars Technica, HN)
-- `LlamaService` — Local Ollama fallback for AI calls
+- `LlamaService` — Local Ollama fallback for AI calls (deprecated)
+- `SocialMediaService` — Twitter/X API integration for auto-posting
 
 ## Controllers
 - `PublicController` — Homepage, article show, search (cached, public)
-- `DashboardController` — Studio page (auth required)
+- `DashboardController` — Studio page + Analytics (auth required)
 - `ArticleController` — CRUD + publish + like
 - `AiController` — AI generation endpoints (generate-ideas, generate-draft, studio-chat, etc.)
+- `ScoutQueueController` — Scout agent queue management
+- `AnalyticsController` — Public analytics endpoints
+- `ChatController` — RAG copilot chat
 
 ## Eloquent Conventions
 - Use `$fillable` arrays, never `$guarded = []`
 - Cast JSON columns: `'tags' => 'array'`
 - Store content as raw HTML string — never `json_encode()` HTML
+- Use type hints on all method parameters and return types
+
+## Error Handling (Mandatory)
+- **ALWAYS** wrap external API calls (Gemini, OpenRouter, RSS) in try/catch
+- **ALWAYS** log with context: `Log::error('Gemini API failed', ['model' => $model, 'error' => $e->getMessage()])`
+- **ALWAYS** return structured JSON errors: `response()->json(['error' => $message], $statusCode)`
+- **NEVER** catch and silently ignore exceptions
+- **Fallback chain**: Gemini → OpenRouter → user-friendly error message
 
 ## Artisan Commands
 - `news:generate-daily` — Daily automated article generation (scheduled 06:00)
@@ -30,8 +42,15 @@ All business logic lives in `app/Services/`:
 ## Environment Variables
 - `GEMINI_API_KEY` — Required for AI generation
 - `GEMINI_MODEL` — Model name (default: `gemini-2.0-flash`)
+- `OPEN_ROUTER_API_KEY` — Fallback AI provider
+- `OPEN_ROUTER_MODEL` — Fallback model name
 - `DB_*` — MySQL production credentials
 
 ## Rate Limiting
 - 10-second `sleep()` between consecutive Gemini API calls
 - HTTP timeout: 60 seconds per request
+
+## Testing Requirements
+- Run `php artisan test` before every deploy
+- Write tests for new service methods
+- Test API endpoints with `curl` after deploy

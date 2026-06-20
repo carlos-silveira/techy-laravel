@@ -6,9 +6,9 @@ globs: "**/*.{php,jsx,js,css}"
 # Base Development Standards — TechyNews
 
 ## Architecture Overview
-- **Backend**: Laravel 13 (PHP 8.2+), Eloquent ORM, MySQL  
-- **Frontend**: React 18 + Inertia.js, Vite, Framer Motion  
-- **AI Layer**: Gemini 2.0 Flash API (with LlamaService fallback)  
+- **Backend**: Laravel 13 (PHP 8.3), Eloquent ORM, MySQL  
+- **Frontend**: React 18 + Inertia.js, Vite, Framer Motion, TailwindCSS  
+- **AI Layer**: Gemini 2.0 Flash API (primary) + OpenRouter (fallback)  
 - **Deployment**: GitHub Actions CI/CD → cPanel (rsync + SSH)
 
 ## Key Principles
@@ -17,7 +17,9 @@ globs: "**/*.{php,jsx,js,css}"
 3. **English only** — All code, comments, documentation in English
 4. **Descriptive naming** — `generateDraft()` not `gd()`
 5. **Service layer** — Business logic lives in `app/Services/`, not controllers
-6. **Strict Testing** — All changes MUST pass unit testing and/or component testing depending on what applies. Do not release unusable code.
+6. **Strict Testing** — All changes MUST pass unit testing and/or component testing. Do not release unusable code.
+7. **Fail Fast** — Never swallow exceptions silently. Log with context, surface to user.
+8. **Verify Before Ship** — Every deploy must include a smoke test on production.
 
 ## Content Pipeline
 ```
@@ -34,9 +36,10 @@ RSS Feeds → NewsService → GeminiService.generateIdeas() → generateDraft() 
 - No soft deletes — articles are hard-deleted
 
 ## Error Handling
-- Log errors via `Log::error()` / `Log::warning()`
-- Gemini API failures fall back to LlamaService
+- Log errors via `Log::error()` / `Log::warning()` with actionable context
+- Gemini API failures fall back to OpenRouter, then to graceful error message
 - Frontend uses `toast.error()` / `toast.success()` for user feedback
+- **NEVER** catch and ignore exceptions. Always log or re-throw.
 
 ## API Naming
 - `POST /api/generate-draft` — Generate article content
@@ -44,3 +47,11 @@ RSS Feeds → NewsService → GeminiService.generateIdeas() → generateDraft() 
 - `POST /api/generate-article-meta` — Generate summary + SEO + tags
 - `POST /api/studio-chat` — Conversational AI assistant
 - `GET /api/generate-ideas` — Fetch trending editorial angles
+- `POST /api/scouted-queue/trigger` — Trigger web scout scan
+- `GET /api/analytics/dashboard` — Analytics data
+
+## External API Verification
+Before deploying any feature that uses an external API (Gemini, OpenRouter, NewsAPI):
+1. Verify the API key is valid (`curl` a simple test request)
+2. Verify the model/endpoint exists and is not deprecated
+3. Log the verification result
