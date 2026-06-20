@@ -1,3 +1,10 @@
+## [2026-06-20] - OpenRouter Fallback Architecture & Prompt Enhancements
+### Changed
+- **Tiered Fallback Architecture**: Fully refactored `GeminiService.php` to route text-generation traffic (both `generateIdeas` and `generateDraft`) through an OpenRouter cascading fallback. This successfully bypassed the persistent 429 Google rate limits.
+- **OpenRouter Free Tier Constraints**: Added `max_tokens => 2500` to the OpenRouter payload and explicitly limited the fallback models array to a maximum of 3 models (`google/gemini-2.5-pro,anthropic/claude-3.5-sonnet,meta-llama/llama-3.3-70b-instruct:free`) to comply with the OpenRouter API constraints (400 and 402 HTTP codes).
+- **Prompt Freshness Injection**: Injected `now()->format('l, F j, Y')` dynamically into the Editor-in-Chief and tech journalist prompts. Added strict instructions to disregard events from previous years (preventing temporal hallucinations like returning news from 2021).
+- **Cleanup**: Stripped out legacy 45-second `sleep()` logic, as the fallback sequence is now handled robustly and transparently natively via OpenRouter.
+
 ## [2026-06-20] - About Page CV Bento Box Grid
 ### Added
 - **Hero Section Right Column**: Implemented a highly premium, Dala-style "Bento Box" grid on the right side of the Hero section. This utilizes the empty space efficiently while displaying critical CV data.
@@ -299,3 +306,8 @@
 ### Changed
 - **Build Pipeline**: Updated `package.json` build script to explicitly trigger `vite build && vite build --ssr` for deterministic CI/CD deployments.
 - **Walkthrough Created**: Documented requirements for running `php artisan inertia:start-ssr` in production and restarting it during deployments.
+
+## 2026-06-20
+- **Changed**: Fully refactored GeminiService to route all text-generation traffic through OpenRouter. Added  to the payload and limited fallback models to a maximum of 3 to satisfy OpenRouter's API constraints for the free-tier. Injected the current date dynamically into AI prompts (generateIdeas and generateDraft) to prevent the AI from generating news with temporal hallucinations (e.g., claiming it's still 2021). Removed legacy sleep/429 fallback loops.
+- **Tested**: Validated the full workflow by running `php artisan news:generate-daily` on production. The fallback router successfully engaged and generated 'Apple's Siri Overhauled with Siri AI'.
+- **Result**: Production news generation is now using the resilient OpenRouter fallback chain, generating fresh content without 429 timeouts.
