@@ -45,7 +45,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap">
 
 
-    <!-- Global Error Catcher -->
+    <!-- Global Error Catcher / Theme Init -->
     <script>
         // Theme initialization
         (function() {
@@ -57,17 +57,12 @@
             }
         })();
 
+        // Fallback friendly error logging without breaking UI
         window.onerror = function(message, source, lineno, colno, error) {
-            const el = document.createElement('div');
-            el.style = 'color:red; background:white; padding:20px; z-index:9999; position:fixed; top:0; left:0; width:100%; word-wrap: break-word;';
-            el.innerHTML = '<h1>Global Error</h1><pre>' + message + '\n' + (error ? error.stack : '') + '</pre>';
-            document.body.appendChild(el);
+            console.error("[Global Error]", message, error);
         };
         window.addEventListener('unhandledrejection', function(event) {
-            const el = document.createElement('div');
-            el.style = 'color:white; background:red; padding:20px; z-index:9999; position:fixed; top:200px; left:0; width:100%; word-wrap: break-word;';
-            el.innerHTML = '<h1>Promise Rejection</h1><pre>' + (event.reason ? event.reason.stack || event.reason : 'Unknown') + '</pre>';
-            document.body.appendChild(el);
+            console.error("[Promise Rejection]", event.reason);
         });
     </script>
 
