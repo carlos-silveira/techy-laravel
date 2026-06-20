@@ -68,7 +68,7 @@ jobs:
           node-version: '22'
           
       - name: 🏗️ Install Cypress
-        run: npm ci
+        run: npm install --legacy-peer-deps --no-audit
 
       - name: 🧪 Run Cypress E2E Smoke Tests
         run: npm run test:e2e -- --spec "cypress/e2e/smoke.cy.js"
