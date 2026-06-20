@@ -158,5 +158,28 @@ jobs:
           check https://techynews.lat/login
           check https://techynews.lat/sitemap.xml
           check https://techynews.lat/feed
-                    check https://techynews.lat/llms.txt
+          check https://techynews.lat/llms.txt
           check "https://techynews.lat/api/search?q=AI"
+
+      - name: 🧩 JS Asset Integrity Check — Verify Critical Chunks Are Reachable
+        run: |
+          # Fetch the manifest and verify the main app entry + ArticleShow chunk are accessible.
+          # This catches the "manifest updated but assets not uploaded" failure mode.
+          MANIFEST=$(curl -s "https://techynews.lat/build/manifest.json")
+          APP_FILE=$(echo "$MANIFEST" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('resources/js/app.jsx',{}).get('file',''))")
+          ARTICLE_FILE=$(echo "$MANIFEST" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('resources/js/Pages/ArticleShow.jsx',{}).get('file',''))")
+          
+          for ASSET in "$APP_FILE" "$ARTICLE_FILE"; do
+            if [ -z "$ASSET" ]; then
+              echo "❌ Could not read asset path from manifest"
+              exit 1
+            fi
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://techynews.lat/build/${ASSET}")
+            if [ "$STATUS" != "200" ]; then
+              echo "❌ JS chunk missing on production: /build/${ASSET} returned $STATUS"
+              echo "This means the manifest was deployed but the asset files were not. Rollback required."
+              exit 1
+            fi
+            echo "✅ /build/${ASSET} → $STATUS"
+          done
+
