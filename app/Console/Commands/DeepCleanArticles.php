@@ -139,10 +139,11 @@ class DeepCleanArticles extends Command
                 $this->warn("Removing duplicates for title: '{$duplicate->normalized_title}'");
                 
                 $articles = Article::whereRaw('LOWER(TRIM(title)) = ?', [$duplicate->normalized_title])
+                    ->orderBy('views_count', 'desc')
                     ->orderBy('created_at', 'desc')
                     ->get();
 
-                $keep = $articles->shift(); // Keep first (newest)
+                $keep = $articles->shift(); // Keep first (most viewed)
                 
                 foreach ($articles as $redundant) {
                     $this->info("🗑️ Deleting article ID {$redundant->id}: '{$redundant->title}'");

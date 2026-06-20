@@ -200,7 +200,7 @@ class PublicController extends Controller
             'meta' => [
                 'title' => $article->title,
                 'description' => $article->ai_summary,
-                'image' => $article->cover_image_path ? asset('storage/' . $article->cover_image_path) : null,
+                'image' => $article->cover_image_path ? (str_starts_with($article->cover_image_path, 'http') ? $article->cover_image_path : asset('storage/' . $article->cover_image_path)) : null,
                 'url' => url()->current(),
             ]
         ]);

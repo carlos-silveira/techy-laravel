@@ -303,16 +303,15 @@ class NewsAgent
             try {
                 $response = \Illuminate\Support\Facades\Http::withHeaders([
                     'Authorization' => "Client-ID {$accessKey}",
-                ])->get('https://api.unsplash.com/search/photos', [
+                ])->get('https://api.unsplash.com/photos/random', [
                     'query' => $query,
-                    'per_page' => 1,
                     'orientation' => 'landscape',
                 ]);
 
                 if ($response->successful()) {
-                    $results = $response->json()['results'] ?? [];
-                    if (!empty($results)) {
-                        return $results[0]['urls']['regular'] ?? null;
+                    $result = $response->json();
+                    if (!empty($result['urls']['regular'])) {
+                        return $result['urls']['regular'];
                     }
                 }
             } catch (\Exception $e) {

@@ -63,18 +63,16 @@ class UpdateImages extends Command
             try {
                 $response = Http::withHeaders([
                     'Authorization' => "Client-ID {$accessKey}",
-                ])->get('https://api.unsplash.com/search/photos', [
+                ])->get('https://api.unsplash.com/photos/random', [
                     'query' => $query,
-                    'per_page' => 1,
                     'orientation' => 'landscape',
-                    'content_filter' => 'high',
                 ]);
 
                 if ($response->successful()) {
-                    $results = $response->json()['results'] ?? [];
-                    if (!empty($results)) {
-                        $photo = $results[0];
-                        $imageUrl = $photo['urls']['regular'] ?? $photo['urls']['small'] ?? null;
+                    $result = $response->json();
+                    if (!empty($result['urls']['regular'])) {
+                        $imageUrl = $result['urls']['regular'];
+                        $photographer = $result['user']['name'] ?? 'Unknown Photographer';
                         
                         if ($imageUrl) {
                             $article->cover_image_path = $imageUrl;

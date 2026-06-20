@@ -59,7 +59,8 @@ class SocialMediaService
         }
 
         try {
-            $postText = $this->formatPostText($article);
+            $translations = is_string($article->translations) ? json_decode($article->translations, true) : $article->translations;
+            $postText = $translations['es']['summary'] ?? $article->ai_summary;
             $pageId = env('FACEBOOK_PAGE_ID');
             $accessToken = env('FACEBOOK_PAGE_ACCESS_TOKEN');
             $link = url('/article/' . $article->slug);

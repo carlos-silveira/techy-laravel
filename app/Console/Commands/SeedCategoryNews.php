@@ -227,18 +227,15 @@ class SeedCategoryNews extends Command
         try {
             $response = Http::withHeaders([
                 'Authorization' => "Client-ID {$accessKey}",
-            ])->get('https://api.unsplash.com/search/photos', [
+            ])->get('https://api.unsplash.com/photos/random', [
                 'query' => $query,
-                'per_page' => 1,
                 'orientation' => 'landscape',
-                'content_filter' => 'high',
             ]);
 
             if ($response->successful()) {
-                $results = $response->json()['results'] ?? [];
-                if (!empty($results)) {
-                    $photo = $results[0];
-                    return $photo['urls']['regular'] ?? $photo['urls']['small'] ?? null;
+                $result = $response->json();
+                if (!empty($result['urls']['regular'])) {
+                    return $result['urls']['regular'];
                 }
             }
         } catch (\Exception $e) {
