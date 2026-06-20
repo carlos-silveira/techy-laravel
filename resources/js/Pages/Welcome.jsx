@@ -126,17 +126,19 @@ export default function Welcome({ articles, editorsChoice, dailyBrief, trendingA
         <title>{`${__('Home')} | TechyNews`}</title>
         <meta name="description" content="TechyNews: Plataforma líder en periodismo tecnológico impulsado por Inteligencia Artificial. Descubre noticias sobre IA, startups, ciberseguridad y el futuro de la tecnología." />
         <link rel="canonical" href="https://techynews.lat" />
-        <script type="application/ld+json">
-            {`
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: `
                 {
                     "@context": "https://schema.org",
                     "@type": "WebSite",
                     "name": "TechyNews",
                     "url": "https://techynews.lat/",
-                    "description": "AI-Powered Tech Intelligence"
+                    "description": "TechyNews: Inteligencia Artificial y Periodismo Tecnológico",
+                    "publisher": {
+                        "@type": "Organization",
+                        "name": "TechyNews"
+                    }
                 }
-            `}
-        </script>
+            `}} />
         <meta property="og:title" content="Techy News — AI-Powered Tech Intelligence" />
         <meta property="og:description" content="A cutting-edge, AI-powered journalism platform delivering deep technical research and automated synthesis of global tech news." />
         <meta property="og:type" content="website" />

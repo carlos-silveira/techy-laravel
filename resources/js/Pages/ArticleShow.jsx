@@ -191,8 +191,7 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
                 <meta name="twitter:site" content="@TechyNewsLat" />
                 
                 {/* JSON-LD Structured Data for NewsArticle */}
-                <script type="application/ld+json">
-                    {JSON.stringify({
+                <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
                         "@context": "https://schema.org",
                         "@type": "NewsArticle",
                         "headline": article.title,
@@ -217,8 +216,7 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
                             "@type": "WebPage",
                             "@id": `https://techynews.lat/article/${article.slug}`
                         }
-                    })}
-                </script>
+                    })}} />
             </Head>
             <CommandPalette />
 
