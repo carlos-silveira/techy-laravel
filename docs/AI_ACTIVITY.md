@@ -311,3 +311,11 @@
 - **Changed**: Fully refactored GeminiService to route all text-generation traffic through OpenRouter. Added  to the payload and limited fallback models to a maximum of 3 to satisfy OpenRouter's API constraints for the free-tier. Injected the current date dynamically into AI prompts (generateIdeas and generateDraft) to prevent the AI from generating news with temporal hallucinations (e.g., claiming it's still 2021). Removed legacy sleep/429 fallback loops.
 - **Tested**: Validated the full workflow by running `php artisan news:generate-daily` on production. The fallback router successfully engaged and generated 'Apple's Siri Overhauled with Siri AI'.
 - **Result**: Production news generation is now using the resilient OpenRouter fallback chain, generating fresh content without 429 timeouts.
+
+## 2026-06-20
+- **Changed**: Enforced "ALWAYS SPANISH" for Social Media posts. Updated `SocialMediaService.php` to post only the clean Spanish summary to Facebook without titles or hashtags (to prevent "See more" truncation). Ensured Twitter formatting strictly uses the Spanish title and summary, gracefully falling back if unavailable.
+- **Changed**: Moved `ArticlePublished::dispatch` in `GenerateDailyNews.php` and `SeedCategoryNews.php` to execute *after* translations are saved to the database, ensuring social media listeners have access to the Spanish texts.
+- **Changed**: Updated `PublicController.php` to force Open Graph (`og:`) meta tags to translate to Spanish `es` by default for the `ArticleShow` view. This ensures Facebook and Twitter URL scrapers capture the Spanish title and cover image metadata correctly for preview cards.
+- **Added**: Appended the official Facebook page URL to the `PublicFooter.jsx` component.
+- **Changed**: Reconfigured `OPEN_ROUTER_MODELS` in `config/services.php` to implement a robust, high-quality model tiering structure (Gemini 2.5 Pro -> Claude 3.7 Sonnet -> GPT 4o -> Gemini Flash -> GPT 4o Mini -> Llama 3.3 70b) falling back to free tiers gracefully.
+- **Result**: All content syndicated to social platforms now guarantees Spanish-first delivery with rich metadata previews, and the AI backend operates with top-tier model fallback resilience.
