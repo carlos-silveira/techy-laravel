@@ -6,13 +6,13 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { route } from 'ziggy-js';
 import { Toaster } from 'sonner';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Techy News';
+const appName = 'TechyNews';
 
 createServer((page) =>
     createInertiaApp({
         page,
         render: ReactDOMServer.renderToString,
-        title: (title) => `${title} - ${appName}`,
+        title: (title) => title ? (title.includes(appName) ? title : `${title} | ${appName}`) : appName,
         resolve: (name) => resolvePageComponent(`./Pages/${name}.jsx`, import.meta.glob('./Pages/**/*.jsx')),
         setup({ App, props }) {
             // Setup ziggy for SSR

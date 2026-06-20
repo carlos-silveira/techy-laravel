@@ -16,16 +16,16 @@ async function resolvePageComponent(path, pages) {
 }
 //#endregion
 //#region resources/js/ssr.jsx
-var appName = "Techy News";
+var appName = "TechyNews";
 createServer((page) => createInertiaApp({
 	page,
 	render: ReactDOMServer.renderToString,
-	title: (title) => `${title} - ${appName}`,
+	title: (title) => title ? title.includes(appName) ? title : `${title} | ${appName}` : appName,
 	resolve: (name) => resolvePageComponent(`./Pages/${name}.jsx`, /* #__PURE__ */ Object.assign({
 		"./Pages/About.jsx": () => import("./assets/About-BF4mg2OX.mjs"),
 		"./Pages/AboutUs.jsx": () => import("./assets/AboutUs-dttcHBnJ.mjs"),
 		"./Pages/Archive.jsx": () => import("./assets/Archive-DjWIWHMH.mjs"),
-		"./Pages/ArticleShow.jsx": () => import("./assets/ArticleShow-CNAqmeC0.mjs"),
+		"./Pages/ArticleShow.jsx": () => import("./assets/ArticleShow-CBRoB0Lq.mjs"),
 		"./Pages/Auth/ConfirmPassword.jsx": () => import("./assets/ConfirmPassword-rhVogesD.mjs"),
 		"./Pages/Auth/ForgotPassword.jsx": () => import("./assets/ForgotPassword-C6p1OChC.mjs"),
 		"./Pages/Auth/Login.jsx": () => import("./assets/Login-B4hr0W_3.mjs"),
@@ -42,7 +42,7 @@ createServer((page) => createInertiaApp({
 		"./Pages/Privacy.jsx": () => import("./assets/Privacy-BCScX6Jb.mjs"),
 		"./Pages/Terms.jsx": () => import("./assets/Terms-CSpP4RQ2.mjs"),
 		"./Pages/TopNav.jsx": () => import("./assets/TopNav-X8GB84N3.mjs").then((n) => n.n),
-		"./Pages/Welcome.jsx": () => import("./assets/Welcome-EkFZ9UNl.mjs")
+		"./Pages/Welcome.jsx": () => import("./assets/Welcome-CfVZCSsm.mjs")
 	})),
 	setup({ App, props }) {
 		global.route = (name, params, absolute) => route(name, params, absolute, {

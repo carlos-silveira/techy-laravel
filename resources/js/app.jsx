@@ -8,10 +8,10 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { Toaster } from 'sonner';
 import { route } from 'ziggy-js';
 
-const appName = import.meta.env.VITE_APP_NAME || 'TechyNews';
+const appName = 'TechyNews';
 
 createInertiaApp({
-    title: (title) => title ? (title.includes(appName) || title.includes('Techy News') ? title : `${title} - ${appName}`) : appName,
+    title: (title) => title ? (title.includes(appName) ? title : `${title} | ${appName}`) : appName,
     resolve: (name) => resolvePageComponent(`./Pages/${name}.jsx`, import.meta.glob('./Pages/**/*.jsx')),
     setup({ el, App, props }) {
         window.route = (name, params, absolute) =>
