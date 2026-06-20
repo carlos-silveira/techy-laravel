@@ -1,4 +1,30 @@
+## [2026-06-20] - Production Outage: Missing JS Chunks Fix & CI/CD Hardening
+
+### Incident
+- **Outage**: Article pages (`/article/*`) showed blank white screens after a failed deploy attempt.
+- **Root Cause**: CI workflow #288 (Inertia downgrade) failed at staging QA. But the production `manifest.json` had already been overwritten to reference new asset hash filenames (e.g., `_chunk-Cyuzqnbw.js`, `_jsx-runtime-BH3idZxw.js`). Since the `web-deploy` job never ran, the actual chunk files with new hashes were never uploaded. Result: 124/125 JS assets returned 404 on production.
+
+### Actions Taken
+- **Restored working build**: `git checkout 763143d -- public/build/` to revert `public/build` to the last known-good asset set with consistent hashes.
+- **Triggered redeploy**: Committed and pushed source-only fixes to trigger a clean CI run that rebuilt all assets with fresh, consistent hashes and deployed the full `public/build/` directory.
+- **Verified**: All 125 manifest-referenced chunks return HTTP 200 on production. All 7 key URLs return 200.
+
+### Preventive Measures Added
+- **JS Asset Integrity Check** (`deploy.yml`): Added a post-deploy step that fetches `manifest.json` from production and verifies that the main `app.js` and `ArticleShow.js` chunks are actually reachable (HTTP 200). If they are missing, the pipeline fails immediately with a clear error message.
+- **Cache clearing in staging**: Added `php artisan view:clear` + `php artisan optimize:clear` to the staging Docker prepare step.
+- **Fixed indentation bug**: Fixed stray extra whitespace before `check https://techynews.lat/llms.txt` line in health check.
+
+### Other Fixes (same session)
+- **Spanish OG meta tags**: Fixed `app.blade.php` fallback Open Graph tags from English ("AI-Powered Tech News") to Spanish ("TechyNews — Noticias de Tecnología con IA") with full Twitter Card tags.
+- **Facebook token expired**: The Facebook Page Access Token expired (`OAuthException: code 190`). Twitter post for "Hyundai Acquires Boston Dynamics" succeeded ✅. Facebook requires manual token refresh.
+- **Twitter post**: Successfully posted "Hyundai Acquires Boston Dynamics" article to Twitter/X in Spanish ✅.
+
+### Files Changed
+- `.github/workflows/deploy.yml` — JS asset integrity check + staging cache clearing + fixed indentation
+- `resources/views/app.blade.php` — ALWAYS SPANISH fallback OG/Twitter meta tags
+
 ## [2026-06-20] - OpenRouter Fallback Architecture & Prompt Enhancements
+
 ### Changed
 - **Tiered Fallback Architecture**: Fully refactored `GeminiService.php` to route text-generation traffic (both `generateIdeas` and `generateDraft`) through an OpenRouter cascading fallback. This successfully bypassed the persistent 429 Google rate limits.
 - **OpenRouter Free Tier Constraints**: Added `max_tokens => 2500` to the OpenRouter payload and explicitly limited the fallback models array to a maximum of 3 models (`google/gemini-2.5-pro,anthropic/claude-3.5-sonnet,meta-llama/llama-3.3-70b-instruct:free`) to comply with the OpenRouter API constraints (400 and 402 HTTP codes).
