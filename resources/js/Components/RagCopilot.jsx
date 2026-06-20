@@ -160,23 +160,32 @@ export default function RagCopilot() {
                                     }`}>
                                         {msg.role === 'assistant' ? (
                                             <div className="prose prose-sm dark:prose-invert prose-p:leading-relaxed prose-a:text-primary max-w-full break-words">
-                                                <ReactMarkdown 
-                                                    remarkPlugins={[remarkGfm]}
-                                                    components={{
-                                                        table: ({node, ...props}) => (
-                                                            <div className="overflow-x-auto w-full my-4 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#0a0f1c]">
-                                                                <table className="w-full text-left border-collapse text-sm whitespace-nowrap sm:whitespace-normal" {...props} />
-                                                            </div>
-                                                        ),
-                                                        th: ({node, ...props}) => <th className="p-2 sm:p-3 bg-gray-50/50 dark:bg-white/[0.02] border-b border-black/10 dark:border-white/10 font-bold" {...props} />,
-                                                        td: ({node, ...props}) => <td className="p-2 sm:p-3 border-b border-black/5 dark:border-white/5 last:border-0" {...props} />,
-                                                        a: ({node, ...props}) => <a className="text-primary hover:underline font-medium" {...props} />,
-                                                        p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />
-                                                    }}
-                                                >
-                                                    {msg.text}
-                                                </ReactMarkdown>
-                                                {msg.isStreaming && <span className="inline-block w-1.5 h-4 ml-1 bg-primary/60 animate-pulse align-middle rounded-full"></span>}
+                                                {msg.text === '' && msg.isStreaming ? (
+                                                    <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 font-medium py-1">
+                                                        <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                                                        <span className="text-[13px]">{__('Thinking...')}</span>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <ReactMarkdown 
+                                                            remarkPlugins={[remarkGfm]}
+                                                            components={{
+                                                                table: ({node, ...props}) => (
+                                                                    <div className="overflow-x-auto w-full my-4 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#0a0f1c]">
+                                                                        <table className="w-full text-left border-collapse text-sm whitespace-nowrap sm:whitespace-normal" {...props} />
+                                                                    </div>
+                                                                ),
+                                                                th: ({node, ...props}) => <th className="p-2 sm:p-3 bg-gray-50/50 dark:bg-white/[0.02] border-b border-black/10 dark:border-white/10 font-bold" {...props} />,
+                                                                td: ({node, ...props}) => <td className="p-2 sm:p-3 border-b border-black/5 dark:border-white/5 last:border-0" {...props} />,
+                                                                a: ({node, ...props}) => <a className="text-primary hover:underline font-medium" {...props} />,
+                                                                p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />
+                                                            }}
+                                                        >
+                                                            {msg.text}
+                                                        </ReactMarkdown>
+                                                        {msg.isStreaming && <span className="inline-block w-1.5 h-4 ml-1 bg-primary/60 animate-pulse align-middle rounded-full"></span>}
+                                                    </>
+                                                )}
                                             </div>
                                         ) : (
                                             <span className="whitespace-pre-wrap leading-relaxed font-medium">{msg.text}</span>
