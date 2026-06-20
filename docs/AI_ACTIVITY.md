@@ -3,6 +3,8 @@
 - **Gemini API Key Burned**: Diagnosed and fixed broken `Quick Create` and `Scout Agent` caused by Google revoking the previous Gemini API Key. The key was replaced locally and in production, restoring the `text-embedding-004` capability.
 
 ### Added
+- **AdSense Projections**: Implemented a "Monetization Forecast" widget calculating AdSense earnings projections (low, average, high) based on total page views over the last 30 days.
+- **Analytics Most Liked Links**: Made the article titles in the "Most Liked Content" table clickable by injecting the `$slug` property from the backend.
 - **Analytics Most Liked**: Added a dedicated "Most Liked Content" (All Time) neon table section directly below the Viral Content panel.
 - **Analytics Viral Content**: Clarified the timeframe by renaming to "Viral Content (Last 7 Days)".
 - **OpenRouter Model Tracking**: Extracted the real model alias from the API response (`$json['model']`) so that `GeminiUsage.jsx` shows the actual open source model used instead of the generic `openrouter/free` fallback alias.
