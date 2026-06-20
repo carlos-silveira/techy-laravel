@@ -16,4 +16,7 @@ export default defineConfig({
         }),
         react(),
     ],
+    ssr: {
+        noExternal: true,
+    },
 });
