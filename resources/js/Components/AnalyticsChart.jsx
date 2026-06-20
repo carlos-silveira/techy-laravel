@@ -321,6 +321,39 @@ export default function AnalyticsChart({ analyticsData }) {
                     )}
                 </div>
             </motion.div>
+
+            {/* ═══ MOST LIKED ARTICLES ═══ */}
+            {stats.topLikedArticles && stats.topLikedArticles.length > 0 && (
+                <motion.div variants={itemVariants} className="bg-pink-500/5 border border-pink-500/10 dark:border-pink-500/20 rounded-3xl p-8 backdrop-blur-md">
+                    <div className="flex items-center justify-between mb-8">
+                        <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-xl bg-pink-500/20 flex items-center justify-center">
+                                <Heart className="w-4 h-4 text-pink-500" />
+                            </div>
+                            <h3 className="text-[10px] font-black text-pink-500 uppercase tracking-[0.3em]">Most Liked Content</h3>
+                        </div>
+                        <div className="text-[10px] font-bold text-pink-500/70 uppercase tracking-widest bg-pink-500/10 px-3 py-1.5 rounded-lg">All Time</div>
+                    </div>
+                    <div className="space-y-2">
+                        {stats.topLikedArticles.map((article, i) => (
+                            <motion.div whileHover={{ scale: 1.01, x: 5 }} key={i} className="flex items-center gap-6 group/row hover:bg-pink-500/10 -mx-4 px-4 py-4 rounded-2xl transition-all cursor-pointer">
+                                <span className="text-xl font-black text-pink-500/30 w-8 text-center font-mono group-hover/row:text-pink-500 transition-colors">{String(i + 1).padStart(2, '0')}</span>
+                                <div className="flex-1 min-w-0">
+                                    <div className="text-sm font-black text-gray-900 dark:text-white group-hover/row:text-pink-500 transition-colors truncate tracking-tight mb-1">
+                                        {article.title}
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-5 flex-shrink-0">
+                                    <div className="text-right">
+                                        <div className="text-sm font-black text-pink-500">{article.likes?.toLocaleString()}</div>
+                                        <div className="text-[9px] font-black text-pink-500/50 uppercase tracking-widest mt-0.5">Likes</div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                </motion.div>
+            )}
         </motion.div>
     );
 }
