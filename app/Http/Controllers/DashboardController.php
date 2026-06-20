@@ -73,8 +73,12 @@ class DashboardController extends Controller
         $topLikedArticles = \App\Models\Article::where('likes_count', '>', 0)
             ->orderByDesc('likes_count')
             ->limit(3)
-            ->get(['title', 'likes_count'])
-            ->map(fn($item) => ['title' => $item->title, 'likes' => $item->likes_count]);
+            ->get(['title', 'slug', 'likes_count'])
+            ->map(fn($item) => [
+                'title' => $item->title,
+                'slug' => $item->slug,
+                'likes' => $item->likes_count
+            ]);
 
         // ─── DEVICE BREAKDOWN (includes bots from user_agent) ───
         $deviceBreakdown = DB::table('page_views')
@@ -247,6 +251,22 @@ class DashboardController extends Controller
         $totalGeminiRequests7d = Schema::hasTable('gemini_logs') ?
             DB::table('gemini_logs')->where('created_at', '>=', now()->subDays(7))->count() : 0;
 
+        // ─── ADSENSE REVENUE PROJECTION (30D) ───
+        $totalViews30d = DB::table('page_views')
+            ->where('created_at', '>=', now()->subDays(30))->count();
+        // Assuming typical tech niche RPM range: $1.50 - $4.00
+        $rpmLow = 1.50;
+        $rpmHigh = 4.00;
+        $projLow = ($totalViews30d / 1000) * $rpmLow;
+        $projHigh = ($totalViews30d / 1000) * $rpmHigh;
+        
+        $adsenseProjection = [
+            'views30d' => $totalViews30d,
+            'low' => round($projLow, 2),
+            'high' => round($projHigh, 2),
+            'rpmAverage' => 2.75, // Just for display
+        ];
+
         // Raw Gemini logs (recent 15, with correct column names)
         $rawGeminiLogs = Schema::hasTable('gemini_logs') ?
             DB::table('gemini_logs')
@@ -305,6 +325,7 @@ class DashboardController extends Controller
                     'totalGeminiTokens7d' => $totalGeminiTokens7d,
                     'totalGeminiCost7d' => round((float) $totalGeminiCost7d, 4),
                     'totalGeminiRequests7d' => $totalGeminiRequests7d,
+                    'adsenseProjection' => $adsenseProjection,
                 ],
             ]
         ]);
