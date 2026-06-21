@@ -45,6 +45,9 @@ jobs:
           docker exec staging-app cp .env.example .env
           docker exec staging-app php artisan key:generate
           docker exec staging-app php artisan migrate --force
+          # Build Frontend Assets (Required for React Hydration)
+          docker exec staging-app npm install --legacy-peer-deps --prefer-offline --no-audit
+          docker exec staging-app npm run build
       
       - name: 🔍 Staging Health Check
         run: |
