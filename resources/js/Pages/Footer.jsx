@@ -11,7 +11,7 @@ export default function Footer() {
         <div>
           <ul className="flex space-x-4">
             <li>
-              <a href="#" className="text-gray-400 hover:text-gray-200">
+              <a href="https://www.facebook.com/techynews" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-200">
                 <FaFacebook className="h-6 w-6" />
               </a>
             </li>

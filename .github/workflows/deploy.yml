@@ -183,3 +183,18 @@ jobs:
             echo "✅ /build/${ASSET} → $STATUS"
           done
 
+      - name: ⏪ Auto-Rollback on Failure
+        if: failure()
+        run: |
+          echo "⚠️ Deployment failed! Triggering automatic rollback to previous working version..."
+          HTTP_RESPONSE=$(curl -w "%{http_code}" -s -X POST \
+            -H "X-Deploy-Token: ${{ secrets.TECHY_DEPLOY_TOKEN }}" \
+            "https://techynews.lat/_m/rollback")
+          
+          if [[ "$HTTP_RESPONSE" == *200 ]]; then
+            echo "✅ Rollback successful. The site has been restored."
+            echo "${HTTP_RESPONSE%200}" | jq -r '.message' || echo "${HTTP_RESPONSE%200}"
+          else
+            echo "❌ Rollback failed! Manual intervention required. HTTP Status: $HTTP_RESPONSE"
+          fi
+

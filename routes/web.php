@@ -72,47 +72,6 @@ Route::middleware([])->group(function () {
         return "Generation dispatched.";
     });
 
-    // TEMPORARY: Update FB token in .env
-    Route::get('/admin/update-fb-token', function () use ($gate) {
-        $gate();
-        $token = 'EAAOGstoI0GEBR0BGlt3u1DrL3pg69eQ9VEz0H9nK8laqr5awney6dieHD5NMpKpSqLvjJaiEeSrHpsLBvWKbK66QPu11fUZAyTGJylrKSBarzjd4sZAUYRkoWNwZCqStGhLFR7VndJ6trxydPJNIE9sO0bKTYx950Axfhkqv76vrpPZAr8prSBNVfFkoChmvcVWPmb9wcYooz1aIOZA3UzURNMiGIdnnNjF8BIjYZCBokmL1RDFdgEnlorTtxEZCit22S6S69v35nCjBk6WfXeIJXlZA2ZB8ya5ZBZA5FIKvAZDZD';
-        $envPath = base_path('.env');
-        $current = file_get_contents($envPath);
-        if (str_contains($current, 'FACEBOOK_PAGE_ACCESS_TOKEN=')) {
-            $updated = preg_replace('/^FACEBOOK_PAGE_ACCESS_TOKEN=.*/m', 'FACEBOOK_PAGE_ACCESS_TOKEN=' . $token, $current);
-        } else {
-            $updated = $current . "\nFACEBOOK_PAGE_ACCESS_TOKEN=" . $token . "\n";
-        }
-        file_put_contents($envPath, $updated);
-        \Illuminate\Support\Facades\Artisan::call('config:clear');
-        return '<pre>✅ FACEBOOK_PAGE_ACCESS_TOKEN updated and config cleared.</pre>';
-    });
-
-    // TEMPORARY: Delete duplicate articles (remove after use)
-    Route::get('/admin/delete-duplicates', function () use ($gate) {
-        $gate();
-        $idsToDelete = [13, 24, 17, 28, 25, 31, 56];
-        $deleted = [];
-        $errors = [];
-        foreach ($idsToDelete as $id) {
-            try {
-                $article = \App\Models\Article::find($id);
-                if ($article) {
-                    $title = $article->title;
-                    $article->delete();
-                    $deleted[] = "ID:$id - $title";
-                } else {
-                    $errors[] = "ID:$id not found";
-                }
-            } catch (\Exception $e) {
-                $errors[] = "ID:$id error: " . $e->getMessage();
-            }
-        }
-        return "<pre>DELETED:\n" . implode("\n", $deleted) . "\n\nERRORS:\n" . implode("\n", $errors) . "</pre>";
-    });
-
-
-
     Route::get('/admin/images', function () use ($gate) {
         $gate();
         $command = "cd " . escapeshellarg(base_path()) . " && /usr/local/bin/php artisan news:update-images > storage/logs/image-update.log 2>&1 &";
@@ -171,6 +130,35 @@ Route::middleware([])->group(function () {
         }
     });
 
+    Route::post('/_m/rollback', function () use ($gate) {
+        try {
+            $gate();
+            $base = base_path();
+            $rollbackFile = $base . '/rollback.zip';
+            
+            if (!file_exists($rollbackFile)) {
+                return response()->json(['status' => 'error', 'message' => 'No rollback.zip found'], 400);
+            }
+            
+            exec("cd ".escapeshellarg($base)." && /usr/bin/unzip -o rollback.zip 2>&1", $zipOut);
+            
+            $php = '/opt/alt/php85/usr/bin/php';
+            $artisan = $base . '/artisan';
+            exec("$php $artisan config:clear 2>&1");
+            exec("$php $artisan optimize 2>&1");
+            exec("$php $artisan queue:restart 2>&1");
+            exec("cd ".escapeshellarg($base)." && bash scripts/start-ssr.sh > /dev/null 2>&1 &");
+            
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Rollback completed successfully.',
+                'logs' => implode("\n", $zipOut)
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    });
+
     Route::post('/_m/ci-cd', function () use ($gate) {
         try {
             $gate();
@@ -191,6 +179,10 @@ Route::middleware([])->group(function () {
             $base = base_path();
             $php = '/opt/alt/php85/usr/bin/php';
             $artisan = $base . '/artisan';
+
+            // CREATE BACKUP FOR POTENTIAL ROLLBACK
+            $output[] = "Creating rollback backup...";
+            exec("cd ".escapeshellarg($base)." && zip -r rollback.zip app config database public resources routes scripts vendor bootstrap artisan composer.json composer.lock .htaccess -x \"public/storage\" \"storage/logs/*\" \"deploy-temp.zip\" \"rollback.zip\" 2>&1", $bkpOut);
 
             exec("cd ".escapeshellarg($base)." && /usr/bin/unzip -o deploy-temp.zip 2>&1", $zipOut);
             $output[] = "Unzip: " . implode("\n", $zipOut);
