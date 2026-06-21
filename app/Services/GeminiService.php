@@ -137,7 +137,7 @@ class GeminiService
     /**
      * Generate editorial angles from trending news — daily.dev style hot takes.
      */
-    public function generateIdeas(array $newsItems): array
+    public function generateIdeas(array $newsItems, array $recentTitles = []): array
     {
         if ($this->isQuotaExhausted()) return [];
         
@@ -152,9 +152,17 @@ class GeminiService
         }
 
         $date = now()->format('l, F j, Y');
+
+        // LAYER 1 DEDUP: Tell the AI which topics we already published
+        $existingContext = '';
+        if (!empty($recentTitles)) {
+            $existingList = implode("\n", array_map(fn($t) => "- $t", array_slice($recentTitles, 0, 30)));
+            $existingContext = "\n\nCRITICAL — ALREADY PUBLISHED (last 7 days, DO NOT REPEAT THESE TOPICS):\n{$existingList}\n\nYou MUST NOT suggest any topic that covers the same story, company, or event as any item in the list above. Even a different angle on the same news event is forbidden if it appears above.";
+        }
+
         $prompt = "You are the Editor-in-Chief of techynews.lat. Today is {$date}. You have these trending headlines from today's tech news cycle:
 
-{$newsContext}
+{$newsContext}{$existingContext}
 
 Your job is to select the 5 to 10 MOST IMPORTANT, exciting, and concrete individual tech news stories from the list above. DO NOT combine unrelated stories. Pick actual, factual events (e.g., a new product launch, a major lawsuit, an AI breakthrough).
 
@@ -166,6 +174,7 @@ Generate between 5 and 10 article ideas. Each MUST:
 
 CRITICAL RECENCY RULE: Today is {$date}. ONLY focus on confirmed tech events from the EXACT last 24 to 48 hours. DO NOT output legacy news or events from previous years (e.g. do not act like it is 2021). If the news is not from today or yesterday, discard it.
 CRITICAL TOPIC RULE: ABSOLUTELY DO NOT write meta-commentary about AI generating articles. Focus on actual tech industry news.
+CRITICAL DEDUP RULE: If you already see a topic in the 'ALREADY PUBLISHED' list above, skip it entirely \u2014 even if the angle is slightly different.
 
 Return ONLY a JSON array, no markdown fences:
 [{\"title\": \"...\", \"prompt\": \"A simple 2-sentence explanation of the news.\", \"angle\": \"product_launch\"}]";

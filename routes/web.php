@@ -72,6 +72,22 @@ Route::middleware([])->group(function () {
         return "Generation dispatched.";
     });
 
+    // TEMPORARY: Update FB token in .env
+    Route::get('/admin/update-fb-token', function () use ($gate) {
+        $gate();
+        $token = 'EAAOGstoI0GEBR0BGlt3u1DrL3pg69eQ9VEz0H9nK8laqr5awney6dieHD5NMpKpSqLvjJaiEeSrHpsLBvWKbK66QPu11fUZAyTGJylrKSBarzjd4sZAUYRkoWNwZCqStGhLFR7VndJ6trxydPJNIE9sO0bKTYx950Axfhkqv76vrpPZAr8prSBNVfFkoChmvcVWPmb9wcYooz1aIOZA3UzURNMiGIdnnNjF8BIjYZCBokmL1RDFdgEnlorTtxEZCit22S6S69v35nCjBk6WfXeIJXlZA2ZB8ya5ZBZA5FIKvAZDZD';
+        $envPath = base_path('.env');
+        $current = file_get_contents($envPath);
+        if (str_contains($current, 'FACEBOOK_PAGE_ACCESS_TOKEN=')) {
+            $updated = preg_replace('/^FACEBOOK_PAGE_ACCESS_TOKEN=.*/m', 'FACEBOOK_PAGE_ACCESS_TOKEN=' . $token, $current);
+        } else {
+            $updated = $current . "\nFACEBOOK_PAGE_ACCESS_TOKEN=" . $token . "\n";
+        }
+        file_put_contents($envPath, $updated);
+        \Illuminate\Support\Facades\Artisan::call('config:clear');
+        return '<pre>✅ FACEBOOK_PAGE_ACCESS_TOKEN updated and config cleared.</pre>';
+    });
+
     // TEMPORARY: Delete duplicate articles (remove after use)
     Route::get('/admin/delete-duplicates', function () use ($gate) {
         $gate();

@@ -34,11 +34,20 @@ class NewsAgent
             return ['status' => 'error', 'message' => 'No news sourced.'];
         }
 
-        // 2. RANK TRENDS (AI Intelligence)
-        $rankedIdeas = $this->gemini->generateIdeas($rawNews);
-        // We assume generateIdeas returns top 3 ranked by default
-        
-        $toProcess = array_slice($rankedIdeas, 0, $limit);
+        // 2. FETCH RECENT PUBLISHED TITLES (last 7 days) so the AI knows what already exists
+        $recentTitles = Article::where('status', 'published')
+            ->where('created_at', '>', now()->subDays(7))
+            ->pluck('title')
+            ->toArray();
+
+        // 3. RANK TRENDS (AI Intelligence) — pass recent titles so AI avoids duplicates at source
+        $rankedIdeas = $this->gemini->generateIdeas($rawNews, $recentTitles);
+
+        // 4. LAYER 2: Keyword-based deduplication filter before spending API quota on drafting
+        $filteredIdeas = $this->filterDuplicateIdeas($rankedIdeas, $recentTitles);
+        Log::info("NewsAgent: {$this->count($rankedIdeas)} ideas ranked, {$this->count($filteredIdeas)} passed dedup filter.");
+
+        $toProcess = array_slice($filteredIdeas, 0, $limit);
 
         foreach ($toProcess as $idea) {
             $results[] = $this->processArticle($idea, $rawNews);
@@ -49,6 +58,51 @@ class NewsAgent
 
         return $results;
     }
+
+    /**
+     * Count helper (avoids count() type error on non-countable).
+     */
+    private function count(mixed $arr): int
+    {
+        return is_array($arr) ? count($arr) : 0;
+    }
+
+    /**
+     * LAYER 2 DEDUP: Filter AI-generated ideas against recently published titles.
+     * Uses keyword overlap — removes any idea that shares 60%+ meaningful keywords
+     * with a recently published article title.
+     */
+    private function filterDuplicateIdeas(array $ideas, array $recentTitles): array
+    {
+        $stopWords = ['the','a','an','in','of','to','for','and','or','is','are','was',
+                      'that','with','on','at','by','as','it','its','amid','new','over',
+                      'after','into','about','how','what','why','says','say','us','ai'];
+
+        $normalize = fn(string $title): array => array_values(array_diff(
+            array_filter(explode(' ', preg_replace('/[^a-z0-9 ]/', '', strtolower($title)))),
+            $stopWords
+        ));
+
+        $recentKeywordSets = array_map($normalize, $recentTitles);
+
+        return array_values(array_filter($ideas, function (array $idea) use ($normalize, $recentKeywordSets) {
+            $ideaWords = $normalize($idea['title']);
+            if (empty($ideaWords)) return true;
+
+            foreach ($recentKeywordSets as $existingWords) {
+                if (empty($existingWords)) continue;
+                $overlap = count(array_intersect($ideaWords, $existingWords));
+                $maxLen   = max(count($ideaWords), count($existingWords));
+                if ($maxLen > 0 && ($overlap / $maxLen) >= 0.60) {
+                    Log::info("NewsAgent dedup: Skipping idea '{$idea['title']}' (" .
+                        round(($overlap / $maxLen) * 100) . "% overlap with existing article)");
+                    return false;
+                }
+            }
+            return true;
+        }));
+    }
+
 
     /**
      * Scout the internet for news and store ideas in the scouted_articles table.
@@ -66,20 +120,29 @@ class NewsAgent
             return ['status' => 'error', 'message' => 'No news sourced.'];
         }
 
-        // 2. RANK TRENDS (AI Intelligence)
-        $rankedIdeas = $this->gemini->generateIdeas($rawNews);
-        
-        $toProcess = array_slice($rankedIdeas, 0, $limit);
+        // 2. Fetch recent titles for AI context + local dedup
+        $recentTitles = Article::where('status', 'published')
+            ->where('created_at', '>', now()->subDays(7))
+            ->pluck('title')
+            ->toArray();
+
+        // 3. RANK TRENDS (AI Intelligence) — aware of existing articles
+        $rankedIdeas = $this->gemini->generateIdeas($rawNews, $recentTitles);
+
+        // 4. LAYER 2: Pre-filter by keyword overlap before storing
+        $filteredIdeas = $this->filterDuplicateIdeas($rankedIdeas, $recentTitles);
+
+        $toProcess = array_slice($filteredIdeas, 0, $limit);
 
         foreach ($toProcess as $idea) {
             $normalizedTitle = Str::slug($idea['title']);
             
-            // Check for duplicate in live articles
+            // Check for duplicate in live articles (slug-based)
             $existsLive = Article::where('slug', 'like', $normalizedTitle . '%')
                 ->where('created_at', '>', now()->subDays(7))
                 ->exists();
                 
-            // Check for duplicate in scouted
+            // Check for duplicate in scouted queue
             $existsScouted = \App\Models\ScoutedArticle::where('title', $idea['title'])
                 ->where('created_at', '>', now()->subDays(2))
                 ->exists();
@@ -91,18 +154,18 @@ class NewsAgent
 
             // Store in Queue
             $scouted = \App\Models\ScoutedArticle::create([
-                'title' => $idea['title'],
-                'url' => $rawNews[0]['link'] ?? null, // Fallback logic is rough here but acceptable for scout metadata
+                'title'  => $idea['title'],
+                'url'    => $rawNews[0]['link'] ?? null,
                 'source' => 'AI Aggregator',
                 'prompt' => $idea['prompt'],
-                'status' => 'pending'
+                'status' => 'pending',
             ]);
 
             Log::info("NewsAgent: Scouted idea #{$scouted->id} -> {$idea['title']}");
             $results[] = [
-                'id' => $scouted->id,
-                'title' => $scouted->title,
-                'status' => 'scouted'
+                'id'     => $scouted->id,
+                'title'  => $scouted->title,
+                'status' => 'scouted',
             ];
         }
 
@@ -209,14 +272,42 @@ class NewsAgent
         // 5. METADATA & FINALIZE
         $meta = $this->gemini->generateArticleMeta($title, $polishedHtml);
         
-        // 6. PUBLISH
-        // Check for duplication before creating - use more robust title check
+        // 6. PUBLISH — LAYER 3 DEDUP GUARD (last line of defense before DB write)
         $normalizedTitle = Str::slug($title);
+
+        // 6a. Exact slug match (fast)
         if (Article::where('slug', 'like', $normalizedTitle . '%')
-            ->where('created_at', '>', now()->subDays(3))
+            ->where('created_at', '>', now()->subDays(7))
             ->exists()) {
-            Log::warning("NewsAgent: Skipping duplicate topic '{$title}'");
-            return ['title' => $title, 'status' => 'failed', 'reason' => 'Duplicate topic'];
+            Log::warning("NewsAgent [L3-slug]: Skipping duplicate topic '{$title}'");
+            return ['title' => $title, 'status' => 'failed', 'reason' => 'Duplicate topic (slug match)'];
+        }
+
+        // 6b. Keyword overlap against all recent titles (catches same story, different title)
+        $stopWords = ['the','a','an','in','of','to','for','and','or','is','are','was','that',
+                      'with','on','at','by','as','it','its','amid','new','over','after','into',
+                      'about','how','what','why','says','say','us','ai'];
+        $normalize = fn(string $t): array => array_values(array_diff(
+            array_filter(explode(' ', preg_replace('/[^a-z0-9 ]/', '', strtolower($t)))),
+            $stopWords
+        ));
+        $ideaWords = $normalize($title);
+
+        $recentArticles = Article::where('status', 'published')
+            ->where('created_at', '>', now()->subDays(7))
+            ->pluck('title')
+            ->toArray();
+
+        foreach ($recentArticles as $existingTitle) {
+            $existingWords = $normalize($existingTitle);
+            if (empty($existingWords) || empty($ideaWords)) continue;
+            $overlap = count(array_intersect($ideaWords, $existingWords));
+            $maxLen  = max(count($ideaWords), count($existingWords));
+            if ($maxLen > 0 && ($overlap / $maxLen) >= 0.60) {
+                Log::warning("NewsAgent [L3-fuzzy]: Skipping '{$title}' — " .
+                    round(($overlap / $maxLen) * 100) . "% keyword overlap with '{$existingTitle}'");
+                return ['title' => $title, 'status' => 'failed', 'reason' => 'Duplicate topic (keyword overlap)'];
+            }
         }
 
         $slug = $normalizedTitle . '-' . Str::random(6);
