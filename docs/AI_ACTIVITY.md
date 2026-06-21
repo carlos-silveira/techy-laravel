@@ -355,3 +355,14 @@
 - **Added**: Appended the official Facebook page URL to the `PublicFooter.jsx` component.
 - **Changed**: Reconfigured `OPEN_ROUTER_MODELS` in `config/services.php` to implement a robust, high-quality model tiering structure (Gemini 2.5 Pro -> Claude 3.7 Sonnet -> GPT 4o -> Gemini Flash -> GPT 4o Mini -> Llama 3.3 70b) falling back to free tiers gracefully.
 - **Result**: All content syndicated to social platforms now guarantees Spanish-first delivery with rich metadata previews, and the AI backend operates with top-tier model fallback resilience.
+
+## 2026-06-20: Deduplication, Rollback & Deployment Fixes
+- **What was changed**: 
+  - Executed cleanup endpoints to update FB token in prod `.env` and remove 7 approved duplicate articles.
+  - Implemented 3-layer anti-duplication filter in `NewsAgent` and `GeminiService` (Layer 1: AI Prompt Injection, Layer 2: Pre-draft Keyword Overlap Filter, Layer 3: Pre-publish Guard with Fuzzy Matching).
+  - Fixed Cypress smoke test to handle empty staging DB correctly to prevent CI failures.
+  - Updated Facebook social link in `Footer.jsx`.
+  - Added an auto-rollback endpoint `/_m/rollback` to the deployment webhook. The webhook now creates `rollback.zip` before extracting the new deploy. If the CI health check fails, it triggers the rollback to restore the previous working version.
+- **Why**: To prevent generating duplicate news, ensure the deploy pipeline doesn't block on empty staging environments, and guarantee that failed deployments to production are automatically reverted without manual intervention.
+- **What was tested**: Local build verified, Cypress logic reviewed, manual execution of endpoints succeeded, direct webhook emergency deploy passed.
+- **Result**: Site stable, new CI push underway.
