@@ -72,6 +72,31 @@ Route::middleware([])->group(function () {
         return "Generation dispatched.";
     });
 
+    // TEMPORARY: Delete duplicate articles (remove after use)
+    Route::get('/admin/delete-duplicates', function () use ($gate) {
+        $gate();
+        $idsToDelete = [13, 24, 17, 28, 25, 31, 56];
+        $deleted = [];
+        $errors = [];
+        foreach ($idsToDelete as $id) {
+            try {
+                $article = \App\Models\Article::find($id);
+                if ($article) {
+                    $title = $article->title;
+                    $article->delete();
+                    $deleted[] = "ID:$id - $title";
+                } else {
+                    $errors[] = "ID:$id not found";
+                }
+            } catch (\Exception $e) {
+                $errors[] = "ID:$id error: " . $e->getMessage();
+            }
+        }
+        return "<pre>DELETED:\n" . implode("\n", $deleted) . "\n\nERRORS:\n" . implode("\n", $errors) . "</pre>";
+    });
+
+
+
     Route::get('/admin/images', function () use ($gate) {
         $gate();
         $command = "cd " . escapeshellarg(base_path()) . " && /usr/local/bin/php artisan news:update-images > storage/logs/image-update.log 2>&1 &";
