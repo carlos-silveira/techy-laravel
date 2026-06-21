@@ -10,7 +10,7 @@ describe('Smoke Tests (Deployment Safeguard)', () => {
     it('Visits the homepage and checks for React hydration', () => {
         cy.visit('/');
         // The React app should mount and we should see the title
-        cy.contains('TechyNews', { timeout: 10000 }).should('be.visible');
+        cy.title({ timeout: 10000 }).should('include', 'TechyNews');
         // Ensure main layout is rendered
         cy.get('main').should('exist');
     });
