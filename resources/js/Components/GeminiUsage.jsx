@@ -86,7 +86,11 @@ export default function GeminiUsage({ usageData, modelDistribution }) {
                                         fontSize={10}
                                         axisLine={false}
                                         tickLine={false}
-                                        width={80}
+                                        width={140}
+                                        tickFormatter={(tick) => {
+                                            const parts = tick.split('/');
+                                            return parts.length > 1 ? parts[1] : tick;
+                                        }}
                                     />
                                     <Tooltip
                                         cursor={{ fill: 'rgba(255,255,255,0.02)' }}

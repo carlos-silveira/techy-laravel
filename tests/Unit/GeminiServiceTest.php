@@ -27,14 +27,8 @@ class GeminiServiceTest extends TestCase
         config(['services.gemini.api_key' => 'test-key']);
 
         Http::fake([
-            'generativelanguage.googleapis.com/*' => Http::response([
-                'candidates' => [[
-                    'content' => [
-                        'parts' => [[
-                            'text' => '[{"title": "Test Idea", "prompt": "An editorial brief"}]'
-                        ]]
-                    ]
-                ]]
+            'openrouter.ai/*' => Http::response([
+                'choices' => [['message' => ['content' => '[{"title": "Test Idea", "prompt": "An editorial brief"}]']]]
             ], 200)
         ]);
 
@@ -58,8 +52,7 @@ class GeminiServiceTest extends TestCase
         $ideas = $service->generateIdeas([]);
 
         $this->assertIsArray($ideas);
-        $this->assertNotEmpty($ideas);
-        $this->assertEquals('The State of Developer Tools in 2026', $ideas[0]['title']);
+        $this->assertEmpty($ideas);
     }
 
     /** @test */
@@ -68,24 +61,18 @@ class GeminiServiceTest extends TestCase
         config(['services.gemini.api_key' => 'test-key']);
 
         Http::fake([
-            'generativelanguage.googleapis.com/*' => Http::response([
-                'candidates' => [[
-                    'content' => [
-                        'parts' => [[
-                            'text' => '{"titular": "Refactored Title", "tldr_twitter": "Short summary", "cuerpo_noticia": "<p>Content</p>", "categoria_principal": "Artificial Intelligence"}'
-                        ]]
-                    ]
-                ]]
+            'openrouter.ai/*' => Http::response([
+                'choices' => [['message' => ['content' => '{"title": "Refactored Title", "twitter_tldr": "Short summary", "article_body": "<p>Content ' . str_repeat('more content ', 30) . '</p>", "main_category": "Artificial Intelligence"}']]]
             ], 200)
         ]);
 
         $service = new GeminiService();
-        $result = $service->generateDraft('Test Title', 'A test prompt', []);
+        $draft = $service->generateDraft('Test Title', 'A test prompt', []);
 
-        $this->assertIsArray($result);
-        $this->assertEquals('Refactored Title', $result['titular']);
-        $this->assertEquals('Short summary', $result['tldr_twitter']);
-        $this->assertEquals('Artificial Intelligence', $result['categoria_principal']);
+        $this->assertIsArray($draft);
+        $this->assertEquals('Refactored Title', $draft['title']);
+        $this->assertEquals('Short summary', $draft['twitter_tldr']);
+        $this->assertEquals('Artificial Intelligence', $draft['main_category']);
     }
 
     /** @test */
@@ -94,14 +81,8 @@ class GeminiServiceTest extends TestCase
         config(['services.gemini.api_key' => 'test-key']);
 
         Http::fake([
-            'generativelanguage.googleapis.com/*' => Http::response([
-                'candidates' => [[
-                    'content' => [
-                        'parts' => [[
-                            'text' => '<h2>Improved Article</h2><p>Revised content.</p>'
-                        ]]
-                    ]
-                ]]
+            'openrouter.ai/*' => Http::response([
+                'choices' => [['message' => ['content' => '<h2>Improved Article</h2><p>Revised content.</p>']]]
             ], 200)
         ]);
 
@@ -123,14 +104,8 @@ class GeminiServiceTest extends TestCase
         config(['services.gemini.api_key' => 'test-key']);
 
         Http::fake([
-            'generativelanguage.googleapis.com/*' => Http::response([
-                'candidates' => [[
-                    'content' => [
-                        'parts' => [[
-                            'text' => '{"summary": "A great article", "meta_description": "SEO desc", "seo_keywords": "ai, tech", "tags": ["ai", "tech"]}'
-                        ]]
-                    ]
-                ]]
+            'openrouter.ai/*' => Http::response([
+                'choices' => [['message' => ['content' => '{"summary": "A great article", "meta_description": "SEO desc", "seo_keywords": "ai, tech", "tags": ["ai", "tech"]}']]]
             ], 200)
         ]);
 
@@ -149,7 +124,7 @@ class GeminiServiceTest extends TestCase
         config(['services.gemini.api_key' => 'test-key']);
 
         Http::fake([
-            'generativelanguage.googleapis.com/*' => Http::response(['error' => 'Bad request'], 400)
+            'openrouter.ai/*' => Http::response(['error' => 'Bad request'], 400)
         ]);
 
         $service = new GeminiService();
@@ -165,14 +140,8 @@ class GeminiServiceTest extends TestCase
         config(['services.gemini.api_key' => 'test-key']);
 
         Http::fake([
-            'generativelanguage.googleapis.com/*' => Http::response([
-                'candidates' => [[
-                    'content' => [
-                        'parts' => [[
-                            'text' => 'This is a daily brief summary.'
-                        ]]
-                    ]
-                ]]
+            'openrouter.ai/*' => Http::response([
+                'choices' => [['message' => ['content' => 'This is a daily brief summary.']]]
             ], 200)
         ]);
 
@@ -191,14 +160,8 @@ class GeminiServiceTest extends TestCase
         config(['services.gemini.api_key' => 'test-key']);
 
         Http::fake([
-            'generativelanguage.googleapis.com/*' => Http::response([
-                'candidates' => [[
-                    'content' => [
-                        'parts' => [[
-                            'text' => "```json\n{\"summary\": \"test\", \"meta_description\": \"desc\", \"seo_keywords\": \"kw\", \"tags\": [\"t1\"]}\n```"
-                        ]]
-                    ]
-                ]]
+            'openrouter.ai/*' => Http::response([
+                'choices' => [['message' => ['content' => "```json\n{\"summary\": \"test\", \"meta_description\": \"desc\", \"seo_keywords\": \"kw\", \"tags\": [\"t1\"]}\n```"]]]
             ], 200)
         ]);
 

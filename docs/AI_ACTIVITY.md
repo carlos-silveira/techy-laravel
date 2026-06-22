@@ -366,3 +366,12 @@
 - **Why**: To prevent generating duplicate news, ensure the deploy pipeline doesn't block on empty staging environments, and guarantee that failed deployments to production are automatically reverted without manual intervention.
 - **What was tested**: Local build verified, Cypress logic reviewed, manual execution of endpoints succeeded, direct webhook emergency deploy passed.
 - **Result**: Site stable, new CI push underway.
+
+## 2026-06-22: System Recovery & Analytics UI Enhancements
+- **Backend**: Implemented `callNativeGeminiFallback` in `GeminiService.php` to automatically switch to the native Google Gemini API when OpenRouter returns 402/429 errors.
+- **Backend**: Prevented garbage output generation by validating short prompts before API submission.
+- **Backend**: Created interactive `php artisan news:duplicates` tool to list, compare (by views count) and delete duplicate historical articles.
+- **Frontend**: Upgraded `ScoutedQueue.jsx` and `ScoutQueueController.php` to run the YOLO agent synchronously on manual trigger, providing real-time console execution logs via UI modal, plus Next/Last run observability.
+- **Frontend**: Fixed `AnalyticsChart.jsx` stat card grid compression and AreaChart peak clipping by updating Tailwind `grid-cols` and Recharts YAxis domain padding.
+- **Frontend**: Fixed model labels overlapping the donut chart in `GeminiUsage.jsx` by expanding Y-Axis width and shortening label strings.
+- **Tests**: Ran `npm run build` and `php -l` to verify syntax and compilation before deployment.

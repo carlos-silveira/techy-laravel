@@ -18,6 +18,7 @@ class WizardApiTest extends TestCase
     {
         parent::setUp();
         $this->user = User::factory()->create();
+        $this->actingAs($this->user);
         config(['services.gemini.api_key' => 'test-key']);
     }
 
@@ -25,10 +26,8 @@ class WizardApiTest extends TestCase
     public function wizard_can_fetch_ideas()
     {
         Http::fake([
-            'generativelanguage.googleapis.com/*' => Http::response([
-                'candidates' => [[
-                    'content' => ['parts' => [['text' => '[{"title": "Test Idea", "prompt": "Brief"}]']]]
-                ]]
+            'openrouter.ai/*' => Http::response([
+                'choices' => [['message' => ['content' => '[{"title": "Test Idea", "prompt": "Brief"}]']]]
             ], 200),
             '*' => Http::response(
                 '<?xml version="1.0"?><rss><channel><item><title>Test</title><description>Desc</description></item></channel></rss>',
@@ -45,10 +44,8 @@ class WizardApiTest extends TestCase
     public function wizard_can_generate_draft()
     {
         Http::fake([
-            'generativelanguage.googleapis.com/*' => Http::response([
-                'candidates' => [[
-                    'content' => ['parts' => [['text' => '<h2>Draft</h2><p>Content</p>']]]
-                ]]
+            'openrouter.ai/*' => Http::response([
+                'choices' => [['message' => ['content' => '{"title": "Draft", "twitter_tldr": "summary", "article_body": "<h2>Draft</h2><p>Content ' . str_repeat('more content ', 30) . '</p>", "main_category": "Tech"}']]]
             ], 200),
             '*' => Http::response(
                 '<?xml version="1.0"?><rss><channel><item><title>Test</title><description>Desc</description></item></channel></rss>',
@@ -69,10 +66,8 @@ class WizardApiTest extends TestCase
     public function wizard_can_regenerate_draft_with_feedback()
     {
         Http::fake([
-            'generativelanguage.googleapis.com/*' => Http::response([
-                'candidates' => [[
-                    'content' => ['parts' => [['text' => '<h2>Revised</h2><p>Updated content.</p>']]]
-                ]]
+            'openrouter.ai/*' => Http::response([
+                'choices' => [['message' => ['content' => '{"title": "Revised", "twitter_tldr": "summary", "article_body": "<h2>Revised</h2><p>Updated content. ' . str_repeat('more content ', 30) . '</p>", "main_category": "Tech"}']]]
             ], 200),
         ]);
 
@@ -91,10 +86,8 @@ class WizardApiTest extends TestCase
     public function wizard_can_generate_article_meta()
     {
         Http::fake([
-            'generativelanguage.googleapis.com/*' => Http::response([
-                'candidates' => [[
-                    'content' => ['parts' => [['text' => '{"summary":"Sum","meta_description":"Desc","seo_keywords":"kw","tags":["t"]}']]]
-                ]]
+            'openrouter.ai/*' => Http::response([
+                'choices' => [['message' => ['content' => '{"summary":"Sum","meta_description":"Desc","seo_keywords":"kw","tags":["t"]}']]]
             ], 200),
         ]);
 
@@ -119,7 +112,7 @@ class WizardApiTest extends TestCase
 
         $response->assertStatus(503);
         $response->assertJsonStructure(['error']);
-        $response->assertJsonFragment(['error' => 'GEMINI_API_KEY is not configured. Please set it in your .env file.']);
+        $response->assertJsonFragment(['error' => 'GEMINI_API_KEY is not configured.']);
     }
 
     /** @test */
@@ -133,6 +126,12 @@ class WizardApiTest extends TestCase
     public function wizard_full_flow_creates_published_article()
     {
         $this->actingAs($this->user);
+
+        Http::fake([
+            'openrouter.ai/*' => Http::response([
+                'choices' => [['message' => ['content' => '{"title": "Translated", "content": "Translated Content"}']]]
+            ], 200)
+        ]);
 
         $response = $this->postJson('/articles', [
             'title' => 'Wizard Created Article',

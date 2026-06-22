@@ -24,6 +24,11 @@ class StudioFeatureTest extends TestCase
     /** @test */
     public function it_can_save_and_publish_an_article()
     {
+        Http::fake([
+            'openrouter.ai/*' => Http::response([
+                'choices' => [['message' => ['content' => '{"title": "Translated", "content": "Translated"}']]]
+            ], 200)
+        ]);
         $response = $this->actingAs($this->user)->postJson('/articles', [
             'title' => 'Test Article',
             'content' => '<h2>Test</h2><p>This is the test content of the article.</p>',
@@ -62,12 +67,8 @@ class StudioFeatureTest extends TestCase
     public function it_can_generate_seo_tags_via_gemini()
     {
         Http::fake([
-            'generativelanguage.googleapis.com/*' => Http::response([
-                'candidates' => [[
-                    'content' => ['parts' => [[
-                        'text' => '{"summary":"A test","meta_description":"SEO desc","seo_keywords":"ai,tech","tags":["ai"]}'
-                    ]]]
-                ]]
+            'openrouter.ai/*' => Http::response([
+                'choices' => [['message' => ['content' => '{"summary":"A test","meta_description":"SEO desc","seo_keywords":"ai,tech","tags":["ai"]}']]]
             ], 200),
         ]);
 
@@ -83,12 +84,8 @@ class StudioFeatureTest extends TestCase
     public function it_can_generate_image_prompt_via_gemini()
     {
         Http::fake([
-            'generativelanguage.googleapis.com/*' => Http::response([
-                'candidates' => [[
-                    'content' => ['parts' => [[
-                        'text' => 'A futuristic cityscape'
-                    ]]]
-                ]]
+            'openrouter.ai/*' => Http::response([
+                'choices' => [['message' => ['content' => 'A futuristic cityscape']]]
             ], 200),
         ]);
 

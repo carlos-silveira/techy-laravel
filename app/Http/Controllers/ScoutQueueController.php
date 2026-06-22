@@ -23,9 +23,16 @@ class ScoutQueueController extends Controller
             $query->where('status', $status);
         }
 
+        $lastRun = \Illuminate\Support\Facades\Cache::get('yolo_agent_last_run');
+        $nextRun = $lastRun ? \Carbon\Carbon::parse($lastRun)->addHours(2)->toIso8601String() : null;
+
         return response()->json([
             'success' => true,
-            'data' => $query->get()
+            'data' => $query->get(),
+            'observability' => [
+                'last_run' => $lastRun,
+                'next_run' => $nextRun,
+            ]
         ]);
     }
 
@@ -69,16 +76,19 @@ class ScoutQueueController extends Controller
     }
 
     /**
-     * Trigger the background scout agent manually.
+     * Trigger the background scout agent manually (Synchronously for real-time UI feedback).
      */
     public function trigger()
     {
-        // Enqueue the artisan command to run the news scout
-        Artisan::queue('yolo:agent', ['--scout' => true]);
+        // Execute synchronously and capture output
+        Artisan::call('yolo:agent', ['--scout' => true]);
+        
+        $output = Artisan::output();
 
         return response()->json([
             'success' => true,
-            'message' => 'Scout agent deployed successfully. Finding new stories now!',
+            'message' => 'Scout agent completed its scan.',
+            'log' => $output
         ]);
     }
 }

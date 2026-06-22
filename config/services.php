@@ -37,7 +37,7 @@ return [
 
     'openrouter' => [
         'api_key' => env('OPEN_ROUTER_API_KEY', ''),
-        'models' => env('OPEN_ROUTER_MODELS', 'google/gemini-2.5-pro,anthropic/claude-3.7-sonnet,openai/gpt-4o,google/gemini-2.5-flash,openai/gpt-4o-mini,meta-llama/llama-3.3-70b-instruct:free,openrouter/free'),
+        'models' => env('OPEN_ROUTER_MODELS', 'google/gemini-2.5-pro,anthropic/claude-3.7-sonnet,google/gemini-2.5-flash,google/gemma-4-31b-it:free,meta-llama/llama-3.3-70b-instruct:free,openrouter/free'),
     ],
 
     'unsplash' => [

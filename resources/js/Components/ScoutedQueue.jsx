@@ -8,12 +8,17 @@ export default function ScoutedQueue() {
     const [items, setItems] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isTriggering, setIsTriggering] = useState(false);
+    const [observability, setObservability] = useState(null);
+    const [logOutput, setLogOutput] = useState(null);
 
     const fetchQueue = async () => {
         setIsLoading(true);
         try {
             const res = await axios.get('/api/scouted-queue?status=all');
             setItems(res.data.data);
+            if (res.data.observability) {
+                setObservability(res.data.observability);
+            }
         } catch (error) {
             toast.error('Failed to load queue');
         } finally {
@@ -51,12 +56,15 @@ export default function ScoutedQueue() {
 
     const handleTriggerScout = async () => {
         setIsTriggering(true);
-        const loadingToast = toast.loading('Initializing Scout Agent radar...');
+        setLogOutput(null);
+        const loadingToast = toast.loading('Running Scout Agent... This might take 30-60 seconds.');
         try {
             const res = await axios.post('/api/scouted-queue/trigger');
-            toast.success(res.data.message || 'Scout triggered!', { id: loadingToast });
-            // Refresh after a few seconds assuming scout finds something
-            setTimeout(fetchQueue, 5000);
+            toast.success(res.data.message || 'Scout scan completed!', { id: loadingToast });
+            if (res.data.log) {
+                setLogOutput(res.data.log);
+            }
+            fetchQueue();
         } catch (err) {
             toast.error('Failed to trigger scout agent', { id: loadingToast });
         } finally {
@@ -89,7 +97,20 @@ export default function ScoutedQueue() {
                                 <Radar className={`w-5 h-5 text-primary ${isTriggering ? 'animate-spin' : ''}`} /> 
                                 Want new ideas right now?
                             </h4>
-                            <p className="text-sm text-gray-500">Deploy the Scout Agent to scan the web for the latest breaking tech news.</p>
+                            <p className="text-sm text-gray-500 mb-4">Deploy the Scout Agent to scan the web for the latest breaking tech news.</p>
+                            
+                            {observability && (
+                                <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-gray-400">
+                                    <span className="flex items-center gap-1.5" title="Last run time">
+                                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                                        Last: {observability.last_run ? new Date(observability.last_run).toLocaleString() : 'Never'}
+                                    </span>
+                                    <span className="flex items-center gap-1.5" title="Next scheduled run">
+                                        <Clock className="w-3.5 h-3.5 text-blue-500" />
+                                        Next: {observability.next_run ? new Date(observability.next_run).toLocaleString() : 'N/A'}
+                                    </span>
+                                </div>
+                            )}
                         </div>
                         <button 
                             onClick={handleTriggerScout}
@@ -100,6 +121,23 @@ export default function ScoutedQueue() {
                             {isTriggering ? 'SCANNING WEB...' : 'SCAN THE WEB NOW'}
                         </button>
                     </div>
+
+                    {/* Execution Logs */}
+                    <AnimatePresence>
+                        {logOutput && (
+                            <motion.div 
+                                initial={{ opacity: 0, height: 0 }} 
+                                animate={{ opacity: 1, height: 'auto' }} 
+                                exit={{ opacity: 0, height: 0 }}
+                                className="mt-6 pt-6 border-t border-black/5 dark:border-white/5"
+                            >
+                                <h5 className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Agent Execution Logs</h5>
+                                <pre className="bg-black dark:bg-[#02040a] text-green-400 p-4 rounded-xl text-[10px] overflow-x-auto max-h-64 whitespace-pre-wrap border border-white/5 font-mono">
+                                    {logOutput}
+                                </pre>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
 

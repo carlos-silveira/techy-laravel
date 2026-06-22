@@ -12,6 +12,12 @@ class PublicFrontendTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        \Illuminate\Support\Facades\Queue::fake();
+    }
+
     public function test_homepage_shows_published_articles_only()
     {
         // Custom creation matching Laravel 8 behavior

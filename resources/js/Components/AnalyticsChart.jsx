@@ -120,7 +120,7 @@ export default function AnalyticsChart({ analyticsData }) {
     return (
         <motion.div variants={containerVariants} initial="hidden" animate="show" className="space-y-6">
             {/* ═══ STAT CARDS ═══ */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7 gap-4">
                 {[
                     { icon: Zap, label: "LLM Tokens", value: stats.totalGeminiTokens7d?.toLocaleString() || 0, subValue: `$${stats.totalGeminiCost7d || '0.00'} est.`, color: "orange" },
                     { icon: Eye, label: "Views (7d)", value: stats.totalViews7d || 0, trend: stats.viewsGrowth, color: "primary" },
@@ -180,7 +180,7 @@ export default function AnalyticsChart({ analyticsData }) {
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(128,128,128,0.1)" vertical={false} />
                                 <XAxis dataKey="date" stroke="rgba(128,128,128,0.5)" fontSize={10} tickMargin={10} />
-                                <YAxis stroke="rgba(128,128,128,0.5)" fontSize={10} axisLine={false} tickLine={false} />
+                                <YAxis stroke="rgba(128,128,128,0.5)" fontSize={10} axisLine={false} tickLine={false} domain={[0, 'auto']} padding={{ top: 20 }} />
                                 <Tooltip content={<CustomTooltip />} />
                                 <Area type="monotone" dataKey="views" stroke="rgb(var(--color-primary))" strokeWidth={3} fillOpacity={1} fill="url(#colorViews)" animationDuration={1500} />
                                 <Area type="monotone" dataKey="visitors" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorVisitors)" animationDuration={1500} />

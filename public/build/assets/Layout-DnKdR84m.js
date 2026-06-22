@@ -1,0 +1,1 @@
+import"./chunk-Cyuzqnbw.js";import{n as e,t}from"./jsx-runtime-BH3idZxw.js";import{t as n}from"./TopNav-CcoqyNvg.js";import{t as r}from"./Footer-rf_9_OqO.js";e();var i=t(),a=({children:e})=>(0,i.jsxs)(`div`,{className:`flex flex-col min-h-screen`,children:[(0,i.jsx)(n,{}),(0,i.jsx)(`main`,{className:`flex-grow`,children:e}),(0,i.jsx)(r,{})]});export{a as default};

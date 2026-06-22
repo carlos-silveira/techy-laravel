@@ -27,8 +27,9 @@ class GeminiService
 
     public function __construct()
     {
-        $this->apiKey = config('services.gemini.api_key', env('GEMINI_API_KEY', ''));
-        $this->model = config('services.gemini.model', env('GEMINI_MODEL', 'gemini-2.5-flash'));
+        // Use OpenRouter key as primary since we migrated to openrouter.ai
+        $this->apiKey = config('services.openrouter.api_key', env('OPEN_ROUTER_API_KEY', config('services.gemini.api_key', env('GEMINI_API_KEY', ''))));
+        $this->model = config('services.openrouter.models', env('OPEN_ROUTER_MODEL', config('services.gemini.model', env('GEMINI_MODEL', 'google/gemini-2.5-flash'))));
     }
 
     /**
@@ -516,8 +517,8 @@ Return exactly a JSON object (no markdown fences):
 
         return [
             'title' => $result['title'],
-            'summary' => $result['summary'],
-            'content' => $result['content'],
+            'summary' => $result['summary'] ?? null,
+            'content' => $result['content'] ?? null,
         ];
     }
 
@@ -554,20 +555,41 @@ Return exactly a JSON object (no markdown fences):
         try {
             return $this->callOpenRouterFallback($messages, false);
         } catch (\Exception $e) {
-            Log::error("OpenRouter conversational failed: " . $e->getMessage());
+            Log::warning("OpenRouter conversational failed: " . $e->getMessage() . " - Attempting Native Gemini Fallback");
+            
+            if (env('GEMINI_API_KEY')) {
+                return $this->callNativeGeminiFallback($messages, false);
+            }
+            
             throw new \RuntimeException('AI API is currently resting or unavailable. Last error: ' . $e->getMessage());
         }
     }
 
     /**
-     * Call AI API for single-prompt requests (via OpenRouter).
+     * Call AI API for single-prompt requests (via OpenRouter or Native Fallback).
      */
     private function callGemini(string $prompt, bool $expectJson = false)
     {
+        $this->ensureApiKey();
+        
+        // PRE-GENERATION VALIDATION: Prevent garbage generation if context is too short.
+        if (strlen(trim($prompt)) < 50) {
+            throw new \RuntimeException('Prompt validation failed: content is too short or empty. Generating an article from this will result in garbage output.');
+        }
+        
         try {
             return $this->callOpenRouterFallback($prompt, $expectJson);
         } catch (\Exception $e) {
-            Log::error("OpenRouter API failed: " . $e->getMessage());
+            Log::warning("OpenRouter API failed: " . $e->getMessage() . " - Attempting Native Gemini Fallback");
+            
+            if (env('GEMINI_API_KEY')) {
+                try {
+                    return $this->callNativeGeminiFallback($prompt, $expectJson);
+                } catch (\Exception $e2) {
+                    Log::error("Native Gemini Fallback also failed: " . $e2->getMessage());
+                }
+            }
+            
             if ($expectJson) return [];
             throw new \RuntimeException('AI API is currently resting or unavailable. Last error: ' . $e->getMessage());
         }
@@ -578,7 +600,7 @@ Return exactly a JSON object (no markdown fences):
      */
     private function callOpenRouterFallback($promptOrMessages, bool $expectJson = false)
     {
-        $apiKey = config('services.openrouter.api_key');
+        $apiKey = $this->apiKey;
         $modelsConfig = config('services.openrouter.models', 'google/gemini-2.5-pro,anthropic/claude-3.5-sonnet,google/gemini-2.5-flash,meta-llama/llama-3.3-70b-instruct:free,qwen/qwen-2.5-72b-instruct:free,mistralai/mistral-nemo:free');
         
         $modelsArray = array_values(array_filter(array_map('trim', explode(',', $modelsConfig))));
@@ -656,8 +678,11 @@ Return exactly a JSON object (no markdown fences):
         if ($response->successful()) {
             $json = $response->json();
             $text = $json['choices'][0]['message']['content'] ?? '';
-            $result = $expectJson ? $this->extractJson($text) : trim($text);
-
+            
+            if ($expectJson) {
+                return $this->extractJson($text);
+            }
+            
             // Track OpenRouter API Usage tokens
             if (isset($json['usage'])) {
                 $actualModel = $json['model'] ?? 'openrouter';
@@ -680,6 +705,62 @@ Return exactly a JSON object (no markdown fences):
         }
 
         throw new \RuntimeException("OpenRouter API Error: " . $response->body());
+    }
+
+    /**
+     * Fallback to native Google Gemini API if OpenRouter fails.
+     */
+    private function callNativeGeminiFallback($promptOrMessages, bool $expectJson = false)
+    {
+        $nativeKey = env('GEMINI_API_KEY');
+        if (!$nativeKey) {
+            throw new \RuntimeException("GEMINI_API_KEY not configured for fallback.");
+        }
+        
+        $model = 'gemini-2.5-flash';
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$nativeKey}";
+        
+        $contents = [];
+        if (is_string($promptOrMessages)) {
+            $contents[] = ['parts' => [['text' => $promptOrMessages]]];
+        } else {
+            foreach ($promptOrMessages as $msg) {
+                $role = (isset($msg['role']) && $msg['role'] === 'assistant') ? 'model' : 'user';
+                $text = $msg['content'] ?? ($msg['parts'][0]['text'] ?? '');
+                $contents[] = ['role' => $role, 'parts' => [['text' => $text]]];
+            }
+        }
+
+        $payload = [
+            'contents' => $contents,
+            'generationConfig' => [
+                'temperature' => 0.7,
+                'maxOutputTokens' => 4000,
+            ]
+        ];
+
+        if ($expectJson) {
+            $payload['generationConfig']['responseMimeType'] = 'application/json';
+        }
+
+        $response = Http::timeout(180)
+            ->withHeaders([
+                'Content-Type' => 'application/json',
+            ])
+            ->post($url, $payload);
+
+        if ($response->successful()) {
+            Log::info("Successfully generated using Native Gemini Fallback model: {$model}");
+            $json = $response->json();
+            $text = $json['candidates'][0]['content']['parts'][0]['text'] ?? '';
+            
+            if ($expectJson) {
+                return $this->extractJson($text);
+            }
+            return $text;
+        }
+        
+        throw new \RuntimeException("Native Gemini API Error: " . $response->body());
     }
 
     /**

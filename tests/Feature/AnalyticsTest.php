@@ -12,6 +12,13 @@ class AnalyticsTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        \Illuminate\Support\Facades\Queue::fake();
+    }
+
+    /** @test */
     public function test_dashboard_analytics_endpoint_returns_correct_stats()
     {
         Article::forceCreate([

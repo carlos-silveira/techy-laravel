@@ -17,6 +17,9 @@ class NewsYoloAgent extends Command
     {
         $this->info("🤖 Techy YOLO Agent activated.");
         
+        // Track the last run time
+        \Illuminate\Support\Facades\Cache::put('yolo_agent_last_run', now()->toIso8601String());
+
         if ($gemini->isQuotaExhausted()) {
             $this->error("🚫 Gemini quota is exhausted for today. Standby mode.");
             return 1;
