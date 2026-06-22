@@ -148,7 +148,8 @@ class GeminiService
         $newsContext = "";
         foreach ($newsItems as $item) {
             $source = $item['source'] ?? 'Unknown';
-            $newsContext .= "- [{$source}] {$item['title']}: {$item['description']}\n";
+            $link = $item['link'] ?? '';
+            $newsContext .= "- [{$source}] {$item['title']}: {$item['description']} (URL: {$link})\n";
         }
 
         $date = now()->format('l, F j, Y');
@@ -171,13 +172,14 @@ Generate between 5 and 10 article ideas. Each MUST:
 2. Have a clear, catchy, and factual title.
 3. Include a 'prompt' field: a 2-sentence brief explaining exactly what the article should be about in plain, simple English. What happened and why is it important?
 4. Include an 'angle' field, which should be a simple category like 'product_launch', 'business', or 'ai_breakthrough'.
+5. Include a 'source_url' field: the exact URL of the news item you based this on from the context provided above.
 
 CRITICAL RECENCY RULE: Today is {$date}. ONLY focus on confirmed tech events from the EXACT last 24 to 48 hours. DO NOT output legacy news or events from previous years (e.g. do not act like it is 2021). If the news is not from today or yesterday, discard it.
 CRITICAL TOPIC RULE: ABSOLUTELY DO NOT write meta-commentary about AI generating articles. Focus on actual tech industry news.
-CRITICAL DEDUP RULE: If you already see a topic in the 'ALREADY PUBLISHED' list above, skip it entirely \u2014 even if the angle is slightly different.
+CRITICAL DEDUP RULE: If you already see a topic in the 'ALREADY PUBLISHED' list above, skip it entirely — even if the angle is slightly different.
 
 Return ONLY a JSON array, no markdown fences:
-[{\"title\": \"...\", \"prompt\": \"A simple 2-sentence explanation of the news.\", \"angle\": \"product_launch\"}]";
+[{\"title\": \"...\", \"prompt\": \"A simple 2-sentence explanation of the news.\", \"angle\": \"product_launch\", \"source_url\": \"https://...\"}]";
 
         $result = $this->callGemini($prompt, true);
         return is_array($result) && !empty($result) ? $result : [];
@@ -581,8 +583,19 @@ Return exactly a JSON object (no markdown fences):
         
         $modelsArray = array_values(array_filter(array_map('trim', explode(',', $modelsConfig))));
         
-        // OpenRouter API limits the 'models' array fallback to a maximum of 3 items
-        $modelsArray = array_slice($modelsArray, 0, 3);
+        // OpenRouter API limits the 'models' array fallback to a maximum of 3 items.
+        // We ensure the best available models are tried first, but explicitly append a 
+        // free model at the end so it falls back gracefully if the user runs out of credits (402).
+        $freeModel = collect($modelsArray)->first(fn($m) => str_ends_with($m, 'free'));
+        $finalModels = array_slice($modelsArray, 0, 2);
+        
+        if ($freeModel && !in_array($freeModel, $finalModels)) {
+            $finalModels[] = $freeModel;
+        } elseif (count($modelsArray) >= 3 && count($finalModels) < 3) {
+            $finalModels[] = $modelsArray[2];
+        }
+        
+        $modelsArray = $finalModels;
 
         if (is_string($promptOrMessages)) {
             $messages = [['role' => 'user', 'content' => $promptOrMessages]];
@@ -612,6 +625,33 @@ Return exactly a JSON object (no markdown fences):
                 'X-Title' => config('app.name'),
             ])
             ->post('https://openrouter.ai/api/v1/chat/completions', $payload);
+
+        // If OpenRouter rejects the request upfront due to insufficient credits for the paid models (402),
+        // we must retry the request explicitly sending ONLY free models to bypass the cost check.
+        // We loop through them manually because OpenRouter's auto-fallback often fails on upstream 429 errors.
+        if ($response->status() === 402) {
+            $allFreeModels = array_values(array_filter(array_map('trim', explode(',', $modelsConfig)), fn($m) => str_ends_with($m, 'free')));
+            if (!empty($allFreeModels)) {
+                Log::warning("OpenRouter 402 Insufficient Credits. Falling back to free models manually.");
+                foreach ($allFreeModels as $fallbackModel) {
+                    $payload['models'] = [$fallbackModel];
+                    $response = Http::timeout(180)
+                        ->withHeaders([
+                            'Authorization' => "Bearer {$apiKey}",
+                            'HTTP-Referer' => config('app.url'),
+                            'X-Title' => config('app.name'),
+                        ])
+                        ->post('https://openrouter.ai/api/v1/chat/completions', $payload);
+                        
+                    if ($response->successful()) {
+                        Log::info("Successfully generated using free model: {$fallbackModel}");
+                        break; // Success, stop trying other free models
+                    } else {
+                        Log::warning("Free model {$fallbackModel} failed: " . $response->status() . " " . $response->body());
+                    }
+                }
+            }
+        }
 
         if ($response->successful()) {
             $json = $response->json();
@@ -660,21 +700,39 @@ Return exactly a JSON object (no markdown fences):
         // 1. Remove non-printable characters or Zero Width Spaces that often break JSON
         $text = str_replace(["\u200b", "\ufeff"], '', $text);
 
-        // 2. Robust balanced extraction for JSON objects {}
+        // 2. Simple fallback: find first { and last } (prevents PCRE backtrack limits on huge payloads)
+        $firstBrace = strpos($text, '{');
+        $lastBrace = strrpos($text, '}');
+        if ($firstBrace !== false && $lastBrace !== false && $lastBrace > $firstBrace) {
+            $jsonCandidate = substr($text, $firstBrace, $lastBrace - $firstBrace + 1);
+            $decoded = json_decode($jsonCandidate, true);
+            if (is_array($decoded)) return $decoded;
+        }
+
+        // 3. Simple fallback for arrays: find first [ and last ]
+        $firstBracket = strpos($text, '[');
+        $lastBracket = strrpos($text, ']');
+        if ($firstBracket !== false && $lastBracket !== false && $lastBracket > $firstBracket) {
+            $jsonArrayCandidate = substr($text, $firstBracket, $lastBracket - $firstBracket + 1);
+            $decoded = json_decode($jsonArrayCandidate, true);
+            if (is_array($decoded)) return $decoded;
+        }
+
+        // 4. Robust balanced extraction for JSON objects {} (smaller payloads)
         if (preg_match('/\{(?:[^{}]|(?R))*\}/s', $text, $matches)) {
             $jsonStr = $matches[0];
             $decoded = json_decode($jsonStr, true);
             if (is_array($decoded)) return $decoded;
         }
 
-        // 3. Robust balanced extraction for JSON arrays []
+        // 5. Robust balanced extraction for JSON arrays [] (smaller payloads)
         if (preg_match('/\[(?:[^\[\]]|(?R))*\]/s', $text, $matches)) {
             $jsonStr = $matches[0];
             $decoded = json_decode($jsonStr, true);
             if (is_array($decoded)) return $decoded;
         }
 
-        // 4. Fallback to basic stripping
+        // 6. Fallback to basic stripping
         $jsonCandidate = preg_replace('/^```(?:json)?\s*/i', '', $text);
         $jsonCandidate = preg_replace('/\s*```\s*$/', '', $jsonCandidate);
         $jsonCandidate = trim($jsonCandidate);

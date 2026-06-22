@@ -92,10 +92,10 @@ class NewsAgent
             foreach ($recentKeywordSets as $existingWords) {
                 if (empty($existingWords)) continue;
                 $overlap = count(array_intersect($ideaWords, $existingWords));
-                $maxLen   = max(count($ideaWords), count($existingWords));
-                if ($maxLen > 0 && ($overlap / $maxLen) >= 0.60) {
+                $minLen  = min(count($ideaWords), count($existingWords));
+                if ($minLen > 0 && ($overlap / $minLen) >= 0.60) {
                     Log::info("NewsAgent dedup: Skipping idea '{$idea['title']}' (" .
-                        round(($overlap / $maxLen) * 100) . "% overlap with existing article)");
+                        round(($overlap / $minLen) * 100) . "% overlap with existing article)");
                     return false;
                 }
             }
@@ -155,7 +155,7 @@ class NewsAgent
             // Store in Queue
             $scouted = \App\Models\ScoutedArticle::create([
                 'title'  => $idea['title'],
-                'url'    => $rawNews[0]['link'] ?? null,
+                'url'    => $idea['source_url'] ?? null,
                 'source' => 'AI Aggregator',
                 'prompt' => $idea['prompt'],
                 'status' => 'pending',
@@ -254,7 +254,16 @@ class NewsAgent
     private function processArticle(array $idea, array $contextNews): array
     {
         $title = $idea['title'];
+        $sourceUrl = $idea['source_url'] ?? null;
         Log::info("NewsAgent: Processing '{$title}'");
+
+        // 2b. Exact source_url match (prevents drafting entirely if we already covered this exact URL)
+        if (!empty($sourceUrl)) {
+            if (Article::where('source_url', $sourceUrl)->exists()) {
+                Log::warning("NewsAgent [L2.5-url]: Skipping duplicate topic '{$title}' (Exact source_url exists)");
+                return ['title' => $title, 'status' => 'failed', 'reason' => 'Duplicate topic (source_url match)'];
+            }
+        }
 
         // 3. DRAFT
         try {
@@ -302,10 +311,10 @@ class NewsAgent
             $existingWords = $normalize($existingTitle);
             if (empty($existingWords) || empty($ideaWords)) continue;
             $overlap = count(array_intersect($ideaWords, $existingWords));
-            $maxLen  = max(count($ideaWords), count($existingWords));
-            if ($maxLen > 0 && ($overlap / $maxLen) >= 0.60) {
+            $minLen  = min(count($ideaWords), count($existingWords));
+            if ($minLen > 0 && ($overlap / $minLen) >= 0.60) {
                 Log::warning("NewsAgent [L3-fuzzy]: Skipping '{$title}' — " .
-                    round(($overlap / $maxLen) * 100) . "% keyword overlap with '{$existingTitle}'");
+                    round(($overlap / $minLen) * 100) . "% keyword overlap with '{$existingTitle}'");
                 return ['title' => $title, 'status' => 'failed', 'reason' => 'Duplicate topic (keyword overlap)'];
             }
         }
@@ -325,6 +334,7 @@ class NewsAgent
             'title' => $title,
             'slug' => $slug,
             'content' => $polishedHtml,
+            'source_url' => $sourceUrl,
             'language' => 'en',
             'status' => 'published',
             'is_editors_choice' => true,
