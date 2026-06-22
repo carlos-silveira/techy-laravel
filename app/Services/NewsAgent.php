@@ -315,7 +315,8 @@ class NewsAgent
 
         // Attempt image fetch with improved query from meta if available
         $imageQuery = $draft['suggested_image'] ?? ($meta['tags'][0] ?? $title);
-        $coverImage = $this->fetchCoverImageFallback(Str::limit($imageQuery, 50));
+        $cleanQuery = trim(Str::limit($imageQuery, 30)) . ' technology';
+        $coverImage = $this->fetchCoverImageFallback($cleanQuery);
         if (empty($coverImage)) {
             $coverImage = 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=1200&q=80';
         }

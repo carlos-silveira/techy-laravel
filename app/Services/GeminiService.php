@@ -580,6 +580,9 @@ Return exactly a JSON object (no markdown fences):
         $modelsConfig = config('services.openrouter.models', 'google/gemini-2.5-pro,anthropic/claude-3.5-sonnet,google/gemini-2.5-flash,meta-llama/llama-3.3-70b-instruct:free,qwen/qwen-2.5-72b-instruct:free,mistralai/mistral-nemo:free');
         
         $modelsArray = array_values(array_filter(array_map('trim', explode(',', $modelsConfig))));
+        
+        // OpenRouter API limits the 'models' array fallback to a maximum of 3 items
+        $modelsArray = array_slice($modelsArray, 0, 3);
 
         if (is_string($promptOrMessages)) {
             $messages = [['role' => 'user', 'content' => $promptOrMessages]];
@@ -595,7 +598,7 @@ Return exactly a JSON object (no markdown fences):
         $payload = [
             'models' => $modelsArray,
             'messages' => $messages,
-            'max_tokens' => 1500,
+            'max_tokens' => 4000,
         ];
 
         if ($expectJson) {
@@ -680,7 +683,7 @@ Return exactly a JSON object (no markdown fences):
         if (is_array($decoded)) return $decoded;
 
         // If all decoding fails, log for debugging
-        Log::warning("GeminiService: Failed to decode JSON. Raw response: " . substr($text, 0, 100));
+        Log::warning("GeminiService: Failed to decode JSON. Raw response: " . $text);
         return [];
     }
 

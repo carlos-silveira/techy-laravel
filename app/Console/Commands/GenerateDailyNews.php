@@ -219,7 +219,7 @@ class GenerateDailyNews extends Command
             $query = implode(' ', array_slice(array_values($keywords), 0, 3));
         }
 
-        $query = trim($query);
+        $query = trim(Str::limit($query, 30)) . ' technology';
         $accessKey = config('services.unsplash.access_key');
 
         if (!empty($accessKey)) {
