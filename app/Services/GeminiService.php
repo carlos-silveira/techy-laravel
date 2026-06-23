@@ -596,7 +596,7 @@ Return exactly a JSON object (no markdown fences):
                 return $this->callNativeGeminiFallback($messages, false);
             }
             
-            throw new \RuntimeException('AI API is currently resting or unavailable. Last error: ' . $e->getMessage());
+            throw new \RuntimeException('AI API is currently resting or unavailable. Please try again later.');
         }
     }
 
@@ -625,7 +625,7 @@ Return exactly a JSON object (no markdown fences):
                 }
             }
             
-            throw new \RuntimeException('AI API is currently resting or unavailable. Last error: ' . $e->getMessage());
+            throw new \RuntimeException('AI API is currently resting or unavailable. Please try again later.');
         }
     }
 

@@ -13,11 +13,13 @@ class AiController extends Controller
 {
     private GeminiService $geminiService;
     private NewsService $newsService;
+    private \App\Services\NewsAgent $newsAgent;
 
-    public function __construct(GeminiService $geminiService, NewsService $newsService)
+    public function __construct(GeminiService $geminiService, NewsService $newsService, \App\Services\NewsAgent $newsAgent)
     {
         $this->geminiService = $geminiService;
         $this->newsService = $newsService;
+        $this->newsAgent = $newsAgent;
     }
 
     /**
@@ -56,6 +58,12 @@ class AiController extends Controller
 
             // The result is already formatted HTML from GeminiService
             $html = $result['article_body'] ?? '';
+            
+            // Resolve any placeholder images into actual Unsplash URLs
+            if (!empty($html)) {
+                $imageQuery = $result['suggested_image'] ?? $request->input('title');
+                $html = $this->newsAgent->resolveImagePlaceholders($html, $imageQuery);
+            }
 
             return response()->json([
                 'draft' => $html,

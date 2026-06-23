@@ -374,7 +374,7 @@ class NewsAgent
     /**
      * Resolve <img src="PLACEHOLDER_IMAGE" alt="..."> tags by fetching relative images from Unsplash.
      */
-    private function resolveImagePlaceholders(string $content, string $fallbackQuery): string
+    public function resolveImagePlaceholders(string $content, string $fallbackQuery): string
     {
         $pattern = '/<img\s+[^>]*src=["\']PLACEHOLDER_IMAGE["\'][^>]*alt=["\']([^"\']*)["\'][^>]*>|<img\s+[^>]*alt=["\']([^"\']*)["\'][^>]*src=["\']PLACEHOLDER_IMAGE["\'][^>]*>/i';
         
@@ -398,7 +398,7 @@ class NewsAgent
     /**
      * Fetch a copyright-free cover image from Unsplash or Wikimedia Commons fallback.
      */
-    private function fetchCoverImageFallback(string $query): ?string
+    public function fetchCoverImageFallback(string $query): ?string
     {
         $accessKey = config('services.unsplash.access_key');
         if (!empty($accessKey)) {
