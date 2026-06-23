@@ -1,3 +1,18 @@
+## [2026-06-22] - Agent Observability & Unsplash Image Fix
+
+### Added
+- **Agent Control Panel**: Built a new React UI component `AgentControl.jsx` in the Dashboard to allow manual triggering of the autonomous agent (`yolo:agent`) in the background. Features a live terminal log window and next/last run timestamps.
+- **Agent API**: Created `AgentController` with `/api/agent/run` and `/api/agent/status` endpoints to securely dispatch the artisan command into a detached background process and poll the output logs for the dashboard terminal.
+
+### Fixed
+- **Unsplash Image Relevance (Strict Ban on Literal Brands)**: Fixed an issue where the agent would request highly specific and literal image queries (like "Jean-Baptiste Kempf Kyber", "Apple" fruit for Apple Inc., or "Steam" train for Steam Machine) resulting in irrelevant fallback photos. Overrode the `suggested_image` and `suggested_cover_query` prompt instructions in `GeminiService.php` to strictly ban literal translations of brands. Enforced the generation of 1-2 word broad, conceptual tech keywords (e.g., "smartphone", "gaming", "robotics") instead.
+
+## [2026-06-23] - Social Media Auto-Publishing Fix & Image Prompts
+
+### Fixed
+- **Social Media Race Condition**: Fixed a race condition where the `ArticlePublished` event was firing before the `TranslateArticle` background job completed. This caused the `SocialMediaService` to fail and skip posts because the Spanish translation (`$summaryEs`) was unavailable. Moved the `ArticlePublished::dispatch()` call into the `TranslateArticle` job (only triggering once the 'es' translation is saved and cache cleared), and removed the premature dispatches from the `GenerateDailyNews` and `SeedCategoryNews` commands.
+- **Unsplash Image Relevance (Strict Ban on Literal Brands)**: Fixed an issue where the agent would request highly specific and literal image queries (like "Jean-Baptiste Kempf Kyber", "Apple" fruit for Apple Inc., or "Steam" train for Steam Machine) resulting in irrelevant fallback photos. Overrode the `suggested_image` and `suggested_cover_query` prompt instructions in `GeminiService.php` to strictly ban literal translations of brands. Enforced the generation of 1-2 word broad, conceptual tech keywords (e.g., "smartphone", "gaming", "robotics") instead.
+
 ## [2026-06-20] - Production Outage: Missing JS Chunks Fix & CI/CD Hardening
 
 ### Incident

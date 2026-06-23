@@ -83,6 +83,11 @@ class TranslateArticle implements ShouldQueue
             \Illuminate\Support\Facades\Cache::forget("article_{$this->article->slug}_related_{$this->locale}");
             
             \Illuminate\Support\Facades\Log::info("Background translation complete for Article #{$this->article->id} -> {$this->locale}");
+            
+            // Dispatch social media posting ONLY after the Spanish translation is complete
+            if ($this->locale === 'es') {
+                \App\Events\ArticlePublished::dispatch($this->article);
+            }
         } catch (\Exception $e) {
             // Handle specific Quota Exhausted exception from service
             if (str_contains($e->getMessage(), 'QUOTA_EXHAUSTED')) {

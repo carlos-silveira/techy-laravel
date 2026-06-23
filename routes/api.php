@@ -6,6 +6,8 @@ use App\Http\Controllers\AiController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\NewsletterController;
+use App\Http\Controllers\ScoutQueueController;
+use App\Http\Controllers\AgentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,6 +25,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+
+    Route::post('/agent/run', [AgentController::class, 'runAgent']);
+    Route::get('/agent/status', [AgentController::class, 'getStatus']);
 
     Route::get('/scouted-queue', [ScoutQueueController::class, 'index']);
     Route::post('/scouted-queue/{id}/approve', [ScoutQueueController::class, 'approve']);

@@ -183,7 +183,28 @@ Return ONLY a JSON array, no markdown fences:
 [{\"title\": \"...\", \"prompt\": \"A simple 2-sentence explanation of the news.\", \"angle\": \"product_launch\", \"source_url\": \"https://...\"}]";
 
         $result = $this->callGemini($prompt, true);
-        return is_array($result) && !empty($result) ? $result : [];
+        
+        $validIdeas = [];
+        if (is_array($result)) {
+            // Hotfix: AI model occasionally returns a single flat array instead of an array of objects
+            if (isset($result[0]) && is_string($result[0]) && count($result) >= 2) {
+                return [[
+                    'title' => $result[0],
+                    'prompt' => $result[1] ?? '',
+                    'angle' => $result[2] ?? '',
+                    'source_url' => $result[3] ?? ''
+                ]];
+            }
+            
+            // Standard validation: Keep only valid associative arrays
+            foreach ($result as $item) {
+                if (is_array($item) && !empty($item['title'])) {
+                    $validIdeas[] = $item;
+                }
+            }
+        }
+        
+        return $validIdeas;
     }
 
     /**
@@ -224,6 +245,7 @@ ARTICLE STRUCTURE (HTML):
   2. **Details (Bulleted List)**: A bulleted list (`<ul>` containing 4 to 6 `<li>` elements) breaking down the key specs, facts, numbers, or timeline of the event. Bold the first 2-3 words of each bullet point to make it highly scannable. Each bullet point should be highly informative, containing 1 to 2 detailed sentences of distinct facts.
   3. **Consequence/Next Steps**: A final short paragraph (2-3 sentences max) explaining the immediate consequence or what happens next. Do NOT use any subheading for this final paragraph.
 - Under NO circumstances should you use more than one `<h2>` heading in the entire article, and only use it if it describes a highly specific, contextual aspect of the details (e.g., `<h2>Specs and Pricing</h2>`). Never use generic headings.
+- IMAGE QUERY: For 'suggested_image', generate a BROAD, 1-2 word conceptual TECH search term for Unsplash. EXTREMELY IMPORTANT: Do NOT use brand names that have literal meanings in English (e.g., NEVER use 'apple' for Apple Inc, use 'smartphone' or 'tablet'; NEVER use 'steam' or 'valve' for gaming, use 'gaming', 'esports' or 'controller'; NEVER use 'jean' or 'jeans' for a person named Jean, use 'developer' or 'robotics'). Avoid specific company names, people, or obscure products. Use generic tech concepts like 'robotics', 'server', 'coding', 'cybersecurity', 'processor'.
 
 Return ONLY a valid JSON object with these exact keys: \"title\", \"twitter_tldr\", \"article_body\", \"suggested_image\", \"main_category\".
 CRITICAL RULE FOR X (TWITTER): The 'twitter_tldr' field MUST be written entirely in SPANISH (Español). All other fields MUST remain in English. Ensure the 'article_body' includes an unsplash image placeholder like <img src=\"PLACEHOLDER_IMAGE\" alt=\"description\">.
@@ -340,7 +362,7 @@ RETURN ONLY A JSON OBJECT. NO MARKDOWN FENCES.
   \"title\": \"A clear, catchy headline. Max 10 words.\",
   \"html_content\": \"The full article content in raw HTML. Do NOT use markdown. Ensure it is clean, valid HTML.\",
   \"category\": \"{$category}\",
-  \"suggested_cover_query\": \"1 to 3 short concrete English words for Unsplash image search.\"
+  \"suggested_cover_query\": \"1 to 3 short conceptual TECH words for Unsplash. NEVER use brand names with literal meanings (e.g., 'apple', 'steam'). Use concepts like 'smartphone', 'gaming', 'robotics'.\"
 }";
 
         $result = $this->callGemini($prompt, true);

@@ -125,7 +125,11 @@ class PublicController extends Controller
                 $allTranslated = false;
             }
             return $this->translateIfNecessary($article, $locale);
-        });
+        })->filter(function($article) use ($locale) {
+            $articleLang = $article->language ?? 'en';
+            // Only show articles that match the current locale OR have been successfully translated
+            return $articleLang === $locale || !empty($article->translations[$locale]['title']);
+        })->values();
 
         // Use a short TTL if any article still needs translation
         $ttl = $allTranslated ? 3600 : 30;

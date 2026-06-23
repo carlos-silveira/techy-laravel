@@ -180,7 +180,7 @@ export default function AnalyticsChart({ analyticsData }) {
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(128,128,128,0.1)" vertical={false} />
                                 <XAxis dataKey="date" stroke="rgba(128,128,128,0.5)" fontSize={10} tickMargin={10} />
-                                <YAxis stroke="rgba(128,128,128,0.5)" fontSize={10} axisLine={false} tickLine={false} domain={[0, 'auto']} padding={{ top: 20 }} />
+                                <YAxis stroke="rgba(128,128,128,0.5)" fontSize={10} axisLine={false} tickLine={false} domain={[0, dataMax => Math.ceil(dataMax * 1.2)]} padding={{ top: 20 }} />
                                 <Tooltip content={<CustomTooltip />} />
                                 <Area type="monotone" dataKey="views" stroke="rgb(var(--color-primary))" strokeWidth={3} fillOpacity={1} fill="url(#colorViews)" animationDuration={1500} />
                                 <Area type="monotone" dataKey="visitors" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorVisitors)" animationDuration={1500} />

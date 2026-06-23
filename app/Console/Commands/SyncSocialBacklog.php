@@ -49,13 +49,14 @@ class SyncSocialBacklog extends Command
         foreach ($articles as $index => $article) {
             $this->info("🐦 [" . ($index + 1) . "/{$limit}] Tweeting: '{$article->title}'");
             
-            $result = $socialMedia->postToTwitter($article);
+            $twitterResult = $socialMedia->postToTwitter($article);
+            $fbResult = $socialMedia->postToFacebook($article);
             
-            if ($result) {
+            if ($twitterResult || $fbResult) {
                 $successCount++;
-                $this->info("   ✅ Tweet successful.");
+                $this->info("   ✅ Posted successfully (Twitter: " . ($twitterResult ? 'Yes' : 'No') . " | FB: " . ($fbResult ? 'Yes' : 'No') . ")");
             } else {
-                $this->error("   ❌ Tweet failed (Rate limited or missing keys).");
+                $this->error("   ❌ Post failed on both networks (Rate limited or missing keys/permissions).");
             }
 
             // Artificial delay to prevent spam bot detection from Twitter heuristics

@@ -116,8 +116,8 @@ export default function GeminiUsage({ usageData, modelDistribution }) {
                                 const colors = ['#f97316', '#8b5cf6', '#06b6d4', '#ec4899', '#22c55e', '#eab308'];
                                 return (
                                 <div key={i} className="flex items-center justify-between bg-white/[0.02] rounded-xl px-4 py-2 border border-white/5">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: colors[i % colors.length] }} />
+                                    <div className="flex items-center gap-2 min-w-0 pr-2">
+                                        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: colors[i % colors.length] }} />
                                         <span className="text-[10px] font-bold text-gray-400 truncate">{m.model}</span>
                                     </div>
                                     <div className="flex items-center gap-3 text-[9px] font-black">

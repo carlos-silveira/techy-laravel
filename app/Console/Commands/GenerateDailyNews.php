@@ -162,9 +162,6 @@ class GenerateDailyNews extends Command
             $article->update(['translations' => $translations]);
         }
 
-        // Dispatch social posts ONLY after translations are stored to ensure SPANISH
-        \App\Events\ArticlePublished::dispatch($article);
-
         if ($coverImageUrl) {
             $this->info("🖼️  Cover image: {$coverImageUrl}");
         }

@@ -167,8 +167,7 @@ class SeedCategoryNews extends Command
                 $article->update(['translations' => $translations]);
             }
 
-            // Dispatch social posts ONLY after translations are stored to ensure SPANISH
-            \App\Events\ArticlePublished::dispatch($article);
+            // Social posts will be dispatched by the Translation job after Spanish text is ready
             
             $generatedCount++;
             $this->info("--------------------------------------------------");
