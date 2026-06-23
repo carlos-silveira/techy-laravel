@@ -401,3 +401,5 @@
 - **DevOps**: Executed `npm run build` and deployed local changes to `main` to trigger the CI/CD deployment to cPanel.
 
 - **GeminiService.php**: Fixed `extractJson` and `callGemini` to throw exceptions instead of returning empty arrays when OpenRouter fails or returns empty/invalid strings. This prevents silent failures (0 ideas) in Quick Create and Scout Queue. Also refactored Native Gemini Fallback to iterate over multiple free models (2.5-pro, 2.5-flash, 2.0-flash) to survive isolated model rate limits.
+
+- **GeminiService.php**: Expanded fallback chain to include `gemini-1.5-flash` and `gemini-1.5-pro`. Added a 5-second `sleep()` delay between model retries if a 429 Rate Limit error is encountered. This effectively prevents the aggressive 15 RPM limit from instantly exhausting all fallback models in a single burst.

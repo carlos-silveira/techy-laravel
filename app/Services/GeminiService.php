@@ -23,6 +23,8 @@ class GeminiService
         'gemini-2.5-flash',
         'gemini-2.0-flash',
         'gemini-2.0-flash-lite',
+        'gemini-1.5-flash',
+        'gemini-1.5-pro',
     ];
 
     public function __construct()
@@ -791,6 +793,11 @@ Return exactly a JSON object (no markdown fences):
 
             $lastError = $response->body();
             Log::warning("Native Gemini Fallback model {$model} failed: " . $response->status() . " " . $lastError);
+            
+            if ($response->status() === 429) {
+                // Wait briefly before trying the next model to help clear rate limit windows
+                sleep(5);
+            }
         }
         
         throw new \RuntimeException("Native Gemini API Error (All fallback models exhausted): " . $lastError);
