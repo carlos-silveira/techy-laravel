@@ -623,7 +623,6 @@ Return exactly a JSON object (no markdown fences):
                 }
             }
             
-            if ($expectJson) return [];
             throw new \RuntimeException('AI API is currently resting or unavailable. Last error: ' . $e->getMessage());
         }
     }
@@ -745,9 +744,6 @@ Return exactly a JSON object (no markdown fences):
             throw new \RuntimeException("GEMINI_API_KEY not configured for fallback.");
         }
         
-        $model = 'gemini-2.0-flash';
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$nativeKey}";
-        
         $contents = [];
         if (is_string($promptOrMessages)) {
             $contents[] = ['parts' => [['text' => $promptOrMessages]]];
@@ -771,24 +767,33 @@ Return exactly a JSON object (no markdown fences):
             $payload['generationConfig']['responseMimeType'] = 'application/json';
         }
 
-        $response = Http::timeout(180)
-            ->withHeaders([
-                'Content-Type' => 'application/json',
-            ])
-            ->post($url, $payload);
+        $lastError = "";
 
-        if ($response->successful()) {
-            Log::info("Successfully generated using Native Gemini Fallback model: {$model}");
-            $json = $response->json();
-            $text = $json['candidates'][0]['content']['parts'][0]['text'] ?? '';
+        foreach ($this->modelFallbackChain as $model) {
+            $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$nativeKey}";
             
-            if ($expectJson) {
-                return $this->extractJson($text);
+            $response = Http::timeout(180)
+                ->withHeaders([
+                    'Content-Type' => 'application/json',
+                ])
+                ->post($url, $payload);
+
+            if ($response->successful()) {
+                Log::info("Successfully generated using Native Gemini Fallback model: {$model}");
+                $json = $response->json();
+                $text = $json['candidates'][0]['content']['parts'][0]['text'] ?? '';
+                
+                if ($expectJson) {
+                    return $this->extractJson($text);
+                }
+                return $text;
             }
-            return $text;
+
+            $lastError = $response->body();
+            Log::warning("Native Gemini Fallback model {$model} failed: " . $response->status() . " " . $lastError);
         }
         
-        throw new \RuntimeException("Native Gemini API Error: " . $response->body());
+        throw new \RuntimeException("Native Gemini API Error (All fallback models exhausted): " . $lastError);
     }
 
     /**
@@ -849,9 +854,8 @@ Return exactly a JSON object (no markdown fences):
         
         if (is_array($decoded)) return $decoded;
 
-        // If all decoding fails, log for debugging
-        Log::warning("GeminiService: Failed to decode JSON. Raw response: " . $text);
-        return [];
+        // If all decoding fails, throw an exception so the fallback chain can catch it
+        throw new \RuntimeException("GeminiService: Failed to decode JSON. Raw response: " . $text);
     }
 
     /**
