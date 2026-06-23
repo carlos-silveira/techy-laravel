@@ -19,11 +19,18 @@ class GenerateDailyNews extends Command
 
     public function handle(NewsService $newsService, GeminiService $geminiService)
     {
+        \Illuminate\Support\Facades\Cache::put('yolo_agent_last_run', now()->toIso8601String());
+        
+        $logMsg = "[" . now()->toDateTimeString() . "] 🤖 Techy Agent activated via GenerateDailyNews.\n";
+        @file_put_contents(storage_path('logs/agent.log'), $logMsg, FILE_APPEND);
+
         $this->info('🔍 Fetching today\'s tech news from multiple sources...');
         $newsItems = $newsService->fetchTodayTechNews();
 
         if (empty($newsItems)) {
-            $this->error('No news items found. Aborting.');
+            $err = "No news items found. Aborting.\n";
+            $this->error(trim($err));
+            @file_put_contents(storage_path('logs/agent.log'), $err, FILE_APPEND);
             return 1;
         }
 
@@ -197,6 +204,9 @@ class GenerateDailyNews extends Command
 
         \Illuminate\Support\Facades\Cache::flush();
         $this->info("🧹 Cache flushed to ensure latest content is visible.");
+
+        $logMsg = "[" . now()->toDateTimeString() . "] 🏁 Cycle complete. Article generated and cached.\n\n";
+        @file_put_contents(storage_path('logs/agent.log'), $logMsg, FILE_APPEND);
 
         return 0;
     }

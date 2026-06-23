@@ -31,3 +31,6 @@ Schedule::command('news:update-images')->dailyAt('02:00')->withoutOverlapping();
 
 // Run queue worker via cron for cPanel shared hosting
 Schedule::command('queue:work --stop-when-empty --max-jobs=2 --max-time=120 --tries=3')->everyMinute()->withoutOverlapping();
+
+// Automatically publish missing articles to social media
+Schedule::command('social:sync-backlog')->everyThirtyMinutes()->withoutOverlapping();

@@ -18,9 +18,9 @@ class AgentController extends Controller
         $mode = $request->input('mode', 'autonomous'); // 'scout' or 'autonomous'
         $limit = (int) $request->input('limit', 10);
         
-        $command = "php " . base_path('artisan') . " yolo:agent --limit={$limit}";
+        $command = "php " . base_path('artisan') . " news:generate-daily";
         if ($mode === 'scout') {
-            $command .= " --scout";
+            $command = "php " . base_path('artisan') . " yolo:agent --scout"; // Keep scout mode as is for now if needed
         }
         
         $logPath = storage_path('logs/agent.log');

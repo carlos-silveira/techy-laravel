@@ -459,6 +459,22 @@ const TipTapRenderer = ({ content }) => {
                 );
             case 'blockquote':
                 return <blockquote key={index} className="border-l-4 border-primary pl-6 py-2 my-8 italic text-gray-700 dark:text-gray-300 bg-primary/5 rounded-r-xl">{node.content?.map((n, i) => renderNode(n, i))}</blockquote>;
+            case 'image':
+                return (
+                    <div key={index} className="my-10 relative group overflow-hidden rounded-[2rem] border border-black/5 dark:border-white/10 shadow-2xl">
+                        <img 
+                            src={node.attrs?.src} 
+                            alt={node.attrs?.alt || 'Article image'} 
+                            title={node.attrs?.title}
+                            className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out" 
+                        />
+                        {(node.attrs?.title || node.attrs?.alt) && (
+                            <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-6 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
+                                <p className="text-white text-sm font-medium">{node.attrs?.title || node.attrs?.alt}</p>
+                            </div>
+                        )}
+                    </div>
+                );
             default:
                 return null;
         }

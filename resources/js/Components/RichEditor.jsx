@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import Image from '@tiptap/extension-image';
 import axios from 'axios';
 import { 
     Bold, Italic, Strikethrough, Heading2, Heading3, 
@@ -141,7 +142,7 @@ const MenuBar = ({ editor }) => {
 
 export default function RichEditor({ initialContent, onChange, keyTrigger }) {
     const editor = useEditor({
-        extensions: [StarterKit],
+        extensions: [StarterKit, Image],
         editorProps: {
             attributes: {
                 class: 'prose prose-invert prose-p:text-gray-400 prose-headings:text-white prose-a:text-primary max-w-none focus:outline-none min-h-[400px] text-lg font-light leading-relaxed relative z-10',

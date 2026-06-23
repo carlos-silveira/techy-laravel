@@ -83,7 +83,7 @@ class GeminiService
     /**
      * Handle a conversational chat specialized for creating news.
      */
-    public function studioChat(string $message, array $history = []): string
+    public function studioChat(string $message, array $history = [], array $editorContext = []): string
     {
         try {
             $this->ensureQuotaNotExhausted();
@@ -91,8 +91,17 @@ class GeminiService
             return $e->getMessage();
         }
 
+        $contextStr = '';
+        if (!empty($editorContext)) {
+            $contextStr = "CURRENT EDITOR CONTEXT:\nTitle: " . ($editorContext['title'] ?? 'Untitled') . "\n";
+            $contextStr .= "Tags: " . implode(', ', $editorContext['tags'] ?? []) . "\n";
+            $contextStr .= "Current Content:\n" . ($editorContext['content'] ?? '') . "\n\n";
+        }
+
         $systemContext = "You are 'Techy AI', a world-class investigative tech journalist and editor.
         Your goal is to help the user build viral, high-authority tech news.
+
+{$contextStr}
         
         CAPABILITIES:
         1. Contextual Research: Analyze today's news to find unique angles.
