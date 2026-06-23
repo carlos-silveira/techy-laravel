@@ -83,9 +83,26 @@ class SocialMediaService
 
             $pageId = config('services.facebook.page_id');
             $accessToken = config('services.facebook.page_access_token');
-            $link = url('/article/' . $article->slug);
+            $baseUrl = rtrim(config('app.url', 'https://techynews.lat'), '/');
+            // Force HTTPS to avoid redirect loops or cPanel firewall rules blocking HTTP bot requests
+            if (!str_starts_with($baseUrl, 'https://')) {
+                $baseUrl = str_replace('http://', 'https://', $baseUrl);
+            }
+            $link = $baseUrl . '/article/' . $article->slug;
 
-            // POST ONLY the summary, no title, no hashtags.
+            // 1. Force Facebook to scrape the URL first. 
+            // This prevents the "403 Forbidden" preview bug where FB's internal crawler 
+            // fails to fetch the OpenGraph data concurrently with the feed post.
+            Http::post("https://graph.facebook.com/v19.0/", [
+                'id' => $link,
+                'scrape' => 'true',
+                'access_token' => $accessToken,
+            ]);
+
+            // Wait 2 seconds to allow Facebook's cache to propagate internally
+            sleep(2);
+
+            // 2. POST ONLY the summary, no title, no hashtags.
             $response = Http::post("https://graph.facebook.com/v19.0/{$pageId}/feed", [
                 'message' => $postText,
                 'link' => $link,
