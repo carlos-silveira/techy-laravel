@@ -23,6 +23,8 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\TrackPageView::class,
         ]);
         
+        $middleware->statefulApi();
+        
         $middleware->alias([
             'auth' => \App\Http\Middleware\Authenticate::class,
         ]);
