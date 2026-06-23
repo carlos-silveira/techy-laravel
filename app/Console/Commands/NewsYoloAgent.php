@@ -27,20 +27,24 @@ class NewsYoloAgent extends Command
 
         $limit = (int) $this->option('limit');
         
-        if ($this->option('scout')) {
-            $this->info("🔍 Scouting top trends (Manual Flag)...");
-            $results = $agent->scoutOnly($limit);
-        } else {
-            $this->info("🤖 Autonomous cycle initiated...");
-            $results = $agent->runAutonomousCycle($limit);
-        }
-
-        foreach ($results as $res) {
-            if ($res['status'] === 'scouted') {
-                $this->info("✅ Scouted and queued: '{$res['title']}'");
+        try {
+            if ($this->option('scout')) {
+                $this->info("🔍 Scouting top trends (Manual Flag)...");
+                $results = $agent->scoutOnly($limit);
             } else {
-                $this->error("❌ Framework Failed: " . ($res['message'] ?? 'Unknown'));
+                $this->info("🤖 Autonomous cycle initiated...");
+                $results = $agent->runAutonomousCycle($limit);
             }
+
+            foreach ($results as $res) {
+                if (($res['status'] ?? '') === 'scouted') {
+                    $this->info("✅ Scouted and queued: '{$res['title']}'");
+                } else {
+                    $this->error("❌ Framework Failed: " . ($res['message'] ?? 'Unknown'));
+                }
+            }
+        } catch (\RuntimeException $e) {
+            $this->error("🚨 AI API Error: " . $e->getMessage());
         }
 
         $this->info("🏁 Cycle complete.");

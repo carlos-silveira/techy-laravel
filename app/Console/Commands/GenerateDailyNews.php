@@ -21,8 +21,7 @@ class GenerateDailyNews extends Command
     {
         \Illuminate\Support\Facades\Cache::put('yolo_agent_last_run', now()->toIso8601String());
         
-        $logMsg = "[" . now()->toDateTimeString() . "] 🤖 Techy Agent activated via GenerateDailyNews.\n";
-        @file_put_contents(storage_path('logs/agent.log'), $logMsg, FILE_APPEND);
+        $this->info("🤖 Techy Agent activated via GenerateDailyNews.");
 
         $this->info('🔍 Fetching today\'s tech news from multiple sources...');
         $newsItems = $newsService->fetchTodayTechNews();
@@ -205,8 +204,7 @@ class GenerateDailyNews extends Command
         \Illuminate\Support\Facades\Cache::flush();
         $this->info("🧹 Cache flushed to ensure latest content is visible.");
 
-        $logMsg = "[" . now()->toDateTimeString() . "] 🏁 Cycle complete. Article generated and cached.\n\n";
-        @file_put_contents(storage_path('logs/agent.log'), $logMsg, FILE_APPEND);
+        $this->info("🏁 Cycle complete. Article generated and cached.");
 
         return 0;
     }

@@ -149,7 +149,9 @@ class GeminiService
      */
     public function generateIdeas(array $newsItems, array $recentTitles = []): array
     {
-        if ($this->isQuotaExhausted()) return [];
+        if ($this->isQuotaExhausted()) {
+            throw new \RuntimeException('AI API quota is currently exhausted or rate-limited. Please try again later.');
+        }
         
         if (empty($newsItems)) {
             return [];
@@ -727,12 +729,7 @@ Return exactly a JSON object (no markdown fences):
                     'updated_at' => now(),
                 ]);
             }
-            
-            // Normalize single object responses to an array of objects
-            if ($expectJson && is_array($result) && isset($result['title']) && isset($result['prompt'])) {
-                return [$result];
-            }
-            return $result;
+            return $text;
         }
 
         throw new \RuntimeException("OpenRouter API Error: " . $response->body());
@@ -748,7 +745,7 @@ Return exactly a JSON object (no markdown fences):
             throw new \RuntimeException("GEMINI_API_KEY not configured for fallback.");
         }
         
-        $model = 'gemini-2.5-flash';
+        $model = 'gemini-2.0-flash';
         $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$nativeKey}";
         
         $contents = [];

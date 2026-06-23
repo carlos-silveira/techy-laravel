@@ -147,13 +147,17 @@ class AiController extends Controller
             'editor_context' => 'nullable|array'
         ]);
 
-        $response = $this->geminiService->studioChat(
-            $request->input('message'),
-            $request->input('history', []),
-            $request->input('editor_context', [])
-        );
+        try {
+            $response = $this->geminiService->studioChat(
+                $request->input('message'),
+                $request->input('history', []),
+                $request->input('editor_context', [])
+            );
 
-        return response()->json(['response' => $response]);
+            return response()->json(['response' => $response]);
+        } catch (\RuntimeException $e) {
+            return response()->json(['error' => $e->getMessage()], 503);
+        }
     }
 
     /**
