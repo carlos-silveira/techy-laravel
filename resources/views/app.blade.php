@@ -16,7 +16,7 @@
         <meta property="og:type" content="article">
         <meta name="twitter:card" content="summary_large_image">
         @if(!empty($meta['image']))
-            <meta property="og:image" content="{{ $meta['image'] }}">
+            <meta property="og:image" content="{!! $meta['image'] !!}">
         @endif
     @else
         <meta property="og:title" content="TechyNews — Noticias de Tecnología con IA">
