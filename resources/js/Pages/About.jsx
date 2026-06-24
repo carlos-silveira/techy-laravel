@@ -6,7 +6,7 @@ import { SiLaravel, SiReact, SiTailwindcss, SiDocker, SiMysql, SiFramer, SiGit, 
 import Navbar from '@/Components/Navbar';
 import PublicFooter from '@/Components/PublicFooter';
 import CommandPalette from '@/Components/CommandPalette';
-import RagCopilot from '@/Components/RagCopilot';
+const RagCopilot = React.lazy(() => import('@/Components/RagCopilot'));
 import useLanguage from '@/Hooks/useLanguage';
 
 // Apple-like Parallax Floating Shapes
@@ -399,7 +399,9 @@ export default function About() {
                 <PublicFooter />
             </div>
             
-            <RagCopilot />
+            <React.Suspense fallback={null}>
+                <RagCopilot />
+            </React.Suspense>
         </div>
     );
 }

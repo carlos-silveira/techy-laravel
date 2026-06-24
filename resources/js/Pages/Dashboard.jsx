@@ -15,7 +15,7 @@ import {
 import AnalyticsChart from '@/Components/AnalyticsChart';
 import RichEditor from '@/Components/RichEditor';
 import ThemeToggle from '@/Components/ThemeToggle';
-import RagCopilot from '@/Components/RagCopilot';
+const RagCopilot = React.lazy(() => import('@/Components/RagCopilot'));
 import GeminiUsage from '@/Components/GeminiUsage';
 import ScoutedQueue from '@/Components/ScoutedQueue';
 import AgentControl from '@/Components/AgentControl';
@@ -1033,7 +1033,9 @@ export default function Dashboard({ auth, articles: initialArticles, analytics, 
                 )}
             </div>
             </main>
-            <RagCopilot />
+            <React.Suspense fallback={null}>
+                <RagCopilot />
+            </React.Suspense>
         </div>
     );
 }

@@ -58776,10 +58776,10 @@ server_default((page) => createInertiaApp({
 	render: import_server_node.renderToString,
 	title: (title) => title ? title.includes(appName) ? title : `${title} | ${appName}` : appName,
 	resolve: (name) => resolvePageComponent(`./Pages/${name}.jsx`, /* #__PURE__ */ Object.assign({
-		"./Pages/About.jsx": () => import("./assets/About-SitKAom9.mjs"),
+		"./Pages/About.jsx": () => import("./assets/About-BnYRY4jI.mjs"),
 		"./Pages/AboutUs.jsx": () => import("./assets/AboutUs-Cl_eEH5O.mjs"),
-		"./Pages/Archive.jsx": () => import("./assets/Archive-feK2vrWB.mjs"),
-		"./Pages/ArticleShow.jsx": () => import("./assets/ArticleShow-DJt-XHbe.mjs"),
+		"./Pages/Archive.jsx": () => import("./assets/Archive-x7Kia2tZ.mjs"),
+		"./Pages/ArticleShow.jsx": () => import("./assets/ArticleShow-Dk8ObCeS.mjs"),
 		"./Pages/Auth/ConfirmPassword.jsx": () => import("./assets/ConfirmPassword-xv6hHONx.mjs"),
 		"./Pages/Auth/ForgotPassword.jsx": () => import("./assets/ForgotPassword-Dme-QLLY.mjs"),
 		"./Pages/Auth/Login.jsx": () => import("./assets/Login-Cxa9rbxl.mjs"),
@@ -58787,16 +58787,16 @@ server_default((page) => createInertiaApp({
 		"./Pages/Auth/ResetPassword.jsx": () => import("./assets/ResetPassword-BdBWAqvM.mjs"),
 		"./Pages/Auth/VerifyEmail.jsx": () => import("./assets/VerifyEmail-CR4hpOWI.mjs"),
 		"./Pages/Contact.jsx": () => import("./assets/Contact-eSQ1aoRd.mjs"),
-		"./Pages/Dashboard.jsx": () => import("./assets/Dashboard-DkcDpDiW.mjs"),
-		"./Pages/Error.jsx": () => import("./assets/Error-CySuq8vb.mjs"),
+		"./Pages/Dashboard.jsx": () => import("./assets/Dashboard-jLmE1UOJ.mjs"),
+		"./Pages/Error.jsx": () => import("./assets/Error-BkWn4YVs.mjs"),
 		"./Pages/Footer.jsx": () => import("./assets/Footer-BS7nm7Wo.mjs").then((n) => n.n),
 		"./Pages/Layout.jsx": () => import("./assets/Layout-B_p3WB6V.mjs"),
-		"./Pages/NewsletterArchive.jsx": () => import("./assets/NewsletterArchive-BLxhVKNt.mjs"),
+		"./Pages/NewsletterArchive.jsx": () => import("./assets/NewsletterArchive-D3hHsrW0.mjs"),
 		"./Pages/Post.jsx": () => import("./assets/Post-va8vqM1T.mjs"),
-		"./Pages/Privacy.jsx": () => import("./assets/Privacy-CL7a3sEn.mjs"),
-		"./Pages/Terms.jsx": () => import("./assets/Terms-pCri3MbX.mjs"),
+		"./Pages/Privacy.jsx": () => import("./assets/Privacy-BNKVPDFJ.mjs"),
+		"./Pages/Terms.jsx": () => import("./assets/Terms-B9-_83Hm.mjs"),
 		"./Pages/TopNav.jsx": () => import("./assets/TopNav-DH003LlL.mjs").then((n) => n.n),
-		"./Pages/Welcome.jsx": () => import("./assets/Welcome-Bhdd0mkG.mjs")
+		"./Pages/Welcome.jsx": () => import("./assets/Welcome-B4NJicyY.mjs")
 	})),
 	setup({ App, props }) {
 		global.route = (name, params, absolute) => s(name, params, absolute, {

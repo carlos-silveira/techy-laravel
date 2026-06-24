@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -12,7 +12,7 @@ import CommandPalette from '@/Components/CommandPalette';
 import Navbar from '@/Components/Navbar';
 import PublicFooter from '@/Components/PublicFooter';
 import AdSlot from '@/Components/AdSlot';
-import RagCopilot from '@/Components/RagCopilot';
+const RagCopilot = React.lazy(() => import('@/Components/RagCopilot'));
 import { ArrowRight, Zap, BookOpen, Clock } from 'lucide-react';
 import useLanguage from '@/Hooks/useLanguage';
 import { getFinalImage } from '@/utils';
@@ -127,6 +127,8 @@ export default function Welcome({ articles, editorsChoice, dailyBrief, trendingA
                 src={getFinalImage(featured, 1600)}
                 fetchpriority="high"
                 loading="eager"
+                width="1600"
+                height="900"
                 alt={featured.title}
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-[10s] group-hover:scale-110"
               />
@@ -316,9 +318,11 @@ export default function Welcome({ articles, editorsChoice, dailyBrief, trendingA
                       <div className="h-52 bg-gradient-to-br from-white/10 to-black/50 relative overflow-hidden">
                         <img 
                           src={getFinalImage(article, 600)} 
+                          alt={article.title}
+                          width="600"
+                          height="400"
                           loading="lazy" 
-                          alt={article.title} 
-                          className="absolute inset-0 w-full h-full object-cover" 
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-[#02040a] to-transparent opacity-60" />
                         <div className="absolute inset-0 group-hover:bg-amber-400/5 transition-colors duration-500" />
@@ -389,9 +393,11 @@ export default function Welcome({ articles, editorsChoice, dailyBrief, trendingA
                         <div className={`w-full flex-shrink-0 relative overflow-hidden bg-gray-100 dark:bg-gray-900 ${isLarge ? 'h-72' : 'h-40'}`}>
                           <img 
                             src={getFinalImage(article, isLarge ? 1200 : 600)} 
+                            alt={article.title}
+                            width={isLarge ? "1200" : "600"}
+                            height={isLarge ? "800" : "400"}
                             loading="lazy" 
-                            alt={article.title} 
-                            className="absolute inset-0 w-full h-full object-cover"
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-[#02040a] via-transparent to-transparent" />
                           <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-colors duration-700 mix-blend-overlay" />
@@ -497,7 +503,9 @@ export default function Welcome({ articles, editorsChoice, dailyBrief, trendingA
         {/* ... */}
         {/* ===== FOOTER ===== */}
         <PublicFooter />
-        <RagCopilot />
+        <Suspense fallback={null}>
+          <RagCopilot />
+        </Suspense>
 
       </main>
     </div>

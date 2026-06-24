@@ -48,6 +48,8 @@ export default function Navbar() {
                             <img 
                                 src="/img/logo_wbc.png" 
                                 alt="Techy News" 
+                                width="170"
+                                height="32"
                                 className="h-8 w-auto object-contain transition-all duration-500 dark:brightness-100 brightness-0" 
                             />
                         </Link>

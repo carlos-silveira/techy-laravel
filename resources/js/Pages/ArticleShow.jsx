@@ -10,7 +10,7 @@ import Navbar from '@/Components/Navbar';
 import PublicFooter from '@/Components/PublicFooter';
 import { getFinalImage } from '@/utils';
 import AdSlot from '@/Components/AdSlot';
-import RagCopilot from '@/Components/RagCopilot';
+const RagCopilot = React.lazy(() => import('@/Components/RagCopilot'));
 import useLanguage from '@/Hooks/useLanguage';
 
 export default function ArticleShow({ article, relatedArticles, auth }) {
@@ -308,7 +308,9 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
             </main>
 
             <PublicFooter className="mt-20" />
-            <RagCopilot />
+            <React.Suspense fallback={null}>
+                <RagCopilot />
+            </React.Suspense>
         </div>
     );
 }
