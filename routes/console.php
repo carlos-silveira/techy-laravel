@@ -27,7 +27,7 @@ Schedule::command('news:generate-daily')->cron('0 */4 * * *')->withoutOverlappin
 Schedule::command('newsletter:send-weekly')->weeklyOn(5, '09:00');
 
 // Auto-seed missing images (if unsplash limits were hit previously)
-Schedule::command('news:update-images')->dailyAt('02:00')->withoutOverlapping();
+// Schedule::command('news:update-images')->dailyAt('02:00')->withoutOverlapping();
 
 // Run queue worker via cron for cPanel shared hosting
 Schedule::command('queue:work --stop-when-empty --max-time=280 --tries=3')->everyMinute()->withoutOverlapping();
