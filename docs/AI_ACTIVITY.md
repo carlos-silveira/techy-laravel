@@ -410,3 +410,9 @@
 - **Backend**: Recalibrated AdSense revenue projections to utilize the dynamic Human Views count.
 - **Frontend**: Injected a Date Picker filter UI into the Analytics section (`Dashboard.jsx`) that triggers seamless Inertia state updates.
 - **Frontend**: Upgraded `AnalyticsChart.jsx` grids and tables with `overflow-x-auto` to prevent layout breaking on mobile devices.
+
+## 2026-06-24: Frontend Mobile Responsive Fixes & Groq Integration
+- **Frontend (Mobile)**: Fixed the horizontal breaking of the Studio Editor (`Dashboard.jsx`). The Chat Assistant and Editor now stack vertically (`flex-col`) on mobile viewports instead of maintaining fixed widths (`w-[450px]`).
+- **Frontend (PageSpeed)**: Injected native `loading="lazy"` tags to all below-the-fold images in `NewsletterArchive.jsx` to dramatically optimize Largest Contentful Paint (LCP) and resolve low PageSpeed scores.
+- **Backend (API Fallback)**: Upgraded `config/services.php` to natively support Groq (`GROQ_API_KEY`). Appended the user's provided Groq key directly into the production `.env`. OpenRouter failures will now successfully cascade down to Gemini Native, and finally Groq (`llama-3.3-70b-versatile`).
+- **Backend (Observability)**: Enabled deep backend Sentry performance profiling directly on production by injecting `SENTRY_PROFILES_SAMPLE_RATE=1.0` into the remote `.env` and flushing the config cache, allowing the user to deeply trace slow endpoint requests.
