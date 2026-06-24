@@ -46,7 +46,7 @@ export default function Navbar() {
                     >
                         <Link href="/" className="relative z-[110]">
                             <img 
-                                src="/img/logo_wbc.png" 
+                                src="/img/logo_wbc.webp" 
                                 alt="Techy News" 
                                 width="170"
                                 height="32"

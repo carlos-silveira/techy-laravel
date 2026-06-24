@@ -31,14 +31,37 @@
         <meta name="twitter:description" content="Plataforma líder en periodismo tecnológico impulsado por Inteligencia Artificial.">
     @endif
 
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PJF86HK6PG"></script>
+    <!-- Monetization & Analytics (Deferred for PageSpeed) -->
     <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
+        let thirdPartyScriptsLoaded = false;
+        function loadThirdPartyScripts() {
+            if (thirdPartyScriptsLoaded) return;
+            thirdPartyScriptsLoaded = true;
 
-        gtag('config', 'G-PJF86HK6PG');
+            // Load Google Analytics
+            const gtagScript = document.createElement('script');
+            gtagScript.src = "https://www.googletagmanager.com/gtag/js?id=G-PJF86HK6PG";
+            gtagScript.async = true;
+            document.head.appendChild(gtagScript);
+            
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            window.gtag = gtag;
+            gtag('js', new Date());
+            gtag('config', 'G-PJF86HK6PG');
+
+            // Load AdSense
+            const adsenseScript = document.createElement('script');
+            adsenseScript.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6228787275246149";
+            adsenseScript.async = true;
+            adsenseScript.crossOrigin = "anonymous";
+            document.head.appendChild(adsenseScript);
+        }
+
+        ['scroll', 'mousemove', 'touchstart', 'click'].forEach(event => {
+            window.addEventListener(event, loadThirdPartyScripts, { once: true, passive: true });
+        });
+        setTimeout(loadThirdPartyScripts, 4000);
     </script>
     <!-- Favicons & App Icons (Optimized for Google Search) -->
     <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=2">
@@ -78,8 +101,7 @@
         });
     </script>
 
-    <!-- Monetization (Google AdSense) -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6228787275246149" crossorigin="anonymous"></script>
+    <!-- AdSense removed from here, now loaded via the deferred script above -->
 
     <!-- Scripts -->
     @routes
