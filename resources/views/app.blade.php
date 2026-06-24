@@ -10,6 +10,35 @@
     <meta name="description" inertia content="TechyNews: Inteligencia Artificial y Periodismo Tecnológico" />
     <meta name="google-site-verification" content="COpjFK5aGPvLfkTW5lZCSaAtmjDfxJMEsLS3XcwMYw8" />
 
+    @php
+        $pageData = $page ?? [];
+        $pageProps = $pageData['props'] ?? [];
+        $featured = $pageProps['featured'] ?? null;
+        $editorsChoice = $pageProps['editorsChoice'] ?? [];
+        
+        $getImageUrl = function($article) {
+            if (!$article) return null;
+            $url = $article['cover_image_path'] ?? null;
+            if ($url) {
+                if (!str_starts_with($url, 'http') && !str_starts_with($url, '/')) {
+                    $url = '/storage/' . $url;
+                }
+            }
+            return $url;
+        };
+
+        $featuredUrl = $getImageUrl($featured);
+        $mobileLcpUrl = count($editorsChoice) > 0 ? $getImageUrl($editorsChoice[0]) : null;
+    @endphp
+
+    @if($featuredUrl)
+        <link rel="preload" as="image" href="{{ $featuredUrl }}" media="(min-width: 769px)" fetchpriority="high">
+    @endif
+    
+    @if($mobileLcpUrl)
+        <link rel="preload" as="image" href="{{ $mobileLcpUrl }}" media="(max-width: 768px)" fetchpriority="high">
+    @endif
+
     @if(isset($meta))
         <meta property="og:title" content="{{ $meta['title'] }}">
         <meta property="og:description" content="{{ $meta['description'] }}">
