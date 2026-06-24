@@ -138,9 +138,11 @@ export default function AgentControl() {
                         <div className="w-3 h-3 rounded-full bg-emerald-500/80"></div>
                     </div>
                 </div>
-                <div className="p-6 h-[400px] overflow-y-auto font-mono text-xs text-gray-300 leading-relaxed custom-scrollbar">
+                <div className="p-6 h-[400px] overflow-y-auto overflow-x-auto font-mono text-xs text-gray-300 leading-relaxed custom-scrollbar">
                     {status.logs ? (
-                        <pre className="whitespace-pre-wrap">{status.logs}</pre>
+                        <div className="min-w-max">
+                            <pre className="whitespace-pre-wrap">{status.logs}</pre>
+                        </div>
                     ) : (
                         <div className="text-gray-500 flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>

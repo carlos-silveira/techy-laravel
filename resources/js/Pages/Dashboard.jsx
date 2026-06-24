@@ -10,7 +10,7 @@ import {
     ChevronLeft, Sparkles, Globe, FileEdit, Save, ShieldCheck,
     Lightbulb, RefreshCw, MessageSquare, Send, Copy, ChevronRight,
     Cpu, Wand2, RotateCcw, ThumbsUp, ThumbsDown, Rocket, 
-    ArrowLeft, Check, ChevronDown, Newspaper, Terminal
+    ArrowLeft, Check, ChevronDown, Newspaper, Terminal, Activity
 } from 'lucide-react';
 import AnalyticsChart from '@/Components/AnalyticsChart';
 import RichEditor from '@/Components/RichEditor';
@@ -19,6 +19,7 @@ import RagCopilot from '@/Components/RagCopilot';
 import GeminiUsage from '@/Components/GeminiUsage';
 import ScoutedQueue from '@/Components/ScoutedQueue';
 import AgentControl from '@/Components/AgentControl';
+import Observability from '@/Components/Observability';
 
 /* ──────────────────────────────────────────────
    WIZARD STEPS COMPONENT — No-code guided flow
@@ -788,6 +789,10 @@ export default function Dashboard({ auth, articles: initialArticles, analytics }
                             <BarChart2 className="w-5 h-5" />
                             <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Analytics</span>
                         </button>
+                        <button onClick={() => setView('observability')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'observability' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white'}`}>
+                            <Activity className="w-5 h-5" />
+                            <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Observability</span>
+                        </button>
                         <button onClick={() => { resetEditor(); setView('editor'); }} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'editor' && !currentArticleId ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-black/5 dark:bg-white/5 text-black dark:text-white'}`}>
                             <Edit3 className="w-5 h-5 text-primary" />
                             <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Advanced Editor</span>
@@ -832,6 +837,7 @@ export default function Dashboard({ auth, articles: initialArticles, analytics }
                 <div className="flex-1 flex flex-row overflow-hidden relative">
                     {view === 'agent' && <div className="flex-1 overflow-y-auto p-4 md:p-10"><AgentControl /></div>}
                     {view === 'scout' && <ScoutedQueue />}
+                    {view === 'observability' && <div className="flex-1 overflow-y-auto p-4 md:p-10"><Observability /></div>}
                     
                     {view === 'wizard' && (
                     <WizardView 
