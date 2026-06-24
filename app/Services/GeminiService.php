@@ -592,7 +592,7 @@ Return exactly a JSON object (no markdown fences):
         } catch (\Exception $e) {
             Log::warning("OpenRouter conversational failed: " . $e->getMessage() . " - Attempting Native Gemini Fallback");
             
-            if (env('GEMINI_API_KEY')) {
+            if (config('services.gemini.api_key')) {
                 try {
                     return $this->callNativeGeminiFallback($messages, false);
                 } catch (\Exception $e2) {
@@ -600,7 +600,7 @@ Return exactly a JSON object (no markdown fences):
                 }
             }
             
-            if (env('GROQ_API_KEY')) {
+            if (config('services.groq.api_key')) {
                 try {
                     return $this->callGroqFallback($messages, false);
                 } catch (\Exception $e3) {
@@ -629,7 +629,7 @@ Return exactly a JSON object (no markdown fences):
         } catch (\Exception $e) {
             Log::warning("OpenRouter API failed: " . $e->getMessage() . " - Attempting Native Gemini Fallback");
             
-            if (env('GEMINI_API_KEY')) {
+            if (config('services.gemini.api_key')) {
                 try {
                     return $this->callNativeGeminiFallback($prompt, $expectJson);
                 } catch (\Exception $e2) {
@@ -637,7 +637,7 @@ Return exactly a JSON object (no markdown fences):
                 }
             }
 
-            if (env('GROQ_API_KEY')) {
+            if (config('services.groq.api_key')) {
                 try {
                     return $this->callGroqFallback($prompt, $expectJson);
                 } catch (\Exception $e3) {
@@ -761,8 +761,8 @@ Return exactly a JSON object (no markdown fences):
      */
     private function callNativeGeminiFallback($promptOrMessages, bool $expectJson = false)
     {
-        $nativeKey = env('GEMINI_API_KEY');
-        if (!$nativeKey) {
+        $apiKey = config('services.gemini.api_key');
+        if (!$apiKey) {
             throw new \RuntimeException("GEMINI_API_KEY not configured for fallback.");
         }
         
@@ -828,7 +828,7 @@ Return exactly a JSON object (no markdown fences):
      */
     private function callGroqFallback($promptOrMessages, bool $expectJson = false)
     {
-        $apiKey = env('GROQ_API_KEY');
+        $apiKey = config('services.groq.api_key');
         if (!$apiKey) {
             throw new \RuntimeException("GROQ_API_KEY not configured for fallback.");
         }
