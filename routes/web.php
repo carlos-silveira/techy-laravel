@@ -147,7 +147,7 @@ Route::middleware([])->group(function () {
             exec("$php $artisan config:clear 2>&1");
             exec("$php $artisan optimize 2>&1");
             exec("$php $artisan queue:restart 2>&1");
-            exec("cd ".escapeshellarg($base)." && bash scripts/start-ssr.sh > /dev/null 2>&1 &");
+            exec("cd ".escapeshellarg($base)." && bash scripts/start-ssr.sh ".escapeshellarg($php)." > /dev/null 2>&1 &");
             
             return response()->json([
                 'status' => 'success',
@@ -207,7 +207,7 @@ Route::middleware([])->group(function () {
             $output[] = "Queue Restart: " . implode("\n", $queueOut);
 
             // Restart SSR Process
-            exec("cd ".escapeshellarg($base)." && bash scripts/start-ssr.sh > /dev/null 2>&1 &");
+            exec("cd ".escapeshellarg($base)." && bash scripts/start-ssr.sh ".escapeshellarg($php)." > /dev/null 2>&1 &");
             $output[] = "SSR Restart script executed.";
 
             return response()->json([
