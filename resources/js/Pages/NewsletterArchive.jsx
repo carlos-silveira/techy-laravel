@@ -5,6 +5,7 @@ import Navbar from '@/Components/Navbar';
 import PublicFooter from '@/Components/PublicFooter';
 import useLanguage from '@/Hooks/useLanguage';
 import { ArrowRight, Mail } from 'lucide-react';
+import { getFinalImage } from '@/utils';
 
 export default function NewsletterArchive({ newsletters, dailyBrief }) {
     const { __ } = useLanguage();
@@ -60,15 +61,15 @@ export default function NewsletterArchive({ newsletters, dailyBrief }) {
                                 {newsletter.articles.map((article, i) => (
                                     <Link key={i} href={`/article/${article.slug}`} className="block group">
                                         <div className="flex flex-col md:flex-row gap-6 p-4 -mx-4 rounded-2xl hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
-                                            {article.cover_image_path && (
-                                                <div className="w-full md:w-48 h-32 flex-shrink-0 rounded-xl overflow-hidden border border-black/5 dark:border-white/5 relative">
-                                                    <img 
-                                                        src={article.cover_image_path.startsWith('http') ? article.cover_image_path : `/storage/${article.cover_image_path}`} 
-                                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
-                                                        alt={article.title} 
-                                                    />
-                                                </div>
-                                            )}
+                                            <div className="w-full md:w-48 h-32 flex-shrink-0 rounded-xl overflow-hidden border border-black/5 dark:border-white/5 relative bg-gray-100 dark:bg-gray-800">
+                                                <img 
+                                                    src={getFinalImage(article, 800)} 
+                                                    fetchpriority={idx === 0 && i === 0 ? "high" : "auto"}
+                                                    decoding="async"
+                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                                                    alt={article.title} 
+                                                />
+                                            </div>
                                             <div className="flex-1 flex flex-col justify-center">
                                                 <h3 className="text-lg md:text-xl font-black mb-2 text-gray-900 dark:text-white group-hover:text-primary transition-colors leading-tight">
                                                     {article.title}

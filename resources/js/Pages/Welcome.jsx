@@ -15,63 +15,9 @@ import AdSlot from '@/Components/AdSlot';
 import RagCopilot from '@/Components/RagCopilot';
 import { ArrowRight, Zap, BookOpen, Clock } from 'lucide-react';
 import useLanguage from '@/Hooks/useLanguage';
+import { getFinalImage } from '@/utils';
 
 dayjs.extend(relativeTime);
-
-/**
- * Helper to find the first image in the content (HTML string or JSON object).
- */
-const findFirstImage = (content) => {
-  if (!content) return null;
-  
-  if (typeof content === 'string') {
-    // Basic regex to find <img> tags in raw HTML
-    const match = content.match(/<img[^>]+src="([^">]+)"/);
-    if (match) return match[1];
-    
-    // Check if it's JSON encoded string
-    try {
-      const parsed = JSON.parse(content);
-      return findFirstImage(parsed);
-    } catch {
-      return null;
-    }
-  }
-  
-  if (typeof content === 'object') {
-    if (content.type === 'image' && content.attrs?.src) return content.attrs.src;
-    if (content.content && Array.isArray(content.content)) {
-      for (const node of content.content) {
-        const found = findFirstImage(node);
-        if (found) return found;
-      }
-    }
-  }
-  
-  return null;
-};
-
-const getFinalImage = (article, width = 1200) => {
-  let url = article.cover_image_path;
-  if (!url) {
-    url = findFirstImage(article.content);
-  }
-  
-  // Generic tech fallbacks based on keywords or slug
-  if (!url) {
-    url = article.slug.includes('not-paid-to-write-code') 
-      ? 'https://images.unsplash.com/photo-1498050108023-c5249f4df085'
-      : 'https://images.unsplash.com/photo-1451187580459-43490279c0fa';
-  }
-
-  // Inject Unsplash optimization parameters if it's an unsplash URL
-  if (url.includes('unsplash.com')) {
-    const separator = url.includes('?') ? '&' : '?';
-    return `${url}${separator}auto=format&fit=crop&q=80&w=${width}`;
-  }
-
-  return url;
-};
 
 export default function Welcome({ articles, editorsChoice, dailyBrief, trendingArticles }) {
   const { __ } = useLanguage();
