@@ -19,10 +19,19 @@ class ImageUploadController extends Controller
 
         if ($request->hasFile('image')) {
             $file = $request->file('image');
-            $filename = Str::random(40) . '.' . $file->getClientOriginalExtension();
+            $filename = Str::random(40) . '.webp';
 
-            // Store the file in the public disk under the 'uploads' directory
-            $path = $file->storeAs('uploads', $filename, 'public');
+            // Create ImageManager with GD driver
+            $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+            
+            // Read, resize and encode
+            $image = $manager->read($file);
+            $image->scaleDown(width: 1600);
+            $encoded = $image->toWebp(80);
+
+            // Store the WebP buffer in the public disk
+            $path = 'uploads/' . $filename;
+            Storage::disk('public')->put($path, $encoded->toString());
 
             // Return the full public URL
             $url = Storage::url($path);

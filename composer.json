@@ -9,9 +9,11 @@
         "abraham/twitteroauth": "*",
         "guzzlehttp/guzzle": "^7.8",
         "inertiajs/inertia-laravel": "^2.0",
+        "intervention/image": "^4.1",
         "laravel/framework": "^13.0",
         "laravel/sanctum": "*",
         "laravel/tinker": "*",
+        "sentry/sentry-laravel": "^4.26",
         "silviolleite/laravelpwa": "*",
         "tightenco/ziggy": "^2.0"
     },
