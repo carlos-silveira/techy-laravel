@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -461,7 +461,7 @@ function WizardView({ onComplete, onSwitchToEditor }) {
 /* ──────────────────────────────────────────────
    MAIN DASHBOARD COMPONENT
    ────────────────────────────────────────────── */
-export default function Dashboard({ auth, articles: initialArticles, analytics }) {
+export default function Dashboard({ auth, articles: initialArticles, analytics, period = '7d' }) {
     const [articles, setArticles] = useState(initialArticles || []);
     const [title, setTitle] = useState('');
     const [richContent, setRichContent] = useState(null);
@@ -877,14 +877,34 @@ export default function Dashboard({ auth, articles: initialArticles, analytics }
 
                 {view === 'analytics' && (
                     <div className="flex-1 overflow-y-auto p-4 sm:p-10 md:p-24 max-w-6xl mx-auto w-full">
-                        <div className="mb-10 sm:mb-20">
-                            <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-4">Live Metrics</h3>
-                            <h2 className="text-4xl sm:text-5xl font-black tracking-tighter text-gray-900 dark:text-white">Analytics.</h2>
+                        <div className="mb-10 sm:mb-20 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                            <div>
+                                <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-4">Live Metrics</h3>
+                                <h2 className="text-4xl sm:text-5xl font-black tracking-tighter text-gray-900 dark:text-white">Analytics.</h2>
+                            </div>
+                            
+                            <div className="flex bg-black/5 dark:bg-white/5 p-1.5 rounded-2xl backdrop-blur-md overflow-x-auto custom-scrollbar">
+                                {[
+                                    { id: 'today', label: 'Today' },
+                                    { id: '7d', label: '7 Days' },
+                                    { id: '30d', label: '30 Days' },
+                                    { id: 'all', label: 'All Time' },
+                                ].map((p) => (
+                                    <button
+                                        key={p.id}
+                                        onClick={() => router.get('/dashboard', { period: p.id }, { preserveState: true, replace: true })}
+                                        className={`px-4 py-2 text-xs font-black uppercase tracking-widest rounded-xl transition-all whitespace-nowrap ${period === p.id ? 'bg-white dark:bg-[#0a0f1c] text-primary shadow-sm' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'}`}
+                                    >
+                                        {p.label}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
-                        <AnalyticsChart analyticsData={analytics} />
+                        <AnalyticsChart analyticsData={analytics} period={period} />
                         <GeminiUsage 
                             usageData={analytics.rawGeminiLogs} 
                             modelDistribution={analytics.geminiModelDistribution} 
+                            period={period}
                         />
                     </div>
                 )}

@@ -78,7 +78,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 
-export default function AnalyticsChart({ analyticsData }) {
+export default function AnalyticsChart({ analyticsData, period }) {
     if (!analyticsData) {
         return (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
@@ -122,13 +122,13 @@ export default function AnalyticsChart({ analyticsData }) {
             {/* ═══ STAT CARDS ═══ */}
             <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7 gap-4">
                 {[
-                    { icon: Zap, label: "LLM Tokens", value: stats.totalGeminiTokens7d?.toLocaleString() || 0, subValue: `$${stats.totalGeminiCost7d || '0.00'} est.`, color: "orange" },
-                    { icon: Eye, label: "Views (7d)", value: stats.totalViews7d || 0, trend: stats.viewsGrowth, color: "primary" },
-                    { icon: Users, label: "Unique", value: stats.uniqueVisitors7d || 0, color: "purple" },
+                    { icon: Zap, label: "LLM Tokens", value: stats.totalGeminiTokens?.toLocaleString() || 0, subValue: `$${stats.totalGeminiCost || '0.00'} est.`, color: "orange" },
+                    { icon: Eye, label: "Views", value: stats.totalViews || 0, trend: stats.viewsGrowth, color: "primary" },
+                    { icon: Users, label: "Unique", value: stats.uniqueVisitors || 0, color: "purple" },
                     { icon: Newspaper, label: "Articles", value: stats.totalArticles || 0, color: "emerald" },
                     { 
                         icon: Heart, 
-                        label: "Likes (All Time)", 
+                        label: "Likes", 
                         value: stats.totalLikes || 0, 
                         color: "pink",
                         tooltipContent: stats.topLikedArticles?.length > 0 ? (
@@ -159,7 +159,7 @@ export default function AnalyticsChart({ analyticsData }) {
                 <motion.div variants={itemVariants} className="bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-6 relative overflow-hidden group hover:border-primary/20 transition-colors backdrop-blur-md">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[100px] rounded-full pointer-events-none opacity-30 group-hover:opacity-60 transition-opacity duration-1000" />
                     <div className="flex justify-between items-center mb-6 relative z-10">
-                        <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest">Traffic Overview (14 Days)</h3>
+                        <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest">Traffic Overview</h3>
                         <div className="flex items-center gap-4 text-[10px] font-bold text-gray-500">
                             <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-primary" /> Views</span>
                             <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-purple-500" /> Unique</span>
@@ -260,29 +260,31 @@ export default function AnalyticsChart({ analyticsData }) {
             {crawlerDetails && crawlerDetails.length > 0 && (
                 <motion.div variants={itemVariants} className="bg-orange-500/5 border border-orange-500/20 rounded-3xl p-8 relative overflow-hidden backdrop-blur-md">
                     <div className="absolute top-0 right-0 w-40 h-40 bg-orange-500/10 blur-[80px] rounded-full animate-pulse" />
-                    <div className="flex items-center justify-between mb-8">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                         <div className="flex items-center gap-4">
                             <div className="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center">
                                 <Shield className="w-5 h-5 text-orange-500" />
                             </div>
                             <div>
                                 <h3 className="text-xs font-black text-orange-500 uppercase tracking-[0.2em]">Crawler Intelligence</h3>
-                                <p className="text-[10px] text-orange-500/70 font-bold mt-1">Who's indexing your content (7d)</p>
+                                <p className="text-[10px] text-orange-500/70 font-bold mt-1">Who's indexing your content</p>
                             </div>
                         </div>
-                        <div className="text-right">
+                        <div className="text-left md:text-right">
                             <div className="text-2xl font-black text-orange-500">{botViews.toLocaleString()}</div>
                             <div className="text-[9px] font-bold text-orange-500/70 uppercase tracking-widest mt-1">Bot Hits</div>
                         </div>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-                        {crawlerDetails.map((c, i) => (
-                            <motion.div whileHover={{ scale: 1.05 }} key={i} className="bg-orange-500/10 border border-orange-500/20 rounded-2xl px-5 py-4 hover:border-orange-500/40 transition-colors">
-                                <div className="text-[11px] font-bold text-orange-500/80 truncate">{c.crawler}</div>
-                                <div className="text-xl font-black text-orange-500 mt-2">{c.hits}</div>
-                                <div className="text-[8px] text-orange-500/60 font-bold uppercase tracking-widest mt-1">hits</div>
-                            </motion.div>
-                        ))}
+                    <div className="overflow-x-auto pb-4 custom-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+                        <div className="flex sm:grid sm:grid-cols-3 lg:grid-cols-5 gap-4 min-w-max sm:min-w-0">
+                            {crawlerDetails.map((c, i) => (
+                                <motion.div whileHover={{ scale: 1.05 }} key={i} className="bg-orange-500/10 border border-orange-500/20 rounded-2xl px-5 py-4 hover:border-orange-500/40 transition-colors flex-shrink-0 w-32 sm:w-auto">
+                                    <div className="text-[11px] font-bold text-orange-500/80 truncate">{c.crawler}</div>
+                                    <div className="text-xl font-black text-orange-500 mt-2">{c.hits}</div>
+                                    <div className="text-[8px] text-orange-500/60 font-bold uppercase tracking-widest mt-1">hits</div>
+                                </motion.div>
+                            ))}
+                        </div>
                     </div>
                 </motion.div>
             )}
@@ -291,9 +293,9 @@ export default function AnalyticsChart({ analyticsData }) {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {topReferrers && topReferrers.length > 0 && (
                     <motion.div variants={itemVariants} className="bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-8 backdrop-blur-md">
-                        <div className="flex items-center justify-between mb-8">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-8">
                             <h3 className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-[0.3em]">Traffic Sources</h3>
-                            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-lg">Last 7 Days</div>
+                            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-lg w-fit">Selected Period</div>
                         </div>
                         <div className="space-y-4">
                             {topReferrers.map((ref, i) => {
@@ -319,10 +321,10 @@ export default function AnalyticsChart({ analyticsData }) {
                 )}
 
                 {topPages && topPages.length > 0 && (
-                    <motion.div variants={itemVariants} className="bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-8 backdrop-blur-md">
-                        <div className="flex items-center justify-between mb-8">
+                    <motion.div variants={itemVariants} className="bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-8 backdrop-blur-md overflow-hidden">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-8">
                             <h3 className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-[0.3em]">Top Entry Pages</h3>
-                            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-lg">Last 7 Days</div>
+                            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-lg w-fit">Selected Period</div>
                         </div>
                         <div className="space-y-4">
                             {topPages.map((page, i) => (
@@ -342,10 +344,10 @@ export default function AnalyticsChart({ analyticsData }) {
             </div>
 
             {/* ═══ TOP ARTICLES ═══ */}
-            <motion.div variants={itemVariants} className="bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-8 backdrop-blur-md">
-                <div className="flex items-center justify-between mb-8">
-                    <h3 className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-[0.3em]">Viral Content (Last 7 Days)</h3>
-                    <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-lg">By Total Hits</div>
+            <motion.div variants={itemVariants} className="bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-8 backdrop-blur-md overflow-hidden">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-8">
+                    <h3 className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-[0.3em]">Viral Content</h3>
+                    <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-lg w-fit">By Total Hits</div>
                 </div>
                 <div className="space-y-2">
                     {topArticles && topArticles.length > 0 ? topArticles.map((article, i) => (
@@ -431,7 +433,7 @@ export default function AnalyticsChart({ analyticsData }) {
                         </div>
                         <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-xl text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">
                             <Activity className="w-3.5 h-3.5" />
-                            Volume: {stats.adsenseProjection.views30d.toLocaleString()}
+                            Volume: {stats.adsenseProjection.views.toLocaleString()}
                         </div>
                     </div>
                     

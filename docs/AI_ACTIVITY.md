@@ -403,3 +403,10 @@
 - **GeminiService.php**: Fixed `extractJson` and `callGemini` to throw exceptions instead of returning empty arrays when OpenRouter fails or returns empty/invalid strings. This prevents silent failures (0 ideas) in Quick Create and Scout Queue. Also refactored Native Gemini Fallback to iterate over multiple free models (2.5-pro, 2.5-flash, 2.0-flash) to survive isolated model rate limits.
 
 - **GeminiService.php**: Expanded fallback chain to include `gemini-1.5-flash` and `gemini-1.5-pro`. Added a 5-second `sleep()` delay between model retries if a 429 Rate Limit error is encountered. This effectively prevents the aggressive 15 RPM limit from instantly exhausting all fallback models in a single burst.
+
+## 2026-06-24: Analytics Refactor & Bot Filtering
+- **Backend**: Refactored `DashboardController@index` to accurately filter out bot traffic (Googlebot, bingbot, GPTBot, etc.) from core analytics (Total Views, Unique Visitors, Top Articles, Top Pages).
+- **Backend**: Extracted a global `$period` parameter (`today`, `7d`, `30d`, `all`) to dynamically generate `$startDate` instead of hardcoding 7 or 14 days, providing true historical flexibility.
+- **Backend**: Recalibrated AdSense revenue projections to utilize the dynamic Human Views count.
+- **Frontend**: Injected a Date Picker filter UI into the Analytics section (`Dashboard.jsx`) that triggers seamless Inertia state updates.
+- **Frontend**: Upgraded `AnalyticsChart.jsx` grids and tables with `overflow-x-auto` to prevent layout breaking on mobile devices.

@@ -12,16 +12,58 @@ use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $articles = \App\Models\Article::latest()->get();
-
         $isMysql = config('database.default') === 'mysql';
 
-        // ─── TRAFFIC: Views + Unique Visitors (14d) ───
+        $period = $request->query('period', '7d');
+        
+        $startDate = match($period) {
+            'today' => now()->startOfDay(),
+            '7d' => now()->subDays(7),
+            '30d' => now()->subDays(30),
+            'all' => null,
+            default => now()->subDays(7),
+        };
+
+        $prevStartDate = match($period) {
+            'today' => now()->subDays(1)->startOfDay(),
+            '7d' => now()->subDays(14),
+            '30d' => now()->subDays(60),
+            'all' => null,
+            default => now()->subDays(14),
+        };
+
+        $prevEndDate = match($period) {
+            'today' => now()->startOfDay(),
+            '7d' => now()->subDays(7),
+            '30d' => now()->subDays(30),
+            'all' => null,
+            default => now()->subDays(7),
+        };
+
+        $excludeBots = function ($q) {
+            $q->where('user_agent', 'not like', '%bot%')
+              ->where('user_agent', 'not like', '%Bot%')
+              ->where('user_agent', 'not like', '%spider%')
+              ->where('user_agent', 'not like', '%crawl%')
+              ->where('user_agent', 'not like', '%Crawl%')
+              ->where('user_agent', 'not like', '%Googlebot%')
+              ->where('user_agent', 'not like', '%bingbot%')
+              ->where('user_agent', 'not like', '%GPTBot%')
+              ->where('user_agent', 'not like', '%Applebot%')
+              ->where('user_agent', 'not like', '%facebookexternalhit%')
+              ->where('user_agent', 'not like', '%Twitterbot%')
+              ->where('user_agent', 'not like', '%LinkedInBot%')
+              ->where('user_agent', 'not like', '%WhatsApp%');
+        };
+
+        // ─── TRAFFIC: Views + Unique Visitors (Human Only) ───
         $viewsPerDay = DB::table('page_views')
             ->selectRaw('DATE(created_at) as date, COUNT(DISTINCT ip_address) as visitors, COUNT(id) as views')
-            ->where('created_at', '>=', now()->subDays(14))
+            ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
+            ->where($excludeBots)
             ->groupBy('date')
             ->orderBy('date', 'asc')
             ->get()
@@ -31,34 +73,44 @@ class DashboardController extends Controller
                 'views' => $item->views,
             ]);
 
-        // ─── SUMMARY COUNTS ───
-        $totalViews7d = DB::table('page_views')
-            ->where('created_at', '>=', now()->subDays(7))->count();
-        $totalViewsPrev7d = DB::table('page_views')
-            ->where('created_at', '>=', now()->subDays(14))
-            ->where('created_at', '<', now()->subDays(7))->count();
-        $uniqueVisitors7d = DB::table('page_views')
-            ->where('created_at', '>=', now()->subDays(7))
+        // ─── SUMMARY COUNTS (Human Only) ───
+        $totalViews = DB::table('page_views')
+            ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
+            ->where($excludeBots)->count();
+            
+        $totalViewsPrev = $prevStartDate ? DB::table('page_views')
+            ->where('created_at', '>=', $prevStartDate)
+            ->where('created_at', '<', $prevEndDate)
+            ->where($excludeBots)->count() : 0;
+            
+        $uniqueVisitors = DB::table('page_views')
+            ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
+            ->where($excludeBots)
             ->distinct('ip_address')->count('ip_address');
+            
         $totalArticles = \App\Models\Article::where('status', 'published')->count();
-        $totalLikes = \App\Models\Article::sum('likes_count');
-        $totalViewsAllTime = \App\Models\Article::sum('views_count');
+        $totalLikesAllTime = \App\Models\Article::sum('likes_count'); // Overall engagement metric
+        $totalViewsAllTime = DB::table('page_views')->where($excludeBots)->count();
+        
         $engagementRate = $totalViewsAllTime > 0
-            ? round(($totalLikes / $totalViewsAllTime) * 100, 2)
+            ? round(($totalLikesAllTime / $totalViewsAllTime) * 100, 2)
             : 0;
-        $viewsGrowth = $totalViewsPrev7d > 0
-            ? round((($totalViews7d - $totalViewsPrev7d) / $totalViewsPrev7d) * 100, 1)
-            : ($totalViews7d > 0 ? 100 : 0);
+            
+        $viewsGrowth = $totalViewsPrev > 0
+            ? round((($totalViews - $totalViewsPrev) / $totalViewsPrev) * 100, 1)
+            : ($totalViews > 0 && $period !== 'all' ? 100 : 0);
 
-        // ─── TOP ARTICLES (7d) ───
+        // ─── TOP ARTICLES (Human Only) ───
         $topArticles = DB::table('page_views')
             ->selectRaw('article_id, COUNT(id) as views, COUNT(DISTINCT ip_address) as unique_views')
             ->whereNotNull('article_id')
-            ->where('created_at', '>=', now()->subDays(7))
+            ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
+            ->where($excludeBots)
             ->groupBy('article_id')
             ->orderByDesc('views')
             ->limit(10)
             ->get();
+            
         $topArticleIds = $topArticles->pluck('article_id');
         $topArticlesData = \App\Models\Article::whereIn('id', $topArticleIds)->get()->keyBy('id');
         $topArticlesWithData = $topArticles->map(fn($item) => [
@@ -69,8 +121,9 @@ class DashboardController extends Controller
             'unique_views' => $item->unique_views,
         ]);
 
-        // ─── TOP LIKED (All Time) ───
+        // ─── TOP LIKED (Filtered by publication date) ───
         $topLikedArticles = \App\Models\Article::where('likes_count', '>', 0)
+            ->when($startDate, fn($q) => $q->where('published_at', '>=', $startDate)->orWhere('created_at', '>=', $startDate))
             ->orderByDesc('likes_count')
             ->limit(3)
             ->get(['title', 'slug', 'likes_count'])
@@ -80,7 +133,7 @@ class DashboardController extends Controller
                 'likes' => $item->likes_count
             ]);
 
-        // ─── DEVICE BREAKDOWN (includes bots from user_agent) ───
+        // ─── DEVICE BREAKDOWN (Includes bots to show ratio) ───
         $deviceBreakdown = DB::table('page_views')
             ->selectRaw("
                 CASE
@@ -100,7 +153,7 @@ class DashboardController extends Controller
                 END as device,
                 COUNT(*) as count
             ")
-            ->where('created_at', '>=', now()->subDays(7))
+            ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
             ->groupBy('device')
             ->orderByDesc('count')
             ->get()
@@ -109,7 +162,7 @@ class DashboardController extends Controller
                 'count' => (int) $item->count,
             ]);
 
-        // ─── CRAWLER DETAILS (who's crawling you?) ───
+        // ─── CRAWLER DETAILS ───
         $crawlerDetails = DB::table('page_views')
             ->selectRaw("
                 CASE
@@ -132,7 +185,7 @@ class DashboardController extends Controller
                 END as crawler,
                 COUNT(*) as hits
             ")
-            ->where('created_at', '>=', now()->subDays(7))
+            ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
             ->where(function ($q) {
                 $q->where('user_agent', 'like', '%bot%')
                   ->orWhere('user_agent', 'like', '%Bot%')
@@ -153,7 +206,7 @@ class DashboardController extends Controller
             ->limit(15)
             ->get();
 
-        // ─── TOP PAGES ───
+        // ─── TOP PAGES (Human Only) ───
         $topPages = DB::table('page_views')
             ->selectRaw("
                 CASE
@@ -162,7 +215,8 @@ class DashboardController extends Controller
                 END as clean_url,
                 COUNT(*) as views
             ")
-            ->where('created_at', '>=', now()->subDays(7))
+            ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
+            ->where($excludeBots)
             ->groupBy('clean_url')
             ->orderByDesc('views')
             ->limit(10)
@@ -172,7 +226,7 @@ class DashboardController extends Controller
                 'views' => $item->views,
             ]);
 
-        // ─── REFERRERS (extract actual domain, not just "Reference") ───
+        // ─── REFERRERS (Human Only) ───
         $referrerExpr = $isMysql
             ? "SUBSTRING_INDEX(SUBSTRING_INDEX(REPLACE(REPLACE(referrer, 'https://', ''), 'http://', ''), '/', 1), '?', 1)"
             : "REPLACE(REPLACE(referrer, 'https://', ''), 'http://', '')";
@@ -187,13 +241,13 @@ class DashboardController extends Controller
                 END as source,
                 COUNT(*) as views
             ")
-            ->where('created_at', '>=', now()->subDays(7))
+            ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
+            ->where($excludeBots)
             ->groupBy('source')
             ->orderByDesc('views')
             ->limit(12)
             ->get()
             ->map(function ($item) {
-                // Clean up referrer domains (strip trailing paths for non-MySQL)
                 $source = $item->source;
                 if (str_contains($source, '/')) {
                     $source = explode('/', $source)[0];
@@ -218,22 +272,23 @@ class DashboardController extends Controller
                 ];
             });
 
-        // ─── HOURLY TRAFFIC (24h) ───
+        // ─── HOURLY TRAFFIC (Last 24h, always 24h for human) ───
         $hourFunc = $isMysql ? "HOUR(created_at)" : "strftime('%H', created_at)";
         $hourlyTraffic = DB::table('page_views')
             ->selectRaw("{$hourFunc} as hour, COUNT(*) as views")
             ->where('created_at', '>=', now()->subHours(24))
+            ->where($excludeBots)
             ->groupBy('hour')
             ->orderBy('hour')
             ->get()
             ->map(fn($item) => ['hour' => sprintf('%02d:00', (int) $item->hour), 'views' => $item->views]);
 
-        // ─── GEMINI AI USAGE (7d) ───
+        // ─── GEMINI AI USAGE ───
         $dateFunc = "DATE(created_at)";
         $geminiUsagePerDay = Schema::hasTable('gemini_logs') ?
             DB::table('gemini_logs')
                 ->selectRaw("{$dateFunc} as date, SUM(total_tokens) as tokens, COUNT(*) as requests, SUM(cost_estimate) as cost")
-                ->where('created_at', '>=', now()->subDays(7))
+                ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
                 ->groupBy('date')
                 ->orderBy('date', 'asc')
                 ->get()
@@ -244,34 +299,32 @@ class DashboardController extends Controller
                     'cost' => round((float) $item->cost, 4),
                 ]) : collect([]);
 
-        $totalGeminiTokens7d = Schema::hasTable('gemini_logs') ?
-            DB::table('gemini_logs')->where('created_at', '>=', now()->subDays(7))->sum('total_tokens') : 0;
-        $totalGeminiCost7d = Schema::hasTable('gemini_logs') ?
-            DB::table('gemini_logs')->where('created_at', '>=', now()->subDays(7))->sum('cost_estimate') : 0;
-        $totalGeminiRequests7d = Schema::hasTable('gemini_logs') ?
-            DB::table('gemini_logs')->where('created_at', '>=', now()->subDays(7))->count() : 0;
+        $totalGeminiTokens = Schema::hasTable('gemini_logs') ?
+            DB::table('gemini_logs')->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))->sum('total_tokens') : 0;
+        $totalGeminiCost = Schema::hasTable('gemini_logs') ?
+            DB::table('gemini_logs')->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))->sum('cost_estimate') : 0;
+        $totalGeminiRequests = Schema::hasTable('gemini_logs') ?
+            DB::table('gemini_logs')->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))->count() : 0;
 
-        // ─── ADSENSE REVENUE PROJECTION (30D) ───
-        $totalViews30d = DB::table('page_views')
-            ->where('created_at', '>=', now()->subDays(30))->count();
-        // Assuming typical tech niche RPM range: $1.50 - $4.00
+        // ─── ADSENSE REVENUE PROJECTION (Dynamic based on Period) ───
         $rpmLow = 1.50;
         $rpmHigh = 4.00;
-        $projLow = ($totalViews30d / 1000) * $rpmLow;
-        $projHigh = ($totalViews30d / 1000) * $rpmHigh;
+        $projLow = ($totalViews / 1000) * $rpmLow;
+        $projHigh = ($totalViews / 1000) * $rpmHigh;
         
         $adsenseProjection = [
-            'views30d' => $totalViews30d,
+            'views' => $totalViews,
             'low' => round($projLow, 2),
             'high' => round($projHigh, 2),
             'rpmAverage' => 2.75, // Just for display
         ];
 
-        // Raw Gemini logs (recent 15, with correct column names)
+        // Raw Gemini logs
         $rawGeminiLogs = Schema::hasTable('gemini_logs') ?
             DB::table('gemini_logs')
+                ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
                 ->orderByDesc('created_at')
-                ->limit(15)
+                ->limit(30)
                 ->get()
                 ->map(fn($log) => [
                     'id' => $log->id,
@@ -288,7 +341,7 @@ class DashboardController extends Controller
         $geminiModelDistribution = Schema::hasTable('gemini_logs') ?
             DB::table('gemini_logs')
                 ->selectRaw('model_name, SUM(total_tokens) as tokens, COUNT(*) as requests, SUM(cost_estimate) as cost')
-                ->where('created_at', '>=', now()->subDays(7))
+                ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
                 ->groupBy('model_name')
                 ->get()
                 ->map(fn($item) => [
@@ -296,12 +349,13 @@ class DashboardController extends Controller
                     'tokens' => (int) $item->tokens,
                     'requests' => (int) $item->requests,
                     'cost' => round((float) $item->cost, 4),
-                    'percentage' => $totalGeminiTokens7d > 0 ? round(($item->tokens / $totalGeminiTokens7d) * 100, 1) : 0,
+                    'percentage' => $totalGeminiTokens > 0 ? round(($item->tokens / $totalGeminiTokens) * 100, 1) : 0,
                 ]) : collect([]);
 
         return Inertia::render('Dashboard', [
             'initialBrief' => 'The AI Daily Brief will appear here.',
             'articles' => $articles,
+            'period' => $period,
             'analytics' => [
                 'viewsPerDay' => $viewsPerDay,
                 'topArticles' => $topArticlesWithData,
@@ -314,17 +368,17 @@ class DashboardController extends Controller
                 'geminiModelDistribution' => $geminiModelDistribution,
                 'rawGeminiLogs' => $rawGeminiLogs,
                 'summary' => [
-                    'totalViews7d' => $totalViews7d,
+                    'totalViews' => $totalViews,
                     'viewsGrowth' => $viewsGrowth,
-                    'uniqueVisitors7d' => $uniqueVisitors7d,
+                    'uniqueVisitors' => $uniqueVisitors,
                     'totalArticles' => $totalArticles,
-                    'totalLikes' => $totalLikes,
+                    'totalLikes' => $totalLikesAllTime,
                     'topLikedArticles' => $topLikedArticles,
                     'engagementRate' => $engagementRate,
                     'totalViewsAllTime' => $totalViewsAllTime,
-                    'totalGeminiTokens7d' => $totalGeminiTokens7d,
-                    'totalGeminiCost7d' => round((float) $totalGeminiCost7d, 4),
-                    'totalGeminiRequests7d' => $totalGeminiRequests7d,
+                    'totalGeminiTokens' => $totalGeminiTokens,
+                    'totalGeminiCost' => round((float) $totalGeminiCost, 4),
+                    'totalGeminiRequests' => $totalGeminiRequests,
                     'adsenseProjection' => $adsenseProjection,
                 ],
             ]
