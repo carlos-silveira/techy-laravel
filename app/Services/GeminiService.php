@@ -880,7 +880,7 @@ Return exactly a JSON object (no markdown fences):
             
             if ($expectJson) {
                 try {
-                    return $this->extractJsonFromText($text);
+                    return $this->extractJson($text);
                 } catch (\Exception $e) {
                     Log::warning("Groq JSON extraction failed: " . $e->getMessage() . " Text: " . substr($text, 0, 100));
                     throw new \App\Exceptions\GenerationException("Groq fallback returned invalid JSON.");
