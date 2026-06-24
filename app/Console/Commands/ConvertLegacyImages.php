@@ -35,9 +35,9 @@ class ConvertLegacyImages extends Command
                 }
 
                 $fileContents = \Illuminate\Support\Facades\Storage::disk('public')->get($oldPath);
-                $image = $manager->read($fileContents);
+                $image = $manager->decode($fileContents);
                 $image->scaleDown(width: 1600);
-                $encoded = $image->toWebp(80);
+                $encoded = $image->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 80));
 
                 $newFilename = pathinfo($oldPath, PATHINFO_FILENAME) . '_' . uniqid() . '.webp';
                 $newPath = 'uploads/' . $newFilename;

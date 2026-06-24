@@ -25,9 +25,9 @@ class ImageUploadController extends Controller
             $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
             
             // Read, resize and encode
-            $image = $manager->read($file);
+            $image = $manager->decode($file);
             $image->scaleDown(width: 1600);
-            $encoded = $image->toWebp(80);
+            $encoded = $image->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 80));
 
             // Store the WebP buffer in the public disk
             $path = 'uploads/' . $filename;
