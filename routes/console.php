@@ -20,8 +20,8 @@ Artisan::command('inspire', function () {
 
 use Illuminate\Support\Facades\Schedule;
 
-// Generate AI-powered news every 4 hours
-Schedule::command('news:generate-daily')->cron('0 */4 * * *')->withoutOverlapping();
+// Generate AI-powered news every 4 hours via Background Queue
+Schedule::job(new \App\Jobs\GenerateNewsJob)->cron('0 */4 * * *')->withoutOverlapping();
 
 // Schedule weekly newsletter
 Schedule::command('newsletter:send-weekly')->weeklyOn(5, '09:00');
