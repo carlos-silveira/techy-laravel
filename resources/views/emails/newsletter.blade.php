@@ -107,11 +107,11 @@
                                                 </span>
                                             </td>
                                         </tr>
-                                        @if($article->cover_image_path)
+                                        @if($article->final_image_url)
                                         <tr>
                                             <td align="center" style="padding-bottom: 25px;">
                                                 <a href="{{ url('/article/' . $article->slug) }}?utm_source=newsletter&utm_medium=email&utm_campaign=weekly_newsletter" target="_blank">
-                                                    <img src="{{ url(str_starts_with($article->cover_image_path, 'http') ? $article->cover_image_path : '/storage/' . $article->cover_image_path) }}" alt="{{ $article->title }}" width="520" style="display: block; width: 100%; max-width: 520px; height: auto; border-radius: 16px; border: 1px solid #1f2937;" />
+                                                    <img src="{{ $article->final_image_url }}" alt="{{ $article->title }}" width="520" style="display: block; width: 100%; max-width: 520px; height: auto; border-radius: 16px; border: 1px solid #1f2937;" />
                                                 </a>
                                             </td>
                                         </tr>
@@ -150,9 +150,9 @@
                                                 <table border="0" cellpadding="0" cellspacing="0" width="100%" dir="ltr">
                                                     <tr>
                                                         <td align="center">
-                                                            @if($article->cover_image_path)
+                                                            @if($article->final_image_url)
                                                             <a href="{{ url('/article/' . $article->slug) }}?utm_source=newsletter&utm_medium=email&utm_campaign=weekly_newsletter" target="_blank">
-                                                                <img class="stack-img" src="{{ url(str_starts_with($article->cover_image_path, 'http') ? $article->cover_image_path : '/storage/' . $article->cover_image_path) }}" alt="{{ $article->title }}" width="220" style="display: block; width: 100%; max-width: 220px; height: auto; border-radius: 12px; border: 1px solid #1f2937;" />
+                                                                <img class="stack-img" src="{{ $article->final_image_url }}" alt="{{ $article->title }}" width="220" style="display: block; width: 100%; max-width: 220px; height: auto; border-radius: 12px; border: 1px solid #1f2937;" />
                                                             </a>
                                                             @endif
                                                         </td>

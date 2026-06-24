@@ -420,10 +420,11 @@ const TipTapRenderer = ({ content }) => {
             case 'blockquote':
                 return <blockquote key={index} className="border-l-4 border-primary pl-6 py-2 my-8 italic text-gray-700 dark:text-gray-300 bg-primary/5 rounded-r-xl">{node.content?.map((n, i) => renderNode(n, i))}</blockquote>;
             case 'image':
+                const imageSrc = node.attrs?.src ? (node.attrs.src.startsWith('http') || node.attrs.src.startsWith('/') ? node.attrs.src : '/storage/' + node.attrs.src) : null;
                 return (
                     <div key={index} className="my-10 relative group overflow-hidden rounded-[2rem] border border-black/5 dark:border-white/10 shadow-2xl">
                         <img 
-                            src={node.attrs?.src} 
+                            src={imageSrc} 
                             alt={node.attrs?.alt || 'Article image'} 
                             title={node.attrs?.title}
                             className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out" 

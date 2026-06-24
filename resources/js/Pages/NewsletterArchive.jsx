@@ -66,6 +66,7 @@ export default function NewsletterArchive({ newsletters, dailyBrief }) {
                                                     src={getFinalImage(article, 800)} 
                                                     fetchpriority={idx === 0 && i === 0 ? "high" : "auto"}
                                                     decoding="async"
+                                                    loading={idx === 0 && i === 0 ? "eager" : "lazy"}
                                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                                                     alt={article.title} 
                                                 />

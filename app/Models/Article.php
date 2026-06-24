@@ -49,6 +49,42 @@ class Article extends Model
         return $this->status === 'published';
     }
 
+    /**
+     * Get the final image URL, falling back to content extraction or generic defaults.
+     */
+    public function getFinalImageUrlAttribute(): string
+    {
+        $url = $this->cover_image_path;
+
+        if (!$url) {
+            if (preg_match('/<img[^>]+src=["\']([^"\']+)["\']/i', $this->content ?? '', $matches)) {
+                $url = $matches[1];
+            } elseif (preg_match('/"src"\s*:\s*"([^"]+)"/i', $this->content ?? '', $matches)) {
+                $url = $matches[1];
+            } else {
+                if (str_contains($this->slug ?? '', 'not-paid-to-write-code')) {
+                    return 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=1200';
+                }
+                return 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=1200';
+            }
+        }
+
+        if (str_contains($url, 'unsplash.com')) {
+            $separator = str_contains($url, '?') ? '&' : '?';
+            return $url . $separator . 'auto=format&fit=crop&q=80&w=1200';
+        }
+
+        if (str_starts_with($url, 'http')) {
+            return $url;
+        }
+
+        if (str_starts_with($url, '/storage/')) {
+            return url($url);
+        }
+
+        return url('/storage/' . ltrim($url, '/'));
+    }
+
     // NOTE: Translation is handled explicitly by PublicController::translateIfNecessary().
     // Do NOT add model accessors for auto-translation — they conflict with caching
     // and cause double-translation / mixed-language bugs.

@@ -835,7 +835,7 @@ export default function Dashboard({ auth, articles: initialArticles, analytics, 
                     <div className="w-10"></div> {/* Spacer */}
                 </header>
 
-                <div className="flex-1 flex flex-row overflow-hidden relative">
+                <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
                     {view === 'agent' && <div className="flex-1 overflow-y-auto p-4 md:p-10"><AgentControl /></div>}
                     {view === 'scout' && <ScoutedQueue />}
                     {view === 'observability' && <div className="flex-1 overflow-y-auto p-4 md:p-10"><Observability /></div>}
@@ -912,7 +912,7 @@ export default function Dashboard({ auth, articles: initialArticles, analytics, 
                 {view === 'editor' && (
                     <>
                         {/* Editor Column */}
-                        <div className="flex-1 flex flex-col border-r border-black/5 dark:border-white/5 overflow-y-auto no-scrollbar">
+                        <div className="flex-1 flex flex-col lg:border-r border-black/5 dark:border-white/5 overflow-y-auto no-scrollbar">
                             <header className="sticky top-0 z-40 bg-white/80 dark:bg-[#02040a]/80 backdrop-blur-2xl border-b border-black/5 dark:border-white/5 px-10 h-20 flex items-center justify-between transition-colors duration-500">
                                 <div className="flex items-center gap-6">
                                     <button onClick={() => setView('list')} className="p-2.5 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 rounded-xl transition-all"><ChevronLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" /></button>
@@ -974,7 +974,7 @@ export default function Dashboard({ auth, articles: initialArticles, analytics, 
                         </div>
 
                         {/* Chat Assistant Column */}
-                        <div className="w-[450px] flex flex-col bg-black/[0.01] dark:bg-white/[0.01] relative">
+                        <div className="w-full lg:w-[450px] h-[50vh] lg:h-auto flex flex-col bg-black/[0.01] dark:bg-white/[0.01] relative border-t lg:border-t-0 lg:border-l border-black/5 dark:border-white/5 flex-shrink-0">
                             <div className="p-6 border-b border-black/5 dark:border-white/5 flex items-center justify-between bg-white dark:bg-[#02040a]/50">
                                 <div className="flex items-center gap-3">
                                     <MessageSquare className="w-5 h-5 text-primary" />
