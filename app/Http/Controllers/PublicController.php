@@ -96,6 +96,10 @@ class PublicController extends Controller
             }
         );
 
+        $editorsChoice->each->makeHidden(['translations', 'content', 'embedding']);
+        $articles->each->makeHidden(['translations', 'content', 'embedding']);
+        $trendingArticles->each->makeHidden(['translations', 'content', 'embedding']);
+
         return Inertia::render('Welcome', [
             'editorsChoice' => $editorsChoice,
             'articles' => $articles,
