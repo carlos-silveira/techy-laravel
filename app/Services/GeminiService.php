@@ -593,7 +593,19 @@ Return exactly a JSON object (no markdown fences):
             Log::warning("OpenRouter conversational failed: " . $e->getMessage() . " - Attempting Native Gemini Fallback");
             
             if (env('GEMINI_API_KEY')) {
-                return $this->callNativeGeminiFallback($messages, false);
+                try {
+                    return $this->callNativeGeminiFallback($messages, false);
+                } catch (\Exception $e2) {
+                    Log::error("Native Gemini Fallback also failed: " . $e2->getMessage() . " - Attempting Groq Fallback");
+                }
+            }
+            
+            if (env('GROQ_API_KEY')) {
+                try {
+                    return $this->callGroqFallback($messages, false);
+                } catch (\Exception $e3) {
+                    Log::error("Groq Fallback also failed: " . $e3->getMessage());
+                }
             }
             
             throw new \RuntimeException('AI API is currently resting or unavailable. Please try again later.');
@@ -621,7 +633,15 @@ Return exactly a JSON object (no markdown fences):
                 try {
                     return $this->callNativeGeminiFallback($prompt, $expectJson);
                 } catch (\Exception $e2) {
-                    Log::error("Native Gemini Fallback also failed: " . $e2->getMessage());
+                    Log::error("Native Gemini Fallback also failed: " . $e2->getMessage() . " - Attempting Groq Fallback");
+                }
+            }
+
+            if (env('GROQ_API_KEY')) {
+                try {
+                    return $this->callGroqFallback($prompt, $expectJson);
+                } catch (\Exception $e3) {
+                    Log::error("Groq Fallback also failed: " . $e3->getMessage());
                 }
             }
             
@@ -801,6 +821,76 @@ Return exactly a JSON object (no markdown fences):
         }
         
         throw new \RuntimeException("Native Gemini API Error (All fallback models exhausted): " . $lastError);
+    }
+
+    /**
+     * Fallback to Groq API.
+     */
+    private function callGroqFallback($promptOrMessages, bool $expectJson = false)
+    {
+        $apiKey = env('GROQ_API_KEY');
+        if (!$apiKey) {
+            throw new \RuntimeException("GROQ_API_KEY not configured for fallback.");
+        }
+
+        $model = 'llama-3.3-70b-versatile';
+
+        if (is_string($promptOrMessages)) {
+            $messages = [['role' => 'user', 'content' => $promptOrMessages]];
+        } else {
+            $messages = [];
+            foreach ($promptOrMessages as $msg) {
+                if (isset($msg['role']) && isset($msg['parts'])) {
+                    $messages[] = [
+                        'role' => $msg['role'] === 'model' ? 'assistant' : 'user',
+                        'content' => is_array($msg['parts']) ? ($msg['parts'][0]['text'] ?? '') : $msg['parts']
+                    ];
+                } else {
+                    $messages[] = [
+                        'role' => ($msg['role'] ?? 'user') === 'model' ? 'assistant' : ($msg['role'] ?? 'user'),
+                        'content' => $msg['content'] ?? ''
+                    ];
+                }
+            }
+        }
+
+        $payload = [
+            'model' => $model,
+            'messages' => $messages,
+            'temperature' => 0.7,
+        ];
+
+        // Llama 3.3 on Groq supports JSON mode natively!
+        if ($expectJson) {
+            $payload['response_format'] = ['type' => 'json_object'];
+            // Append instruction to ensure model outputs JSON
+            $lastIndex = count($messages) - 1;
+            $messages[$lastIndex]['content'] .= "\n\nYou must output ONLY valid JSON.";
+            $payload['messages'] = $messages;
+        }
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $apiKey,
+            'Content-Type' => 'application/json',
+        ])->timeout(45)->post('https://api.groq.com/openai/v1/chat/completions', $payload);
+
+        if ($response->successful()) {
+            Log::info("Successfully generated using Groq Fallback model: {$model}");
+            $text = $response->json('choices.0.message.content') ?? '';
+            
+            if ($expectJson) {
+                try {
+                    return $this->extractJsonFromText($text);
+                } catch (\Exception $e) {
+                    Log::warning("Groq JSON extraction failed: " . $e->getMessage() . " Text: " . substr($text, 0, 100));
+                    throw new \App\Exceptions\GenerationException("Groq fallback returned invalid JSON.");
+                }
+            }
+            
+            return $text;
+        }
+
+        throw new \RuntimeException("Groq Fallback failed: " . $response->status() . " " . $response->body());
     }
 
     /**
