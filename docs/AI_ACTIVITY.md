@@ -416,3 +416,8 @@
 - **Frontend (PageSpeed)**: Injected native `loading="lazy"` tags to all below-the-fold images in `NewsletterArchive.jsx` to dramatically optimize Largest Contentful Paint (LCP) and resolve low PageSpeed scores.
 - **Backend (API Fallback)**: Upgraded `config/services.php` to natively support Groq (`GROQ_API_KEY`). Appended the user's provided Groq key directly into the production `.env`. OpenRouter failures will now successfully cascade down to Gemini Native, and finally Groq (`llama-3.3-70b-versatile`).
 - **Backend (Observability)**: Enabled deep backend Sentry performance profiling directly on production by injecting `SENTRY_PROFILES_SAMPLE_RATE=1.0` into the remote `.env` and flushing the config cache, allowing the user to deeply trace slow endpoint requests.
+
+## 2026-06-24: Dashboard 500 Recovery & Extreme PageSpeed Optimization
+- **Backend (Critical Fix)**: Resolved a `500 Server Meltdown` on the Studio Dashboard caused by querying a non-existent `published_at` column in the Analytics Top Liked Articles. Rewrote the Eloquent query in `DashboardController` to correctly use `created_at`.
+- **Frontend (PageSpeed)**: Completely eliminated render-blocking CSS caused by Google Fonts in `app.blade.php`. Implemented asynchronous font loading with `<link rel="preload" as="style">` and `onload="this.media='all'"`, while maintaining the correct `gstatic` preconnect.
+- **Frontend (PageSpeed LCP)**: Injected dynamic `<link rel="preload" as="image" fetchpriority="high">` tags into the Inertia `<Head>` of `Welcome.jsx` for the Hero Featured Image. This forces browsers to start downloading the heavy LCP image immediately during the initial HTML response, drastically cutting down the 2.8s LCP delay caused by waiting for React hydration.
