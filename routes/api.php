@@ -29,6 +29,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/agent/run', [AgentController::class, 'runAgent']);
     Route::get('/agent/status', [AgentController::class, 'getStatus']);
 
+    Route::get('/observability', [\App\Http\Controllers\ObservabilityController::class, 'index']);
     Route::get('/scouted-queue', [ScoutQueueController::class, 'index']);
     Route::post('/scouted-queue/{id}/approve', [ScoutQueueController::class, 'approve']);
     Route::delete('/scouted-queue/{id}', [ScoutQueueController::class, 'destroy']);

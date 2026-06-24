@@ -38,6 +38,10 @@ export const getFinalImage = (article, width = 1200) => {
         url = findFirstImage(article.content);
     }
     
+    if (url && !url.startsWith('http') && !url.startsWith('/')) {
+        url = '/storage/' + url;
+    }
+    
     // Generic tech fallbacks based on keywords or slug
     if (!url) {
         url = article.slug && article.slug.includes('not-paid-to-write-code') 
