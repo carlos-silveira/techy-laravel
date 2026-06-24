@@ -41,6 +41,23 @@ export default function Welcome({ articles, editorsChoice, dailyBrief, trendingA
 
   const [email, setEmail] = useState('');
   const [isSubscribing, setIsSubscribing] = useState(false);
+  const [showCopilot, setShowCopilot] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowCopilot(true), 3500);
+    const handleInteraction = () => setShowCopilot(true);
+    
+    window.addEventListener('scroll', handleInteraction, { once: true, passive: true });
+    window.addEventListener('mousemove', handleInteraction, { once: true, passive: true });
+    window.addEventListener('touchstart', handleInteraction, { once: true, passive: true });
+    
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('scroll', handleInteraction);
+      window.removeEventListener('mousemove', handleInteraction);
+      window.removeEventListener('touchstart', handleInteraction);
+    };
+  }, []);
 
   const handleSubscribe = async (e) => {
     e.preventDefault();
@@ -97,6 +114,9 @@ export default function Welcome({ articles, editorsChoice, dailyBrief, trendingA
         <meta name="twitter:description" content="AI-powered journalism platform delivering deep technical research and automated synthesis of global tech news." />
         {featured && (
             <link rel="preload" as="image" href={getFinalImage(featured, 1600)} fetchpriority="high" />
+        )}
+        {editorsChoice?.[0] && (
+            <link rel="preload" as="image" href={getFinalImage(editorsChoice[0], 600)} media="(max-width: 768px)" fetchpriority="high" />
         )}
       </Head>
       <CommandPalette />
@@ -321,7 +341,8 @@ export default function Welcome({ articles, editorsChoice, dailyBrief, trendingA
                           alt={article.title}
                           width="600"
                           height="400"
-                          loading="lazy" 
+                          loading={index === 0 ? "eager" : "lazy"} 
+                          fetchpriority={index === 0 ? "high" : "auto"}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-[#02040a] to-transparent opacity-60" />
@@ -503,9 +524,11 @@ export default function Welcome({ articles, editorsChoice, dailyBrief, trendingA
         {/* ... */}
         {/* ===== FOOTER ===== */}
         <PublicFooter />
-        <Suspense fallback={null}>
-          <RagCopilot />
-        </Suspense>
+        {showCopilot && (
+          <Suspense fallback={null}>
+            <RagCopilot />
+          </Suspense>
+        )}
 
       </main>
     </div>
