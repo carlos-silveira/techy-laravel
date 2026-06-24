@@ -1,3 +1,9 @@
+## [2026-06-24] - Gemini Fallback JSON Parsing Fix
+
+### Fixed
+- **Gemini Fallback JSON Wrapper**: Fixed an issue where the daily news generator would fail if the primary OpenRouter API rate limit was hit. The script successfully fell back to the native Gemini API (Gemini 2.5 Flash), but Gemini returned the valid JSON array wrapped in an object (e.g., `{"ideas": [...]}`). The `extractJson` method returned this correctly, but `generateIdeas()` didn't unwrap the object, resulting in an empty array and the error "Gemini could not generate ideas." Added an unwrap condition (`$result['ideas']` / `$result['articles']`) in `GeminiService.php` to correctly parse the Gemini payload. Manually SCP'd the patched file to the production server to bypass the 5-minute GitHub Action CI/CD delay and ran `news:generate-daily` to publish today's news instantly.
+- **Lighthouse Performance LCP**: Moved the native `<link rel="preload">` tag from the React client-side (`Welcome.jsx`) to the server-side Laravel view (`app.blade.php`) to fix Lighthouse's mobile preload warnings and hit 94/100 score on Mobile. Also converted the OG and structured data logo images to WebP.
+
 ## [2026-06-22] - Agent Observability & Unsplash Image Fix
 
 ### Added
