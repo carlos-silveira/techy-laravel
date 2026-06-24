@@ -106,7 +106,7 @@ export default function Welcome({ articles, editorsChoice, dailyBrief, trendingA
         <meta property="og:description" content="A cutting-edge, AI-powered journalism platform delivering deep technical research and automated synthesis of global tech news." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://techynews.lat" />
-        <meta property="og:image" content="https://techynews.lat/img/logo_wbc.png" />
+        <meta property="og:image" content="https://techynews.lat/img/logo_wbc.webp" />
         <meta property="og:site_name" content="Techy News" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:site" content="@TechyNewsLat" />

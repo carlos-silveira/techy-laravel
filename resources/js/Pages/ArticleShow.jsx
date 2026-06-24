@@ -166,7 +166,7 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
                             "name": "TechyNews",
                             "logo": {
                                 "@type": "ImageObject",
-                                "url": "https://techynews.lat/img/logo_wbc.png"
+                                "url": "https://techynews.lat/img/logo_wbc.webp"
                             }
                         },
                         "description": article.ai_summary || article.meta_description || '',

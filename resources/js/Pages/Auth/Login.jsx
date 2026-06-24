@@ -38,7 +38,7 @@ export default function Login({ status, canResetPassword }) {
                 {/* Logo */}
                 <div className="flex justify-center mb-10">
                     <Link href="/">
-                        <img src="/img/logo_wbc.png" alt="Techy News" className="h-10 w-auto" />
+                        <img src="/img/logo_wbc.webp" alt="Techy News" className="h-10 w-auto" />
                     </Link>
                 </div>
 

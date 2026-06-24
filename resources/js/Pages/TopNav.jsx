@@ -13,8 +13,8 @@ function TopNav() {
         <div className="flex justify-between h-16">
           <div className="flex">
             <a href="/" className="flex-shrink-0 flex items-center">
-              <img className="block lg:hidden h-8 w-auto" src="/img/logo_wbc.png" alt="Logo" />
-              <img className="hidden lg:block h-8 w-auto" src="/img/logo_wbc.png" alt="Logo" />
+              <img className="block lg:hidden h-8 w-auto" src="/img/logo_wbc.webp" alt="Logo" />
+              <img className="hidden lg:block h-8 w-auto" src="/img/logo_wbc.webp" alt="Logo" />
             </a>
           </div>
           <div className="flex items-center">

@@ -23,6 +23,9 @@
                 if (!str_starts_with($url, 'http') && !str_starts_with($url, '/')) {
                     $url = '/storage/' . $url;
                 }
+                if (!str_starts_with($url, 'http')) {
+                    $url = 'https://techynews.lat' . $url;
+                }
             }
             return $url;
         };
@@ -52,7 +55,7 @@
         <meta property="og:title" content="TechyNews — Noticias de Tecnología con IA">
         <meta property="og:description" content="Plataforma líder en periodismo tecnológico impulsado por Inteligencia Artificial. IA, startups, ciberseguridad y el futuro de la tecnología.">
         <meta property="og:type" content="website">
-        <meta property="og:image" content="https://techynews.lat/img/logo_wbc.png">
+        <meta property="og:image" content="https://techynews.lat/img/logo_wbc.webp">
         <meta property="og:site_name" content="TechyNews">
         <meta name="twitter:card" content="summary">
         <meta name="twitter:site" content="@TechyNewsLat">
