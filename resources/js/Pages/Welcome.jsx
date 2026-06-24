@@ -145,7 +145,7 @@ export default function Welcome({ articles, editorsChoice, dailyBrief, trendingA
         <meta property="og:url" content="https://techynews.lat" />
         <meta property="og:image" content="https://techynews.lat/img/logo_wbc.png" />
         <meta property="og:site_name" content="Techy News" />
-        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:site" content="@TechyNewsLat" />
         <meta name="twitter:title" content="Techy News — AI-Powered Tech Intelligence" />
         <meta name="twitter:description" content="AI-powered journalism platform delivering deep technical research and automated synthesis of global tech news." />
@@ -174,9 +174,12 @@ export default function Welcome({ articles, editorsChoice, dailyBrief, trendingA
               className="absolute inset-0"
               style={{ scale: useTransform(scrollYProgress, [0, 0.3], [1.05, 1]) }}
             >
-              <div
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-[10s] group-hover:scale-110"
-                style={{ backgroundImage: `url(${getFinalImage(featured, 1600)})` }}
+              <img
+                src={getFinalImage(featured, 1600)}
+                fetchpriority="high"
+                loading="eager"
+                alt={featured.title}
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-[10s] group-hover:scale-110"
               />
               {/* Multi-layer gradient overlay to fade into page background smoothly */}
               <div className="absolute inset-0 bg-gradient-to-t from-[#f8f6f6] dark:from-[#02040a] via-[#f8f6f6]/80 dark:via-[#02040a]/80 to-transparent" />
@@ -207,7 +210,7 @@ export default function Welcome({ articles, editorsChoice, dailyBrief, trendingA
                       <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">{__('Featured Story')}</span>
                     </motion.div>
 
-                    <Link href={`/article/${featured.slug}`}>
+                    <Link href={`/article/${featured.slug}`} aria-label={featured.title}>
                       <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-black tracking-tighter leading-[0.95] mb-6 text-black dark:text-white hover:text-primary transition-colors duration-500 cursor-pointer drop-shadow-md">
                         {featured.title}
                       </h1>
@@ -262,7 +265,7 @@ export default function Welcome({ articles, editorsChoice, dailyBrief, trendingA
                               <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-[#0a0f1c] animate-pulse"></div>
                             </div>
                             <div>
-                              <h2 className="text-xs font-black uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">{__('Intelligence Feed')}</h2>
+                              <h2 className="text-xs font-black uppercase tracking-[0.3em] text-gray-600 dark:text-gray-400">{__('Intelligence Feed')}</h2>
                               <div className="flex items-center gap-2 mt-1">
                                 <span className="text-sm font-black text-black dark:text-white tracking-tighter uppercase">{__('Daily Briefing')}</span>
                                 <span className="inline-block w-1.5 h-4 bg-primary/40 animate-[blink_1s_infinite]"></span>
@@ -288,7 +291,7 @@ export default function Welcome({ articles, editorsChoice, dailyBrief, trendingA
                         </div>
 
                         <div className="mt-8 pt-6 border-t border-black/5 dark:border-white/5 flex items-center justify-between">
-                           <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest italic font-mono">
+                           <div className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest italic font-mono">
                              ST-ID: {Math.random().toString(36).substring(7).toUpperCase()}
                            </div>
                            <div className="text-[10px] font-black text-primary/60 uppercase tracking-widest">
@@ -359,12 +362,15 @@ export default function Welcome({ articles, editorsChoice, dailyBrief, trendingA
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <Link href={`/article/${article.slug}`} className="group block">
+                  <Link href={`/article/${article.slug}`} className="group block" aria-label={article.title}>
                     <div className="relative rounded-[2rem] overflow-hidden bg-white/[0.6] dark:bg-white/[0.03] border border-black/5 dark:border-white/5 group-hover:border-amber-400/30 transition-all duration-500 shadow-sm dark:shadow-none">
-                      <div
-                        className="h-52 bg-gradient-to-br from-white/10 to-black/50 bg-cover bg-center relative overflow-hidden"
-                        style={{ backgroundImage: `url(${getFinalImage(article, 600)})` }}
-                      >
+                      <div className="h-52 bg-gradient-to-br from-white/10 to-black/50 relative overflow-hidden">
+                        <img 
+                          src={getFinalImage(article, 600)} 
+                          loading="lazy" 
+                          alt={article.title} 
+                          className="absolute inset-0 w-full h-full object-cover" 
+                        />
                         <div className="absolute inset-0 bg-gradient-to-t from-[#02040a] to-transparent opacity-60" />
                         <div className="absolute inset-0 group-hover:bg-amber-400/5 transition-colors duration-500" />
                         <span className="absolute top-4 right-4 text-[10px] font-black uppercase tracking-widest bg-amber-400/20 text-amber-300 border border-amber-400/30 px-3 py-1.5 rounded-full backdrop-blur-md">
@@ -429,12 +435,15 @@ export default function Welcome({ articles, editorsChoice, dailyBrief, trendingA
                     transition={{ duration: 0.7, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
                     className={isLarge ? 'lg:col-span-2 lg:row-span-2' : ''}
                   >
-                    <Link href={`/article/${article.slug}`} className="group block h-full">
+                    <Link href={`/article/${article.slug}`} className="group block h-full" aria-label={article.title}>
                       <div className={`h-full bg-white/[0.6] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 group-hover:border-primary/30 rounded-[2rem] overflow-hidden transition-all duration-500 flex flex-col shadow-sm dark:shadow-none ${isLarge ? 'min-h-[500px]' : 'min-h-[280px]'}`}>
-                        <div
-                          className={`w-full bg-cover bg-center flex-shrink-0 relative overflow-hidden ${isLarge ? 'h-72' : 'h-40'}`}
-                          style={{ backgroundImage: `url(${getFinalImage(article, isLarge ? 1200 : 600)})` }}
-                        >
+                        <div className={`w-full flex-shrink-0 relative overflow-hidden bg-gray-100 dark:bg-gray-900 ${isLarge ? 'h-72' : 'h-40'}`}>
+                          <img 
+                            src={getFinalImage(article, isLarge ? 1200 : 600)} 
+                            loading="lazy" 
+                            alt={article.title} 
+                            className="absolute inset-0 w-full h-full object-cover"
+                          />
                           <div className="absolute inset-0 bg-gradient-to-t from-[#02040a] via-transparent to-transparent" />
                           <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-colors duration-700 mix-blend-overlay" />
                         </div>

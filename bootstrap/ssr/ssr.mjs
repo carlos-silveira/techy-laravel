@@ -58779,7 +58779,7 @@ server_default((page) => createInertiaApp({
 		"./Pages/About.jsx": () => import("./assets/About-w9x55c9L.mjs"),
 		"./Pages/AboutUs.jsx": () => import("./assets/AboutUs-Cl_eEH5O.mjs"),
 		"./Pages/Archive.jsx": () => import("./assets/Archive-DUcZvpz5.mjs"),
-		"./Pages/ArticleShow.jsx": () => import("./assets/ArticleShow-CgccBm-w.mjs"),
+		"./Pages/ArticleShow.jsx": () => import("./assets/ArticleShow-99rFdbPP.mjs"),
 		"./Pages/Auth/ConfirmPassword.jsx": () => import("./assets/ConfirmPassword-xv6hHONx.mjs"),
 		"./Pages/Auth/ForgotPassword.jsx": () => import("./assets/ForgotPassword-Dme-QLLY.mjs"),
 		"./Pages/Auth/Login.jsx": () => import("./assets/Login-Cxa9rbxl.mjs"),
@@ -58796,7 +58796,7 @@ server_default((page) => createInertiaApp({
 		"./Pages/Privacy.jsx": () => import("./assets/Privacy-c0avm3co.mjs"),
 		"./Pages/Terms.jsx": () => import("./assets/Terms-CV5KU3At.mjs"),
 		"./Pages/TopNav.jsx": () => import("./assets/TopNav-DH003LlL.mjs").then((n) => n.n),
-		"./Pages/Welcome.jsx": () => import("./assets/Welcome-C_hPcVGe.mjs")
+		"./Pages/Welcome.jsx": () => import("./assets/Welcome-CwbQl94Q.mjs")
 	})),
 	setup({ App, props }) {
 		global.route = (name, params, absolute) => s(name, params, absolute, {

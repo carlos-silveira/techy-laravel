@@ -242,6 +242,8 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
                             <img 
                                 src={finalCoverImage} 
                                 alt={article.title}
+                                fetchpriority="high"
+                                loading="eager"
                                 className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                             />
                         </div>
