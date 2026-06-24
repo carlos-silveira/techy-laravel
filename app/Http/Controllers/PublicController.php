@@ -76,17 +76,20 @@ class PublicController extends Controller
                     ->limit(5)
                     ->pluck('article_id');
 
+                $selectCols = ['id', 'title', 'slug', 'ai_summary', 'updated_at', 'cover_image_path', 'language', 'translations', 'reading_time_minutes', 'tags'];
+
                 if ($ids->isEmpty()) {
-                    $articles = Article::where('status', 'published')->orderByDesc('created_at')->limit(5)->get();
+                    $articles = Article::where('status', 'published')->orderByDesc('created_at')->limit(5)->select($selectCols)->get();
                 } else {
                     $articles = Article::whereIn('id', $ids)
                         ->where('status', 'published')
+                        ->select($selectCols)
                         ->get()
                         ->sortBy(fn($a) => array_search($a->id, $ids->toArray()));
                 }
 
                 if ($articles->isEmpty()) {
-                    $articles = Article::where('status', 'published')->latest()->limit(5)->get();
+                    $articles = Article::where('status', 'published')->latest()->limit(5)->select($selectCols)->get();
                 }
 
                 return $articles;
