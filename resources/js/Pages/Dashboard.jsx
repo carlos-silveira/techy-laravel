@@ -20,6 +20,7 @@ import GeminiUsage from '@/Components/GeminiUsage';
 import ScoutedQueue from '@/Components/ScoutedQueue';
 import AgentControl from '@/Components/AgentControl';
 import Observability from '@/Components/Observability';
+import { getFinalImage } from '@/utils';
 
 /* ──────────────────────────────────────────────
    WIZARD STEPS COMPONENT — No-code guided flow
@@ -857,7 +858,7 @@ export default function Dashboard({ auth, articles: initialArticles, analytics }
                                 <div key={article.id} onClick={() => handleEdit(article)} className="p-6 bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl hover:border-primary/30 transition-all flex items-center justify-between group cursor-pointer">
                                     <div className="flex items-center gap-6">
                                         <div className="w-20 h-20 rounded-2xl bg-black overflow-hidden flex-shrink-0 border border-black/5 dark:border-white/10">
-                                            {article.cover_image_path && <img src={article.cover_image_path} className="w-full h-full object-cover" alt="" />}
+                                            {getFinalImage(article, 200) && <img src={getFinalImage(article, 200)} className="w-full h-full object-cover" alt="" />}
                                         </div>
                                         <div>
                                             <h3 className="font-black text-xl text-gray-900 dark:text-white group-hover:text-primary transition-colors">{article.title}</h3>

@@ -8,50 +8,7 @@ import CommandPalette from '@/Components/CommandPalette';
 import Navbar from '@/Components/Navbar';
 import PublicFooter from '@/Components/PublicFooter';
 import useLanguage from '@/Hooks/useLanguage';
-
-/**
- * Helper to find the first image in the content (HTML string or JSON object).
- */
-const findFirstImage = (content) => {
-  if (!content) return null;
-  if (typeof content === 'string') {
-    const match = content.match(/<img[^>]+src="([^">]+)"/);
-    if (match) return match[1];
-    try {
-      const parsed = JSON.parse(content);
-      return findFirstImage(parsed);
-    } catch { return null; }
-  }
-  if (typeof content === 'object') {
-    if (content.type === 'image' && content.attrs?.src) return content.attrs.src;
-    if (content.content && Array.isArray(content.content)) {
-      for (const node of content.content) {
-        const found = findFirstImage(node);
-        if (found) return found;
-      }
-    }
-  }
-  return null;
-};
-
-const getFinalImage = (article, width = 600) => {
-  let url = article.cover_image_path;
-  if (!url) {
-    url = findFirstImage(article.content);
-  }
-  
-  // Generic tech fallbacks
-  if (!url) {
-    url = 'https://images.unsplash.com/photo-1451187580459-43490279c0fa';
-  }
-
-  if (url.includes('unsplash.com')) {
-    const separator = url.includes('?') ? '&' : '?';
-    return `${url}${separator}auto=format&fit=crop&q=80&w=${width}`;
-  }
-
-  return url;
-};
+import { getFinalImage } from '@/utils';
 
 export default function Archive({ articles: originalArticles, currentTag, popularTags, dailyBrief }) {
     const { __ } = useLanguage();

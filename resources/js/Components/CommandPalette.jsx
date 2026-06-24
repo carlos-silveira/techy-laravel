@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link, router } from '@inertiajs/react';
 import { Search, Command, X, Loader2, Zap, ArrowRight } from 'lucide-react';
 import axios from 'axios';
+import { getFinalImage } from '@/utils';
 
 export default function CommandPalette() {
     const [isOpen, setIsOpen] = useState(false);
@@ -134,10 +135,10 @@ export default function CommandPalette() {
                                     onClick={() => setIsOpen(false)}
                                     className={`flex items-start p-4 rounded-2xl transition-all group mb-1 ${activeIndex === index ? 'bg-white/10' : 'hover:bg-white/[0.05]'}`}
                                 >
-                                    {article.cover_image_path ? (
+                                    {getFinalImage(article, 100) ? (
                                         <div
                                             className="w-14 h-14 rounded-xl bg-cover bg-center shrink-0 mr-4 border border-white/5 shadow-xl"
-                                            style={{ backgroundImage: `url(${article.cover_image_path})` }}
+                                            style={{ backgroundImage: `url(${getFinalImage(article, 100)})` }}
                                         />
                                     ) : (
                                         <div className="w-14 h-14 rounded-xl bg-white/[0.03] border border-white/5 shrink-0 mr-4 flex items-center justify-center">
