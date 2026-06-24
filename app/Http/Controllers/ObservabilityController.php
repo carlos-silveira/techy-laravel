@@ -19,8 +19,8 @@ class ObservabilityController extends Controller
         // 1. Gather Database Statistics
         $dbStats = [
             'articles_total' => Article::count(),
-            'articles_published' => Article::where('is_published', true)->count(),
-            'articles_drafts' => Article::where('is_published', false)->count(),
+            'articles_published' => Article::where('status', 'published')->count(),
+            'articles_drafts' => Article::where('status', '!=', 'published')->count(),
             
             'scout_total' => ScoutQueue::count(),
             'scout_pending' => ScoutQueue::where('status', 'pending')->count(),
