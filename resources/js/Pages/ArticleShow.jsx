@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import CommandPalette from '@/Components/CommandPalette';
 import Navbar from '@/Components/Navbar';
 import PublicFooter from '@/Components/PublicFooter';
+import { getFinalImage } from '@/utils';
 import AdSlot from '@/Components/AdSlot';
 import RagCopilot from '@/Components/RagCopilot';
 import useLanguage from '@/Hooks/useLanguage';
@@ -102,49 +103,6 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
         content = content.replace(/\\n/g, '').replace(/\\r/g, '');
         
         return content;
-    };
-
-    /**
-     * Helper to find the first image in the content (HTML string or JSON object).
-     */
-    const findFirstImage = (content) => {
-        if (!content) return null;
-        if (typeof content === 'string') {
-            const match = content.match(/<img[^>]+src="([^">]+)"/);
-            if (match) return match[1];
-            return null;
-        }
-        if (typeof content === 'object') {
-            if (content.type === 'image' && content.attrs?.src) return content.attrs.src;
-            if (content.content && Array.isArray(content.content)) {
-                for (const node of content.content) {
-                    const found = findFirstImage(node);
-                    if (found) return found;
-                }
-            }
-        }
-        return null;
-    };
-
-    const getFinalImage = (article, width = 1600) => {
-        let url = article.cover_image_path;
-        if (!url) {
-            url = findFirstImage(article.content);
-        }
-        
-        // Generic tech fallbacks
-        if (!url) {
-            url = article.slug.includes('not-paid-to-write-code') 
-                ? 'https://images.unsplash.com/photo-1498050108023-c5249f4df085'
-                : 'https://images.unsplash.com/photo-1451187580459-43490279c0fa';
-        }
-
-        if (url && url.includes('unsplash.com')) {
-            const separator = url.includes('?') ? '&' : '?';
-            return `${url}${separator}auto=format&fit=crop&q=80&w=${width}`;
-        }
-
-        return url;
     };
 
     const finalCoverImage = getFinalImage(article);
@@ -329,7 +287,7 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
                             {relatedArticles.map(related => (
                                 <Link key={related.id} href={`/article/${related.slug}`} className="group block h-full">
                                     <div className="bg-white dark:bg-white/[0.03] rounded-[2rem] overflow-hidden border border-black/5 dark:border-white/10 group-hover:border-primary/30 transition-all p-6 h-full flex flex-col shadow-sm dark:shadow-none">
-                                        <div className="h-40 rounded-2xl bg-cover bg-center mb-6 shadow-xl" style={{ backgroundImage: `url(${related.cover_image_path || findFirstImage(related.content) || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=2072'})` }} />
+                                        <div className="h-40 rounded-2xl bg-cover bg-center mb-6 shadow-xl" style={{ backgroundImage: `url(${getFinalImage(related, 800)})` }} />
                                         <div className="flex flex-col flex-1">
                                             <div className="text-[10px] font-black text-primary uppercase tracking-widest mb-3">
                                                 {dayjs(related.updated_at).format('MMM D, YYYY')}
