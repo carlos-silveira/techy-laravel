@@ -199,6 +199,13 @@ Return ONLY a JSON array, no markdown fences:
         
         $validIdeas = [];
         if (is_array($result)) {
+            // Unwrap if Gemini returned an object containing the array
+            if (isset($result['ideas']) && is_array($result['ideas'])) {
+                $result = $result['ideas'];
+            } elseif (isset($result['articles']) && is_array($result['articles'])) {
+                $result = $result['articles'];
+            }
+
             // Hotfix: AI model occasionally returns a single flat array instead of an array of objects
             if (isset($result[0]) && is_string($result[0]) && count($result) >= 2) {
                 return [[
