@@ -237,6 +237,8 @@ export default function RagCopilot() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsOpen(!isOpen)}
+                aria-label={isOpen ? "Cerrar asistente" : "Abrir asistente de IA"}
+                title={isOpen ? "Cerrar asistente" : "Abrir asistente de IA"}
                 className="fixed bottom-6 right-3 sm:right-6 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-primary via-blue-500 to-purple-600 text-white flex items-center justify-center shadow-2xl shadow-primary/40 z-[110]"
             >
                 {isOpen ? <X className="w-6 h-6 sm:w-7 sm:h-7" /> : <MessageSquare className="w-6 h-6 sm:w-7 sm:h-7" />}
