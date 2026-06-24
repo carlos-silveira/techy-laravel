@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Loader2, Plus, Trash2, Globe, Clock, CheckCircle2, XCircle, Radar } from 'lucide-react';
+import { Loader2, Plus, Trash2, Globe, Clock, CheckCircle2, XCircle, Radar, RefreshCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ScoutedQueue() {
@@ -193,7 +193,7 @@ export default function ScoutedQueue() {
                                 </div>
 
                                 <div className="flex items-center gap-3 w-full xl:w-auto shrink-0">
-                                    {item.status === 'pending' && (
+                                    {(item.status === 'pending' || item.status === 'failed') && (
                                         <>
                                             <button 
                                                 onClick={() => handleDismiss(item.id)}
@@ -206,8 +206,14 @@ export default function ScoutedQueue() {
                                                 onClick={() => handleApprove(item.id)}
                                                 className="flex-1 xl:flex-none px-8 py-5 bg-primary/10 hover:bg-primary text-primary hover:text-black border border-primary/20 hover:border-primary rounded-2xl transition-all flex flex-col items-center justify-center gap-2 shadow-[0_0_20px_rgba(var(--color-primary),0.1)] hover:shadow-[0_0_30px_rgba(var(--color-primary),0.3)] group/btn"
                                             >
-                                                <CheckCircle2 className="w-5 h-5 group-hover/btn:scale-110 transition-transform" />
-                                                <span className="text-[10px] font-black uppercase tracking-widest hidden sm:block">Approve</span>
+                                                {item.status === 'failed' ? (
+                                                    <RefreshCcw className="w-5 h-5 group-hover/btn:scale-110 transition-transform" />
+                                                ) : (
+                                                    <CheckCircle2 className="w-5 h-5 group-hover/btn:scale-110 transition-transform" />
+                                                )}
+                                                <span className="text-[10px] font-black uppercase tracking-widest hidden sm:block">
+                                                    {item.status === 'failed' ? 'Retry' : 'Approve'}
+                                                </span>
                                             </button>
                                         </>
                                     )}

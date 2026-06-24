@@ -58787,7 +58787,7 @@ server_default((page) => createInertiaApp({
 		"./Pages/Auth/ResetPassword.jsx": () => import("./assets/ResetPassword-BdBWAqvM.mjs"),
 		"./Pages/Auth/VerifyEmail.jsx": () => import("./assets/VerifyEmail-CR4hpOWI.mjs"),
 		"./Pages/Contact.jsx": () => import("./assets/Contact-eSQ1aoRd.mjs"),
-		"./Pages/Dashboard.jsx": () => import("./assets/Dashboard-CJ91JkBm.mjs"),
+		"./Pages/Dashboard.jsx": () => import("./assets/Dashboard-DqaDch8H.mjs"),
 		"./Pages/Error.jsx": () => import("./assets/Error-B-2di5xp.mjs"),
 		"./Pages/Footer.jsx": () => import("./assets/Footer-BS7nm7Wo.mjs").then((n) => n.n),
 		"./Pages/Layout.jsx": () => import("./assets/Layout-B_p3WB6V.mjs"),
