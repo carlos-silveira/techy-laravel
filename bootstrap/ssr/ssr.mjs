@@ -58796,7 +58796,7 @@ server_default((page) => createInertiaApp({
 		"./Pages/Privacy.jsx": () => import("./assets/Privacy-c0avm3co.mjs"),
 		"./Pages/Terms.jsx": () => import("./assets/Terms-CV5KU3At.mjs"),
 		"./Pages/TopNav.jsx": () => import("./assets/TopNav-DH003LlL.mjs").then((n) => n.n),
-		"./Pages/Welcome.jsx": () => import("./assets/Welcome-CJIoqHog.mjs")
+		"./Pages/Welcome.jsx": () => import("./assets/Welcome-BzRAIXRl.mjs")
 	})),
 	setup({ App, props }) {
 		global.route = (name, params, absolute) => s(name, params, absolute, {

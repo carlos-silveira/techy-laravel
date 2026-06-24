@@ -95,6 +95,9 @@ export default function Welcome({ articles, editorsChoice, dailyBrief, trendingA
         <meta name="twitter:site" content="@TechyNewsLat" />
         <meta name="twitter:title" content="Techy News — AI-Powered Tech Intelligence" />
         <meta name="twitter:description" content="AI-powered journalism platform delivering deep technical research and automated synthesis of global tech news." />
+        {featured && (
+            <link rel="preload" as="image" href={getFinalImage(featured, 1600)} fetchpriority="high" />
+        )}
       </Head>
       <CommandPalette />
 

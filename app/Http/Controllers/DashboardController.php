@@ -123,7 +123,7 @@ class DashboardController extends Controller
 
         // ─── TOP LIKED (Filtered by publication date) ───
         $topLikedArticles = \App\Models\Article::where('likes_count', '>', 0)
-            ->when($startDate, fn($q) => $q->where('published_at', '>=', $startDate)->orWhere('created_at', '>=', $startDate))
+            ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
             ->orderByDesc('likes_count')
             ->limit(3)
             ->get(['title', 'slug', 'likes_count'])
