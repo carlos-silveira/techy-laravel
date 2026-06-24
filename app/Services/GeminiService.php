@@ -792,7 +792,7 @@ Return exactly a JSON object (no markdown fences):
         $lastError = "";
 
         foreach ($this->modelFallbackChain as $model) {
-            $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$nativeKey}";
+            $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
             
             $response = Http::timeout(180)
                 ->withHeaders([
