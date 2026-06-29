@@ -234,8 +234,24 @@ class ArticleController extends Controller
             return response()->json(['message' => 'Backfill is already running.'], 400);
         }
 
+        $total = \App\Models\Article::where('status', 'published')->whereNull('fact_check_status')->count();
+        
+        if ($total === 0) {
+            return response()->json(['message' => 'No articles require fact-checking.'], 400);
+        }
+
+        // Initialize cache immediately so the UI updates instantly
+        Cache::put('fact_check_backfill_progress', [
+            'total' => $total,
+            'completed' => 0,
+            'failed' => 0,
+            'current_article' => 'Warming up engine...',
+            'status' => 'running',
+            'started_at' => now(),
+        ]);
+
         \App\Jobs\FactCheckBackfillJob::dispatch();
         
-        return response()->json(['message' => 'Backfill started.']);
+        return response()->json(['message' => 'Backfill engine started!']);
     }
 }
