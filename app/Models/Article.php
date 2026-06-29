@@ -29,6 +29,8 @@ class Article extends Model
         'translations',
         'qa_passed',
         'embedding',
+        'fact_check_score',
+        'fact_check_status',
     ];
 
     protected $casts = [
@@ -40,6 +42,38 @@ class Article extends Model
         'translations' => 'array',
         'embedding' => 'array',
     ];
+
+    /**
+     * Get the most recent fact check for this article.
+     */
+    public function factCheck()
+    {
+        return $this->hasOne(FactCheck::class)->latestOfMany();
+    }
+
+    /**
+     * Get all fact checks for this article.
+     */
+    public function factChecks()
+    {
+        return $this->hasMany(FactCheck::class);
+    }
+
+    /**
+     * Scope a query to only include fact-checked articles.
+     */
+    public function scopeFactChecked($query)
+    {
+        return $query->whereNotNull('fact_check_status');
+    }
+
+    /**
+     * Scope a query to only include articles needing fact check.
+     */
+    public function scopeNeedsFactCheck($query)
+    {
+        return $query->whereNull('fact_check_status');
+    }
 
     /**
      * Check if the article is published.

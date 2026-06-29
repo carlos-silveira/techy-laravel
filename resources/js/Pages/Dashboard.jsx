@@ -20,6 +20,8 @@ import GeminiUsage from '@/Components/GeminiUsage';
 import ScoutedQueue from '@/Components/ScoutedQueue';
 import AgentControl from '@/Components/AgentControl';
 import Observability from '@/Components/Observability';
+import FactCheckDashboard from '@/Components/FactCheckDashboard';
+import FactCheckPanel from '@/Components/FactCheckPanel';
 import { getFinalImage } from '@/utils';
 
 /* ──────────────────────────────────────────────
@@ -794,6 +796,10 @@ export default function Dashboard({ auth, articles: initialArticles, analytics, 
                             <Activity className="w-5 h-5" />
                             <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Observability</span>
                         </button>
+                        <button onClick={() => setView('factcheck')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'factcheck' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white'}`}>
+                            <ShieldCheck className="w-5 h-5" />
+                            <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Fact-Check Engine</span>
+                        </button>
                         <button onClick={() => { resetEditor(); setView('editor'); }} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'editor' && !currentArticleId ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-black/5 dark:bg-white/5 text-black dark:text-white'}`}>
                             <Edit3 className="w-5 h-5 text-primary" />
                             <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Advanced Editor</span>
@@ -839,6 +845,7 @@ export default function Dashboard({ auth, articles: initialArticles, analytics, 
                     {view === 'agent' && <div className="flex-1 overflow-y-auto p-4 md:p-10"><AgentControl /></div>}
                     {view === 'scout' && <ScoutedQueue />}
                     {view === 'observability' && <div className="flex-1 overflow-y-auto p-4 md:p-10"><Observability /></div>}
+                    {view === 'factcheck' && <div className="flex-1 overflow-y-auto p-4 md:p-10"><FactCheckDashboard setView={setView} handleEdit={handleEdit} /></div>}
                     
                     {view === 'wizard' && (
                     <WizardView 
@@ -969,6 +976,10 @@ export default function Dashboard({ auth, articles: initialArticles, analytics, 
                                         <input type="file" id="cover-image-upload" className="hidden" accept="image/*" onChange={handleImageUpload} />
                                     </div>
                                     <RichEditor initialContent={richContent} onChange={(val) => setRichContent(val)} keyTrigger={editorResetKey} />
+                                    
+                                    <div className="mt-8 pt-8 border-t border-black/5 dark:border-white/5">
+                                        <FactCheckPanel articleId={currentArticleId} />
+                                    </div>
                                 </div>
                             </div>
                         </div>

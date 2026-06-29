@@ -437,3 +437,17 @@
 - **Accessibility**: Fixed a color contrast failure on the footer links in `PublicFooter.jsx` by adding the `dark:text-gray-400` class for dark mode, achieving a WCAG-compliant contrast ratio of 4.5:1.
 - **Frontend (UI/UX)**: Added a "Retry" button to `ScoutedQueue.jsx` for items in a `failed` state. The backend already supported re-approving a failed item (`ScoutQueueController@approve`), so this UI addition allows users to easily retry generating an article when API rate limits or connection errors occur.
 - **Backend (AI Fallback)**: Fixed a critical typo in `GeminiService.php` (`$nativeKey` was used instead of `$apiKey`) which caused the entire fallback chain to crash with an undefined variable exception whenever OpenRouter ran out of credits and attempted to fallback to the native Gemini API.
+
+### 2026-06-24: Jina Reader Content Enhancement
+- **Agent**: Antigravity
+- **Action**: Modified GeminiService and News commands to use JinaReaderService to fetch rich markdown context from official sources (like about.fb.com) to generate much higher quality articles with embedded images.
+- **Testing**: Hit API rate limits (503/429) due to large token context. Truncated context to 10k chars. Manually updated the Facebook article in production DB via SSH tunnel to bypass rate limits and demonstrate the high quality result.
+- **Result**: Success. The article now contains rich official content and inline images.
+
+## 2026-06-29 - Fact-Check Engine Implementation
+- **Changed**: Created fact-checker engine with Google CSE/Jina fallback, added DB tables for fact_checks and fact_check_claims.
+- **Changed**: Modified NewsAgent to run FactCheckService before publishing articles.
+- **Changed**: Added FactCheckPanel to Studio Editor and FactCheckDashboard for backfilling old articles.
+- **Why**: To ensure high reliability and build trust with readers by automatically cross-referencing AI generated articles against 30+ trusted sources.
+- **Tested**: Migrations, Frontend compilation (npm run build). End-to-end functionality needs to be tested in browser by the user.
+

@@ -225,6 +225,21 @@ class NewsAgent
                 'cover_image_path' => $coverImage,
             ]);
 
+            // 4b. FACT CHECK GATE
+            $factCheck = app(\App\Services\FactCheckService::class)->checkArticle($article);
+            
+            if ($factCheck->status === 'failed') {
+                Log::warning("NewsAgent: Article '{$title}' FAILED fact-check (score: {$factCheck->overall_score}). Not publishing.");
+                $article->update(['status' => 'draft', 'fact_check_status' => 'failed']);
+                
+                $scouted->update([
+                    'status' => 'failed',
+                    'error_log' => "Fact-check failed (Score: {$factCheck->overall_score})"
+                ]);
+                
+                return ['status' => 'failed', 'reason' => 'Fact-check failed'];
+            }
+
             // 5. UPDATE QUEUE STATUS
             $scouted->update([
                 'status' => 'published',
@@ -345,6 +360,16 @@ class NewsAgent
             'tags' => $meta['tags'] ?? [],
             'cover_image_path' => $coverImage,
         ]);
+
+        // 6.5 FACT CHECK GATE
+        $factCheck = app(\App\Services\FactCheckService::class)->checkArticle($article);
+
+        if ($factCheck->status === 'failed') {
+            Log::warning("NewsAgent: Article '{$title}' FAILED fact-check (score: {$factCheck->overall_score}). Not publishing.");
+            $article->update(['status' => 'draft', 'fact_check_status' => 'failed']);
+            
+            return ['title' => $title, 'status' => 'failed', 'reason' => 'Fact-check failed'];
+        }
 
         // --- SYNCHRONOUS TRANSLATIONS FOR YOLO MODE ---
         $languages = ['es', 'pt'];

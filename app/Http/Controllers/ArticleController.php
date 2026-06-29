@@ -169,4 +169,73 @@ class ArticleController extends Controller
 
         return response()->json(['likes_count' => $article->likes_count]);
     }
+
+    /**
+     * Trigger a manual fact check for an article.
+     */
+    public function triggerFactCheck($id, \App\Services\FactCheckService $factCheckService)
+    {
+        $article = Article::findOrFail($id);
+        
+        try {
+            $result = $factCheckService->checkArticle($article);
+            return response()->json([
+                'message' => 'Fact check completed',
+                'fact_check' => $result
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Fact check failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get the fact check results for an article.
+     */
+    public function getFactCheck($id)
+    {
+        $article = Article::with('factCheck.claims')->findOrFail($id);
+        
+        if (!$article->factCheck) {
+            return response()->json(['message' => 'No fact check found for this article'], 404);
+        }
+
+        return response()->json($article->factCheck);
+    }
+
+    /**
+     * Get the backfill progress.
+     */
+    public function getBackfillProgress()
+    {
+        $progress = Cache::get('fact_check_backfill_progress', [
+            'status' => 'idle'
+        ]);
+        return response()->json($progress);
+    }
+
+    /**
+     * Start the backfill process.
+     */
+    public function startBackfill(Request $request)
+    {
+        $action = $request->input('action', 'start');
+        
+        if ($action === 'stop') {
+            $progress = Cache::get('fact_check_backfill_progress', []);
+            Cache::put('fact_check_backfill_progress', array_merge($progress, ['status' => 'stopped']));
+            return response()->json(['message' => 'Backfill stopping...']);
+        }
+        
+        $progress = Cache::get('fact_check_backfill_progress', []);
+        if (isset($progress['status']) && $progress['status'] === 'running') {
+            return response()->json(['message' => 'Backfill is already running.'], 400);
+        }
+
+        \App\Jobs\FactCheckBackfillJob::dispatch();
+        
+        return response()->json(['message' => 'Backfill started.']);
+    }
 }

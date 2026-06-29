@@ -230,7 +230,7 @@ Return ONLY a JSON array, no markdown fences:
     /**
      * Generate a long-form, daily.dev-quality investigative article.
      */
-    public function generateDraft(string $title, string $ideaPrompt, array $newsItems): array
+    public function generateDraft(string $title, string $ideaPrompt, array $newsItems, string $richContext = '', array $extractedImages = []): array
     {
         if ($this->isQuotaExhausted()) return ['article_body' => 'Quota exhausted. Check back tomorrow.'];
 
@@ -239,36 +239,43 @@ Return ONLY a JSON array, no markdown fences:
             return "- [{$source}] {$n['title']}";
         }, $newsItems));
 
+        $officialContext = !empty($richContext) 
+            ? "OFFICIAL SOURCE CONTEXT (Use this as your primary information source):\n{$richContext}\n"
+            : "NEWS CONTEXT (Summary):\n{$context}\n";
+
+        $imageInstruction = !empty($extractedImages)
+            ? "EMBED THESE OFFICIAL IMAGES IN THE ARTICLE BODY (use `<img src=\"...\" alt=\"...\">` where contextually relevant):\n" . implode("\n", $extractedImages)
+            : "Ensure the 'article_body' includes an unsplash image placeholder like <img src=\"PLACEHOLDER_IMAGE\" alt=\"description\">.";
+
         $date = now()->format('l, F j, Y');
-        $prompt = "You are a tech journalist for techynews.lat. Today is {$date}. Your absolute priority is CLARITY. You must write articles that are extremely easy to understand, avoiding all complicated jargon, 'verbal vomit', and overly academic language. DO NOT report on events from previous years as if they were new today.
+        $prompt = "You are a tech journalist for techynews.lat. Today is {$date}. Your absolute priority is CLARITY and JOURNALISTIC QUALITY. You must write articles that are extremely easy to understand, avoiding all complicated jargon, 'verbal vomit', and overly academic language. DO NOT report on events from previous years as if they were new today.
 
 ARTICLE TOPIC: {$title}
 EDITORIAL BRIEF: {$ideaPrompt}
-NEWS CONTEXT:
-{$context}
+
+{$officialContext}
 
 Generate an article as a JSON object. The 'article_body' field MUST contain valid HTML.
 
 CRITICAL WRITING RULES (FOR EXTREME CLARITY):
 - CRITICAL LANGUAGE RULE: The output MUST be entirely in English.
 - EXTREME SIMPLICITY: Write at a very basic reading level. Use everyday vocabulary.
-- FACTUAL AND DIRECT: No 'fluff', no 'insider' voice. Just report the facts clearly like a bulleted summary.
+- FACTUAL AND DIRECT: No 'fluff', no 'insider' voice. 
 - NO CODE BLOCKS: DO NOT include any code snippets, python code, or programming examples.
 - NO AI CLICHES: NEVER use words like 'delve', 'complexities', 'nuanced', 'testament', 'tapestry', 'landscape', 'revolutionary', 'transformative'.
-- MAXIMUM LENGTH: 450 words (typically target between 350 and 450 words for complete coverage).
+- MAXIMUM LENGTH: 500 words (typically target between 350 and 500 words for complete coverage).
 
 ARTICLE STRUCTURE (HTML):
 - BANNED HEADINGS: You are strictly FORBIDDEN from using generic, repetitive, or filler subheadings such as 'Why It's Important', 'Why It Matters', 'Deeper Analysis', 'Deep Dive', 'Conclusion', or their exact translations or equivalents.
-- DO NOT divide the article into multiple rigid analytical sections that repeat the same information. Every single sentence and bullet point must add NEW, distinct information.
-- Write the article so it is incredibly easy to scan, using this exact layout:
-  1. **Intro**: A direct, punchy 1-2 sentence paragraph explaining exactly *what* happened, *who* is involved, and *when*. Start directly with the breaking news. Do NOT use any heading for this paragraph.
-  2. **Details (Bulleted List)**: A bulleted list (`<ul>` containing 4 to 6 `<li>` elements) breaking down the key specs, facts, numbers, or timeline of the event. Bold the first 2-3 words of each bullet point to make it highly scannable. Each bullet point should be highly informative, containing 1 to 2 detailed sentences of distinct facts.
-  3. **Consequence/Next Steps**: A final short paragraph (2-3 sentences max) explaining the immediate consequence or what happens next. Do NOT use any subheading for this final paragraph.
+- Write a natural, flowing journalistic article. Use 3 to 5 well-structured paragraphs.
+- You may use a short bulleted list ONLY if you need to list specific specs, prices, or a timeline, but the bulk of the article should be engaging paragraphs.
 - Under NO circumstances should you use more than one `<h2>` heading in the entire article, and only use it if it describes a highly specific, contextual aspect of the details (e.g., `<h2>Specs and Pricing</h2>`). Never use generic headings.
 - IMAGE QUERY: For 'suggested_image', generate a BROAD, 1-2 word conceptual TECH search term for Unsplash. EXTREMELY IMPORTANT: Do NOT use brand names that have literal meanings in English (e.g., NEVER use 'apple' for Apple Inc, use 'smartphone' or 'tablet'; NEVER use 'steam' or 'valve' for gaming, use 'gaming', 'esports' or 'controller'; NEVER use 'jean' or 'jeans' for a person named Jean, use 'developer' or 'robotics'). Avoid specific company names, people, or obscure products. Use generic tech concepts like 'robotics', 'server', 'coding', 'cybersecurity', 'processor'.
 
 Return ONLY a valid JSON object with these exact keys: \"title\", \"twitter_tldr\", \"article_body\", \"suggested_image\", \"main_category\".
-CRITICAL RULE FOR X (TWITTER): The 'twitter_tldr' field MUST be written entirely in SPANISH (Español). All other fields MUST remain in English. Ensure the 'article_body' includes an unsplash image placeholder like <img src=\"PLACEHOLDER_IMAGE\" alt=\"description\">.
+CRITICAL RULE FOR X (TWITTER): The 'twitter_tldr' field MUST be written entirely in SPANISH (Español). All other fields MUST remain in English. 
+
+{$imageInstruction}
 ";
 
         $result = $this->callGemini($prompt, true);
@@ -586,6 +593,16 @@ Return exactly a JSON object (no markdown fences):
 
         $result = $this->callGemini($prompt, false);
         return trim((string) $result);
+    }
+
+    /**
+     * Helper to perform a raw prompt and strictly expect JSON back.
+     * Used by internal services like FactCheckService.
+     */
+    public function askJson(string $prompt): array
+    {
+        $result = $this->callGemini($prompt, true);
+        return is_array($result) ? $result : [];
     }
 
     /**

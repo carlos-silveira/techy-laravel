@@ -35,6 +35,21 @@ return [
         'model' => env('GEMINI_MODEL', 'gemini-2.5-flash'),
     ],
 
+    'jina' => [
+        'api_key' => env('JINA_API_KEY'),
+    ],
+
+    'fact_check' => [
+        'min_score' => env('FACT_CHECK_MIN_SCORE', 60),
+        'block_score' => env('FACT_CHECK_BLOCK_SCORE', 40),
+        'enabled' => env('FACT_CHECK_ENABLED', true),
+    ],
+
+    'google_cse' => [
+        'api_key' => env('GOOGLE_CSE_KEY'),
+        'search_engine_id' => env('GOOGLE_CSE_ID'),
+    ],
+
     'groq' => [
         'api_key' => env('GROQ_API_KEY', ''),
     ],

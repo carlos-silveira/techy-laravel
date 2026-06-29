@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Services\GeminiService;
 use App\Services\NewsService;
+use App\Services\JinaReaderService;
 use App\Models\Article;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
@@ -17,7 +17,7 @@ class GenerateDailyNews extends Command
     protected $signature = 'news:generate-daily';
     protected $description = 'Fetch trending tech news and generate a daily.dev-quality article via Gemini AI';
 
-    public function handle(NewsService $newsService, GeminiService $geminiService)
+    public function handle(NewsService $newsService, GeminiService $geminiService, JinaReaderService $jinaReader)
     {
         \Illuminate\Support\Facades\Cache::put('yolo_agent_last_run', now()->toIso8601String());
         
@@ -74,6 +74,19 @@ class GenerateDailyNews extends Command
         $this->info('⏳ Respecting API rate limits (10s pause)...');
         sleep(10);
 
+        // --- FETCH RICH CONTEXT VIA JINA READER ---
+        $richContext = '';
+        $extractedImages = [];
+        $sourceUrl = $selectedIdea['source_url'] ?? '';
+
+        if (!empty($sourceUrl)) {
+            $this->info("🕸️  Scraping rich context from source URL: {$sourceUrl}");
+            $jinaData = $jinaReader->fetchArticleContext($sourceUrl);
+            $richContext = $jinaData['markdown'];
+            $extractedImages = $jinaData['images'];
+            $this->info("✅ Scraped " . strlen($richContext) . " bytes of markdown and found " . count($extractedImages) . " images.");
+        }
+
         $this->info('✍️  Generating long-form article...');
         
         $content = '';
@@ -82,7 +95,7 @@ class GenerateDailyNews extends Command
         while ($attempts < 3) {
             $this->info("⏳ Attempt " . ($attempts + 1) . " of 3...");
             try {
-                $draftData = $geminiService->generateDraft($selectedIdea['title'], $selectedIdea['prompt'], $newsItems);
+                $draftData = $geminiService->generateDraft($selectedIdea['title'], $selectedIdea['prompt'], $newsItems, $richContext, $extractedImages);
                 
                 $content = $draftData['article_body'] ?? '';
                 break;
@@ -115,7 +128,13 @@ class GenerateDailyNews extends Command
         $content = $this->resolveImagePlaceholders($content);
 
         // Fetch a cover image from Unsplash if not already set (fallback)
-        $coverImageUrl = $this->fetchCoverImage($idea['title'], $meta['tags'] ?? []);
+        // If we extracted images from the official source, use the first one instead of Unsplash.
+        if (!empty($extractedImages) && count($extractedImages) > 0) {
+            $coverImageUrl = $extractedImages[0];
+            $this->info("📸 Using official extracted cover image: {$coverImageUrl}");
+        } else {
+            $coverImageUrl = $this->fetchCoverImage($idea['title'], $meta['tags'] ?? []);
+        }
 
         $slug = Str::slug($idea['title']) . '-' . Str::random(6);
         $wordCount = str_word_count(strip_tags($content));

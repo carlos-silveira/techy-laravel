@@ -45,6 +45,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/regenerate-draft', [AiController::class, 'regenerateDraft']);
     Route::post('/generate-article-meta', [AiController::class, 'generateArticleMeta']);
     Route::post('/ask-llama', [AiController::class, 'askLlama']);
+    
+    // Fact Check
+    Route::post('/articles/{id}/fact-check', [ArticleController::class, 'triggerFactCheck']);
+    Route::get('/articles/{id}/fact-check', [ArticleController::class, 'getFactCheck']);
+    Route::get('/fact-check/backfill-progress', [ArticleController::class, 'getBackfillProgress']);
+    Route::post('/fact-check/start-backfill', [ArticleController::class, 'startBackfill']);
 });
 
 // Public Analytics & Engagement
