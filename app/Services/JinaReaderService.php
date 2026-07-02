@@ -60,7 +60,21 @@ class JinaReaderService
                         $imgUrl = $base . $imgUrl;
                     }
                     if (filter_var($imgUrl, FILTER_VALIDATE_URL)) {
-                        $images[] = $imgUrl;
+                        $lowerUrl = strtolower($imgUrl);
+                        // Filter out common logos, icons, and non-content tracking pixels
+                        if (
+                            !str_ends_with($lowerUrl, '.svg') &&
+                            !str_ends_with($lowerUrl, '.gif') &&
+                            !str_contains($lowerUrl, 'logo') &&
+                            !str_contains($lowerUrl, 'icon') &&
+                            !str_contains($lowerUrl, 'avatar') &&
+                            !str_contains($lowerUrl, 'banner') &&
+                            !str_contains($lowerUrl, 'button') &&
+                            !str_contains($lowerUrl, 'tracker') &&
+                            !str_contains($lowerUrl, 'pixel')
+                        ) {
+                            $images[] = $imgUrl;
+                        }
                     }
                 }
             }

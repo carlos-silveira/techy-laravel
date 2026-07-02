@@ -53,10 +53,17 @@ class GenerateDailyNews extends Command
                 continue;
             }
 
-            $existing = Article::where('title', 'like', '%' . $idea['title'] . '%')
-                ->orWhere('slug', 'like', '%' . Str::slug($idea['title']) . '%')
-                ->where('created_at', '>', now()->subDays(3))
-                ->exists();
+            $query = Article::where('created_at', '>', now()->subDays(3))
+                ->where(function($q) use ($idea) {
+                    $q->where('title', 'like', '%' . $idea['title'] . '%')
+                      ->orWhere('slug', 'like', '%' . Str::slug($idea['title']) . '%');
+                    
+                    if (!empty($idea['source_url'])) {
+                        $q->orWhere('source_url', $idea['source_url']);
+                    }
+                });
+
+            $existing = $query->exists();
 
             if (!$existing) {
                 $selectedIdea = $idea;
@@ -144,6 +151,7 @@ class GenerateDailyNews extends Command
         $article = Article::create([
             'title'                 => $selectedIdea['title'],
             'slug'                  => $slug,
+            'source_url'            => $selectedIdea['source_url'] ?? null,
             'content'               => $content, // Store raw HTML directly — NO json_encode
             'language'              => 'en',
             'status'                => 'published',
