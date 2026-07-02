@@ -7,6 +7,8 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Services\NewsService;
 use App\Services\JinaReaderService;
+use App\Services\GeminiService;
+use App\Services\FactCheckService;
 use App\Models\Article;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
@@ -157,6 +159,16 @@ class GenerateDailyNews extends Command
         ]);
 
         $this->info('✅ Article published: "' . $idea['title'] . '"');
+
+        $this->info('🕵️‍♂️ Running Fact-Check Gate...');
+        $factCheck = app(FactCheckService::class)->checkArticle($article);
+        
+        if ($factCheck->status === 'failed' || $factCheck->status === 'blocked') {
+            $this->warn("⚠️ Fact-Check FAILED or BLOCKED (Score: {$factCheck->overall_score}). Article has been reverted to draft.");
+            return 1;
+        }
+
+        $this->info("✅ Fact-Check passed! (Score: {$factCheck->overall_score})");
 
         $this->info('🧠 Generating embedding for RAG...');
         $textToEmbed = "Title: {$article->title}\nSummary: {$article->ai_summary}\n\n" . strip_tags($article->content);
