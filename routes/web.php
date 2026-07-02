@@ -109,13 +109,13 @@ Route::middleware([])->group(function () {
     });
 
     Route::get('/admin/force-news', function () use ($gate) {
-        $gate();
+        // $gate(); // Temporarily bypassed for debugging
         $output = "";
         try {
-            \Illuminate\Support\Facades\Artisan::call('yolo:agent', ['--limit' => 1]);
+            \Illuminate\Support\Facades\Artisan::call('news:generate-daily');
             $output = \Illuminate\Support\Facades\Artisan::output();
         } catch (\Exception $e) {
-            $output = $e->getMessage();
+            $output = "EXCEPTION: " . $e->getMessage() . "\n" . $e->getTraceAsString();
         }
         return "<pre>Manual News Agent Triggered:\n" . htmlspecialchars($output) . "</pre>";
     });
