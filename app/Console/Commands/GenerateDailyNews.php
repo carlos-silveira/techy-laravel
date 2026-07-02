@@ -165,6 +165,7 @@ class GenerateDailyNews extends Command
         
         if ($factCheck->status === 'failed' || $factCheck->status === 'blocked') {
             $this->warn("⚠️ Fact-Check FAILED or BLOCKED (Score: {$factCheck->overall_score}). Article has been reverted to draft.");
+            $article->update(['status' => 'draft']);
             return 1;
         }
 
