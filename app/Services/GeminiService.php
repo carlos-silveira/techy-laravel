@@ -196,6 +196,7 @@ Return ONLY a JSON array, no markdown fences:
 [{\"title\": \"...\", \"prompt\": \"A simple 2-sentence explanation of the news.\", \"angle\": \"product_launch\", \"source_url\": \"https://...\"}]";
 
         $result = $this->callGemini($prompt, true);
+        \Illuminate\Support\Facades\Log::info("RAW AI RESULT JSON PARSED: ", (array)$result);
         
         $validIdeas = [];
         if (is_array($result)) {
