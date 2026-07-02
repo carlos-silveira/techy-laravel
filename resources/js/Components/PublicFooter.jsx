@@ -16,9 +16,15 @@ export default function PublicFooter({ className = '' }) {
                     <a href="https://github.com/carlos-silveira" target="_blank" rel="noopener noreferrer" className="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">GitHub</a>
                     <a href="https://x.com/TechyNewsLat" target="_blank" rel="noopener noreferrer" className="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">𝕏 Twitter</a>
                     <a href="https://www.facebook.com/techynews" target="_blank" rel="noopener noreferrer" className="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">Facebook</a>
+                    <Link href="/about" className="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">{__('Contact & About')}</Link>
                     <Link href="/terms" className="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">{__('Terms of Use')}</Link>
                     <Link href="/privacy" className="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">{__('Privacy Policy')}</Link>
                 </div>
+            </div>
+            <div className="max-w-7xl mx-auto px-6 mt-8 text-center border-t border-black/5 dark:border-white/5 pt-6">
+                <p className="text-[11px] font-light text-gray-500 dark:text-gray-500 max-w-4xl mx-auto leading-relaxed">
+                    {__('Editorial Disclaimer: TechyNews is a technology news publication. Our content is drafted with the assistance of artificial intelligence to ensure timely reporting, but every article is fact-checked, edited, and analyzed by our human editorial team to guarantee accuracy and provide deep industry insights. We are committed to high-quality journalism and transparency.')}
+                </p>
             </div>
         </footer>
     );

@@ -271,6 +271,22 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
                     </div>
                 </motion.article>
 
+                {/* E-E-A-T Author Box */}
+                <div className="mt-16 p-8 bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 rounded-3xl flex flex-col md:flex-row gap-6 items-center md:items-start text-center md:text-left">
+                    <div className="w-20 h-20 shrink-0 rounded-full bg-gradient-to-br from-primary to-purple-600 p-[2px]">
+                        <img src="/img/carlos-silveira-avatar.jpg" alt="Carlos Silveira" className="w-full h-full rounded-full object-cover bg-white dark:bg-black" onError={(e) => { e.target.src = "https://ui-avatars.com/api/?name=Techy+News&background=0D8ABC&color=fff"; }} />
+                    </div>
+                    <div>
+                        <h4 className="text-xl font-black text-gray-900 dark:text-white mb-2">{__('TechyNews Editorial Board')}</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
+                            {__('This article was drafted using AI and rigorously fact-checked, edited, and analyzed by the TechyNews human editorial team. We strive to provide contextual depth and market analysis to help you understand the tech landscape.')}
+                        </p>
+                        <Link href="/about" className="text-xs font-bold text-primary hover:text-purple-500 transition-colors uppercase tracking-widest">
+                            {__('Read our Editorial Policy')} &rarr;
+                        </Link>
+                    </div>
+                </div>
+
                 {/* Article Footer Ad Slot */}
                 <AdSlot className="mt-20 mb-8" />
 

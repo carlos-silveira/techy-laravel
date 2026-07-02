@@ -104,7 +104,9 @@ class WizardApiTest extends TestCase
     public function wizard_returns_503_when_gemini_api_key_missing()
     {
         config(['services.gemini.api_key' => '']);
-
+        config(['services.openrouter.api_key' => '']);
+        config(['services.groq.api_key' => '']);
+        
         $response = $this->postJson('/api/generate-draft', [
             'title' => 'Test',
             'prompt' => 'Test'

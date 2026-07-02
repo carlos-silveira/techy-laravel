@@ -1,3 +1,14 @@
+## [2026-07-02] - Deduplication & Image Filtering Fix
+
+### Fixed
+- **Duplicate News Articles**: Fixed an issue where the background `GenerateDailyNews` command was generating duplicate articles if Gemini rewrote the title of an existing news angle differently. Updated `app/Console/Commands/GenerateDailyNews.php` to check and save the `source_url` of the idea in the database, allowing deduplication to accurately skip URLs that have already been generated in the last 3 days. Cleaned up duplicated article #94 from production.
+- **Incorrect Logo Cover Images**: Fixed an issue where `JinaReaderService` would blindly extract the first image in a markdown file (often a website logo like `tc-lockup-hp.svg` or a tracking pixel) and use it as the main cover image. Updated `app/Services/JinaReaderService.php` to aggressively filter out extracted images ending in `.svg` and `.gif`, or containing words like `logo`, `icon`, `banner`, `pixel`, etc.
+
+## [2026-07-02] - Jina Reader API Authorization Fix
+
+### Fixed
+- **Jina Reader Unauthorized Errors (401)**: Fixed an issue where the `php artisan news:generate-daily` command was failing to verify sources because the Jina Reader API (`s.jina.ai` and `r.jina.ai`) started requiring a Bearer token. Updated `app/Services/SourceSearchService.php` and `app/Services/JinaReaderService.php` to include an `Authorization: Bearer <API_KEY>` header using the `JINA_API_KEY` environment variable. Also restored the security gate on the `/admin/force-news` route in `routes/web.php` which was temporarily commented out for debugging. Monitored the background job on production to confirm a full cycle completion, including successful translation and daily brief caching.
+
 ## [2026-06-24] - Gemini Fallback JSON Parsing Fix
 
 ### Fixed

@@ -28,6 +28,8 @@ class Article extends Model
         'language',
         'translations',
         'qa_passed',
+        'viral_score',
+        'is_quality_upgraded',
         'embedding',
         'fact_check_score',
         'fact_check_status',

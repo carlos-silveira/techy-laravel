@@ -179,7 +179,7 @@ class GeminiService
 
 {$newsContext}{$existingContext}
 
-Your job is to select the 5 to 10 MOST IMPORTANT, exciting, and concrete individual tech news stories from the list above. DO NOT combine unrelated stories. Pick actual, factual events (e.g., a new product launch, a major lawsuit, an AI breakthrough).
+Your job is to select the 5 to 10 MOST IMPORTANT, exciting, and concrete individual tech news stories from the list above. DO NOT combine unrelated stories. Pick actual, factual events (e.g., a new product launch, a major lawsuit, an AI breakthrough). Evaluate the viral potential of each story.
 
 Generate between 5 and 10 article ideas. Each MUST:
 1. Focus on ONE specific news event. DO NOT try to connect unrelated headlines or invent 'cultural trends'.
@@ -187,17 +187,23 @@ Generate between 5 and 10 article ideas. Each MUST:
 3. Include a 'prompt' field: a 2-sentence brief explaining exactly what the article should be about in plain, simple English. What happened and why is it important?
 4. Include an 'angle' field, which should be a simple category like 'product_launch', 'business', or 'ai_breakthrough'.
 5. Include a 'source_url' field: the exact URL of the news item you based this on from the context provided above.
+6. Include a 'viral_potential_score' field (integer from 1 to 100) scoring how likely this news is to trend or generate high engagement (controversy, major brand, huge tech shift).
 
 CRITICAL RECENCY RULE: Today is {$date}. ONLY focus on confirmed tech events from the EXACT last 24 to 48 hours. DO NOT output legacy news or events from previous years (e.g. do not act like it is 2021). If the news is not from today or yesterday, discard it.
 CRITICAL TOPIC RULE: ABSOLUTELY DO NOT write meta-commentary about AI generating articles. Focus on actual tech industry news.
 CRITICAL DEDUP RULE: If you already see a topic in the 'ALREADY PUBLISHED' list above, skip it entirely — even if the angle is slightly different.
 
 Return ONLY a JSON array, no markdown fences:
-[{\"title\": \"...\", \"prompt\": \"A simple 2-sentence explanation of the news.\", \"angle\": \"product_launch\", \"source_url\": \"https://...\"}]";
+[{\"title\": \"...\", \"prompt\": \"A simple 2-sentence explanation of the news.\", \"angle\": \"product_launch\", \"source_url\": \"https://...\", \"viral_potential_score\": 85}]";
 
         $result = $this->callGemini($prompt, true);
         \Illuminate\Support\Facades\Log::info("RAW AI RESULT JSON PARSED: ", (array)$result);
         
+        // Single object fallback
+        if (is_array($result) && isset($result['title'])) {
+            return [$result];
+        }
+
         $validIdeas = [];
         if (is_array($result)) {
             // Unwrap if Gemini returned an object containing the array
@@ -213,7 +219,8 @@ Return ONLY a JSON array, no markdown fences:
                     'title' => $result[0],
                     'prompt' => $result[1] ?? '',
                     'angle' => $result[2] ?? '',
-                    'source_url' => $result[3] ?? ''
+                    'source_url' => $result[3] ?? '',
+                    'viral_potential_score' => $result[4] ?? 50
                 ]];
             }
             
@@ -249,7 +256,7 @@ Return ONLY a JSON array, no markdown fences:
             : "Ensure the 'article_body' includes an unsplash image placeholder like <img src=\"PLACEHOLDER_IMAGE\" alt=\"description\">.";
 
         $date = now()->format('l, F j, Y');
-        $prompt = "You are a tech journalist for techynews.lat. Today is {$date}. Your absolute priority is CLARITY and JOURNALISTIC QUALITY. You must write articles that are extremely easy to understand, avoiding all complicated jargon, 'verbal vomit', and overly academic language. DO NOT report on events from previous years as if they were new today.
+        $prompt = "You are a Senior Tech Analyst and Editor for techynews.lat. Today is {$date}. Your absolute priority is to provide DEEP EXPERTISE, UNIQUE ANALYSIS, and ADDED VALUE (E-E-A-T) beyond just reporting the raw facts. You must write articles that are authoritative, engaging, and insightful. DO NOT just summarize the source text. DO NOT report on events from previous years as if they were new today.
 
 ARTICLE TOPIC: {$title}
 EDITORIAL BRIEF: {$ideaPrompt}
@@ -258,19 +265,19 @@ EDITORIAL BRIEF: {$ideaPrompt}
 
 Generate an article as a JSON object. The 'article_body' field MUST contain valid HTML.
 
-CRITICAL WRITING RULES (FOR EXTREME CLARITY):
+CRITICAL WRITING RULES (FOR ADSENSE APPROVAL & AUTHORITY):
 - CRITICAL LANGUAGE RULE: The output MUST be entirely in English.
-- EXTREME SIMPLICITY: Write at a very basic reading level. Use everyday vocabulary.
-- FACTUAL AND DIRECT: No 'fluff', no 'insider' voice. 
+- ADDED VALUE & OPINION: You MUST include your own expert analysis. Why does this matter? How does it affect the market, consumers, or the competition? What is the historical context? 
+- MANDATORY SECTION: You MUST include at least one `<h2>` heading titled \"The TechyNews Take\" or \"Why It Matters\" where you deliver a strong, well-reasoned opinion or market analysis.
+- FACTUAL BUT OPINIONATED: Be factual about the news event, but provide a professional analyst's perspective. 
 - NO CODE BLOCKS: DO NOT include any code snippets, python code, or programming examples.
 - NO AI CLICHES: NEVER use words like 'delve', 'complexities', 'nuanced', 'testament', 'tapestry', 'landscape', 'revolutionary', 'transformative'.
-- MAXIMUM LENGTH: 500 words (typically target between 350 and 500 words for complete coverage).
+- MINIMUM LENGTH: Write a comprehensive, deep-dive article. Target between 450 and 600 words for complete coverage.
 
 ARTICLE STRUCTURE (HTML):
-- BANNED HEADINGS: You are strictly FORBIDDEN from using generic, repetitive, or filler subheadings such as 'Why It's Important', 'Why It Matters', 'Deeper Analysis', 'Deep Dive', 'Conclusion', or their exact translations or equivalents.
-- Write a natural, flowing journalistic article. Use 3 to 5 well-structured paragraphs.
-- You may use a short bulleted list ONLY if you need to list specific specs, prices, or a timeline, but the bulk of the article should be engaging paragraphs.
-- Under NO circumstances should you use more than one `<h2>` heading in the entire article, and only use it if it describes a highly specific, contextual aspect of the details (e.g., `<h2>Specs and Pricing</h2>`). Never use generic headings.
+- BANNED HEADINGS: You are strictly FORBIDDEN from using generic filler subheadings such as 'Deeper Analysis', 'Deep Dive', 'Conclusion', or their exact translations. Use highly specific headings or \"The TechyNews Take\".
+- Write a natural, flowing journalistic article. Use 4 to 6 well-structured paragraphs.
+- You may use a short bulleted list ONLY if you need to list specific specs, prices, or a timeline.
 - IMAGE QUERY: For 'suggested_image', generate a BROAD, 1-2 word conceptual TECH search term for Unsplash. EXTREMELY IMPORTANT: Do NOT use brand names that have literal meanings in English (e.g., NEVER use 'apple' for Apple Inc, use 'smartphone' or 'tablet'; NEVER use 'steam' or 'valve' for gaming, use 'gaming', 'esports' or 'controller'; NEVER use 'jean' or 'jeans' for a person named Jean, use 'developer' or 'robotics'). Avoid specific company names, people, or obscure products. Use generic tech concepts like 'robotics', 'server', 'coding', 'cybersecurity', 'processor'.
 
 Return ONLY a valid JSON object with these exact keys: \"title\", \"twitter_tldr\", \"article_body\", \"suggested_image\", \"main_category\".
@@ -604,6 +611,35 @@ Return exactly a JSON object (no markdown fences):
     {
         $result = $this->callGemini($prompt, true);
         return is_array($result) ? $result : [];
+    }
+
+    public function upgradeLegacyArticle(\App\Models\Article $article): array
+    {
+        if ($this->isQuotaExhausted()) return [];
+
+        $prompt = "You are a Senior Tech Analyst and Editor for techynews.lat. We have an old, brief, and basic news article that needs to be UPGRADED to meet our new high-quality Editorial Standards (E-E-A-T).
+
+ORIGINAL ARTICLE TITLE: {$article->title}
+ORIGINAL CONTENT:
+{$article->content}
+
+Your job is to rewrite and expand this article.
+CRITICAL WRITING RULES (FOR ADSENSE APPROVAL & AUTHORITY):
+- CRITICAL LANGUAGE RULE: The output MUST be entirely in English.
+- ADDED VALUE & OPINION: You MUST inject expert analysis, historical context, and 'Why this matters'. Do not just rewrite the facts. Add professional commentary.
+- MANDATORY SECTION: You MUST include an `<h2>` heading titled \"The TechyNews Take\" or \"Market Impact\" with your deep analysis.
+- MINIMUM LENGTH: Target between 450 and 600 words. Expand on the original details meaningfully.
+- The 'article_body' MUST be valid HTML.
+
+Return ONLY a JSON object with the keys: \"title\" (you can keep the same or improve it slightly), \"article_body\".";
+
+        $result = $this->callGemini($prompt, true);
+        
+        if (!is_array($result) || empty($result['article_body'])) {
+            throw new \App\Exceptions\GenerationException("Failed to upgrade legacy article.");
+        }
+
+        return $result;
     }
 
     /**

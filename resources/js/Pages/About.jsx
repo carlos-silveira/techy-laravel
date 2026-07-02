@@ -370,6 +370,39 @@ export default function About() {
                         </div>
                     </motion.section>
 
+                    {/* Editorial & AI Policy */}
+                    <motion.section 
+                        initial={{ opacity: 0, y: 40 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, margin: "-100px" }}
+                        transition={{ duration: 0.8 }}
+                        className="mb-[120px]"
+                    >
+                        <div className="flex items-center gap-4 mb-12">
+                            <div className="w-1 h-6 bg-purple-500 rounded-full"></div>
+                            <h2 className="text-[32px] md:text-[42px] font-extralight tracking-[-0.02em] text-black dark:text-white leading-none">
+                                {__('Editorial & AI Policy')}
+                            </h2>
+                        </div>
+                        <div className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-[2rem] p-8 md:p-12 shadow-sm dark:shadow-none">
+                            <p className="text-[16px] text-gray-700 dark:text-gray-300 font-light leading-[1.8] mb-6">
+                                {__('At TechyNews, our goal is to deliver timely, accurate, and insightful technology news. To achieve this at scale while maintaining high quality, we employ a hybrid editorial model.')}
+                            </p>
+                            <h3 className="text-[20px] font-medium text-black dark:text-white mb-4">{__('AI-Assisted Journalism')}</h3>
+                            <p className="text-[16px] text-gray-700 dark:text-gray-300 font-light leading-[1.8] mb-6">
+                                {__('We utilize advanced artificial intelligence models to help draft, format, and translate our articles. However, AI is strictly a tool in our workflow, not an autonomous publisher. Every piece of content is guided by human editorial intent.')}
+                            </p>
+                            <h3 className="text-[20px] font-medium text-black dark:text-white mb-4">{__('Fact-Checking & Human Review')}</h3>
+                            <p className="text-[16px] text-gray-700 dark:text-gray-300 font-light leading-[1.8] mb-6">
+                                {__('We cross-reference multiple authoritative sources to ensure the factual accuracy of our reports. Our proprietary fact-checking pipeline evaluates the validity of the information before publication. The final analysis, "The TechyNews Take", and market context are overseen by our editorial team to provide genuine value to our readers.')}
+                            </p>
+                            <h3 className="text-[20px] font-medium text-black dark:text-white mb-4">{__('Transparency')}</h3>
+                            <p className="text-[16px] text-gray-700 dark:text-gray-300 font-light leading-[1.8]">
+                                {__('We believe in total transparency. While you may see AI-generated summaries or translated text, you can trust that the core reporting, opinions, and analyses reflect the expertise of the TechyNews editorial board.')}
+                            </p>
+                        </div>
+                    </motion.section>
+
                     {/* Footer CTA */}
                     <motion.section 
                         initial={{ opacity: 0, scale: 0.95 }}

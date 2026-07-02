@@ -45,6 +45,13 @@ class GenerateDailyNews extends Command
             return 1;
         }
 
+        // Sort ideas by viral_potential_score descending
+        usort($ideas, function ($a, $b) {
+            $scoreA = is_array($a) && isset($a['viral_potential_score']) ? (int)$a['viral_potential_score'] : 50;
+            $scoreB = is_array($b) && isset($b['viral_potential_score']) ? (int)$b['viral_potential_score'] : 50;
+            return $scoreB <=> $scoreA;
+        });
+
         $selectedIdea = null;
         foreach ($ideas as $idea) {
             // Guard: Gemini sometimes returns strings instead of objects
@@ -152,6 +159,7 @@ class GenerateDailyNews extends Command
             'title'                 => $selectedIdea['title'],
             'slug'                  => $slug,
             'source_url'            => $selectedIdea['source_url'] ?? null,
+            'viral_score'           => $selectedIdea['viral_potential_score'] ?? 50,
             'content'               => $content, // Store raw HTML directly — NO json_encode
             'language'              => 'en',
             'status'                => 'published',

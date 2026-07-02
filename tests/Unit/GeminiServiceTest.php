@@ -12,6 +12,8 @@ class GeminiServiceTest extends TestCase
     public function it_throws_when_api_key_is_missing()
     {
         config(['services.gemini.api_key' => '']);
+        config(['services.openrouter.api_key' => '']);
+        config(['services.groq.api_key' => '']);
 
         $service = new GeminiService();
 
