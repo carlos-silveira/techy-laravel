@@ -109,7 +109,7 @@ Route::middleware([])->group(function () {
     });
 
     Route::get('/admin/force-news', function () use ($gate) {
-        // $gate(); // Temporarily bypassed for debugging
+        $gate();
         $output = "";
         try {
             \Illuminate\Support\Facades\Artisan::call('news:generate-daily');
