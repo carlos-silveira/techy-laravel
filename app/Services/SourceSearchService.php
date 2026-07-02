@@ -112,9 +112,15 @@ class SourceSearchService
         try {
             // Jina Search API uses s.jina.ai
             $encodedQuery = urlencode($query);
-            $response = Http::withHeaders([
+            $jinaApiKey = config('services.jina.api_key');
+            $headers = [
                 'X-Return-Format' => 'json'
-            ])->timeout(15)->get("https://s.jina.ai/{$encodedQuery}");
+            ];
+            if (!empty($jinaApiKey)) {
+                $headers['Authorization'] = 'Bearer ' . $jinaApiKey;
+            }
+
+            $response = Http::withHeaders($headers)->timeout(15)->get("https://s.jina.ai/{$encodedQuery}");
 
             if (!$response->successful()) {
                 Log::warning("Jina Search failed: " . $response->body());

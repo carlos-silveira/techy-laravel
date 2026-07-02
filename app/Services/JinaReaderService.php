@@ -20,13 +20,19 @@ class JinaReaderService
         try {
             // Jina Reader API URL
             $jinaUrl = "https://r.jina.ai/" . $url;
+            
+            $jinaApiKey = config('services.jina.api_key');
+            $headers = [
+                'X-Return-Format' => 'markdown',
+                // Ask Jina to remove heavily repeated boilerplate to save tokens
+                'X-No-Boilerplate' => 'true'
+            ];
+            if (!empty($jinaApiKey)) {
+                $headers['Authorization'] = 'Bearer ' . $jinaApiKey;
+            }
 
             $response = Http::timeout(60)
-                ->withHeaders([
-                    'X-Return-Format' => 'markdown',
-                    // Ask Jina to remove heavily repeated boilerplate to save tokens
-                    'X-No-Boilerplate' => 'true'
-                ])
+                ->withHeaders($headers)
                 ->get($jinaUrl);
 
             if (!$response->successful()) {
