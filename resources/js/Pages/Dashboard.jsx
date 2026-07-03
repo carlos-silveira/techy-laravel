@@ -22,6 +22,7 @@ import AgentControl from '@/Components/AgentControl';
 import Observability from '@/Components/Observability';
 import FactCheckDashboard from '@/Components/FactCheckDashboard';
 import FactCheckPanel from '@/Components/FactCheckPanel';
+import EeatUpgradeControl from '@/Components/EeatUpgradeControl';
 import { getFinalImage } from '@/utils';
 
 /* ──────────────────────────────────────────────
@@ -800,6 +801,10 @@ export default function Dashboard({ auth, articles: initialArticles, analytics, 
                             <ShieldCheck className="w-5 h-5" />
                             <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Fact-Check Engine</span>
                         </button>
+                        <button onClick={() => setView('eeat')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'eeat' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white'}`}>
+                            <ShieldCheck className="w-5 h-5" />
+                            <span className="hidden md:block font-bold text-xs uppercase tracking-widest">E-E-A-T Upgrades</span>
+                        </button>
                         <button onClick={() => { resetEditor(); setView('editor'); }} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'editor' && !currentArticleId ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-black/5 dark:bg-white/5 text-black dark:text-white'}`}>
                             <Edit3 className="w-5 h-5 text-primary" />
                             <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Advanced Editor</span>
@@ -846,6 +851,7 @@ export default function Dashboard({ auth, articles: initialArticles, analytics, 
                     {view === 'scout' && <ScoutedQueue />}
                     {view === 'observability' && <div className="flex-1 overflow-y-auto p-4 md:p-10"><Observability /></div>}
                     {view === 'factcheck' && <div className="flex-1 overflow-y-auto p-4 md:p-10"><FactCheckDashboard setView={setView} handleEdit={handleEdit} /></div>}
+                    {view === 'eeat' && <div className="flex-1 overflow-y-auto p-4 md:p-10"><EeatUpgradeControl /></div>}
                     
                     {view === 'wizard' && (
                     <WizardView 

@@ -252,6 +252,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/api/scouted-queue', [App\Http\Controllers\ScoutQueueController::class, 'index'])->name('scouted.index');
     Route::post('/api/scouted-queue/{id}/approve', [App\Http\Controllers\ScoutQueueController::class, 'approve'])->name('scouted.approve');
     Route::delete('/api/scouted-queue/{id}', [App\Http\Controllers\ScoutQueueController::class, 'destroy'])->name('scouted.destroy');
+
+    // E-E-A-T Upgrade Control
+    Route::get('/api/eeat-upgrade/status', [App\Http\Controllers\EeatUpgradeController::class, 'status'])->name('eeat.status');
+    Route::post('/api/eeat-upgrade/trigger', [App\Http\Controllers\EeatUpgradeController::class, 'trigger'])->name('eeat.trigger');
+    Route::get('/api/eeat-upgrade/logs', [App\Http\Controllers\EeatUpgradeController::class, 'logs'])->name('eeat.logs');
 });
 
 require __DIR__ . '/auth.php';
