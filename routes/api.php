@@ -51,6 +51,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/articles/{id}/fact-check', [ArticleController::class, 'getFactCheck']);
     Route::get('/fact-check/backfill-progress', [ArticleController::class, 'getBackfillProgress']);
     Route::post('/fact-check/start-backfill', [ArticleController::class, 'startBackfill']);
+    Route::get('/fact-check/queues', [ArticleController::class, 'getFactCheckQueues']);
 });
 
 // Public Analytics & Engagement

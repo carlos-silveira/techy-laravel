@@ -254,4 +254,29 @@ class ArticleController extends Controller
         
         return response()->json(['message' => 'Backfill engine started!']);
     }
+
+    /**
+     * Get the fact check queues (needs review, failed) for observability.
+     */
+    public function getFactCheckQueues()
+    {
+        $needsReview = Article::where('status', 'published')
+            ->where('fact_check_score', '>=', 40)
+            ->where('fact_check_score', '<', 60)
+            ->orderBy('created_at', 'desc')
+            ->select('id', 'title', 'slug', 'fact_check_score', 'fact_check_status', 'created_at')
+            ->get();
+
+        $failed = Article::where('status', 'published')
+            ->where('fact_check_score', '<', 40)
+            ->whereNotNull('fact_check_score')
+            ->orderBy('created_at', 'desc')
+            ->select('id', 'title', 'slug', 'fact_check_score', 'fact_check_status', 'created_at')
+            ->get();
+
+        return response()->json([
+            'needs_review' => $needsReview,
+            'failed' => $failed
+        ]);
+    }
 }

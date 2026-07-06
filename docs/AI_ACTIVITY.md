@@ -462,3 +462,14 @@
 - **Why**: To ensure high reliability and build trust with readers by automatically cross-referencing AI generated articles against 30+ trusted sources.
 - **Tested**: Migrations, Frontend compilation (npm run build). End-to-end functionality needs to be tested in browser by the user.
 
+
+## 2026-07-02: AdSense E-E-A-T & Smart Generation
+- **Backend**: Implemented viral potential scoring and E-E-A-T filtering in GeminiService. Daily generation now prioritizes viral/high-value content. Created `news:upgrade-legacy` command to automatically upgrade old low-value articles into high-quality E-E-A-T compliant articles with author boxes and structured data.
+- **Frontend**: Added E-E-A-T signals across the platform: Editorial Policies to About page, disclaimer to Footer, and an Editorial Board author box to individual articles.
+- **Tests**: Verified GeminiService integration tests and Wizard API endpoints with the new data structures. Fixed token leakage in isolated tests.
+- **Result**: Successfully deployed to production and executed a manual run of `news:upgrade-legacy` on production to upgrade old articles, resolving the AdSense low-value content issue.
+
+## 2026-07-02: Studio E-E-A-T Control UI
+- **Frontend**: Created `EeatUpgradeControl.jsx` component and integrated it into the Studio `Dashboard.jsx`. It provides a visual dashboard to monitor the progress of E-E-A-T legacy upgrades (Upgraded vs Pending).
+- **Backend**: Created `EeatUpgradeController.php` with API endpoints to fetch stats, trigger the background `news:upgrade-legacy` artisan command, and stream logs back to the UI.
+- **Deployment**: Pushed to `main` via Git for automated CI/CD deployment.

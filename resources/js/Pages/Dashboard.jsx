@@ -877,6 +877,17 @@ export default function Dashboard({ auth, articles: initialArticles, analytics, 
                                             <h3 className="font-black text-xl text-gray-900 dark:text-white group-hover:text-primary transition-colors">{article.title}</h3>
                                             <div className="flex items-center gap-5 text-[10px] font-black text-gray-400 dark:text-gray-600 uppercase mt-1.5">
                                                 <span className={`px-2 py-0.5 rounded border ${article.status === 'published' ? 'text-primary border-primary/20 bg-primary/5' : 'text-gray-400 border-black/5 dark:border-white/5'}`}>{article.status}</span>
+                                                
+                                                {article.fact_check_score !== null && (
+                                                    <span className={`px-2 py-0.5 rounded border ${
+                                                        article.fact_check_score >= 60 ? 'text-emerald-500 border-emerald-500/20 bg-emerald-500/5' :
+                                                        article.fact_check_score >= 40 ? 'text-amber-500 border-amber-500/20 bg-amber-500/5' :
+                                                        'text-red-500 border-red-500/20 bg-red-500/5'
+                                                    }`}>
+                                                        Score: {article.fact_check_score}
+                                                    </span>
+                                                )}
+
                                                 <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {new Date(article.created_at).toLocaleDateString()}</span>
                                             </div>
                                         </div>

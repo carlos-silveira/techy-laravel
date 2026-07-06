@@ -6,13 +6,18 @@ import { toast } from 'sonner';
 
 export default function FactCheckDashboard({ setView, handleEdit }) {
     const [progress, setProgress] = useState(null);
+    const [queues, setQueues] = useState({ needs_review: [], failed: [] });
     const [isLoading, setIsLoading] = useState(true);
     const [isActionLoading, setIsActionLoading] = useState(false);
     
     // In a real app we might fetch global stats, for now we focus on backfill
     useEffect(() => {
         fetchProgress();
-        const interval = setInterval(fetchProgress, 5000); // Poll every 5s
+        fetchQueues();
+        const interval = setInterval(() => {
+            fetchProgress();
+            fetchQueues();
+        }, 5000); // Poll every 5s
         return () => clearInterval(interval);
     }, []);
 
@@ -23,6 +28,15 @@ export default function FactCheckDashboard({ setView, handleEdit }) {
             setIsLoading(false);
         } catch (error) {
             console.error("Failed to fetch progress", error);
+        }
+    };
+
+    const fetchQueues = async () => {
+        try {
+            const res = await axios.get('/api/fact-check/queues');
+            setQueues(res.data);
+        } catch (error) {
+            console.error("Failed to fetch queues", error);
         }
     };
 
@@ -139,24 +153,74 @@ export default function FactCheckDashboard({ setView, handleEdit }) {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl p-6">
-                    <h3 className="font-bold mb-4 flex items-center gap-2">
-                        <ShieldAlert className="w-5 h-5 text-amber-500" />
-                        Needs Review Queue
-                    </h3>
-                    <p className="text-sm text-gray-500 italic">
-                        Articles scoring between 40-59 will appear here for manual editorial review.
-                    </p>
+                <div className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl flex flex-col h-[500px]">
+                    <div className="p-6 border-b border-black/5 dark:border-white/5">
+                        <h3 className="font-bold flex items-center gap-2">
+                            <ShieldAlert className="w-5 h-5 text-amber-500" />
+                            Needs Review Queue
+                            <span className="ml-auto bg-amber-500/20 text-amber-600 px-2 py-1 rounded-md text-xs">{queues.needs_review.length}</span>
+                        </h3>
+                        <p className="text-xs text-gray-500 mt-1">
+                            Articles scoring between 40-59 (Possible Hallucinations)
+                        </p>
+                    </div>
+                    <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                        {queues.needs_review.length === 0 ? (
+                            <div className="h-full flex items-center justify-center text-sm text-gray-500">Queue is empty</div>
+                        ) : (
+                            queues.needs_review.map(article => (
+                                <div key={article.id} className="bg-white dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-xl p-4 flex items-center justify-between group hover:border-amber-500/50 transition-colors">
+                                    <div className="overflow-hidden pr-4">
+                                        <h4 className="font-bold text-sm truncate">{article.title}</h4>
+                                        <div className="flex items-center gap-2 mt-1 text-xs font-mono text-amber-500">
+                                            Score: {article.fact_check_score}
+                                        </div>
+                                    </div>
+                                    <button 
+                                        onClick={() => handleEdit(article)}
+                                        className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center flex-shrink-0 hover:bg-primary hover:text-white transition-colors"
+                                    >
+                                        <Edit3 className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            ))
+                        )}
+                    </div>
                 </div>
                 
-                <div className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl p-6">
-                    <h3 className="font-bold mb-4 flex items-center gap-2">
-                        <ShieldX className="w-5 h-5 text-red-500" />
-                        Blocked/Failed Content
-                    </h3>
-                    <p className="text-sm text-gray-500 italic">
-                        Articles scoring below 40 that have been automatically pulled from production.
-                    </p>
+                <div className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl flex flex-col h-[500px]">
+                    <div className="p-6 border-b border-black/5 dark:border-white/5">
+                        <h3 className="font-bold flex items-center gap-2">
+                            <ShieldX className="w-5 h-5 text-red-500" />
+                            Failed / Blocked Content
+                            <span className="ml-auto bg-red-500/20 text-red-600 px-2 py-1 rounded-md text-xs">{queues.failed.length}</span>
+                        </h3>
+                        <p className="text-xs text-gray-500 mt-1">
+                            Articles scoring below 40. Pulled from production.
+                        </p>
+                    </div>
+                    <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                        {queues.failed.length === 0 ? (
+                            <div className="h-full flex items-center justify-center text-sm text-gray-500">Queue is empty</div>
+                        ) : (
+                            queues.failed.map(article => (
+                                <div key={article.id} className="bg-white dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-xl p-4 flex items-center justify-between group hover:border-red-500/50 transition-colors">
+                                    <div className="overflow-hidden pr-4">
+                                        <h4 className="font-bold text-sm truncate">{article.title}</h4>
+                                        <div className="flex items-center gap-2 mt-1 text-xs font-mono text-red-500">
+                                            Score: {article.fact_check_score}
+                                        </div>
+                                    </div>
+                                    <button 
+                                        onClick={() => handleEdit(article)}
+                                        className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center flex-shrink-0 hover:bg-primary hover:text-white transition-colors"
+                                    >
+                                        <Edit3 className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            ))
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
