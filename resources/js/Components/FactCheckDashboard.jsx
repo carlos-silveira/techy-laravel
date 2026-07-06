@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import { ShieldCheck, ShieldAlert, ShieldX, Play, Square, Loader2, Edit3, Activity } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, ShieldX, Play, Square, Loader2, Edit3, Activity, Wand2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function FactCheckDashboard({ setView, handleEdit }) {
@@ -9,6 +9,7 @@ export default function FactCheckDashboard({ setView, handleEdit }) {
     const [queues, setQueues] = useState({ needs_review: [], failed: [] });
     const [isLoading, setIsLoading] = useState(true);
     const [isActionLoading, setIsActionLoading] = useState(false);
+    const [fixingIds, setFixingIds] = useState(new Set());
     
     // In a real app we might fetch global stats, for now we focus on backfill
     useEffect(() => {
@@ -48,6 +49,36 @@ export default function FactCheckDashboard({ setView, handleEdit }) {
             fetchProgress();
         } catch (error) {
             toast.error(error.response?.data?.message || 'Action failed');
+        } finally {
+            setIsActionLoading(false);
+        }
+    };
+
+    const handleMagicFix = async (id) => {
+        setFixingIds(prev => new Set(prev).add(id));
+        try {
+            const res = await axios.post(`/api/fact-check/fix/${id}`);
+            toast.success(res.data.message);
+            fetchQueues();
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to fix article.');
+        } finally {
+            setFixingIds(prev => {
+                const next = new Set(prev);
+                next.delete(id);
+                return next;
+            });
+        }
+    };
+
+    const handleBatchFix = async () => {
+        setIsActionLoading(true);
+        try {
+            const res = await axios.post('/api/fact-check/fix-batch');
+            toast.success(res.data.message);
+            fetchQueues();
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to start batch fix.');
         } finally {
             setIsActionLoading(false);
         }
@@ -154,15 +185,24 @@ export default function FactCheckDashboard({ setView, handleEdit }) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl flex flex-col h-[500px]">
-                    <div className="p-6 border-b border-black/5 dark:border-white/5">
-                        <h3 className="font-bold flex items-center gap-2">
-                            <ShieldAlert className="w-5 h-5 text-amber-500" />
-                            Needs Review Queue
-                            <span className="ml-auto bg-amber-500/20 text-amber-600 px-2 py-1 rounded-md text-xs">{queues.needs_review.length}</span>
-                        </h3>
-                        <p className="text-xs text-gray-500 mt-1">
-                            Articles scoring between 40-59 (Possible Hallucinations)
-                        </p>
+                    <div className="p-6 border-b border-black/5 dark:border-white/5 flex items-center justify-between">
+                        <div>
+                            <h3 className="font-bold flex items-center gap-2">
+                                <ShieldAlert className="w-5 h-5 text-amber-500" />
+                                Needs Review Queue
+                                <span className="ml-2 bg-amber-500/20 text-amber-600 px-2 py-1 rounded-md text-xs">{queues.needs_review.length}</span>
+                            </h3>
+                            <p className="text-xs text-gray-500 mt-1">
+                                Articles scoring between 40-59 (Possible Hallucinations)
+                            </p>
+                        </div>
+                        <button 
+                            onClick={handleBatchFix} 
+                            disabled={isActionLoading || queues.needs_review.length === 0}
+                            className="text-xs font-bold bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-2 disabled:opacity-50"
+                        >
+                            {isActionLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />} Fix All
+                        </button>
                     </div>
                     <div className="flex-1 overflow-y-auto p-4 space-y-2">
                         {queues.needs_review.length === 0 ? (
@@ -176,12 +216,22 @@ export default function FactCheckDashboard({ setView, handleEdit }) {
                                             Score: {article.fact_check_score}
                                         </div>
                                     </div>
-                                    <button 
-                                        onClick={() => handleEdit(article)}
-                                        className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center flex-shrink-0 hover:bg-primary hover:text-white transition-colors"
-                                    >
-                                        <Edit3 className="w-4 h-4" />
-                                    </button>
+                                    <div className="flex gap-2">
+                                        <button 
+                                            onClick={() => handleMagicFix(article.id)}
+                                            disabled={fixingIds.has(article.id)}
+                                            className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-white flex items-center justify-center flex-shrink-0 transition-colors disabled:opacity-50"
+                                            title="Auto-Fix Hallucinations"
+                                        >
+                                            {fixingIds.has(article.id) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+                                        </button>
+                                        <button 
+                                            onClick={() => handleEdit(article)}
+                                            className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center flex-shrink-0 hover:bg-primary hover:text-white transition-colors"
+                                        >
+                                            <Edit3 className="w-4 h-4" />
+                                        </button>
+                                    </div>
                                 </div>
                             ))
                         )}
@@ -189,15 +239,24 @@ export default function FactCheckDashboard({ setView, handleEdit }) {
                 </div>
                 
                 <div className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl flex flex-col h-[500px]">
-                    <div className="p-6 border-b border-black/5 dark:border-white/5">
-                        <h3 className="font-bold flex items-center gap-2">
-                            <ShieldX className="w-5 h-5 text-red-500" />
-                            Failed / Blocked Content
-                            <span className="ml-auto bg-red-500/20 text-red-600 px-2 py-1 rounded-md text-xs">{queues.failed.length}</span>
-                        </h3>
-                        <p className="text-xs text-gray-500 mt-1">
-                            Articles scoring below 40. Pulled from production.
-                        </p>
+                    <div className="p-6 border-b border-black/5 dark:border-white/5 flex items-center justify-between">
+                        <div>
+                            <h3 className="font-bold flex items-center gap-2">
+                                <ShieldX className="w-5 h-5 text-red-500" />
+                                Failed / Blocked Content
+                                <span className="ml-2 bg-red-500/20 text-red-600 px-2 py-1 rounded-md text-xs">{queues.failed.length}</span>
+                            </h3>
+                            <p className="text-xs text-gray-500 mt-1">
+                                Articles scoring below 40. Pulled from production.
+                            </p>
+                        </div>
+                        <button 
+                            onClick={handleBatchFix} 
+                            disabled={isActionLoading || queues.failed.length === 0}
+                            className="text-xs font-bold bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-2 disabled:opacity-50"
+                        >
+                            {isActionLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />} Fix All
+                        </button>
                     </div>
                     <div className="flex-1 overflow-y-auto p-4 space-y-2">
                         {queues.failed.length === 0 ? (
@@ -211,12 +270,22 @@ export default function FactCheckDashboard({ setView, handleEdit }) {
                                             Score: {article.fact_check_score}
                                         </div>
                                     </div>
-                                    <button 
-                                        onClick={() => handleEdit(article)}
-                                        className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center flex-shrink-0 hover:bg-primary hover:text-white transition-colors"
-                                    >
-                                        <Edit3 className="w-4 h-4" />
-                                    </button>
+                                    <div className="flex gap-2">
+                                        <button 
+                                            onClick={() => handleMagicFix(article.id)}
+                                            disabled={fixingIds.has(article.id)}
+                                            className="w-8 h-8 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center flex-shrink-0 transition-colors disabled:opacity-50"
+                                            title="Auto-Fix Hallucinations"
+                                        >
+                                            {fixingIds.has(article.id) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+                                        </button>
+                                        <button 
+                                            onClick={() => handleEdit(article)}
+                                            className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center flex-shrink-0 hover:bg-primary hover:text-white transition-colors"
+                                        >
+                                            <Edit3 className="w-4 h-4" />
+                                        </button>
+                                    </div>
                                 </div>
                             ))
                         )}

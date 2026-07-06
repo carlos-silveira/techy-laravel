@@ -473,3 +473,15 @@
 - **Frontend**: Created `EeatUpgradeControl.jsx` component and integrated it into the Studio `Dashboard.jsx`. It provides a visual dashboard to monitor the progress of E-E-A-T legacy upgrades (Upgraded vs Pending).
 - **Backend**: Created `EeatUpgradeController.php` with API endpoints to fetch stats, trigger the background `news:upgrade-legacy` artisan command, and stream logs back to the UI.
 - **Deployment**: Pushed to `main` via Git for automated CI/CD deployment.
+
+## 2026-07-06: Fact-Check Observability
+- **Backend**: Added `getFactCheckQueues` API endpoint in `ArticleController` to expose `needs_review` and `failed` articles based on their `fact_check_score`.
+- **Frontend**: Updated `FactCheckDashboard.jsx` to dynamically list articles in their respective queues. Updated `Dashboard.jsx` Archives view to prominently display a color-coded Confidence Score badge next to all articles, providing immediate visibility into hallucinated content.
+- **Deployment**: Pushed to production via GitHub Actions.
+
+## 2026-07-06: Studio UI Refactor & Fact-Check Auto-Fix
+- **Backend**: Added `fixFactCheck` and `fixFactCheckBatch` in `ArticleController.php` with `routes/api.php` endpoints.
+- **Console**: Created `FixFactCheckArticle` artisan command that leverages Gemini to rewrite articles fixing detected hallucinations.
+- **Frontend**: Refactored `Dashboard.jsx` sidebar into `Editorial Desk`, `AI Automation`, and `System Hub` sections. Fixed mobile sidebar behavior to auto-close on click.
+- **Frontend**: Added `Magic Fix` buttons to `FactCheckDashboard.jsx` queues allowing single and batch corrections for low-confidence articles.
+- **Validation**: Passed `npm run build` and `php artisan test`.

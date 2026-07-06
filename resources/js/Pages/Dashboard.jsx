@@ -768,46 +768,54 @@ export default function Dashboard({ auth, articles: initialArticles, analytics, 
                         </button>
                     </div>
 
-                    <nav className="space-y-2 w-full mb-10">
+                    <nav className="space-y-1 w-full mb-10">
+                        {/* ─── EDITORIAL DESK ─── */}
+                        <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mt-6 mb-2 px-4">Editorial Desk</div>
+                        <button onClick={() => { setView('list'); setShowMobileSidebar(false); }} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'list' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'}`}>
+                            <Layout className="w-5 h-5" />
+                            <span className="font-bold text-xs uppercase tracking-widest">Archives</span>
+                        </button>
+                        <button onClick={() => { setView('wizard'); setShowMobileSidebar(false); }} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'wizard' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'}`}>
+                            <Wand2 className="w-5 h-5" />
+                            <span className="font-bold text-xs uppercase tracking-widest">AI Writer</span>
+                        </button>
                         <Link href="/" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-all group">
                             <Home className="w-5 h-5 group-hover:text-primary" />
-                            <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Live View</span>
+                            <span className="font-bold text-xs uppercase tracking-widest">Live View</span>
                         </Link>
-                        <button onClick={() => setView('wizard')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'wizard' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white'}`}>
-                            <Wand2 className="w-5 h-5" />
-                            <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Quick Create</span>
-                        </button>
-                        <button onClick={() => setView('scout')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'scout' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white'}`}>
-                            <Globe className="w-5 h-5" />
-                            <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Scout Queue</span>
-                        </button>
-                        <button onClick={() => setView('agent')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'agent' ? 'bg-indigo-500/10 text-indigo-500 border border-indigo-500/20' : 'text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white'}`}>
-                            <Terminal className="w-5 h-5" />
-                            <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Agent Control</span>
-                        </button>
-                        <button onClick={() => setView('list')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'list' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white'}`}>
-                            <Layout className="w-5 h-5" />
-                            <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Archives</span>
-                        </button>
-                        <button onClick={() => setView('analytics')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'analytics' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white'}`}>
-                            <BarChart2 className="w-5 h-5" />
-                            <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Analytics</span>
-                        </button>
-                        <button onClick={() => setView('observability')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'observability' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white'}`}>
-                            <Activity className="w-5 h-5" />
-                            <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Observability</span>
-                        </button>
-                        <button onClick={() => setView('factcheck')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'factcheck' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white'}`}>
-                            <ShieldCheck className="w-5 h-5" />
-                            <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Fact-Check Engine</span>
-                        </button>
-                        <button onClick={() => setView('eeat')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'eeat' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white'}`}>
-                            <ShieldCheck className="w-5 h-5" />
-                            <span className="hidden md:block font-bold text-xs uppercase tracking-widest">E-E-A-T Upgrades</span>
-                        </button>
-                        <button onClick={() => { resetEditor(); setView('editor'); }} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'editor' && !currentArticleId ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-black/5 dark:bg-white/5 text-black dark:text-white'}`}>
+                        <button onClick={() => { resetEditor(); setView('editor'); setShowMobileSidebar(false); }} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left mt-2 ${view === 'editor' && !currentArticleId ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-black/5 dark:bg-white/5 text-black dark:text-white'}`}>
                             <Edit3 className="w-5 h-5 text-primary" />
-                            <span className="hidden md:block font-bold text-xs uppercase tracking-widest">Advanced Editor</span>
+                            <span className="font-bold text-xs uppercase tracking-widest">Advanced Editor</span>
+                        </button>
+
+                        {/* ─── AI AUTOMATION ─── */}
+                        <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mt-6 mb-2 px-4">AI Automation</div>
+                        <button onClick={() => { setView('scout'); setShowMobileSidebar(false); }} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'scout' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'}`}>
+                            <Globe className="w-5 h-5" />
+                            <span className="font-bold text-xs uppercase tracking-widest">Scout Queue</span>
+                        </button>
+                        <button onClick={() => { setView('eeat'); setShowMobileSidebar(false); }} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'eeat' ? 'bg-indigo-500/10 text-indigo-500 border border-indigo-500/20' : 'text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'}`}>
+                            <CheckCircle2 className="w-5 h-5" />
+                            <span className="font-bold text-xs uppercase tracking-widest">E-E-A-T Upgrades</span>
+                        </button>
+
+                        {/* ─── SYSTEM HUB ─── */}
+                        <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mt-6 mb-2 px-4">System Hub</div>
+                        <button onClick={() => { setView('factcheck'); setShowMobileSidebar(false); }} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'factcheck' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' : 'text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'}`}>
+                            <ShieldCheck className="w-5 h-5" />
+                            <span className="font-bold text-xs uppercase tracking-widest">Fact-Check Engine</span>
+                        </button>
+                        <button onClick={() => { setView('observability'); setShowMobileSidebar(false); }} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'observability' ? 'bg-purple-500/10 text-purple-500 border border-purple-500/20' : 'text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'}`}>
+                            <Activity className="w-5 h-5" />
+                            <span className="font-bold text-xs uppercase tracking-widest">Observability</span>
+                        </button>
+                        <button onClick={() => { setView('analytics'); setShowMobileSidebar(false); }} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'analytics' ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' : 'text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'}`}>
+                            <BarChart2 className="w-5 h-5" />
+                            <span className="font-bold text-xs uppercase tracking-widest">Analytics</span>
+                        </button>
+                        <button onClick={() => { setView('agent'); setShowMobileSidebar(false); }} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full group text-left ${view === 'agent' ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'}`}>
+                            <Terminal className="w-5 h-5" />
+                            <span className="font-bold text-xs uppercase tracking-widest">Agent Terminal</span>
                         </button>
                     </nav>
                 </div>

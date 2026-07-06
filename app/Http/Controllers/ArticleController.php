@@ -279,4 +279,64 @@ class ArticleController extends Controller
             'failed' => $failed
         ]);
     }
+
+    /**
+     * Fix a single low-confidence article using the Artisan command.
+     */
+    public function fixFactCheck($id)
+    {
+        $article = Article::findOrFail($id);
+        
+        // Dispatch the artisan command asynchronously if you want it in the background
+        // Or synchronously since it's just one article and the user is waiting
+        // We will run it synchronously to provide immediate feedback
+        try {
+            \Illuminate\Support\Facades\Artisan::call('news:fix-factcheck', ['id' => $id]);
+            $output = \Illuminate\Support\Facades\Artisan::output();
+            
+            // Re-fetch to get updated score
+            $article->refresh();
+            
+            return response()->json([
+                'message' => 'Article successfully fixed.',
+                'output' => $output,
+                'article' => $article
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to fix article.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Fix all low-confidence articles in a batch.
+     */
+    public function fixFactCheckBatch()
+    {
+        // This should ideally be a Job to avoid HTTP timeout, but for simplicity we will
+        // gather the IDs and just tell the frontend we are starting. Or dispatch jobs for each.
+        
+        $lowConfidenceArticles = Article::where('status', 'published')
+            ->where('fact_check_score', '<', 60)
+            ->whereNotNull('fact_check_score')
+            ->get();
+            
+        if ($lowConfidenceArticles->isEmpty()) {
+            return response()->json(['message' => 'No low confidence articles found.'], 400);
+        }
+
+        foreach ($lowConfidenceArticles as $article) {
+            // We can dispatch a Job, or just use the Artisan facade in a queued Job.
+            // Creating an anonymous job to run the artisan command
+            dispatch(function () use ($article) {
+                \Illuminate\Support\Facades\Artisan::call('news:fix-factcheck', ['id' => $article->id]);
+            });
+        }
+        
+        return response()->json([
+            'message' => "Batch fix started for {$lowConfidenceArticles->count()} articles."
+        ]);
+    }
 }
