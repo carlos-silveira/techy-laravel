@@ -485,3 +485,4 @@
 - **Frontend**: Refactored `Dashboard.jsx` sidebar into `Editorial Desk`, `AI Automation`, and `System Hub` sections. Fixed mobile sidebar behavior to auto-close on click.
 - **Frontend**: Added `Magic Fix` buttons to `FactCheckDashboard.jsx` queues allowing single and batch corrections for low-confidence articles.
 - **Validation**: Passed `npm run build` and `php artisan test`.
+- **Backend (Monitoring)**: Installed and configured Laravel Pulse to provide a free on-site dashboard for monitoring 500 errors and slow endpoints. Configured viewPulse authorization gate via the PULSE_ADMIN_EMAILS environment variable.
