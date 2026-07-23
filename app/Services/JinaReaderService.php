@@ -62,19 +62,21 @@ class JinaReaderService
                     if (filter_var($imgUrl, FILTER_VALIDATE_URL)) {
                         $lowerUrl = strtolower($imgUrl);
                         // Filter out common logos, icons, and non-content tracking pixels
-                        if (
-                            !str_ends_with($lowerUrl, '.svg') &&
-                            !str_ends_with($lowerUrl, '.gif') &&
-                            !str_contains($lowerUrl, 'logo') &&
-                            !str_contains($lowerUrl, 'icon') &&
-                            !str_contains($lowerUrl, 'avatar') &&
-                            !str_contains($lowerUrl, 'banner') &&
-                            !str_contains($lowerUrl, 'button') &&
-                            !str_contains($lowerUrl, 'tracker') &&
-                            !str_contains($lowerUrl, 'pixel')
-                        ) {
-                            $images[] = $imgUrl;
-                        }
+                            $pathOnly = parse_url($lowerUrl, PHP_URL_PATH) ?? '';
+                            if (
+                                !str_ends_with($pathOnly, '.svg') &&
+                                !str_ends_with($pathOnly, '.gif') &&
+                                !str_contains($lowerUrl, 'logo') &&
+                                !str_contains($lowerUrl, 'icon') &&
+                                !str_contains($lowerUrl, 'avatar') &&
+                                !str_contains($lowerUrl, 'banner') &&
+                                !str_contains($lowerUrl, 'button') &&
+                                !str_contains($lowerUrl, 'tracker') &&
+                                !str_contains($lowerUrl, 'pixel') &&
+                                !str_contains($lowerUrl, 'wir_cutout')
+                            ) {
+                                $images[] = $imgUrl;
+                            }
                     }
                 }
             }
