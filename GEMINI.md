@@ -29,6 +29,7 @@ For new features, follow the ai-specs command workflow:
 4. **Deploy**: Push to `main` → CI/CD auto-deploys
 
 ## Senior Engineering Mindset
+- **Use Token-Saving Docs First**: Always prioritize reading the VitePress markdown files in `docs/` instead of parsing raw source code files to save tokens and build context instantly.
 - **Think before you code**: Read the relevant files, understand the data flow, check server logs.
 - **Test before you ship**: `npm run build` must pass. `curl` the endpoint. Check logs.
 - **Verify after deploy**: Smoke test production. Report results.
@@ -42,6 +43,7 @@ For new features, follow the ai-specs command workflow:
 - **ALWAYS** add 10s delay between Gemini API calls
 - **ALWAYS** run `npm run build` before pushing to verify no frontend errors
 - **ALWAYS** verify API keys are valid before deploying features that depend on them
+- **ALWAYS** update the VitePress docs in `docs/` whenever you create or modify a feature/model/component. A PR or Deploy is NOT complete until the documentation is updated!
 - **ALWAYS** document AI agent activity in `docs/AI_ACTIVITY.md` after completing a task
 - **CRITICAL**: All changes MUST pass unit testing and/or component testing depending on what applies. DO NOT push or release unusable, broken, or untested code.
 - **CRITICAL**: After every deploy, run a smoke test (`curl` endpoint, check logs) and report results.

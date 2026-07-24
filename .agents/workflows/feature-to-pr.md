@@ -27,6 +27,7 @@ A feature is NOT complete until:
 3. `npx playwright test` passes with 0 failures. (The QA Engineer skill must be applied here).
 
 ## 5. Commit & PR
+- **Update Documentation**: Before committing, update the corresponding markdown file in `docs/` (VitePress) reflecting any structural changes to models, services, or components. This is MANDATORY for token saving.
 - Once tests pass, atomic commits only: `feat(scope): Description` or `fix(scope): Description`.
 - Invoke the `techy-pr-builder` skill to generate the PR description.
 - Never push or create a PR without the user's explicit permission.

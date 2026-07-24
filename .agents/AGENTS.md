@@ -5,6 +5,7 @@ The following rules apply to all AI agents working within this repository. Agent
 ## Mandatory Senior Engineering Workflow (EVERY PROMPT)
 - **Rule**: On EVERY prompt that involves code changes, the agent MUST follow this 3-phase workflow. No exceptions. No shortcuts.
 - **Phase 1 — Analysis / Investigation**:
+  - **Token-Saving Context**: ALWAYS read the VitePress documentation files in `docs/` before parsing huge source code files to build your context efficiently.
   - Understand the root cause BEFORE writing any code.
   - Read relevant source files, check server logs, trace the data flow end-to-end.
   - Identify ALL affected files and endpoints.
@@ -50,10 +51,11 @@ The following rules apply to all AI agents working within this repository. Agent
 2. `php artisan test` — All tests pass (when applicable)
 3. `npx playwright test` — 100% E2E tests passing.
 4. `git diff --stat` — Review what files changed
-5. `rsync` to production → `php artisan optimize:clear`
-6. Smoke test: `curl` the affected endpoints on production
-7. Check `storage/logs/laravel.log` for new errors
-8. Report results to user
+5. **UPDATE DOCS**: If you modified a component, model, or service, update its corresponding VitePress markdown file in `docs/`. Run `npm run docs:build`.
+6. `rsync` to production → `php artisan optimize:clear`
+7. Smoke test: `curl` the affected endpoints on production
+8. Check `storage/logs/laravel.log` for new errors
+9. Report results to user
 
 ## Mobile Responsive UI & Markdown Tables
 - **Rule**: When building UI components that render Markdown, or when designing for mobile, extra care must be taken to prevent layout overflows.

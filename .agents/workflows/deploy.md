@@ -8,8 +8,9 @@ The project uses GitHub Actions CI/CD. Pushing to `main` triggers automatic depl
 
 ## Automatic Deployment (Push to main)
 
-### 1. Commit and push your changes
+### 1. Update Docs and Commit
 ```bash
+npm run docs:build # Verify docs compile if you edited docs/
 git add -A && git commit -m "your message" && git push
 ```
 
