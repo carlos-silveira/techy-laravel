@@ -283,6 +283,41 @@ class DashboardController extends Controller
             ->get()
             ->map(fn($item) => ['hour' => sprintf('%02d:00', (int) $item->hour), 'views' => $item->views]);
 
+        // ─── COUNTRY DATA (Human Only) ───
+        $countriesData = DB::table('page_views')
+            ->selectRaw('country, COUNT(*) as views')
+            ->whereNotNull('country')
+            ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
+            ->where($excludeBots)
+            ->groupBy('country')
+            ->orderByDesc('views')
+            ->get()
+            ->map(fn($item) => [
+                'id' => $item->country,
+                'value' => (int) $item->views,
+            ]);
+
+        // ─── SESSION METRICS (Bounce Rate & Duration) ───
+        $sessions = DB::table('page_views')
+            ->selectRaw('session_id, COUNT(id) as hits, MIN(created_at) as first_hit, MAX(created_at) as last_hit')
+            ->whereNotNull('session_id')
+            ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
+            ->where($excludeBots)
+            ->groupBy('session_id')
+            ->get();
+
+        $totalSessions = $sessions->count();
+        $bouncedSessions = $sessions->where('hits', 1)->count();
+        $bounceRate = $totalSessions > 0 ? round(($bouncedSessions / $totalSessions) * 100, 1) : 0;
+
+        $multiHitSessions = $sessions->where('hits', '>', 1);
+        $totalDurationSeconds = 0;
+        foreach ($multiHitSessions as $s) {
+            $totalDurationSeconds += Carbon::parse($s->last_hit)->diffInSeconds(Carbon::parse($s->first_hit));
+        }
+        $avgDurationSeconds = $multiHitSessions->count() > 0 ? (int) round($totalDurationSeconds / $multiHitSessions->count()) : 0;
+        $avgSessionDuration = gmdate("i:s", $avgDurationSeconds); // e.g. "02:34"
+
         // ─── GEMINI AI USAGE ───
         $dateFunc = "DATE(created_at)";
         $geminiUsagePerDay = Schema::hasTable('gemini_logs') ?
@@ -367,6 +402,7 @@ class DashboardController extends Controller
                 'geminiUsage' => $geminiUsagePerDay,
                 'geminiModelDistribution' => $geminiModelDistribution,
                 'rawGeminiLogs' => $rawGeminiLogs,
+                'countriesData' => $countriesData,
                 'summary' => [
                     'totalViews' => $totalViews,
                     'viewsGrowth' => $viewsGrowth,
@@ -375,6 +411,8 @@ class DashboardController extends Controller
                     'totalLikes' => $totalLikesAllTime,
                     'topLikedArticles' => $topLikedArticles,
                     'engagementRate' => $engagementRate,
+                    'bounceRate' => $bounceRate,
+                    'avgSessionDuration' => $avgSessionDuration,
                     'totalViewsAllTime' => $totalViewsAllTime,
                     'totalGeminiTokens' => $totalGeminiTokens,
                     'totalGeminiCost' => round((float) $totalGeminiCost, 4),

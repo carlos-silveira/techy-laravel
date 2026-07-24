@@ -19,6 +19,7 @@ Use the following workflows for common tasks:
 - **Generate news**: Follow `.agents/workflows/generate-news.md`
 - **Deploy**: Follow `.agents/workflows/deploy.md`
 - **Fix content**: Follow `.agents/workflows/fix-content.md`
+- **Feature to PR**: Follow `.agents/workflows/feature-to-pr.md`
 
 ## Feature Development
 For new features, follow the ai-specs command workflow:

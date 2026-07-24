@@ -16,6 +16,7 @@
         "laravel/tinker": "*",
         "sentry/sentry-laravel": "^4.26",
         "silviolleite/laravelpwa": "*",
+        "stevebauman/location": "^7.6",
         "tightenco/ziggy": "^2.0"
     },
     "require-dev": {

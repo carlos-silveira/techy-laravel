@@ -1,3 +1,32 @@
+## [2026-07-23] - Studio WordPress-Class CMS Admin Transformation
+
+### Added
+- **Design Language System Skill**: Extracted exact colors (`#02040a` canvas, `#00b4ff` primary), typography (`font-black tracking-tighter` display, `text-[10px] font-black uppercase tracking-[0.3em]` labels), surfaces (`bg-white/[0.02]`), paper-thin borders (`border-white/5`), and animation signatures from the live codebase. Saved permanently as `.agents/skills/techy-design-language/SKILL.md`.
+- **Multi-Page Studio Architecture**: Decomposed the 1,078-line monolithic `Dashboard.jsx` into a dedicated multi-page Inertia application with clean route namespaces under `/studio/*`.
+- **Persistent Studio Layout (`StudioLayout.jsx`)**: Built a responsive, editorial-terminal dashboard shell with dark collapsible sidebar, TechyNews brand identity, `LIVE` status dot, user profile snippet, breadcrumbs, search trigger (`⌘K`), and Sonner toast provider.
+- **Central Command Dashboard (`/studio`)**: Built `StudioController@index` and `Studio/Index.jsx` featuring hero stat cards (articles, 7d pageviews + trend, engagement rate, Gemini API costs), recent activity feed, quick actions grid, top performers, and system health status.
+- **Narrative Repository (`/studio/articles`)**: Built `StudioArticleController` and `Studio/Articles/Index.jsx` with real-time status filtering (All/Published/Drafts), live keyword search, sorting (latest/oldest/views/fact-check), and row actions (inline publish toggle, edit, view, delete).
+- **AI Article Writer (`/studio/articles/create`)**: Built `Studio/Articles/Create.jsx` wizard with 4 steps (Discover → Generate → Review → Publish), custom topic generation, draft refinement with feedback, and SEO meta extraction.
+- **Advanced Article Editor (`/studio/articles/{id}/edit`)**: Built `Studio/Articles/Edit.jsx` with editable title, cover image upload drop zone, TipTap rich text editor, and right drawer tabbed inspector for Studio Assistant chat, Fact-Check Engine, and SEO/Meta tags.
+- **Media Library (`/studio/media`)**: Built `StudioMediaController` and `Studio/Media/Index.jsx` with asset grid, drag-and-drop upload zone, copy URL button, asset details inspector, and asset deletion.
+- **Subscriber Audience Manager (`/studio/subscribers`)**: Built `StudioSubscriberController` and `Studio/Subscribers/Index.jsx` with total subscribers stat, new this week count, weekly growth rate, live search, CSV exporter, and subscriber deletion.
+- **Taxonomy & Categories (`/studio/categories`)**: Created `create_categories_table` migration, `Category` model, `StudioCategoryController`, and `Studio/Categories/Index.jsx` with color swatch picker and inline creation/editing modal.
+- **System Settings (`/studio/settings`)**: Built `StudioSettingsController` and `Studio/Settings/Index.jsx` with a 2-column vertical tab layout (General, AI Engine, SEO Defaults, Deployment, Danger Zone).
+- **Command Palette Enhancement**: Updated `CommandPalette.jsx` empty state to include instant navigation shortcuts to all Studio sections.
+- **Feature Test Suite (`StudioCmsTest.php`)**: Created 4 comprehensive tests verifying authentication and access across all 12 Studio endpoints and category CRUD flows.
+
+### Fixed
+- **Redirect Compatibility**: Mapped `/dashboard` to redirect 301 to `/studio.index` so legacy links and bookmarks do not break. Updated `SecurityTest.php` to verify both `/studio` (200 OK) and `/dashboard` (302 Redirect).
+
+---
+
+## [2026-07-23] - Studio Analytics Geographic & Session Metrics
+
+### Added
+- **Geographic World Map**: Integrated `stevebauman/location` package to resolve incoming IP addresses to their respective countries securely in `TrackPageView` middleware (before IP hashing). Added a new `country` column to the `page_views` table. Displayed a world map in `AnalyticsChart.jsx` using `react-simple-maps` and `d3-scale`, shading countries based on visitor volume.
+- **Session Metrics**: Added efficient backend aggregation in `DashboardController` to calculate **Bounce Rate** (percentage of sessions with exactly one page view) and **Average Session Duration** (average time difference between first and last page view per multi-hit session). Displayed these metrics in two new Stat Cards on the Analytics dashboard.
+- **Traffic Sources Upgrade**: Upgraded the Referrers section in `AnalyticsChart.jsx` by adding a dynamic `PieChart` powered by `recharts` to instantly visualize traffic distribution by source type (Search, Social, Direct, Internal, Referral) alongside the existing list.
+
 ## [2026-07-02] - Deduplication & Image Filtering Fix
 
 ### Fixed

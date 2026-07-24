@@ -10,6 +10,18 @@ use App\Http\Controllers\ImageUploadController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\SeoController;
+use App\Http\Controllers\StudioController;
+use App\Http\Controllers\Studio\StudioArticleController;
+use App\Http\Controllers\Studio\StudioAnalyticsController;
+use App\Http\Controllers\Studio\StudioMediaController;
+use App\Http\Controllers\Studio\StudioSubscriberController;
+use App\Http\Controllers\Studio\StudioCategoryController;
+use App\Http\Controllers\Studio\StudioSettingsController;
+use App\Http\Controllers\Studio\StudioScoutController;
+use App\Http\Controllers\Studio\StudioFactCheckController;
+use App\Http\Controllers\Studio\StudioEeatController;
+use App\Http\Controllers\Studio\StudioAgentController;
+use App\Http\Controllers\Studio\StudioObservabilityController;
 
 /*
 |--------------------------------------------------------------------------
@@ -226,7 +238,40 @@ Route::middleware([])->group(function () {
 
 // Protected routes
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    // Studio CMS Routes
+    Route::get('/dashboard', function () {
+        return redirect()->route('studio.index');
+    })->name('dashboard');
+
+    Route::prefix('studio')->group(function () {
+        Route::get('/', [StudioController::class, 'index'])->name('studio.index');
+        Route::get('/articles', [StudioArticleController::class, 'index'])->name('studio.articles');
+        Route::get('/articles/create', [StudioArticleController::class, 'create'])->name('studio.articles.create');
+        Route::get('/articles/{id}/edit', [StudioArticleController::class, 'edit'])->name('studio.articles.edit');
+
+        Route::get('/analytics', [StudioAnalyticsController::class, 'index'])->name('studio.analytics');
+
+        Route::get('/media', [StudioMediaController::class, 'index'])->name('studio.media');
+        Route::delete('/media', [StudioMediaController::class, 'destroy'])->name('studio.media.destroy');
+
+        Route::get('/subscribers', [StudioSubscriberController::class, 'index'])->name('studio.subscribers');
+        Route::get('/subscribers/export', [StudioSubscriberController::class, 'export'])->name('studio.subscribers.export');
+        Route::delete('/subscribers/{id}', [StudioSubscriberController::class, 'destroy'])->name('studio.subscribers.destroy');
+
+        Route::get('/categories', [StudioCategoryController::class, 'index'])->name('studio.categories');
+        Route::post('/categories', [StudioCategoryController::class, 'store'])->name('studio.categories.store');
+        Route::put('/categories/{id}', [StudioCategoryController::class, 'update'])->name('studio.categories.update');
+        Route::delete('/categories/{id}', [StudioCategoryController::class, 'destroy'])->name('studio.categories.destroy');
+
+        Route::get('/settings', [StudioSettingsController::class, 'index'])->name('studio.settings');
+        Route::post('/settings', [StudioSettingsController::class, 'update'])->name('studio.settings.update');
+
+        Route::get('/scout', [StudioScoutController::class, 'index'])->name('studio.scout');
+        Route::get('/factcheck', [StudioFactCheckController::class, 'index'])->name('studio.factcheck');
+        Route::get('/eeat', [StudioEeatController::class, 'index'])->name('studio.eeat');
+        Route::get('/agent', [StudioAgentController::class, 'index'])->name('studio.agent');
+        Route::get('/observability', [StudioObservabilityController::class, 'index'])->name('studio.observability');
+    });
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

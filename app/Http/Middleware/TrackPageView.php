@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\DB;
+use Stevebauman\Location\Facades\Location;
 
 class TrackPageView
 {
@@ -42,6 +43,16 @@ class TrackPageView
                 }
             }
 
+            // Lookup location before hashing IP
+            $country = null;
+            try {
+                if ($position = Location::get($ipRaw)) {
+                    $country = $position->countryCode;
+                }
+            } catch (\Exception $e) {
+                // Ignore location errors
+            }
+
             DB::table('page_views')->insert([
                 'url' => substr($request->fullUrl(), 0, 255),
                 'referrer' => substr($request->headers->get('referer', ''), 0, 255),
@@ -49,6 +60,7 @@ class TrackPageView
                 'route_name' => $request->route() ? $request->route()->getName() : null,
                 'session_id' => $request->session()->getId(),
                 'ip_address' => $ipHash,
+                'country' => $country,
                 'user_agent' => substr($userAgent, 0, 500),
                 'article_id' => $articleId,
                 'created_at' => now(),

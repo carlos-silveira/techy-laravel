@@ -45,3 +45,6 @@ phpinfo.php
 node_modules/
 vendor/
 .env
+prod_dump.sql
+playwright-report/
+test-results/

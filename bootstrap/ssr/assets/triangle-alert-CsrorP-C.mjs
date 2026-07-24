@@ -1,0 +1,24 @@
+import { t as createLucideIcon } from "./createLucideIcon-DvhrQ9-F.mjs";
+//#region node_modules/lucide-react/dist/esm/icons/triangle-alert.js
+/**
+* @license lucide-react v0.460.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
+var TriangleAlert = createLucideIcon("TriangleAlert", [
+	["path", {
+		d: "m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3",
+		key: "wmoenq"
+	}],
+	["path", {
+		d: "M12 9v4",
+		key: "juzpu7"
+	}],
+	["path", {
+		d: "M12 17h.01",
+		key: "p32p05"
+	}]
+]);
+//#endregion
+export { TriangleAlert as t };

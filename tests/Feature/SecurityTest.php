@@ -22,8 +22,11 @@ class SecurityTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->get('/dashboard');
+        $response = $this->actingAs($user)->get('/studio');
         $response->assertStatus(200);
+
+        $dashResponse = $this->actingAs($user)->get('/dashboard');
+        $dashResponse->assertRedirect('/studio');
     }
 
     /** @test */

@@ -117,13 +117,34 @@ export default function CommandPalette() {
                             )}
 
                             {results.length === 0 && (!query || query.length < 2) && (
-                                <div className="text-center py-16 text-gray-700 flex flex-col items-center gap-4">
-                                    <div className="w-14 h-14 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center">
-                                        <Zap className="w-7 h-7 opacity-30 text-primary" />
+                                <div className="p-4 space-y-4">
+                                    <div className="text-center py-6 text-gray-700 flex flex-col items-center gap-2 border-b border-white/5">
+                                        <p className="font-black text-xs uppercase tracking-widest text-gray-400">Start typing to search articles...</p>
                                     </div>
                                     <div>
-                                        <p className="font-black text-xs uppercase tracking-widest text-gray-600">Start typing to search</p>
-                                        <p className="text-[10px] text-gray-800 mt-1">Articles, topics, AI summaries</p>
+                                        <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-500 mb-2 px-2">Studio Quick Nav</p>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {[
+                                                { href: '/studio', label: 'Dashboard' },
+                                                { href: '/studio/articles', label: 'Archives' },
+                                                { href: '/studio/articles/create', label: 'AI Writer' },
+                                                { href: '/studio/analytics', label: 'Analytics' },
+                                                { href: '/studio/media', label: 'Media Library' },
+                                                { href: '/studio/subscribers', label: 'Subscribers' },
+                                                { href: '/studio/categories', label: 'Categories' },
+                                                { href: '/studio/settings', label: 'Settings' },
+                                            ].map((shortcut) => (
+                                                <Link
+                                                    key={shortcut.href}
+                                                    href={shortcut.href}
+                                                    onClick={() => setIsOpen(false)}
+                                                    className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-primary/30 hover:bg-white/5 transition-all text-xs font-bold text-gray-300 hover:text-white"
+                                                >
+                                                    <span>{shortcut.label}</span>
+                                                    <ArrowRight className="w-3.5 h-3.5 text-gray-600" />
+                                                </Link>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
                             )}

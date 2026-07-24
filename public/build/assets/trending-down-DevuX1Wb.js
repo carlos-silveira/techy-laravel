@@ -1,0 +1,1 @@
+import{a as e}from"./app-lbV_jEDj.js";var t=e(`ArrowUpRight`,[[`path`,{d:`M7 7h10v10`,key:`1tivn9`}],[`path`,{d:`M7 17 17 7`,key:`1vkiza`}]]),n=e(`TrendingDown`,[[`polyline`,{points:`22 17 13.5 8.5 8.5 13.5 2 7`,key:`1r2t7k`}],[`polyline`,{points:`16 17 22 17 22 11`,key:`11uiuu`}]]);export{t as n,n as t};

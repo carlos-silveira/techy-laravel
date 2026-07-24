@@ -8,15 +8,17 @@ The following rules apply to all AI agents working within this repository. Agent
   - Understand the root cause BEFORE writing any code.
   - Read relevant source files, check server logs, trace the data flow end-to-end.
   - Identify ALL affected files and endpoints.
+  - **Worktree Isolation**: If starting a new task, you MUST use `Workspace: "share"` (or `git worktree add`) to isolate your changes. NEVER work directly on the main branch.
 - **Phase 2 — Implementation + Testing / QA / Code Review**:
-  - Implement the fix or feature.
-  - **Backend changes**: Run `php artisan test` and verify the endpoint returns the expected response (e.g., `curl` the API on the server).
-  - **Frontend changes**: Run `npm run build` to verify zero compilation errors.
-  - **Integration**: After deploying, verify the live endpoint actually works (e.g., `curl` the production URL, check server logs for errors).
+  - Implement the fix or feature in chunks of at most 2 hours.
+  - **Backend changes**: Run `php artisan test` and verify the endpoint returns the expected response.
+  - **Frontend / E2E changes**: Run `npm run build`. You MUST run `npx playwright test` and ensure 0 errors. If tests fail, fix the code or the tests until they pass.
+  - **Integration**: After deploying, verify the live endpoint actually works.
   - If ANY test fails, DO NOT deploy. Fix the issue first.
 - **Phase 3 — Deploy + Verify**:
   - Only deploy after Phase 2 passes.
-  - After deploy, run a smoke test on production (hit the endpoint, check for 200 OK, verify the response body).
+  - Generate the PR using the `techy-pr-builder` skill.
+  - After deploy, run a smoke test on production.
   - Report the test results to the user.
 - **Enforcement**: NEVER commit, push, or deploy code that has not been verified. Breaking this rule is unacceptable.
 
@@ -46,11 +48,12 @@ The following rules apply to all AI agents working within this repository. Agent
 ## Deployment Checklist (Before Every Push)
 1. `npm run build` — Zero errors, zero warnings
 2. `php artisan test` — All tests pass (when applicable)
-3. `git diff --stat` — Review what files changed
-4. `rsync` to production → `php artisan optimize:clear`
-5. Smoke test: `curl` the affected endpoints on production
-6. Check `storage/logs/laravel.log` for new errors
-7. Report results to user
+3. `npx playwright test` — 100% E2E tests passing.
+4. `git diff --stat` — Review what files changed
+5. `rsync` to production → `php artisan optimize:clear`
+6. Smoke test: `curl` the affected endpoints on production
+7. Check `storage/logs/laravel.log` for new errors
+8. Report results to user
 
 ## Mobile Responsive UI & Markdown Tables
 - **Rule**: When building UI components that render Markdown, or when designing for mobile, extra care must be taken to prevent layout overflows.

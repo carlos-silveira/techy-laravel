@@ -1,8 +1,12 @@
 import React from 'react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import Skeleton from './Skeleton';
-import { Eye, Users, Newspaper, Heart, TrendingUp, TrendingDown, Monitor, Smartphone, Tablet, Bot, Zap, Globe, Search, Share2, Link2, ArrowUpRight, Shield, DollarSign, Activity } from 'lucide-react';
+import { Eye, Users, Newspaper, Heart, TrendingUp, TrendingDown, Monitor, Smartphone, Tablet, Bot, Zap, Globe, Search, Share2, Link2, ArrowUpRight, Shield, DollarSign, Activity, Map, Clock, MousePointerClick } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { ComposableMap, Geographies, Geography } from "react-simple-maps";
+import { scaleLinear } from "d3-scale";
+
+const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
 const DEVICE_COLORS = { Desktop: '#2b7cee', Mobile: '#8b5cf6', Tablet: '#06b6d4', 'Bot / Crawler': '#f97316' };
 const DEVICE_ICONS = { Desktop: Monitor, Mobile: Smartphone, Tablet: Tablet, 'Bot / Crawler': Bot };
@@ -78,8 +82,9 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 
-export default function AnalyticsChart({ analyticsData, period }) {
-    if (!analyticsData) {
+export default function AnalyticsChart({ analyticsData, analytics, period }) {
+    const data = analyticsData || analytics;
+    if (!data) {
         return (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -97,12 +102,24 @@ export default function AnalyticsChart({ analyticsData, period }) {
         );
     }
 
-    const { viewsPerDay, topArticles, deviceBreakdown, crawlerDetails, topPages, topReferrers, hourlyTraffic, summary } = analyticsData;
+    const { viewsPerDay, topArticles, deviceBreakdown, crawlerDetails, topPages, topReferrers, hourlyTraffic, summary, countriesData } = data;
     const stats = summary || {};
 
     const deviceData = (deviceBreakdown || []).map(d => ({ name: d.device, value: d.count }));
     const totalDeviceViews = deviceData.reduce((s, d) => s + d.value, 0);
     const botViews = deviceData.filter(d => d.name === 'Bot / Crawler').reduce((s, d) => s + d.value, 0);
+
+    const maxCountryViews = countriesData && countriesData.length > 0 ? Math.max(...countriesData.map(d => d.value), 1) : 1;
+    const colorScale = scaleLinear()
+        .domain([0, maxCountryViews])
+        .range(["#eff6ff", "#3b82f6"]);
+
+    const referrerTypeData = Object.entries(
+        (topReferrers || []).reduce((acc, ref) => {
+            acc[ref.type] = (acc[ref.type] || 0) + ref.views;
+            return acc;
+        }, {})
+    ).map(([name, value]) => ({ name, value }));
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -120,11 +137,13 @@ export default function AnalyticsChart({ analyticsData, period }) {
     return (
         <motion.div variants={containerVariants} initial="hidden" animate="show" className="space-y-6">
             {/* ═══ STAT CARDS ═══ */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-9 gap-4">
                 {[
                     { icon: Zap, label: "LLM Tokens", value: stats.totalGeminiTokens?.toLocaleString() || 0, subValue: `$${stats.totalGeminiCost || '0.00'} est.`, color: "orange" },
                     { icon: Eye, label: "Views", value: stats.totalViews || 0, trend: stats.viewsGrowth, color: "primary" },
                     { icon: Users, label: "Unique", value: stats.uniqueVisitors || 0, color: "purple" },
+                    { icon: Clock, label: "Avg Time", value: stats.avgSessionDuration || '00:00', color: "blue" },
+                    { icon: MousePointerClick, label: "Bounce Rate", value: `${stats.bounceRate || 0}%`, color: "emerald" },
                     { icon: Newspaper, label: "Articles", value: stats.totalArticles || 0, color: "emerald" },
                     { 
                         icon: Heart, 
@@ -289,6 +308,44 @@ export default function AnalyticsChart({ analyticsData, period }) {
                 </motion.div>
             )}
 
+            {/* ═══ GEOGRAPHIC DATA (MAP) ═══ */}
+            {countriesData && countriesData.length > 0 && (
+                <motion.div variants={itemVariants} className="bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-6 backdrop-blur-md">
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest flex items-center gap-2">
+                            <Map className="w-4 h-4 text-primary" /> Global Audience
+                        </h3>
+                    </div>
+                    <div className="w-full h-96 bg-transparent rounded-2xl overflow-hidden relative">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <ComposableMap projection="geoMercator" projectionConfig={{ scale: 120 }}>
+                                <Geographies geography={geoUrl}>
+                                    {({ geographies }) =>
+                                        geographies.map((geo) => {
+                                            const d = countriesData.find((s) => s.id === geo.properties.iso_a2);
+                                            return (
+                                                <Geography
+                                                    key={geo.rsmKey}
+                                                    geography={geo}
+                                                    fill={d ? colorScale(d.value) : "rgba(128,128,128,0.1)"}
+                                                    stroke="rgba(128,128,128,0.2)"
+                                                    strokeWidth={0.5}
+                                                    style={{
+                                                        default: { outline: "none" },
+                                                        hover: { fill: "rgb(var(--color-primary))", outline: "none", cursor: "pointer" },
+                                                        pressed: { outline: "none" },
+                                                    }}
+                                                />
+                                            );
+                                        })
+                                    }
+                                </Geographies>
+                            </ComposableMap>
+                        </ResponsiveContainer>
+                    </div>
+                </motion.div>
+            )}
+
             {/* ═══ TOP SOURCES & TOP PAGES ═══ */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {topReferrers && topReferrers.length > 0 && (
@@ -297,25 +354,39 @@ export default function AnalyticsChart({ analyticsData, period }) {
                             <h3 className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-[0.3em]">Traffic Sources</h3>
                             <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-lg w-fit">Selected Period</div>
                         </div>
-                        <div className="space-y-4">
-                            {topReferrers.map((ref, i) => {
-                                const Icon = REFERRER_ICONS[ref.type] || Globe;
-                                const color = REFERRER_COLORS[ref.type] || '#6b7280';
-                                return (
-                                    <div key={i} className="flex items-center justify-between group">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-8 h-8 rounded-xl flex items-center justify-center transition-colors" style={{ backgroundColor: `${color}15` }}>
-                                                <Icon className="w-4 h-4" style={{ color }} />
+                        <div className="flex flex-col xl:flex-row gap-8">
+                            <div className="w-full xl:w-1/3 h-48 flex-shrink-0">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie data={referrerTypeData} cx="50%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={2} dataKey="value" animationDuration={1000}>
+                                            {referrerTypeData.map((entry) => (
+                                                <Cell key={entry.name} fill={REFERRER_COLORS[entry.name] || '#6b7280'} />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip content={<CustomTooltip />} />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
+                            <div className="space-y-4 flex-1">
+                                {topReferrers.map((ref, i) => {
+                                    const Icon = REFERRER_ICONS[ref.type] || Globe;
+                                    const color = REFERRER_COLORS[ref.type] || '#6b7280';
+                                    return (
+                                        <div key={i} className="flex items-center justify-between group">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-8 h-8 rounded-xl flex items-center justify-center transition-colors" style={{ backgroundColor: `${color}15` }}>
+                                                    <Icon className="w-4 h-4" style={{ color }} />
+                                                </div>
+                                                <span className="text-sm font-bold text-gray-800 dark:text-gray-200 capitalize">{ref.source}</span>
                                             </div>
-                                            <span className="text-sm font-bold text-gray-800 dark:text-gray-200 capitalize">{ref.source}</span>
+                                            <div className="flex items-center gap-4">
+                                                <span className="text-xs font-black text-gray-500 bg-black/5 dark:bg-white/5 px-2 py-1 rounded-md">{ref.type}</span>
+                                                <div className="w-12 text-right text-sm font-black text-gray-900 dark:text-white">{ref.views.toLocaleString()}</div>
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-4">
-                                            <span className="text-xs font-black text-gray-500 bg-black/5 dark:bg-white/5 px-2 py-1 rounded-md">{ref.type}</span>
-                                            <div className="w-12 text-right text-sm font-black text-gray-900 dark:text-white">{ref.views.toLocaleString()}</div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
+                                    );
+                                })}
+                            </div>
                         </div>
                     </motion.div>
                 )}

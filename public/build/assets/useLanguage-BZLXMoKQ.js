@@ -1,1 +1,0 @@
-import{d as e}from"./app-QDuK2RcX.js";function t(){let{translations:t,locale:n}=e().props;return{__:e=>t?.[e]||e,locale:n}}export{t};
