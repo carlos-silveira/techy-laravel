@@ -62,7 +62,7 @@ class TranslateArticle implements ShouldQueue
             );
 
             // VALIDATION: Only save if we got a real title
-            if (empty($result['title'])) {
+            if (empty($result['title']) || trim($result['title']) === '...') {
                 throw new \RuntimeException("Translation failed or returned empty title for Article #{$this->article->id} ({$this->locale})");
             }
 
