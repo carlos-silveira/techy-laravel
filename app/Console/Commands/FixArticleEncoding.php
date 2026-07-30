@@ -26,11 +26,31 @@ class FixArticleEncoding extends Command
         foreach ($articles as $article) {
             $raw = $article->getRawOriginal('content');
             $cleaned = $this->deepClean($raw);
+            $needsSave = false;
 
             if ($cleaned !== $raw) {
                 $article->content = $cleaned;
+                $needsSave = true;
+            }
+
+            // Fix bad AI translations where title is "..."
+            $translations = $article->translations ?? [];
+            $badTranslationsCleared = false;
+            foreach ($translations as $lang => $trans) {
+                if (isset($trans['title']) && trim($trans['title']) === '...') {
+                    unset($translations[$lang]);
+                    $badTranslationsCleared = true;
+                }
+            }
+
+            if ($badTranslationsCleared) {
+                $article->translations = $translations;
+                $needsSave = true;
+            }
+
+            if ($needsSave) {
                 $article->save();
-                $this->info("✅ Fixed: {$article->title}");
+                $this->info("✅ Fixed: {$article->title}" . ($badTranslationsCleared ? " (cleared bad translation)" : ""));
                 $fixed++;
             } else {
                 $this->line("  OK: '{$article->title}' — already clean.");
