@@ -187,14 +187,7 @@ class GenerateDailyNews extends Command
 
         $this->info("✅ Fact-Check passed! (Score: {$factCheck->overall_score})");
 
-        $this->info('🔔 Sending Push Notifications...');
-        try {
-            $subscribers = \App\Models\PushSubscriber::all();
-            \Illuminate\Support\Facades\Notification::send($subscribers, new \App\Notifications\NewArticlePublished($article));
-            $this->info("✅ Sent push notifications to {$subscribers->count()} subscribers.");
-        } catch (\Exception $e) {
-            $this->error("❌ Failed to send push notifications: " . $e->getMessage());
-        }
+        // Push notifications will be sent after translations are complete so we can send localized versions.
 
         $this->info('🧠 Generating embedding for RAG...');
         $textToEmbed = "Title: {$article->title}\nSummary: {$article->ai_summary}\n\n" . strip_tags($article->content);
@@ -223,6 +216,21 @@ class GenerateDailyNews extends Command
 
         if (!empty($translations)) {
             $article->update(['translations' => $translations]);
+        }
+
+        $this->info('🔔 Sending Push Notifications...');
+        try {
+            $subscribers = \App\Models\PushSubscriber::all();
+            $groupedSubscribers = $subscribers->groupBy('locale');
+
+            foreach ($groupedSubscribers as $locale => $localeSubscribers) {
+                // Ensure locale is a string (default to 'en' if missing)
+                $safeLocale = empty($locale) ? 'en' : $locale;
+                \Illuminate\Support\Facades\Notification::send($localeSubscribers, new \App\Notifications\NewArticlePublished($article, $safeLocale));
+            }
+            $this->info("✅ Sent push notifications to {$subscribers->count()} subscribers.");
+        } catch (\Exception $e) {
+            $this->error("❌ Failed to send push notifications: " . $e->getMessage());
         }
 
         if ($coverImageUrl) {

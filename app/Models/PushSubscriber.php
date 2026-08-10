@@ -11,5 +11,5 @@ class PushSubscriber extends Model
 {
     use HasFactory, Notifiable, HasPushSubscriptions;
 
-    protected $fillable = ['guest_id']; // Optional, if we want to track visitors
+    protected $fillable = ['guest_id', 'locale']; // Optional, if we want to track visitors
 }

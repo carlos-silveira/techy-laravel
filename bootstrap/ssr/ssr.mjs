@@ -58776,10 +58776,10 @@ server_default((page) => createInertiaApp({
 	render: import_server_node.renderToString,
 	title: (title) => title ? title.includes(appName) ? title : `${title} | ${appName}` : appName,
 	resolve: (name) => resolvePageComponent(`./Pages/${name}.jsx`, /* #__PURE__ */ Object.assign({
-		"./Pages/About.jsx": () => import("./assets/About-HaVPgXQK.mjs"),
+		"./Pages/About.jsx": () => import("./assets/About-DLq2C1k2.mjs"),
 		"./Pages/AboutUs.jsx": () => import("./assets/AboutUs-kt3cEJVZ.mjs"),
-		"./Pages/Archive.jsx": () => import("./assets/Archive-BDsdTBnz.mjs"),
-		"./Pages/ArticleShow.jsx": () => import("./assets/ArticleShow-D-qbfkHF.mjs"),
+		"./Pages/Archive.jsx": () => import("./assets/Archive-rR1vaRJx.mjs"),
+		"./Pages/ArticleShow.jsx": () => import("./assets/ArticleShow-BHKk0mSv.mjs"),
 		"./Pages/Auth/ConfirmPassword.jsx": () => import("./assets/ConfirmPassword-BMWH6vjq.mjs"),
 		"./Pages/Auth/ForgotPassword.jsx": () => import("./assets/ForgotPassword-BkKduUhX.mjs"),
 		"./Pages/Auth/Login.jsx": () => import("./assets/Login-BDFxDEzh.mjs"),
@@ -58788,12 +58788,12 @@ server_default((page) => createInertiaApp({
 		"./Pages/Auth/VerifyEmail.jsx": () => import("./assets/VerifyEmail-CoatdHnN.mjs"),
 		"./Pages/Contact.jsx": () => import("./assets/Contact-CIpuhE1u.mjs"),
 		"./Pages/Dashboard.jsx": () => import("./assets/Dashboard-DWwS0rjm.mjs"),
-		"./Pages/Error.jsx": () => import("./assets/Error-kDV6JHkY.mjs"),
+		"./Pages/Error.jsx": () => import("./assets/Error-Bh2-wDiV.mjs"),
 		"./Pages/Footer.jsx": () => import("./assets/Footer-CGhUuaZS.mjs").then((n) => n.n),
 		"./Pages/Layout.jsx": () => import("./assets/Layout-DUmNuscV.mjs"),
-		"./Pages/NewsletterArchive.jsx": () => import("./assets/NewsletterArchive-CIAAQSX6.mjs"),
+		"./Pages/NewsletterArchive.jsx": () => import("./assets/NewsletterArchive-oJNTDlZS.mjs"),
 		"./Pages/Post.jsx": () => import("./assets/Post-DSfOihwa.mjs"),
-		"./Pages/Privacy.jsx": () => import("./assets/Privacy-CZKrvowZ.mjs"),
+		"./Pages/Privacy.jsx": () => import("./assets/Privacy-C8HdaLGX.mjs"),
 		"./Pages/Studio/Agent/Index.jsx": () => import("./assets/Index-Dk1gWH_4.mjs"),
 		"./Pages/Studio/Analytics/Index.jsx": () => import("./assets/Index-rwKoiI9H.mjs"),
 		"./Pages/Studio/Articles/Create.jsx": () => import("./assets/Create-Dxil1AVb.mjs"),
@@ -58808,9 +58808,9 @@ server_default((page) => createInertiaApp({
 		"./Pages/Studio/Scout/Index.jsx": () => import("./assets/Index-ZA1pSkkU.mjs"),
 		"./Pages/Studio/Settings/Index.jsx": () => import("./assets/Index-DkHSoiUR.mjs"),
 		"./Pages/Studio/Subscribers/Index.jsx": () => import("./assets/Index-FnVKugeK.mjs"),
-		"./Pages/Terms.jsx": () => import("./assets/Terms-dI33mIgo.mjs"),
+		"./Pages/Terms.jsx": () => import("./assets/Terms-B-4Go7fS.mjs"),
 		"./Pages/TopNav.jsx": () => import("./assets/TopNav-Bodf4MR3.mjs").then((n) => n.n),
-		"./Pages/Welcome.jsx": () => import("./assets/Welcome-CRaLSUzJ.mjs")
+		"./Pages/Welcome.jsx": () => import("./assets/Welcome-CmQzYnc9.mjs")
 	})),
 	setup({ App, props }) {
 		global.route = (name, params, absolute) => s(name, params, absolute, {

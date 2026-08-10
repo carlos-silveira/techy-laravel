@@ -65,7 +65,11 @@ export default function PushSubscribe() {
                 applicationServerKey: convertedVapidKey
             });
 
-            await axios.post('/push/subscribe', subscription.toJSON());
+            const subscriptionData = subscription.toJSON();
+            const locale = navigator.language ? navigator.language.split('-')[0] : 'en';
+            subscriptionData.locale = locale;
+
+            await axios.post('/push/subscribe', subscriptionData);
 
             setIsSubscribed(true);
             toast.success('Successfully subscribed to notifications!');

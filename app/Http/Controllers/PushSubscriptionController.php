@@ -16,12 +16,22 @@ class PushSubscriptionController extends Controller
             'endpoint'    => 'required|string',
             'keys.auth'   => 'required|string',
             'keys.p256dh' => 'required|string',
+            'locale'      => 'nullable|string|max:10',
         ]);
 
         $guestId = $request->cookie('techynews_guest_id') ?? $request->ip();
+        $locale = $request->input('locale', 'en');
 
         // Find or create the push subscriber (anonymous model)
-        $subscriber = PushSubscriber::firstOrCreate(['guest_id' => $guestId]);
+        $subscriber = PushSubscriber::firstOrCreate(
+            ['guest_id' => $guestId],
+            ['locale' => $locale]
+        );
+
+        // If subscriber exists but locale changed, update it
+        if ($subscriber->locale !== $locale) {
+            $subscriber->update(['locale' => $locale]);
+        }
 
         // Update the push subscription using the trait's method
         $subscriber->updatePushSubscription(
