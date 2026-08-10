@@ -38,9 +38,9 @@ class NewArticlePublished extends Notification
     public function toWebPush($notifiable, $notification)
     {
         return (new WebPushMessage)
-            ->title('New Article on TechyNews!')
+            ->title($this->article->title)
             ->icon('/img/logo_icon.png')
-            ->body($this->article->title)
+            ->body(\Illuminate\Support\Str::limit($this->article->ai_summary ?? strip_tags($this->article->content), 120))
             ->data(['url' => '/article/' . $this->article->slug]);
     }
 }
