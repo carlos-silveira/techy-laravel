@@ -55,6 +55,9 @@ Route::get('/terms', function () { return inertia('Terms'); });
 Route::get('/privacy', function () { return inertia('Privacy'); });
 Route::post('/set-locale', [LanguageController::class, 'setLocale']);
 
+use App\Http\Controllers\PushSubscriptionController;
+Route::post('/push/subscribe', [PushSubscriptionController::class, 'store']);
+Route::post('/push/unsubscribe', [PushSubscriptionController::class, 'destroy']);
 // Preview Newsletter (development only)
 Route::get('/preview-newsletter', function () {
     if (!app()->environment('local')) abort(404);

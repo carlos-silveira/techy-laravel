@@ -3,8 +3,9 @@ import { Link } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import LanguageSwitcher from './LanguageSwitcher';
 import ThemeToggle from './ThemeToggle';
+import PushSubscribe from './PushSubscribe';
 import useLanguage from '@/Hooks/useLanguage';
-import { Menu, X, ArrowRight } from 'lucide-react';
+import { Menu, X, ArrowRight, Search } from 'lucide-react';
 
 export default function Navbar() {
     const { __ } = useLanguage();
@@ -33,6 +34,10 @@ export default function Navbar() {
         { href: '/newsletter', label: __('Newsletter') },
         { href: '/about', label: __('About') },
     ];
+
+    const openSearch = () => {
+        window.dispatchEvent(new CustomEvent('open-command-palette'));
+    };
 
     return (
         <>
@@ -70,6 +75,15 @@ export default function Navbar() {
                         </div>
                         
                         <div className="flex items-center gap-4">
+                            <button
+                                onClick={openSearch}
+                                className="p-2 rounded-xl bg-black/5 dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:bg-black/10 dark:hover:bg-white/10 transition-colors flex items-center gap-2 group"
+                                aria-label="Search"
+                            >
+                                <Search className="w-5 h-5" />
+                                <span className="text-[10px] font-black uppercase tracking-widest hidden xl:block opacity-60 group-hover:opacity-100 transition-opacity">CMD K</span>
+                            </button>
+                            <PushSubscribe />
                             <ThemeToggle />
                             <LanguageSwitcher />
                             <Link 
@@ -82,7 +96,15 @@ export default function Navbar() {
                     </div>
 
                     {/* Mobile Controls */}
-                    <div className="flex md:hidden items-center gap-3 relative z-[110]">
+                    <div className="flex md:hidden items-center gap-2 relative z-[110]">
+                        <button
+                            onClick={openSearch}
+                            className="p-2 rounded-xl bg-black/5 dark:bg-white/5 text-gray-600 dark:text-gray-400"
+                            aria-label="Search"
+                        >
+                            <Search className="w-5 h-5" />
+                        </button>
+                        <PushSubscribe />
                         <ThemeToggle />
                         <LanguageSwitcher />
                         <button 

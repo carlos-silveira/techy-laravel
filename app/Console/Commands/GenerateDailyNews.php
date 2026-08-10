@@ -187,6 +187,15 @@ class GenerateDailyNews extends Command
 
         $this->info("✅ Fact-Check passed! (Score: {$factCheck->overall_score})");
 
+        $this->info('🔔 Sending Push Notifications...');
+        try {
+            $subscribers = \App\Models\PushSubscriber::all();
+            \Illuminate\Support\Facades\Notification::send($subscribers, new \App\Notifications\NewArticlePublished($article));
+            $this->info("✅ Sent push notifications to {$subscribers->count()} subscribers.");
+        } catch (\Exception $e) {
+            $this->error("❌ Failed to send push notifications: " . $e->getMessage());
+        }
+
         $this->info('🧠 Generating embedding for RAG...');
         $textToEmbed = "Title: {$article->title}\nSummary: {$article->ai_summary}\n\n" . strip_tags($article->content);
         $embedding = $geminiService->embedText(substr($textToEmbed, 0, 5000));

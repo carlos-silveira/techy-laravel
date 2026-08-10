@@ -526,3 +526,22 @@
 - **Why:** To drastically reduce token usage (by ~95%) for AI agents trying to build context on the repository, avoiding the parsing of raw source code files.
 - **What was tested:** Ran `npm run docs:build` to ensure zero Vue/Markdown parsing errors. Executed a custom Python coverage script to mathematically prove 100% of the core architecture was documented.
 - **Result:** Successfully built a robust, highly compressed knowledge base. Documentation coverage stands at 100%. CI/CD and Agent rules have been securely updated to maintain this standard.
+
+## [2026-07-24 17:30:00] UI Enhancement: Command Palette Discovery
+- **What was changed:** Added explicit Search buttons (with a `Cmd K` hint on desktop) to the `Navbar` (both mobile and desktop views). Integrated the `CommandPalette` to listen to a new `open-command-palette` custom window event dispatched by these buttons.
+- **Why:** To improve feature discoverability, as the global search (Cmd+K) was hidden and unknown to users who don't rely on keyboard shortcuts.
+- **What was tested:** Verified the UI styling matches the adjacent Theme/Language toggles. Ran `npm run build` to ensure no frontend regression, and `npm run docs:build` after updating `layout-navigation.md`.
+- **Result:** Search is now accessible via the Navbar interface, enhancing UX for all devices.
+
+## Added Web Push Notifications
+- **Date:** 2026-08-10
+- **Description:** Implemented Web Push Notifications using `laravel-notification-channels/webpush`.
+- **Files created/modified:** 
+  - `PushSubscriber` model & migration
+  - `PushSubscriptionController`
+  - `public/sw.js`
+  - `resources/js/Components/PushSubscribe.jsx`
+  - `resources/js/Components/Navbar.jsx`
+  - `app/Notifications/NewArticlePublished.php`
+  - `app/Console/Commands/GenerateDailyNews.php`
+- **Status:** Ready for deployment.

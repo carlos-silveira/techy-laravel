@@ -24,8 +24,15 @@ export default function CommandPalette() {
                 setIsOpen(false);
             }
         };
+        const handleCustomOpen = () => setIsOpen(true);
+        
         window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
+        window.addEventListener('open-command-palette', handleCustomOpen);
+        
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('open-command-palette', handleCustomOpen);
+        };
     }, []);
 
     // Focus input when opened

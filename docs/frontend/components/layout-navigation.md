@@ -9,8 +9,8 @@ The global layout wrappers.
 
 ## `CommandPalette.jsx`
 A macOS-style `Cmd+K` global search palette.
-- **Library:** Headless UI (`<Dialog>`).
-- **Interaction:** Listens globally for keyboard shortcuts (`Cmd+K` or `Ctrl+K`). When opened, it queries the backend's `/api/search` route to instantly find Articles by title.
+- **Library:** Framer Motion (custom built, previously Headless UI).
+- **Interaction:** Listens globally for keyboard shortcuts (`Cmd+K` or `Ctrl+K`) and for the `open-command-palette` custom event (dispatched by search buttons in the Navbar). When opened, it queries the backend's `/api/search` route to instantly find Articles by title.
 
 ## `LanguageSwitcher.jsx`
 A dropdown component that updates the session locale.
