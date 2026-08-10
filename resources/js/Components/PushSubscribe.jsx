@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { usePage } from '@inertiajs/react';
 import axios from 'axios';
 import { toast } from 'sonner';
 
 export default function PushSubscribe() {
+    const { vapidPublicKey } = usePage().props;
     const [isSubscribed, setIsSubscribed] = useState(false);
     const [isSupported, setIsSupported] = useState(false);
 
@@ -50,10 +52,8 @@ export default function PushSubscribe() {
                 }
             }
 
-            const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
-            
             if (!vapidPublicKey) {
-                console.error("VAPID public key not found in env");
+                console.error("VAPID public key not found in Inertia props");
                 toast.error("Push notifications are not configured properly.");
                 return;
             }
