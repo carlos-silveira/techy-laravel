@@ -40,7 +40,7 @@ class NewArticlePublished extends Notification
         return (new WebPushMessage)
             ->title($this->article->title)
             ->icon('/img/logo_icon.png')
-            ->body(\Illuminate\Support\Str::limit($this->article->ai_summary ?? strip_tags($this->article->content), 120))
+            ->body(\Illuminate\Support\Str::limit($this->article->ai_summary ?? strip_tags($this->article->content), 80))
             ->data(['url' => '/article/' . $this->article->slug]);
     }
 }
