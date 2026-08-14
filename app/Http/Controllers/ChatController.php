@@ -103,8 +103,8 @@ PROMPT;
 
         // 4. Stream the response using OpenRouter
         return response()->stream(function () use ($prompt) {
-            $apiKey = config('services.openrouter.api_key', env('OPEN_ROUTER_API_KEY'));
-            $model  = config('services.openrouter.model', env('OPEN_ROUTER_MODEL', 'google/gemma-2-9b-it:free'));
+            $apiKey = config('services.openrouter.api_key', '');
+            $model  = config('services.openrouter.model', 'google/gemma-4-31b-it:free');
 
             if (empty($apiKey)) {
                 echo "I'm unable to connect to my knowledge engine right now. Please try again in a moment.";

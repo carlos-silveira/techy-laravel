@@ -49,7 +49,12 @@ class CleanTechcrunchArtifacts extends Command
                     }
                 }
                 
-                if ($cleanedContent !== $originalContent || json_encode($cleanedTranslations) !== json_encode($originalTranslations)) {
+                $originalCover = $article->cover_image_path;
+                if ($article->cover_image_path && preg_match('/(author|profile|writer|contributor|tc-logo|disrupt|headshot|avatar|reporter|TIm\.jpg|723b22a81ff6a760c4520b963b43451e|Kirsten)/i', $article->cover_image_path)) {
+                    $article->cover_image_path = null;
+                }
+                
+                if ($cleanedContent !== $originalContent || json_encode($cleanedTranslations) !== json_encode($originalTranslations) || $originalCover !== $article->cover_image_path) {
                     $article->content = $cleanedContent;
                     $article->translations = $cleanedTranslations;
                     $article->save();
