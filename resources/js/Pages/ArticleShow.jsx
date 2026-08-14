@@ -219,35 +219,35 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
                     </header>
 
                     {/* Floating Interaction Bar */}
-                    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-12 md:top-1/2 md:-translate-y-1/2 md:bottom-auto z-[60] flex md:flex-col items-center gap-4 sm:gap-6 bg-white/90 dark:bg-white/[0.05] backdrop-blur-2xl border border-black/5 dark:border-white/10 py-2.5 px-4 sm:py-3 sm:px-6 md:py-8 md:px-4 rounded-full shadow-2xl transition-all duration-300">
+                    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-12 md:top-1/2 md:-translate-y-1/2 md:bottom-auto z-[60] flex md:flex-col items-center gap-3 sm:gap-6 bg-white/90 dark:bg-white/[0.05] backdrop-blur-2xl border border-black/5 dark:border-white/10 py-1.5 px-3 sm:py-3 sm:px-6 md:py-8 md:px-4 rounded-full shadow-2xl transition-all duration-300">
                         {isAuthorized && (
                             <>
                                 <Link 
                                     href="/dashboard" 
-                                    className="p-3 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-all"
+                                    className="p-2 sm:p-3 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-all"
                                     title={__('Edit Article')}
                                 >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 012.828 0L21 8.586a2 2 0 010 2.828l-10.586 10.586a2 2 0 01-0.707.293l-3.992.399 0.399-3.992a2 2 0 010.293-0.707L17.586 3.414z" /></svg>
+                                    <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 012.828 0L21 8.586a2 2 0 010 2.828l-10.586 10.586a2 2 0 01-0.707.293l-3.992.399 0.399-3.992a2 2 0 010.293-0.707L17.586 3.414z" /></svg>
                                 </Link>
-                                <div className="w-[1px] h-6 md:w-6 md:h-[1px] bg-black/5 dark:bg-white/10"></div>
+                                <div className="w-[1px] h-4 sm:h-6 md:w-6 md:h-[1px] bg-black/5 dark:bg-white/10"></div>
                             </>
                         )}
                         <button
                             onClick={handleLike}
                             className="group flex flex-col items-center gap-1 transition-transform active:scale-95"
                         >
-                            <Heart className={`w-6 h-6 transition-colors ${likes > 0 ? 'fill-red-500 text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'text-gray-500 group-hover:text-black dark:group-hover:text-white'}`} />
-                            {likes > 0 && <span className="text-[10px] font-black text-gray-500 dark:text-gray-400">{likes}</span>}
+                            <Heart className={`w-5 h-5 sm:w-6 sm:h-6 transition-colors ${likes > 0 ? 'fill-red-500 text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'text-gray-500 group-hover:text-black dark:group-hover:text-white'}`} />
+                            {likes > 0 && <span className="text-[9px] sm:text-[10px] font-black text-gray-500 dark:text-gray-400">{likes}</span>}
                         </button>
-                        <div className="w-[1px] h-6 md:w-6 md:h-[1px] bg-black/5 dark:bg-white/10"></div>
-                        <button onClick={() => handleShare('twitter')} className="text-gray-500 hover:text-primary transition-colors">
-                            <Twitter className="w-5 h-5" />
+                        <div className="w-[1px] h-4 sm:h-6 md:w-6 md:h-[1px] bg-black/5 dark:bg-white/10"></div>
+                        <button onClick={() => handleShare('twitter')} className="p-1 sm:p-0 text-gray-500 hover:text-primary transition-colors">
+                            <Twitter className="w-4 h-4 sm:w-5 sm:h-5" />
                         </button>
-                        <button onClick={() => handleShare('linkedin')} className="text-gray-500 hover:text-primary transition-colors">
-                            <Linkedin className="w-5 h-5" />
+                        <button onClick={() => handleShare('linkedin')} className="p-1 sm:p-0 text-gray-500 hover:text-primary transition-colors">
+                            <Linkedin className="w-4 h-4 sm:w-5 sm:h-5" />
                         </button>
-                        <button onClick={() => handleShare('copy')} className="text-gray-500 hover:text-black dark:hover:text-white transition-colors">
-                            <LinkIcon className="w-5 h-5" />
+                        <button onClick={() => handleShare('copy')} className="p-1 sm:p-0 text-gray-500 hover:text-black dark:hover:text-white transition-colors">
+                            <LinkIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                         </button>
                     </div>
 
