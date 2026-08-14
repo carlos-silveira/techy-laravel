@@ -16,12 +16,14 @@ class CleanTechcrunchArtifacts extends Command
         $this->info("🧹 Cleaning TechCrunch artifacts from existing articles...");
 
         $patterns = [
-            // Text patterns
-            '/<p>[^<]*IMAGE CREDITS:[^<]*<\/p>/i' => '',
-            '/<p>[^<]*contributed reporting from TechCrunch\.[^<]*<\/p>/i' => '',
-            '/<p>[^<]*contributed reporting[^<]*<\/p>/i' => '',
-            // Image patterns
-            '/<img[^>]+src="[^"]*(author|profile|writer|contributor|tc-logo|disrupt|headshot)[^"]*"[^>]*>/i' => '',
+            // Text patterns - catch tags containing the text OR naked sentences
+            '/<[^>]*>[^<]*IMAGE CREDITS:[^<]*<\/[^>]*>/i' => '',
+            '/IMAGE CREDITS:[^<\n]*/i' => '',
+            '/<[^>]*>[^<]*contributed reporting[^<]*<\/[^>]*>/i' => '',
+            '/[A-Za-z\s]+ contributed reporting from [A-Za-z\s]+\.?/i' => '',
+            '/contributed reporting[^<\n]*/i' => '',
+            // Image patterns - including the specific hashes/filenames reported
+            '/<img[^>]+src="[^"]*(author|profile|writer|contributor|tc-logo|disrupt|headshot|avatar|reporter|TIm\.jpg|723b22a81ff6a760c4520b963b43451e|Kirsten)[^"]*"[^>]*>/i' => '',
         ];
 
         Article::chunk(100, function ($articles) use ($patterns) {
