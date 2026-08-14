@@ -81,7 +81,10 @@ class JinaReaderService
                                 !str_contains($lowerUrl, 'contributor') &&
                                 !str_contains($lowerUrl, 'tc-logo') &&
                                 !str_contains($lowerUrl, 'disrupt') &&
-                                !str_contains($lowerUrl, 'headshot')
+                                !str_contains($lowerUrl, 'headshot') &&
+                                !str_contains($lowerUrl, 'tim.jpg') &&
+                                !str_contains($lowerUrl, '723b22a81ff6a760c4520b963b43451e') &&
+                                !str_contains($lowerUrl, 'kirsten')
                             ) {
                                 $images[] = $imgUrl;
                             }
