@@ -1,6 +1,18 @@
-## [2026-07-23] - Studio WordPress-Class CMS Admin Transformation
+## [2026-08-14] - TechCrunch Artifact Cleanup & UI Fixes
 
 ### Added
+- **Database Cleanup Command**: Created `php artisan articles:clean-tc` to scrub existing articles for potential copyright artifacts from TechCrunch. Applies regex to strip "IMAGE CREDITS:", "contributed reporting from", and `<img src="...">` tags containing author, profile, or TechCrunch logos across all localized variants.
+
+### Changed
+- **JinaReader Image Scraping Filter**: Updated `JinaReaderService.php` to aggressively block images containing `author`, `profile`, `writer`, `contributor`, `tc-logo`, `disrupt`, `headshot`, and `.webp` tracking pixels from being extracted from scraped URLs.
+- **Gemini Drafting Prompts**: Added a **CRITICAL LEGAL RULE** to `GeminiService.php` generation prompts (`generateDraft`, `generateCategoryDraft`, `regenerateDraft`) to strictly prohibit the AI from including author names, "IMAGE CREDITS", "contributed reporting", or watermarks.
+
+### Fixed
+- **Mobile UI Overlap**: Fixed a layout bug on mobile where the circular RAG Copilot chat button (`RagCopilot.jsx`) overlapped with the `ArticleShow.jsx` interaction floating bar (Likes/Share). Shrunk the floating interaction bar gaps (`gap-4` and `px-4`) slightly on small screens to provide safe breathing room.
+
+---
+
+## [2026-07-23] - Studio WordPress-Class CMS Admin Transformation
 - **Design Language System Skill**: Extracted exact colors (`#02040a` canvas, `#00b4ff` primary), typography (`font-black tracking-tighter` display, `text-[10px] font-black uppercase tracking-[0.3em]` labels), surfaces (`bg-white/[0.02]`), paper-thin borders (`border-white/5`), and animation signatures from the live codebase. Saved permanently as `.agents/skills/techy-design-language/SKILL.md`.
 - **Multi-Page Studio Architecture**: Decomposed the 1,078-line monolithic `Dashboard.jsx` into a dedicated multi-page Inertia application with clean route namespaces under `/studio/*`.
 - **Persistent Studio Layout (`StudioLayout.jsx`)**: Built a responsive, editorial-terminal dashboard shell with dark collapsible sidebar, TechyNews brand identity, `LIVE` status dot, user profile snippet, breadcrumbs, search trigger (`⌘K`), and Sonner toast provider.
@@ -545,3 +557,13 @@
   - `app/Notifications/NewArticlePublished.php`
   - `app/Console/Commands/GenerateDailyNews.php`
 - **Status:** Ready for deployment.
+
+## [2026-08-14] - Fixed System Glitch and Analytics Map Overflow
+### Fixed
+- **System Glitch on AI Writer**: Fixed a critical crash where `Create.jsx` was attempting to destructure an array but received an object wrapped from the API response (`res.data`). Changed to `setIdeas(res.data.ideas || [])` to prevent the `TypeError` and subsequent `ErrorBoundary` trigger.
+- **Analytics Map GeoJSON**: Fixed the `react-simple-maps` geographic world map rendering empty. Changed the `geoUrl` to a highcharts topojson and updated the lookup to correctly map against `iso-a2` or `hc-a2` country codes.
+- **Analytics Traffic Sources Overflow**: Fixed a visual bug where long referrers overflowed the container. Added `min-w-0` and `truncate` to correctly elide the source text without breaking the flex layout.
+- **Analytics AI Compute Metrics Empty**: Fixed a bug where `Index.jsx` was passing `logs={...}` and `totalCost={...}` instead of the expected `usageData={...}` and `modelDistribution={...}` to `GeminiUsage.jsx`. This caused the AI usage metrics to always appear empty.
+
+### Checked
+- **Vite Build**: Verified the frontend build successfully via `npm run build`.

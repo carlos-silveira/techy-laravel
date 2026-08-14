@@ -37,7 +37,7 @@ export default function ArticlesCreate() {
     setIsLoading(true);
     try {
       const res = await axios.get('/api/generate-ideas');
-      setIdeas(res.data);
+      setIdeas(res.data.ideas || []);
     } catch (err) {
       toast.error('Failed to fetch trending topics');
     } finally {

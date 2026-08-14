@@ -58779,7 +58779,7 @@ server_default((page) => createInertiaApp({
 		"./Pages/About.jsx": () => import("./assets/About-DLq2C1k2.mjs"),
 		"./Pages/AboutUs.jsx": () => import("./assets/AboutUs-kt3cEJVZ.mjs"),
 		"./Pages/Archive.jsx": () => import("./assets/Archive-rR1vaRJx.mjs"),
-		"./Pages/ArticleShow.jsx": () => import("./assets/ArticleShow-BHKk0mSv.mjs"),
+		"./Pages/ArticleShow.jsx": () => import("./assets/ArticleShow-BE5ezdRy.mjs"),
 		"./Pages/Auth/ConfirmPassword.jsx": () => import("./assets/ConfirmPassword-BMWH6vjq.mjs"),
 		"./Pages/Auth/ForgotPassword.jsx": () => import("./assets/ForgotPassword-BkKduUhX.mjs"),
 		"./Pages/Auth/Login.jsx": () => import("./assets/Login-BDFxDEzh.mjs"),
@@ -58787,16 +58787,16 @@ server_default((page) => createInertiaApp({
 		"./Pages/Auth/ResetPassword.jsx": () => import("./assets/ResetPassword-DPnq1BSO.mjs"),
 		"./Pages/Auth/VerifyEmail.jsx": () => import("./assets/VerifyEmail-CoatdHnN.mjs"),
 		"./Pages/Contact.jsx": () => import("./assets/Contact-CIpuhE1u.mjs"),
-		"./Pages/Dashboard.jsx": () => import("./assets/Dashboard-DWwS0rjm.mjs"),
+		"./Pages/Dashboard.jsx": () => import("./assets/Dashboard-Ei7DUexU.mjs"),
 		"./Pages/Error.jsx": () => import("./assets/Error-Bh2-wDiV.mjs"),
 		"./Pages/Footer.jsx": () => import("./assets/Footer-CGhUuaZS.mjs").then((n) => n.n),
 		"./Pages/Layout.jsx": () => import("./assets/Layout-DUmNuscV.mjs"),
-		"./Pages/NewsletterArchive.jsx": () => import("./assets/NewsletterArchive-oJNTDlZS.mjs"),
+		"./Pages/NewsletterArchive.jsx": () => import("./assets/NewsletterArchive-Bnmy4CO6.mjs"),
 		"./Pages/Post.jsx": () => import("./assets/Post-DSfOihwa.mjs"),
 		"./Pages/Privacy.jsx": () => import("./assets/Privacy-C8HdaLGX.mjs"),
 		"./Pages/Studio/Agent/Index.jsx": () => import("./assets/Index-Dk1gWH_4.mjs"),
-		"./Pages/Studio/Analytics/Index.jsx": () => import("./assets/Index-rwKoiI9H.mjs"),
-		"./Pages/Studio/Articles/Create.jsx": () => import("./assets/Create-Dxil1AVb.mjs"),
+		"./Pages/Studio/Analytics/Index.jsx": () => import("./assets/Index-BdWZ52MA.mjs"),
+		"./Pages/Studio/Articles/Create.jsx": () => import("./assets/Create-DWztudZt.mjs"),
 		"./Pages/Studio/Articles/Edit.jsx": () => import("./assets/Edit-CYdFR7LE.mjs"),
 		"./Pages/Studio/Articles/Index.jsx": () => import("./assets/Index-Dp4jMMdX.mjs"),
 		"./Pages/Studio/Categories/Index.jsx": () => import("./assets/Index-5B_6VhKC.mjs"),
@@ -58810,7 +58810,7 @@ server_default((page) => createInertiaApp({
 		"./Pages/Studio/Subscribers/Index.jsx": () => import("./assets/Index-FnVKugeK.mjs"),
 		"./Pages/Terms.jsx": () => import("./assets/Terms-B-4Go7fS.mjs"),
 		"./Pages/TopNav.jsx": () => import("./assets/TopNav-Bodf4MR3.mjs").then((n) => n.n),
-		"./Pages/Welcome.jsx": () => import("./assets/Welcome-CmQzYnc9.mjs")
+		"./Pages/Welcome.jsx": () => import("./assets/Welcome-B_b5wBBm.mjs")
 	})),
 	setup({ App, props }) {
 		global.route = (name, params, absolute) => s(name, params, absolute, {

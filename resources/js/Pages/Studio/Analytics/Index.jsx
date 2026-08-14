@@ -62,7 +62,7 @@ export default function AnalyticsIndex(props) {
           <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">
             AI Token Consumption Logs
           </h3>
-          <GeminiUsage logs={props.geminiLogs || props.analytics?.rawGeminiLogs} totalCost={props.stats?.gemini_cost_7d || props.analytics?.summary?.totalGeminiCost} />
+          <GeminiUsage usageData={props.geminiLogs || props.analytics?.rawGeminiLogs} modelDistribution={props.analytics?.geminiModelDistribution} />
         </div>
       </div>
     </StudioLayout>

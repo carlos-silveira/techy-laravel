@@ -1,1 +1,0 @@
-import{f as e}from"./app-BBifdZnO.js";function t(){let{translations:t,locale:n}=e().props;return{__:e=>t?.[e]||e,locale:n}}export{t};

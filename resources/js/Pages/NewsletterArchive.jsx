@@ -6,6 +6,7 @@ import PublicFooter from '@/Components/PublicFooter';
 import useLanguage from '@/Hooks/useLanguage';
 import { ArrowRight, Mail } from 'lucide-react';
 import { getFinalImage } from '@/utils';
+import NewsletterBlock from '@/Components/NewsletterBlock';
 
 export default function NewsletterArchive({ newsletters, dailyBrief }) {
     const { __ } = useLanguage();
@@ -90,6 +91,8 @@ export default function NewsletterArchive({ newsletters, dailyBrief }) {
                     ))}
                 </div>
             </main>
+
+            <NewsletterBlock />
 
             <PublicFooter />
         </div>

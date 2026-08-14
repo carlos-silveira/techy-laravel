@@ -66,6 +66,7 @@ class JinaReaderService
                             if (
                                 !str_ends_with($pathOnly, '.svg') &&
                                 !str_ends_with($pathOnly, '.gif') &&
+                                !str_ends_with($pathOnly, '.webp') &&
                                 !str_contains($lowerUrl, 'logo') &&
                                 !str_contains($lowerUrl, 'icon') &&
                                 !str_contains($lowerUrl, 'avatar') &&
@@ -73,7 +74,14 @@ class JinaReaderService
                                 !str_contains($lowerUrl, 'button') &&
                                 !str_contains($lowerUrl, 'tracker') &&
                                 !str_contains($lowerUrl, 'pixel') &&
-                                !str_contains($lowerUrl, 'wir_cutout')
+                                !str_contains($lowerUrl, 'wir_cutout') &&
+                                !str_contains($lowerUrl, 'author') &&
+                                !str_contains($lowerUrl, 'profile') &&
+                                !str_contains($lowerUrl, 'writer') &&
+                                !str_contains($lowerUrl, 'contributor') &&
+                                !str_contains($lowerUrl, 'tc-logo') &&
+                                !str_contains($lowerUrl, 'disrupt') &&
+                                !str_contains($lowerUrl, 'headshot')
                             ) {
                                 $images[] = $imgUrl;
                             }

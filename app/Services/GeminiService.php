@@ -271,6 +271,7 @@ CRITICAL WRITING RULES (FOR ADSENSE APPROVAL & AUTHORITY):
 - MANDATORY SECTION: You MUST include at least one `<h2>` heading titled \"The TechyNews Take\" or \"Why It Matters\" where you deliver a strong, well-reasoned opinion or market analysis.
 - FACTUAL BUT OPINIONATED: Be factual about the news event, but provide a professional analyst's perspective. 
 - NO CODE BLOCKS: DO NOT include any code snippets, python code, or programming examples.
+- CRITICAL LEGAL RULE: You MUST completely remove any author names, 'IMAGE CREDITS:', 'contributed reporting from', 'TechCrunch', or promotional text from the article. Do not include watermarks or credits.
 - NO AI CLICHES: NEVER use words like 'delve', 'complexities', 'nuanced', 'testament', 'tapestry', 'landscape', 'revolutionary', 'transformative'.
 - MINIMUM LENGTH: Write a comprehensive, deep-dive article. Target between 450 and 600 words for complete coverage.
 
@@ -377,6 +378,7 @@ CRITICAL WRITING RULES:
 - FACTUAL AND DIRECT: No 'fluff', no 'insider' voice. Just report the facts clearly like a bulleted summary.
 - NO CODE BLOCKS: DO NOT include any code snippets or programming examples.
 - NO AI CLICHES: NEVER use words like 'delve', 'complexities', 'nuanced', 'testament', 'tapestry', 'landscape', 'revolutionary', 'transformative', 'realm'.
+- CRITICAL LEGAL RULE: You MUST completely remove any author names, 'IMAGE CREDITS:', 'contributed reporting from', 'TechCrunch', or promotional text from the article. Do not include watermarks or credits.
 - SHORT SENTENCES: Keep your sentences short and punchy. Active voice only.
 - GET TO THE POINT: Start directly with the hook. No long, generic introductions.
 - MAXIMUM LENGTH: 450 words (typically target between 350 and 450 words for complete coverage).
@@ -508,6 +510,7 @@ Rewrite the article incorporating the editor's feedback. Follow the same HTML fo
   2. **Details (Bulleted List)**: A bulleted list (`<ul>` containing 3 to 5 `<li>` elements) breaking down the key specs, facts, numbers, or timeline of the event. Bold the first 2-3 words of each bullet point to make it highly scannable.
   3. **Consequence/Next Steps**: A final short paragraph (2-3 sentences max) explaining the immediate consequence or what happens next. Do NOT use any subheading for this final paragraph.
 - Under NO circumstances should you use more than one `<h2>` heading in the entire article, and only use it if it describes a highly specific, contextual aspect of the details (e.g., `<h2>Specs and Pricing</h2>`). Never use generic headings.
+- CRITICAL LEGAL RULE: You MUST completely remove any author names, 'IMAGE CREDITS:', 'contributed reporting from', 'TechCrunch', or promotional text from the article. Do not include watermarks or credits.
 - MAXIMUM LENGTH: 300 words.
 - Address the editor's feedback directly in your rewrite.
 - Output ONLY raw HTML, no markdown fences.

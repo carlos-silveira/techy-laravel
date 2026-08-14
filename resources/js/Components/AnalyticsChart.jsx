@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { ComposableMap, Geographies, Geography } from "react-simple-maps";
 import { scaleLinear } from "d3-scale";
 
-const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
+const geoUrl = "https://code.highcharts.com/mapdata/custom/world.topo.json";
 
 const DEVICE_COLORS = { Desktop: '#2b7cee', Mobile: '#8b5cf6', Tablet: '#06b6d4', 'Bot / Crawler': '#f97316' };
 const DEVICE_ICONS = { Desktop: Monitor, Mobile: Smartphone, Tablet: Tablet, 'Bot / Crawler': Bot };
@@ -322,7 +322,7 @@ export default function AnalyticsChart({ analyticsData, analytics, period }) {
                                 <Geographies geography={geoUrl}>
                                     {({ geographies }) =>
                                         geographies.map((geo) => {
-                                            const d = countriesData.find((s) => s.id === geo.properties.iso_a2);
+                                            const d = countriesData.find((s) => s.id === (geo.properties['iso-a2'] || geo.properties['hc-a2']));
                                             return (
                                                 <Geography
                                                     key={geo.rsmKey}
@@ -373,11 +373,11 @@ export default function AnalyticsChart({ analyticsData, analytics, period }) {
                                     const color = REFERRER_COLORS[ref.type] || '#6b7280';
                                     return (
                                         <div key={i} className="flex items-center justify-between group">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-8 h-8 rounded-xl flex items-center justify-center transition-colors" style={{ backgroundColor: `${color}15` }}>
+                                            <div className="flex items-center gap-4 min-w-0">
+                                                <div className="w-8 h-8 rounded-xl flex items-center justify-center transition-colors shrink-0" style={{ backgroundColor: `${color}15` }}>
                                                     <Icon className="w-4 h-4" style={{ color }} />
                                                 </div>
-                                                <span className="text-sm font-bold text-gray-800 dark:text-gray-200 capitalize">{ref.source}</span>
+                                                <span className="text-sm font-bold text-gray-800 dark:text-gray-200 capitalize truncate">{ref.source}</span>
                                             </div>
                                             <div className="flex items-center gap-4">
                                                 <span className="text-xs font-black text-gray-500 bg-black/5 dark:bg-white/5 px-2 py-1 rounded-md">{ref.type}</span>
