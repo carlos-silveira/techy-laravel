@@ -57,15 +57,13 @@ jobs:
           npm run build
 
       - name: 🐘 Prepare Local Test Environment (SQLite)
-        env:
-          DB_CONNECTION: sqlite
-          DB_DATABASE: database/database.sqlite
         run: |
           cp .env.example .env
           php artisan key:generate
           
           # Update .env to use SQLite for speed
           sed -i 's/DB_CONNECTION=.*/DB_CONNECTION=sqlite/' .env
+          sed -i 's|DB_DATABASE=.*|DB_DATABASE=database/database.sqlite|' .env
           touch database/database.sqlite
           
           php artisan migrate --force
