@@ -618,3 +618,4 @@
 ## 2026-08-21: Reverted EEAT Disclaimers
 - **Context**: The site originally had "Editorial Board" and "Human fact-checked" disclaimers added in an attempt to pass Google Ads AI content filters. The user decided to remove them to maintain honesty regarding AI-generated content.
 - **Changes**: Removed the fake `E-E-A-T Author Box` block from `ArticleShow.jsx` and removed the `Editorial Disclaimer` from `PublicFooter.jsx`. Kept the dynamically generated "La Opinión de TechyNews" section.
+- **Additional EEAT Rollback**: Found remaining claims of "human filtered" and "human editorial intent" in `About.jsx` (Editorial Policy section) and `NewsletterBlock.jsx`. Updated texts to fully and transparently acknowledge that TechyNews is an automated AI-driven platform powered by LLMs for aggregation, translation, drafting, and fact-checking.
