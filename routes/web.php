@@ -43,6 +43,14 @@ Route::get('/_debug/test-social', function () {
     \Illuminate\Support\Facades\Artisan::call('test:social-post');
     return "Social test executed. Result: <pre>" . \Illuminate\Support\Facades\Artisan::output() . "</pre>";
 });
+
+Route::get('/_debug/logs', function () {
+    $logFile = storage_path('logs/laravel.log');
+    if (file_exists($logFile)) {
+        return "<pre>" . htmlspecialchars(implode("\n", array_slice(file($logFile), -50))) . "</pre>";
+    }
+    return "No logs.";
+});
 Route::get('/feed', [SeoController::class, 'rss']);
 
 use App\Http\Controllers\NewsletterArchiveController;
