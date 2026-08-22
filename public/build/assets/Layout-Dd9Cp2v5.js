@@ -1,0 +1,1 @@
+import"./rolldown-runtime-B0Z9INg1.js";import{n as e,t}from"./jsx-runtime-CF4O39kz.js";import{t as n}from"./TopNav-Di_lavFK.js";import{t as r}from"./Footer-w_Q94Qau.js";e();var i=t(),a=({children:e})=>(0,i.jsxs)(`div`,{className:`flex flex-col min-h-screen`,children:[(0,i.jsx)(n,{}),(0,i.jsx)(`main`,{className:`flex-grow`,children:e}),(0,i.jsx)(r,{})]});export{a as default};
