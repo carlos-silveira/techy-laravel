@@ -2,6 +2,7 @@
 
 ### Added
 - **Database Cleanup Command**: Created `php artisan articles:clean-tc` to scrub existing articles for potential copyright artifacts from TechCrunch. Applies regex to strip "IMAGE CREDITS:", "contributed reporting from", and `<img src="...">` tags containing author, profile, or TechCrunch logos across all localized variants.
+- **Newsletter Intelligence Feed**: Added the `<NewsletterBlock>` widget and the "Daily Briefing" intelligence feed grid block to the `/newsletter` page (`NewsletterArchive.jsx`) to mirror the experience on the homepage.
 
 ### Changed
 - **JinaReader Image Scraping Filter**: Updated `JinaReaderService.php` to aggressively block images containing `author`, `profile`, `writer`, `contributor`, `tc-logo`, `disrupt`, `headshot`, and `.webp` tracking pixels from being extracted from scraped URLs.
@@ -9,6 +10,8 @@
 
 ### Fixed
 - **Mobile UI Overlap**: Fixed a layout bug on mobile where the circular RAG Copilot chat button (`RagCopilot.jsx`) overlapped with the `ArticleShow.jsx` interaction floating bar (Likes/Share). Shrunk the floating interaction bar gaps (`gap-4` and `px-4`) slightly on small screens to provide safe breathing room.
+- **AI Writer Dashboard Crash**: Fixed a critical bug in `/studio/write` causing the dashboard to fail loading due to a `ReferenceError` for `formatSource` nested incorrectly inside `AnalyticsChart.jsx`.
+- **Mangled Spanish Translations**: Cleared corrupted Spanish and Portuguese translations (mixed with wrong articles and old author images) for `openai-completes-7-billion-employee-tender-offer...` directly in the production database and dispatched a new translation queue job.
 
 ---
 
@@ -567,3 +570,29 @@
 
 ### Checked
 - **Vite Build**: Verified the frontend build successfully via `npm run build`.
+
+## [2026-08-21] CI/CD Pipeline Optimization
+- **Agent**: Antigravity
+- **Action**: Completely removed Docker from `.github/workflows/deploy.yml` and replaced the Staging QA job with a native Ubuntu runner job.
+- **Why**: The Docker setup was very slow (taking almost 3 minutes to just start), caused Git permission errors (`exit code 128`), and used mismatched PHP/Node versions compared to production. It also failed to test the actual artifact being deployed.
+- **Changes**: Combined Build and QA into a single `build-test-deploy` job. Replaced MySQL with SQLite for lightning fast E2E Cypress tests. Added built-in caching for Composer and NPM to further speed up the action.
+- **Result**: The CI/CD pipeline is now significantly faster, tests the exact ZIP artifact that is deployed, and accurately mirrors the production PHP 8.3 and Node 22 environment.
+
+## [2026-08-21] Security Vulnerabilities Resolution
+- **Agent**: Antigravity
+- **Action**: Resolved all high and moderate severity security vulnerabilities in PHP and Node.js dependencies as reported by `composer audit` and `npm audit`.
+- **Changes**: 
+  - Updated `guzzlehttp/guzzle`, `guzzlehttp/promises`, and `symfony/deprecation-contracts` to their latest safe versions.
+  - Added specific overrides for `d3-color`, `esbuild`, and `vite` in `package.json` to bypass indirect vulnerable dependencies safely without breaking builds.
+  - Removed unused `react-router-dom` from package.json that had moderate security advisories.
+- **Verification**: Verified PHP dependencies using `composer audit` (0 vulnerabilities found), NPM dependencies using `npm audit` (0 vulnerabilities found), successfully built frontend using `npm run build`, and passed all PHP tests (`php artisan test`) and Playwright E2E tests (`npx playwright test`).
+- **Result**: Successfully eliminated all 6 backend and 14 frontend vulnerabilities while preserving application stability.
+
+## 2026-08-21: Adsterra Monetization Integration
+- **Context**: Replaced AdSense with Adsterra ad network following multiple AdSense rejections due to AI content.
+- **Changes**:
+  - Injected global Adsterra Social Bar script in `resources/views/app.blade.php`.
+  - Created `resources/js/Components/AdsterraAd.jsx` to safely mount Adsterra scripts inside `iframe`s to prevent `document.write` from breaking React's hydration and SPA navigation.
+  - Added HTML templates for ad iframes in `public/ads/` (`300x250.html`, `728x90.html`, `320x50.html`, `native.html`).
+  - Replaced `<AdSlot />` with `<AdsterraAd />` in `Welcome.jsx` and `ArticleShow.jsx` ensuring responsive sizes (Desktop: 728x90, Mobile: 320x50/300x250).
+  - Pushed to `main` to trigger auto-deploy.
