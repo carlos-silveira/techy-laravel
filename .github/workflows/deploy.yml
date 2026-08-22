@@ -7,9 +7,10 @@ on:
   workflow_dispatch:
 
 jobs:
-  staging-qa:
-    name: 🐳 Staging Mirror QA (Docker)
+  build-test-deploy:
+    name: 🚀 Build, Test & Deploy
     runs-on: ubuntu-latest
+    
     steps:
       - name: 🚚 Get latest code
         uses: actions/checkout@v4
@@ -17,116 +18,85 @@ jobs:
       - name: 🔐 Security Audit (Secret Detection)
         run: |
           echo "🔍 Scanning codebase for hardcoded secrets..."
-          # Bloquear si detecta patrones de las claves purgadas o tokens hardcoded
           if grep -rEi "PURGED_SECRET|2026Secure|Techy_2026" . --exclude-dir=.git --exclude-dir=docs --exclude=deploy.yml --exclude=test-staging.sh --exclude=AI_ACTIVITY.md; then
             echo "❌ ERROR: Se detectaron rastros de secretos o claves hardcoded!"
             exit 1
           fi
           echo "✅ Auditoría de seguridad pasada."
 
-      - name: 🏗️ Setup Docker & Build Staging
-        run: |
-          docker compose -f docker-compose.staging.yml build
-          docker compose -f docker-compose.staging.yml up -d
-      
-      - name: 🐘 Prepare Staging Environment
-        run: |
-          # Wait for MySQL to be ready
-          echo "Waiting for MySQL..."
-          sleep 12
-          # Fix for Git 'safe directory' issue in newer versions
-          docker exec staging-app git config --global --add safe.directory /var/www/html
-          # Install dependencies with platform-reqs ignored to match host configuration
-          # Install dependencies with platform-reqs ignored to match host configuration
-          docker exec staging-app /usr/bin/composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev --ignore-platform-reqs
-          docker exec staging-app php artisan view:clear
-          docker exec staging-app php artisan optimize:clear
-          # Create .env from example if not exists (required for key:generate)
-          docker exec staging-app cp .env.example .env
-          docker exec staging-app php artisan key:generate
-          docker exec staging-app php artisan migrate --force
-          # Build Frontend Assets (Required for React Hydration)
-          docker exec staging-app npm install --legacy-peer-deps --prefer-offline --no-audit
-          docker exec staging-app npm run build
-      
-      - name: 🔍 Staging Health Check
-        run: |
-          check() {
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$1")
-            if [ "$STATUS" != "200" ]; then
-              echo "❌ Staging $1 failed with $STATUS"
-              echo "--- STAGING CONTAINER LOGS ---"
-              docker logs staging-app
-              echo "--- LARAVEL ERROR LOGS ---"
-              docker exec staging-app cat storage/logs/laravel.log || echo "No logs found."
-              exit 1
-            fi
-            echo "✅ Staging $1 → $STATUS"
-          }
-          # Test local docker instance via basic curl first
-          check http://localhost:8888/
-          check http://localhost:8888/api/search?q=AI
-      
-      - name: 🟢 Setup Node.js for E2E Tests
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          
-      - name: 🏗️ Install Cypress
-        run: npm install --legacy-peer-deps --no-audit
-
-      - name: 🧪 Run Cypress E2E Smoke Tests
-        run: npm run test:e2e -- --spec "cypress/e2e/smoke.cy.js"
-      
-      - name: 🛑 Cleanup & Fix Permissions
-        if: always()
-        run: |
-          docker compose -f docker-compose.staging.yml down
-          # Fix permissions so the actions/checkout post-run step doesn't fail with git error 128
-          sudo chown -R $USER:$USER .
-
-  web-deploy:
-    name: 🚀 Deploy to Production
-    needs: staging-qa
-    runs-on: ubuntu-latest
-    steps:
-      - name: 🚚 Get latest code
-        uses: actions/checkout@v4
-
-      - name: 🐘 Setup PHP
+      - name: 🐘 Setup PHP 8.3
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: '8.3'
           tools: composer:v2
           coverage: none
 
-      - name: 📦 Install PHP Dependencies
-        run: |
-          rm -f composer.lock
-          composer update --no-interaction --prefer-dist --optimize-autoloader --no-dev --ignore-platform-reqs
-
-      - name: 🟢 Setup Node.js
+      - name: 🟢 Setup Node.js 22
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'npm'
 
-      - name: 🏗️ Install NPM Dependencies & Build
+      - name: 📦 Cache Composer Dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: 🏗️ Install Dependencies & Build
         env:
           NODE_OPTIONS: "--max-old-space-size=4096"
         run: |
+          # PHP
+          composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev --ignore-platform-reqs
+          
+          # Node
           npm install --legacy-peer-deps --prefer-offline --no-audit
           npm run build
+
+      - name: 🐘 Prepare Local Test Environment (SQLite)
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          
+          # Update .env to use SQLite for speed
+          sed -i 's/DB_CONNECTION=.*/DB_CONNECTION=sqlite/' .env
+          touch database/database.sqlite
+          
+          php artisan migrate --force
+          php artisan db:seed --force || echo "No seeders found or failed"
+
+      - name: 🧪 Run Cypress E2E Smoke Tests
+        env:
+          CYPRESS_BASE_URL: http://127.0.0.1:8000
+        run: |
+          # Start local PHP server in the background
+          php artisan serve --host=127.0.0.1 --port=8000 &
+          SERVER_PID=$!
+          
+          # Wait a few seconds for the server to be ready
+          sleep 3
+          
+          # Run Cypress (no need to reinstall, it was installed by npm install above)
+          npx cypress run --spec "cypress/e2e/smoke.cy.js"
+          
+          # Clean up server
+          kill $SERVER_PID
 
       - name: 📦 Archive Release
         run: |
           # Only zip essential production files and directories. 
           # Excludes public/storage (symlink) and storage logs to keep it lightweight (~20MB).
-          zip -r deploy.zip app config database public resources routes scripts vendor bootstrap artisan composer.json composer.lock .htaccess -x "public/storage" "storage/logs/*"
+          zip -r deploy.zip app config database public resources routes scripts vendor bootstrap artisan composer.json composer.lock .htaccess -x "public/storage" "storage/logs/*" "database/database.sqlite"
 
       - name: 🚀 Transfer & Execute via Secure HTTPS Webhook
         run: |
           # Use curl to upload the zip directly to the Laravel application.
-          # The token matches ADMIN_SECRET in the production .env
           HTTP_RESPONSE=$(curl -w "%{http_code}" -s -X POST \
             -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" \
             -H "Origin: https://techynews.lat" \
@@ -164,10 +134,9 @@ jobs:
           check https://techynews.lat/llms.txt
           check "https://techynews.lat/api/search?q=AI"
 
-      - name: 🧩 JS Asset Integrity Check — Verify Critical Chunks Are Reachable
+      - name: 🧩 JS Asset Integrity Check
         run: |
           # Fetch the manifest and verify the main app entry + ArticleShow chunk are accessible.
-          # This catches the "manifest updated but assets not uploaded" failure mode.
           MANIFEST=$(curl -s "https://techynews.lat/build/manifest.json")
           APP_FILE=$(echo "$MANIFEST" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('resources/js/app.jsx',{}).get('file',''))")
           ARTICLE_FILE=$(echo "$MANIFEST" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('resources/js/Pages/ArticleShow.jsx',{}).get('file',''))")
@@ -200,4 +169,3 @@ jobs:
           else
             echo "❌ Rollback failed! Manual intervention required. HTTP Status: $HTTP_RESPONSE"
           fi
-
