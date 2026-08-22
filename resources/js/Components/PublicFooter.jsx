@@ -21,11 +21,7 @@ export default function PublicFooter({ className = '' }) {
                     <Link href="/privacy" className="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">{__('Privacy Policy')}</Link>
                 </div>
             </div>
-            <div className="max-w-7xl mx-auto px-6 mt-8 text-center border-t border-black/5 dark:border-white/5 pt-6">
-                <p className="text-[11px] font-light text-gray-500 dark:text-gray-500 max-w-4xl mx-auto leading-relaxed">
-                    {__('Editorial Disclaimer: TechyNews is a technology news publication. Our content is drafted with the assistance of artificial intelligence to ensure timely reporting, but every article is fact-checked, edited, and analyzed by our human editorial team to guarantee accuracy and provide deep industry insights. We are committed to high-quality journalism and transparency.')}
-                </p>
-            </div>
+
         </footer>
     );
 }
