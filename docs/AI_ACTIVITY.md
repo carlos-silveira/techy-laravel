@@ -614,3 +614,7 @@
 - **Root Cause**: The `DB_DATABASE` environment variable was passed dynamically to a single step (`🐘 Prepare Local Test Environment (SQLite)`). `php artisan migrate` created the tables correctly in `database.sqlite`, but in the subsequent step (`🧪 Run Cypress E2E Smoke Tests`), `php artisan serve` ran without this environment variable, falling back to `DB_DATABASE=laravel`. This caused the application to query an empty, non-existent database when Cypress visited the homepage, throwing a 500 Server Error.
 - **Changes**: Modified `.github/workflows/deploy.yml` to write the `DB_DATABASE=database/database.sqlite` override directly into the `.env` file using `sed`, ensuring that all subsequent steps (including `php artisan serve`) use the correct database.
 - **Verification**: Cypress tests now successfully connect to the SQLite database and pass, allowing deployments to succeed.
+
+## 2026-08-21: Reverted EEAT Disclaimers
+- **Context**: The site originally had "Editorial Board" and "Human fact-checked" disclaimers added in an attempt to pass Google Ads AI content filters. The user decided to remove them to maintain honesty regarding AI-generated content.
+- **Changes**: Removed the fake `E-E-A-T Author Box` block from `ArticleShow.jsx` and removed the `Editorial Disclaimer` from `PublicFooter.jsx`. Kept the dynamically generated "La Opinión de TechyNews" section.
