@@ -144,6 +144,9 @@
 
 <body class="font-sans antialiased">
     @inertia
+
+    <!-- Adsterra Social Bar -->
+    <script src="https://pl30963210.profitableratecpmnetwork.com/cb/79/0e/cb790e00a94f0ac83a4b618d55c2d381.js"></script>
 </body>
 
 </html>

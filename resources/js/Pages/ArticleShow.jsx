@@ -9,7 +9,7 @@ import CommandPalette from '@/Components/CommandPalette';
 import Navbar from '@/Components/Navbar';
 import PublicFooter from '@/Components/PublicFooter';
 import { getFinalImage } from '@/utils';
-import AdSlot from '@/Components/AdSlot';
+import AdsterraAd from '@/Components/AdsterraAd';
 const RagCopilot = React.lazy(() => import('@/Components/RagCopilot'));
 import useLanguage from '@/Hooks/useLanguage';
 
@@ -271,6 +271,11 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
                     </div>
                 </motion.article>
 
+                {/* Native Ad inside article flow */}
+                <div className="mt-12 w-full">
+                    <AdsterraAd type="native" />
+                </div>
+
                 {/* E-E-A-T Author Box */}
                 <div className="mt-16 p-8 bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 rounded-3xl flex flex-col md:flex-row gap-6 items-center md:items-start text-center md:text-left">
                     <div className="w-20 h-20 shrink-0 rounded-full bg-gradient-to-br from-primary to-purple-600 p-[2px]">
@@ -288,7 +293,12 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
                 </div>
 
                 {/* Article Footer Ad Slot */}
-                <AdSlot className="mt-20 mb-8" />
+                <div className="mt-20 mb-8 hidden md:block">
+                  <AdsterraAd type="728x90" />
+                </div>
+                <div className="mt-20 mb-8 md:hidden">
+                  <AdsterraAd type="300x250" />
+                </div>
 
                 {/* Read Next Section */}
                 {relatedArticles && relatedArticles.length > 0 && (

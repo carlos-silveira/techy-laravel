@@ -11,7 +11,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import CommandPalette from '@/Components/CommandPalette';
 import Navbar from '@/Components/Navbar';
 import PublicFooter from '@/Components/PublicFooter';
-import AdSlot from '@/Components/AdSlot';
+import AdsterraAd from '@/Components/AdsterraAd';
 const RagCopilot = React.lazy(() => import('@/Components/RagCopilot'));
 import { ArrowRight, Zap, BookOpen, Clock } from 'lucide-react';
 import useLanguage from '@/Hooks/useLanguage';
@@ -454,7 +454,12 @@ export default function Welcome({ articles, editorsChoice, dailyBrief, trendingA
         )}
 
         <section className="px-6 max-w-7xl mx-auto py-12">
-            <AdSlot className="my-8" />
+            <div className="my-8 hidden md:block">
+              <AdsterraAd type="728x90" />
+            </div>
+            <div className="my-8 md:hidden">
+              <AdsterraAd type="320x50" />
+            </div>
         </section>
 
         {/* ===== NEWSLETTER ===== */}
