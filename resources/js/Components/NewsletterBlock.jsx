@@ -42,7 +42,7 @@ export default function NewsletterBlock() {
                             {__('Intelligence,')}<br />{__('delivered weekly.')}
                         </h2>
                         <p className="text-gray-500 mb-12 font-light text-base sm:text-lg max-w-lg mx-auto leading-relaxed">
-                            {__('Every Friday: AI research breakthroughs, engineering insights, and curated tools — synthesized by machine, filtered by humans.')}
+                            {__('Every Friday: AI research breakthroughs, engineering insights, and curated tools — synthesized and curated entirely by our AI engine.')}
                         </p>
                         <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-xl mx-auto">
                             <input
