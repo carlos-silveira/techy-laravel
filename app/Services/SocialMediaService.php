@@ -65,13 +65,12 @@ class SocialMediaService
         try {
             $translations = is_string($article->translations) ? json_decode($article->translations, true) : $article->translations;
             
-            // ALWAYS SPANISH: Get the Spanish summary, or if unavailable, fallback to translating it on the fly or just use the English summary but ideally Spanish. 
-            // Since we will move the dispatch AFTER translation, it should be available.
-            $summaryEs = $translations['es']['summary'] ?? null;
+            // ALWAYS SPANISH: Get the Spanish summary, or if unavailable, fallback to native column.
+            $summaryEs = $translations['es']['summary'] ?? $article->ai_summary;
             
             if (!$summaryEs) {
                 // If translation somehow failed, we could log and abort to respect ALWAYS SPANISH.
-                Log::warning("Facebook post skipped. Spanish translation unavailable for article: {$article->slug}");
+                Log::warning("Facebook post skipped. Summary unavailable for article: {$article->slug}");
                 return false;
             }
 
@@ -127,14 +126,14 @@ class SocialMediaService
      */
     private function formatPostText(Article $article): ?string
     {
-        // 1. Get Spanish Translations
+        // 1. Get Spanish Translations (or fallback to native columns since they are now in Spanish)
         $translations = is_string($article->translations) ? json_decode($article->translations, true) : $article->translations;
         
-        $title = $translations['es']['title'] ?? null;
-        $summary = $translations['es']['summary'] ?? null;
+        $title = $translations['es']['title'] ?? $article->title;
+        $summary = $translations['es']['summary'] ?? $article->ai_summary;
         
         if (!$title || !$summary) {
-            Log::warning("Twitter post skipped. Spanish translation unavailable for article: {$article->slug}");
+            Log::warning("Twitter post skipped. Title or summary unavailable for article: {$article->slug}");
             return null;
         }
         

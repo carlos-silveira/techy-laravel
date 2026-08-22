@@ -34,8 +34,8 @@ class SyncSocialBacklog extends Command
         $this->warn("Twitter's free API will instantly suspend accounts that burst-post more than ~15-17 tweets daily.");
         $this->info("Starting batch process. Limit cap: {$limit}");
 
-        // Fetch the newest articles
         $articles = Article::where('status', 'published')
+            ->where('is_social_published', false)
             ->latest()
             ->take($limit)
             ->get();
@@ -54,6 +54,8 @@ class SyncSocialBacklog extends Command
             
             if ($twitterResult || $fbResult) {
                 $successCount++;
+                $article->is_social_published = true;
+                $article->save();
                 $this->info("   ✅ Posted successfully (Twitter: " . ($twitterResult ? 'Yes' : 'No') . " | FB: " . ($fbResult ? 'Yes' : 'No') . ")");
             } else {
                 $this->error("   ❌ Post failed on both networks (Rate limited or missing keys/permissions).");

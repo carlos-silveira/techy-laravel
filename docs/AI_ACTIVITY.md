@@ -596,3 +596,11 @@
   - Added HTML templates for ad iframes in `public/ads/` (`300x250.html`, `728x90.html`, `320x50.html`, `native.html`).
   - Replaced `<AdSlot />` with `<AdsterraAd />` in `Welcome.jsx` and `ArticleShow.jsx` ensuring responsive sizes (Desktop: 728x90, Mobile: 320x50/300x250).
   - Pushed to `main` to trigger auto-deploy.
+
+## 2026-08-21: Fixed Social Media Publishing Loop
+- **Context**: Twitter and Facebook stopped posting on June 23.
+- **Root Cause**: `SocialMediaService` was failing because the JSON `translations['es']` payload stopped being generated in newer articles (native title/summary are used instead). This caused the script to fail. Also, `SyncSocialBacklog` was hardcoded to fetch the 10 most recent articles infinitely without marking them as posted, creating an infinite fail loop on the latest missing-translation articles.
+- **Changes**:
+  - Modified `SocialMediaService` to use `$article->title` and `$article->ai_summary` as fallbacks.
+  - Created migration `add_is_social_published_to_articles_table` to prevent duplicate posting.
+  - Modified `SyncSocialBacklog.php` to query for `where('is_social_published', false)` and save state upon success.
