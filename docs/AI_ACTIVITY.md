@@ -604,3 +604,7 @@
   - Modified `SocialMediaService` to use `$article->title` and `$article->ai_summary` as fallbacks.
   - Created migration `add_is_social_published_to_articles_table` to prevent duplicate posting.
   - Modified `SyncSocialBacklog.php` to query for `where('is_social_published', false)` and save state upon success.
+
+## 2026-08-21: Removed Social Bar
+- **Context**: The "Social Bar" ad format proved to be too intrusive (gambling popup with confetti).
+- **Changes**: Removed the Adsterra Social Bar script from `resources/views/app.blade.php`.
