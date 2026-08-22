@@ -38,6 +38,11 @@ Route::get('/', [PublicController::class, 'index']);
 Route::get('/article/{slug}', [PublicController::class, 'show']);
 Route::post('/api/articles/{id}/like', [ArticleController::class, 'like']); // Moved from api.php to handle sessions
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap']);
+
+Route::get('/_debug/test-social', function () {
+    \Illuminate\Support\Facades\Artisan::call('test:social-post');
+    return "Social test executed. Result: <pre>" . \Illuminate\Support\Facades\Artisan::output() . "</pre>";
+});
 Route::get('/feed', [SeoController::class, 'rss']);
 
 use App\Http\Controllers\NewsletterArchiveController;
@@ -293,10 +298,7 @@ Route::middleware(['auth'])->group(function () {
         return "Fix command executed. Result: <pre>" . \Illuminate\Support\Facades\Artisan::output() . "</pre>";
     })->name('maintenance.fix-encoding');
 
-    Route::get('/maintenance/test-social', function () {
-        \Illuminate\Support\Facades\Artisan::call('test:social-post');
-        return "Social test executed. Result: <pre>" . \Illuminate\Support\Facades\Artisan::output() . "</pre>";
-    });
+
 
     // Media Uploads
     Route::post('/upload-image', [ImageUploadController::class, 'store'])->name('image.upload');
