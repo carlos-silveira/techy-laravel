@@ -293,6 +293,11 @@ Route::middleware(['auth'])->group(function () {
         return "Fix command executed. Result: <pre>" . \Illuminate\Support\Facades\Artisan::output() . "</pre>";
     })->name('maintenance.fix-encoding');
 
+    Route::get('/maintenance/test-social', function () {
+        \Illuminate\Support\Facades\Artisan::call('test:social-post');
+        return "Social test executed. Result: <pre>" . \Illuminate\Support\Facades\Artisan::output() . "</pre>";
+    });
+
     // Media Uploads
     Route::post('/upload-image', [ImageUploadController::class, 'store'])->name('image.upload');
 
