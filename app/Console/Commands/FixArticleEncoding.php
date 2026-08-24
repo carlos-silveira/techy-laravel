@@ -8,16 +8,19 @@ use App\Services\GeminiService;
 
 class FixArticleEncoding extends Command
 {
-    protected $signature = 'article:fix-encoding {slug?}';
-    protected $description = 'Fix double-encoded / escaped HTML content in articles';
+    protected $signature = 'article:fix-encoding {slug?} {--article= : Specific article ID to fix}';
+    protected $description = 'Fix double-encoded / escaped HTML content and placeholder translations in articles';
 
     public function handle()
     {
         $slug = $this->argument('slug');
+        $articleId = $this->option('article');
 
         $query = Article::query();
         if ($slug) {
             $query->where('slug', $slug);
+        } elseif ($articleId) {
+            $query->where('id', $articleId);
         }
 
         $articles = $query->get();
@@ -33,25 +36,34 @@ class FixArticleEncoding extends Command
                 $needsSave = true;
             }
 
-            // Fix bad AI translations where title is "..."
+            // Fix bad AI translations (placeholders like 'título traducido', '...', or corrupted)
             $translations = $article->translations ?? [];
-            $badTranslationsCleared = false;
+            $badTranslationsCleared = [];
             foreach ($translations as $lang => $trans) {
-                if (isset($trans['title']) && trim($trans['title']) === '...') {
+                if (Article::isInvalidTranslation($trans, $article->content)) {
                     unset($translations[$lang]);
-                    $badTranslationsCleared = true;
+                    $badTranslationsCleared[] = $lang;
                 }
             }
 
-            if ($badTranslationsCleared) {
+            if (!empty($badTranslationsCleared)) {
                 $article->translations = $translations;
                 $needsSave = true;
             }
 
             if ($needsSave) {
                 $article->save();
-                $this->info("✅ Fixed: {$article->title}" . ($badTranslationsCleared ? " (cleared bad translation)" : ""));
+                $clearedMsg = !empty($badTranslationsCleared) ? " (cleared bad translations for: " . implode(', ', $badTranslationsCleared) . ")" : "";
+                $this->info("✅ Fixed: {$article->title}{$clearedMsg}");
                 $fixed++;
+
+                // Queue fresh translation for published articles
+                if ($article->status === 'published') {
+                    foreach ($badTranslationsCleared as $locale) {
+                        \App\Jobs\TranslateArticle::dispatch($article, $locale);
+                        $this->line("  🔄 Dispatched background translation for [{$locale}]");
+                    }
+                }
             } else {
                 $this->line("  OK: '{$article->title}' — already clean.");
             }

@@ -550,36 +550,55 @@ Output ONLY the HTML content.";
 
         $targetLanguage = $languages[$targetLocale] ?? 'English';
 
-        $prompt = "You are a professional translator and tech journalist.
+        $prompt = "You are a senior tech journalist and professional translator.
 Translate the following tech article details into {$targetLanguage}.
-MANDATORY:
-- Maintain the SAME HTML structure and tags for the 'content'.
-- Keep the technical tone bold and opinionated.
-- Translate only the text content, never the HTML tags themselves.
 
-ARTICLE TITLE: {$title}
-EXECUTIVE SUMMARY: {$summary}
-HTML CONTENT:
+TRANSLATION INSTRUCTIONS:
+- Translate the article title into a natural, engaging {$targetLanguage} headline.
+- Translate the executive summary into {$targetLanguage}.
+- Translate the article HTML content into {$targetLanguage}, preserving all HTML tags (`<h2>`, `<p>`, `<ul>`, `<li>`, `<strong>`, `<em>`, `<a>`, `<img>`, `<blockquote>`, etc.) exactly intact.
+- Translate only the human-readable text, never translate HTML tag names or attributes.
+- Keep the journalistic tone bold, insightful, and authoritative.
+- CRITICAL ANTI-PLACEHOLDER RULE: You MUST translate the actual text provided below. DO NOT return placeholder text like 'título traducido', 'translated title', 'resumen traducido', or 'contenido HTML traducido'. Every field must contain the full, accurate translation of the input text.
+
+INPUT ARTICLE TO TRANSLATE:
+<input_title>
+{$title}
+</input_title>
+
+<input_summary>
+{$summary}
+</input_summary>
+
+<input_content>
 {$content}
+</input_content>
 
-Return exactly a JSON object (no markdown fences):
+OUTPUT FORMAT:
+Return ONLY a valid JSON object with the exact keys \"title\", \"summary\", \"content\" (no markdown fences, no explanation):
 {
-  \"title\": \"translated title\",
-  \"summary\": \"translated summary\",
-  \"content\": \"translated html content\"
+  \"title\": \"[Full {$targetLanguage} translated headline]\",
+  \"summary\": \"[Full {$targetLanguage} translated summary]\",
+  \"content\": \"[Full {$targetLanguage} translated HTML content]\"
 }";
 
         $result = $this->callGemini($prompt, true);
 
-        if (empty($result) || empty($result['title'])) {
-             throw new \RuntimeException("Translation to {$targetLanguage} failed: Invalid response or empty title.");
+        if (empty($result) || empty($result['title']) || empty($result['content'])) {
+             throw new \RuntimeException("Translation to {$targetLanguage} failed: Invalid response or empty fields.");
         }
 
-        return [
-            'title' => $result['title'],
-            'summary' => $result['summary'] ?? null,
-            'content' => $result['content'] ?? null,
+        $translated = [
+            'title' => (string) $result['title'],
+            'summary' => isset($result['summary']) ? (string) $result['summary'] : null,
+            'content' => (string) $result['content'],
         ];
+
+        if (\App\Models\Article::isInvalidTranslation($translated, $content)) {
+            throw new \RuntimeException("Translation to {$targetLanguage} returned invalid/placeholder content.");
+        }
+
+        return $translated;
     }
 
     /**

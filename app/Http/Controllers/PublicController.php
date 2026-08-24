@@ -128,14 +128,16 @@ class PublicController extends Controller
         $allTranslated = true;
         $translated = $rawArticles->map(function ($article) use ($locale, &$allTranslated) {
             $articleLang = $article->language ?? 'en';
-            if ($articleLang !== $locale && empty($article->translations[$locale]['title'])) {
+            $trans = $article->translations[$locale] ?? null;
+            if ($articleLang !== $locale && Article::isInvalidTranslation($trans, $article->content)) {
                 $allTranslated = false;
             }
             return $this->translateIfNecessary($article, $locale);
         })->filter(function($article) use ($locale) {
             $articleLang = $article->language ?? 'en';
-            // Only show articles that match the current locale OR have been successfully translated
-            return $articleLang === $locale || !empty($article->translations[$locale]['title']);
+            $trans = $article->translations[$locale] ?? null;
+            // Only show articles that match the current locale OR have a valid translation
+            return $articleLang === $locale || !Article::isInvalidTranslation($trans, $article->content);
         })->values();
 
         // Use a short TTL if any article still needs translation
@@ -258,8 +260,8 @@ class PublicController extends Controller
 
         $translations = $article->translations ?? [];
 
-        // If a full translation (title + content) exists, apply it.
-        if (!empty($translations[$locale]['title']) && !empty($translations[$locale]['content'])) {
+        // If a valid translation exists, apply it.
+        if (isset($translations[$locale]) && !Article::isInvalidTranslation($translations[$locale], $article->content)) {
             $article->title      = $this->recursivelyUnwrap($translations[$locale]['title']);
             $article->content    = $this->recursivelyUnwrap($translations[$locale]['content']);
             
@@ -275,7 +277,13 @@ class PublicController extends Controller
             return $article;
         }
 
-        // No translation available yet — dispatch background job and return original.
+        // If an invalid placeholder translation exists in the array, clean it up
+        if (isset($translations[$locale])) {
+            unset($translations[$locale]);
+            $article->update(['translations' => $translations]);
+        }
+
+        // No translation available yet (or invalid and cleared) — dispatch background job and return original.
         // The rememberLocaleAware() method will cache this with a 30s TTL so it retries soon.
         \App\Jobs\TranslateArticle::dispatch($article, $locale);
 

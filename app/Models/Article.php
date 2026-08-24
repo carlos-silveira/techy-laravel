@@ -126,6 +126,62 @@ class Article extends Model
     // and cause double-translation / mixed-language bugs.
 
     /**
+     * Check if a translation array is invalid, empty, or contains AI placeholder text.
+     */
+    public static function isInvalidTranslation(?array $translation, ?string $originalContent = null): bool
+    {
+        if (empty($translation) || empty($translation['title']) || empty($translation['content'])) {
+            return true;
+        }
+
+        $title = mb_strtolower(trim(strip_tags((string)$translation['title'])), 'UTF-8');
+        $summary = mb_strtolower(trim(strip_tags((string)($translation['summary'] ?? ''))), 'UTF-8');
+        $content = mb_strtolower(trim(strip_tags((string)$translation['content'])), 'UTF-8');
+
+        // Banned dummy / placeholder strings (English, Spanish, Portuguese)
+        $bannedPlaceholders = [
+            'translated title',
+            'título traducido',
+            'titulo traducido',
+            'título traduzido',
+            'titulo traduzido',
+            'translated summary',
+            'resumen traducido',
+            'resumo traduzido',
+            'translated html content',
+            'translated content',
+            'contenido html traducido',
+            'contenido traducido',
+            'conteúdo html traduzido',
+            'conteudo html traduzido',
+            'conteúdo traduzido',
+            'conteudo traduzido',
+            '...',
+            'n/a',
+            'null',
+        ];
+
+        if (in_array($title, $bannedPlaceholders, true)) {
+            return true;
+        }
+
+        if (!empty($summary) && in_array($summary, $bannedPlaceholders, true)) {
+            return true;
+        }
+
+        if (in_array($content, $bannedPlaceholders, true)) {
+            return true;
+        }
+
+        // Check if content is suspiciously short placeholder text
+        if (strlen($content) < 40 && (empty($originalContent) || strlen(strip_tags($originalContent)) > 100)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * The "booted" method of the model.
      *
      * @return void

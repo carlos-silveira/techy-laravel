@@ -203,4 +203,51 @@ class GeminiServiceTest extends TestCase
         $this->assertStringContainsString('<h2>Hello World</h2>', $html);
         $this->assertStringContainsString('<p>This is <strong>bold</strong> and <em>italic</em>.</p>', $html);
     }
+
+    /** @test */
+    public function it_translates_article_successfully()
+    {
+        config(['services.gemini.api_key' => 'test-key']);
+        config(['services.openrouter.api_key' => 'test-key']);
+
+        Http::fake([
+            'openrouter.ai/*' => Http::response([
+                'choices' => [['message' => ['content' => json_encode([
+                    'title' => 'Título de prueba en español',
+                    'summary' => 'Resumen ejecutivo de prueba en español',
+                    'content' => '<h2>Subtítulo</h2><p>' . str_repeat('Contenido de prueba en español extenso. ', 5) . '</p>'
+                ])]]]
+            ], 200)
+        ]);
+
+        $service = new GeminiService();
+        $translated = $service->translateArticle('Test Title', 'Test Summary', '<p>' . str_repeat('English article content here. ', 5) . '</p>', 'es');
+
+        $this->assertIsArray($translated);
+        $this->assertEquals('Título de prueba en español', $translated['title']);
+        $this->assertStringContainsString('<h2>Subtítulo</h2>', $translated['content']);
+    }
+
+    /** @test */
+    public function it_rejects_placeholder_translations()
+    {
+        config(['services.gemini.api_key' => 'test-key']);
+        config(['services.openrouter.api_key' => 'test-key']);
+
+        Http::fake([
+            'openrouter.ai/*' => Http::response([
+                'choices' => [['message' => ['content' => json_encode([
+                    'title' => 'título traducido',
+                    'summary' => 'resumen traducido',
+                    'content' => 'contenido HTML traducido'
+                ])]]]
+            ], 200)
+        ]);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('invalid/placeholder content');
+
+        $service = new GeminiService();
+        $service->translateArticle('Test Title', 'Test Summary', '<p>' . str_repeat('English article content here. ', 5) . '</p>', 'es');
+    }
 }

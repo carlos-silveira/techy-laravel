@@ -1,3 +1,15 @@
+## [2026-08-24] - Spanish / Multilingual Translation Anti-Placeholder Fix & Validation Engine
+
+### Fixed
+- **Literal Translation Placeholders**: Fixed a bug where certain articles (such as `/article/instincts-ai-assistant-raises-red-flags-over-privacy-and-sweeping-permissions-u4QfJB`) displayed literal translation placeholder text (`título traducido`, `resumen traducido`, `contenido HTML traducido`) instead of the actual article translation.
+- **Prompt Structure in `GeminiService`**: Redesigned `translateArticle()` prompt to use structured XML input tags (`<input_title>`, `<input_summary>`, `<input_content>`) and strict anti-placeholder rules so LLMs do not echo schema example values.
+- **Translation Validation Engine (`Article::isInvalidTranslation`)**: Added validation in `Article` model that detects dummy placeholders (`título traducido`, `resumen traducido`, `contenido html traducido`, `translated title`, `...`, and suspiciously short translations).
+- **Graceful Client Fallback (`PublicController`)**: Updated `PublicController::translateIfNecessary()` to detect and clear placeholder translations, re-dispatch `TranslateArticle` in the background, and immediately serve the clean source content so users are never exposed to broken/dummy translation text.
+- **Social Media Safety (`SocialMediaService`)**: Added validation so social posts to Twitter/Facebook ignore placeholder translations and fallback to clean article content.
+- **Artisan Healing Commands**: Updated `article:fix-encoding` and `articles:pre-translate` to automatically scan, detect, and re-translate articles with corrupted or placeholder translations.
+
+---
+
 ## [2026-08-14] - TechCrunch Artifact Cleanup & UI Fixes
 
 ### Added

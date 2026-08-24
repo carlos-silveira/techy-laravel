@@ -13,10 +13,11 @@ The heaviest operation. It uses **Blueprint Prompting** to instruct Gemini to wr
 - Enforces tone guidelines (senior developer, objective, no fluff).
 - Injects the `current_date` to prevent temporal hallucinations.
 
-### 3. `translate(Article $article, string $locale)`
+### 3. `translateArticle(string $title, string $summary, string $content, string $targetLocale)`
 Handles on-demand translation of the `title`, `summary`, and `content`.
-- Implements **Recursive Unwrapping** to ensure if Gemini mistakenly wraps the HTML in a JSON object, the service unwraps it until valid HTML is exposed.
-- Caches the result in the `translations` column of the `Article` model.
+- Uses Blueprint Prompting with explicit XML input blocks (`<input_title>`, `<input_summary>`, `<input_content>`) to prevent AI models from echoing example placeholders.
+- Enforces strict anti-placeholder validation using `Article::isInvalidTranslation()` before saving or returning.
+- Caches the result in the `translations` JSON column of the `Article` model.
 
 ## API Integration & Fallbacks
 

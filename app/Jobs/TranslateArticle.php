@@ -37,9 +37,9 @@ class TranslateArticle implements ShouldQueue
     public function handle(\App\Services\GeminiService $geminiService)
     {
         try {
-            // Already translated?
+            // Already translated with a valid translation?
             $translations = $this->article->translations ?? [];
-            if (isset($translations[$this->locale])) {
+            if (isset($translations[$this->locale]) && !\App\Models\Article::isInvalidTranslation($translations[$this->locale], $this->article->content)) {
                 return;
             }
 
@@ -61,9 +61,9 @@ class TranslateArticle implements ShouldQueue
                 $this->locale
             );
 
-            // VALIDATION: Only save if we got a real title
-            if (empty($result['title']) || trim($result['title']) === '...') {
-                throw new \RuntimeException("Translation failed or returned empty title for Article #{$this->article->id} ({$this->locale})");
+            // VALIDATION: Only save if valid translation
+            if (\App\Models\Article::isInvalidTranslation($result, $this->article->content)) {
+                throw new \RuntimeException("Translation failed or returned placeholder text for Article #{$this->article->id} ({$this->locale})");
             }
 
             // Save results - Don't fall back to original English if we are translating!

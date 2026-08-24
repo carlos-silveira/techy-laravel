@@ -59,4 +59,25 @@ class ArticleTest extends TestCase
 
         $this->assertEquals('my-great-article', $article->slug);
     }
+
+    /** @test */
+    public function it_identifies_invalid_translations()
+    {
+        $originalLong = '<p>' . str_repeat('Long content for testing purposes. ', 10) . '</p>';
+
+        $this->assertTrue(Article::isInvalidTranslation(null));
+        $this->assertTrue(Article::isInvalidTranslation([]));
+        $this->assertTrue(Article::isInvalidTranslation(['title' => 'título traducido', 'content' => '<p>contenido HTML traducido</p>']));
+        $this->assertTrue(Article::isInvalidTranslation(['title' => 'translated title', 'content' => 'translated html content']));
+        $this->assertTrue(Article::isInvalidTranslation(['title' => 'título traduzido', 'content' => 'conteúdo HTML traduzido']));
+        $this->assertTrue(Article::isInvalidTranslation(['title' => '...', 'content' => '...']));
+        $this->assertTrue(Article::isInvalidTranslation(['title' => 'Valid Title', 'content' => 'too short'], $originalLong));
+
+        $validTranslation = [
+            'title' => 'Título Real y Traducido',
+            'summary' => 'Resumen descriptivo en español',
+            'content' => '<h2>Subtítulo</h2><p>' . str_repeat('Este es un contenido completo y traducido correctamente. ', 5) . '</p>'
+        ];
+        $this->assertFalse(Article::isInvalidTranslation($validTranslation, $originalLong));
+    }
 }

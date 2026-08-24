@@ -27,6 +27,16 @@
 **Fix**: Excluded API routes from CSRF middleware for the development phase to ensure 100% uptime for AI features.
 **Lesson**: API-heavy dashboards should prioritize state reliability, especially during rapid prototyping.
 
+## Bug 5: Literal Placeholder Translations in Spanish / Multilingual Pipeline (Fixed)
+**Symptom**: Certain articles rendered literally with title: `"título traducido"`, summary: `["resumen traducido"`, and content: `"contenido HTML traducido"`.
+**Root Cause**: The translation prompt in `GeminiService::translateArticle()` previously ended with an example schema containing placeholder strings (`"title": "translated title", "summary": "translated summary", "content": "translated html content"`). Certain LLM models took this literally and translated the placeholder keys and schema values instead of translating the input article. Furthermore, there was no validation preventing these placeholders from being saved to the database.
+**Fix**: 
+1. Redesigned `GeminiService::translateArticle()` prompt with explicit XML input blocks (`<input_title>`, `<input_summary>`, `<input_content>`) and strict anti-placeholder instructions.
+2. Added `Article::isInvalidTranslation()` to validate that translations do not contain dummy strings or suspiciously short content.
+3. Updated `PublicController::translateIfNecessary()` and `SocialMediaService` to detect invalid translations, clear them, re-dispatch `TranslateArticle`, and fall back to the clean source content so users never see placeholder text.
+4. Enhanced `articles:pre-translate` and `article:fix-encoding` commands to automatically find and heal invalid placeholder translations.
+**Lesson**: Always validate AI-generated output for mock/placeholder strings from example JSON schemas. Never trust example schemas to be understood purely as types by all LLMs.
+
 ---
 **Testing Requirement**: Every change must be verified by:
 1. `php artisan test` (Backend logic)

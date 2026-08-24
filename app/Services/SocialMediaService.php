@@ -64,9 +64,12 @@ class SocialMediaService
 
         try {
             $translations = is_string($article->translations) ? json_decode($article->translations, true) : $article->translations;
+            $esTrans = (is_array($translations) && isset($translations['es']) && !Article::isInvalidTranslation($translations['es'], $article->content)) 
+                ? $translations['es'] 
+                : null;
             
             // ALWAYS SPANISH: Get the Spanish summary, or if unavailable, fallback to native column.
-            $summaryEs = $translations['es']['summary'] ?? $article->ai_summary;
+            $summaryEs = $esTrans['summary'] ?? $article->ai_summary;
             
             if (!$summaryEs) {
                 // If translation somehow failed, we could log and abort to respect ALWAYS SPANISH.
@@ -128,9 +131,12 @@ class SocialMediaService
     {
         // 1. Get Spanish Translations (or fallback to native columns since they are now in Spanish)
         $translations = is_string($article->translations) ? json_decode($article->translations, true) : $article->translations;
+        $esTrans = (is_array($translations) && isset($translations['es']) && !Article::isInvalidTranslation($translations['es'], $article->content)) 
+            ? $translations['es'] 
+            : null;
         
-        $title = $translations['es']['title'] ?? $article->title;
-        $summary = $translations['es']['summary'] ?? $article->ai_summary;
+        $title = $esTrans['title'] ?? $article->title;
+        $summary = $esTrans['summary'] ?? $article->ai_summary;
         
         if (!$title || !$summary) {
             Log::warning("Twitter post skipped. Title or summary unavailable for article: {$article->slug}");
