@@ -128,9 +128,22 @@ class Article extends Model
     /**
      * Check if a translation array is invalid, empty, or contains AI placeholder text.
      */
-    public static function isInvalidTranslation(?array $translation, ?string $originalContent = null): bool
+    public static function isInvalidTranslation(mixed $translation, mixed $originalContent = null): bool
     {
-        if (empty($translation) || empty($translation['title']) || empty($translation['content'])) {
+        if (empty($translation)) {
+            return true;
+        }
+
+        if (is_string($translation)) {
+            $decoded = json_decode($translation, true);
+            if (is_array($decoded)) {
+                $translation = $decoded;
+            } else {
+                return true;
+            }
+        }
+
+        if (!is_array($translation) || empty($translation['title']) || empty($translation['content'])) {
             return true;
         }
 
@@ -174,8 +187,11 @@ class Article extends Model
         }
 
         // Check if content is suspiciously short placeholder text
-        if (strlen($content) < 40 && (empty($originalContent) || strlen(strip_tags($originalContent)) > 100)) {
-            return true;
+        if (strlen($content) < 40) {
+            $origLen = is_string($originalContent) ? strlen(strip_tags($originalContent)) : 0;
+            if ($origLen > 100) {
+                return true;
+            }
         }
 
         return false;

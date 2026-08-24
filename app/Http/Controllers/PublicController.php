@@ -277,10 +277,14 @@ class PublicController extends Controller
             return $article;
         }
 
-        // If an invalid placeholder translation exists in the array, clean it up
+        // If an invalid placeholder translation exists in the array, clean it up without triggering recursive saved events
         if (isset($translations[$locale])) {
             unset($translations[$locale]);
-            $article->update(['translations' => $translations]);
+            Article::withoutEvents(function () use ($article, $translations) {
+                if (!empty($article->id)) {
+                    Article::where('id', $article->id)->update(['translations' => $translations]);
+                }
+            });
         }
 
         // No translation available yet (or invalid and cleared) — dispatch background job and return original.
