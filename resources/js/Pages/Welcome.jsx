@@ -179,13 +179,7 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
 
               {/* Main Content Overlay */}
               <div className="absolute inset-0 z-10 flex flex-col justify-end p-5 md:p-12 lg:p-24 pb-10 md:pb-16 pt-28 md:pt-32 w-full max-w-5xl mx-auto">
-                <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: false, amount: 0.5 }}
-                      transition={{ duration: 0.5, delay: 0.2 }}
-                      className="max-w-3xl pr-16 md:pr-20"
-                    >
+                <div className="max-w-3xl pr-16 md:pr-20">
                       {/* Tags */}
                       {article.tags?.[0] && (
                         <span className="inline-flex items-center gap-2 px-3 py-1.5 mb-3 md:px-4 md:py-2 md:mb-4 text-[10px] font-black uppercase tracking-widest bg-primary/80 backdrop-blur-md rounded-full text-white shadow-lg border border-white/20">
@@ -201,7 +195,7 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
                       </h1>
                       
                       {/* TL;DR Section */}
-                      <div className="mb-4 md:mb-6 bg-white/10 backdrop-blur-xl border border-white/20 p-4 md:p-5 rounded-2xl shadow-xl max-h-[35vh] md:max-h-none overflow-y-auto overscroll-contain">
+                      <div className="mb-4 md:mb-6 bg-white/10 backdrop-blur-xl transform-gpu border border-white/20 p-4 md:p-5 rounded-2xl shadow-xl max-h-[35vh] md:max-h-none overflow-y-auto overscroll-contain">
                          <div className="flex items-center gap-2 mb-2 md:mb-3">
                            <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
                            <h4 className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-amber-400">{__('TL;DR Summary')}</h4>
@@ -218,11 +212,11 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
                       </div>
                       
                       <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-gray-300">
-                        <span className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
+                        <span className="flex items-center gap-2 bg-white/10 backdrop-blur-md transform-gpu px-4 py-2 rounded-full border border-white/10">
                           <Clock className="w-4 h-4 text-primary" />
                           {article.reading_time_minutes || 5} {__('min read')}
                         </span>
-                        <span className="opacity-70 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/5">{dayjs(article.updated_at).fromNow()}</span>
+                        <span className="opacity-70 bg-black/40 backdrop-blur-md transform-gpu px-4 py-2 rounded-full border border-white/5">{dayjs(article.updated_at).fromNow()}</span>
                       </div>
                       
                       <div className="mt-5 md:mt-8">
@@ -234,7 +228,7 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
                           {__('Read Full Story')}
                         </Link>
                       </div>
-                    </motion.div>
+                    </div>
               </div>
 
               {/* Right Side Action Buttons */}
