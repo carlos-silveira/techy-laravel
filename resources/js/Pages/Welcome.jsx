@@ -102,7 +102,7 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
   }
 
   return (
-    <div className="bg-black text-white h-screen w-screen overflow-hidden font-sans selection:bg-primary/30 relative">
+    <main className="bg-black text-white h-screen w-screen overflow-hidden font-sans selection:bg-primary/30 relative">
       <Head title="TechyNews" />
       
       {/* Retain Global Navbar */}
@@ -333,7 +333,7 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
         )}
       </AnimatePresence>
       <CommandPalette />
-    </div>
+    </main>
   );
 }
 
