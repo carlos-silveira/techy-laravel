@@ -123,6 +123,84 @@ class PublicController extends Controller
     /**
      * Display a specific published article.
      */
+    
+    /**
+     * Display the classic homepage layout.
+     */
+    public function classicIndex()
+    {
+        $locale = IlluminateSupportFacadesApp::getLocale();
+
+        $editorsChoice = $this->rememberLocaleAware(
+            "homepage_editors_choice_{$locale}",
+            $locale,
+            function () use ($locale) {
+                return AppModelsArticle::where('status', 'published')
+                    ->where('is_editors_choice', true)
+                    ->orderBy('created_at', 'desc')
+                    ->select('id', 'title', 'slug', 'ai_summary', 'updated_at', 'cover_image_path', 'language', 'translations', 'reading_time_minutes', 'tags')
+                    ->take(3)
+                    ->get();
+            }
+        );
+
+        $articles = $this->rememberLocaleAware(
+            "homepage_articles_{$locale}",
+            $locale,
+            function () use ($locale) {
+                return AppModelsArticle::where('status', 'published')
+                    ->orderBy('created_at', 'desc')
+                    ->select('id', 'title', 'slug', 'ai_summary', 'updated_at', 'cover_image_path', 'language', 'translations', 'reading_time_minutes', 'tags')
+                    ->take(10)
+                    ->get();
+            }
+        );
+
+        $trendingArticles = $this->rememberLocaleAware(
+            "homepage_trending_{$locale}",
+            $locale,
+            function () use ($locale) {
+                $ids = IlluminateSupportFacadesDB::table('page_views')
+                    ->where('created_at', '>=', now()->subDays(7))
+                    ->whereNotNull('article_id')
+                    ->select('article_id', IlluminateSupportFacadesDB::raw('count(*) as total_views'))
+                    ->groupBy('article_id')
+                    ->orderByDesc('total_views')
+                    ->limit(5)
+                    ->pluck('article_id');
+
+                $selectCols = ['id', 'title', 'slug', 'ai_summary', 'updated_at', 'cover_image_path', 'language', 'translations', 'reading_time_minutes', 'tags'];
+
+                if ($ids->isEmpty()) {
+                    $articles = AppModelsArticle::where('status', 'published')->orderByDesc('created_at')->limit(5)->select($selectCols)->get();
+                } else {
+                    $articles = AppModelsArticle::whereIn('id', $ids)
+                        ->where('status', 'published')
+                        ->select($selectCols)
+                        ->get()
+                        ->sortBy(fn($a) => array_search($a->id, $ids->toArray()));
+                }
+
+                if ($articles->isEmpty()) {
+                    $articles = AppModelsArticle::where('status', 'published')->latest()->limit(5)->select($selectCols)->get();
+                }
+
+                return $articles;
+            }
+        );
+
+        $editorsChoice->each->makeHidden(['translations', 'content', 'embedding']);
+        $articles->each->makeHidden(['translations', 'content', 'embedding']);
+        $trendingArticles->each->makeHidden(['translations', 'content', 'embedding']);
+
+        return InertiaInertia::render('Classic', [
+            'editorsChoice' => $editorsChoice,
+            'articles' => $articles,
+            'trendingArticles' => $trendingArticles,
+            'dailyBrief' => $this->getDailyBrief($locale),
+        ]);
+    }
+
     public function show(string $slug)
     {
         $locale = App::getLocale();

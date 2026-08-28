@@ -61,7 +61,7 @@ export default function Navbar({ transparent = false }) {
                                 alt="Techy News" 
                                 width="170"
                                 height="32"
-                                className="h-8 w-auto object-contain transition-all duration-500 dark:brightness-100 brightness-0" 
+                                className={`h-8 w-auto object-contain transition-all duration-500 ${transparent ? 'brightness-100' : 'dark:brightness-100 brightness-0'}`} 
                             />
                         </Link>
                     </motion.div>
@@ -106,7 +106,7 @@ export default function Navbar({ transparent = false }) {
                     <div className="flex md:hidden items-center gap-2 relative z-[110]">
                         <button
                             onClick={openSearch}
-                            className="p-2 rounded-xl bg-black/5 dark:bg-white/5 text-gray-600 dark:text-gray-400"
+                            className={`p-2 rounded-xl ${transparent ? "bg-white/10 text-white" : "bg-black/5 dark:bg-white/5 text-gray-600 dark:text-gray-400"}`}
                             aria-label="Search"
                         >
                             <Search className="w-5 h-5" />
@@ -114,7 +114,7 @@ export default function Navbar({ transparent = false }) {
                         <RagCopilot variant="navbar" />
                         <button 
                             onClick={() => setIsSidebarOpen(true)}
-                            className="p-2 rounded-xl bg-black/5 dark:bg-white/5 text-gray-600 dark:text-gray-400"
+                            className={`p-2 rounded-xl ${transparent ? "bg-white/10 text-white" : "bg-black/5 dark:bg-white/5 text-gray-600 dark:text-gray-400"}`}
                             aria-label="Open menu"
                         >
                             <Menu className="w-6 h-6" />
@@ -153,7 +153,7 @@ export default function Navbar({ transparent = false }) {
                                 <div className="space-y-2">
                                     <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4">{__('Menu')}</h4>
                                     <Link 
-                                        href="/" 
+                                        href="/classic" 
                                         className="block text-xl font-black tracking-tighter text-black dark:text-white hover:text-primary transition-colors py-2"
                                     >
                                         {__('Formato Clásico')}

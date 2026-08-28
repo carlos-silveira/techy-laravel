@@ -35,6 +35,8 @@ use App\Http\Controllers\Studio\StudioObservabilityController;
 |*/
 
 Route::get('/', [PublicController::class, 'index']);
+Route::get('/classic', [PublicController::class, 'classicIndex'])->name('classic');
+
 Route::get('/article/{slug}', [PublicController::class, 'show']);
 Route::post('/article/{id}/comment', [PublicController::class, 'storeComment']);
 Route::post('/api/articles/{id}/like', [ArticleController::class, 'like']); // Moved from api.php to handle sessions

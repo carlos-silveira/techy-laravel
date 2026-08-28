@@ -211,22 +211,24 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
                          </ul>
                       </div>
                       
-                      <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-gray-300">
-                        <span className="flex items-center gap-2 bg-white/10 backdrop-blur-md transform-gpu px-4 py-2 rounded-full border border-white/10">
-                          <Clock className="w-4 h-4 text-primary" />
-                          {article.reading_time_minutes || 5} {__('min read')}
-                        </span>
-                        <span className="opacity-70 bg-black/40 backdrop-blur-md transform-gpu px-4 py-2 rounded-full border border-white/5">{dayjs(article.updated_at).fromNow()}</span>
-                      </div>
-                      
-                      <div className="mt-5 md:mt-8">
+                      <div className="flex flex-row items-center gap-2 md:gap-4 mt-1 md:mt-6">
                         <Link 
                           href={`/article/${article.slug}`}
-                          className="inline-flex items-center gap-3 bg-white text-black px-6 py-3 md:px-8 md:py-4 rounded-full font-black uppercase tracking-widest text-xs md:text-sm hover:scale-105 transition-transform shadow-[0_0_30px_rgba(255,255,255,0.3)]"
+                          className="flex-1 md:flex-none justify-center inline-flex items-center gap-2 bg-white text-black px-4 py-2.5 md:px-8 md:py-4 rounded-full font-black uppercase tracking-widest text-[10px] md:text-sm hover:scale-105 transition-transform shadow-lg md:shadow-[0_0_30px_rgba(255,255,255,0.3)]"
                         >
-                          <BookOpen className="w-5 h-5" />
-                          {__('Read Full Story')}
+                          <BookOpen className="w-4 h-4 md:w-5 md:h-5" />
+                          <span className="truncate">{__('Read Full Story')}</span>
                         </Link>
+                        
+                        <span className="flex-none inline-flex items-center gap-1.5 text-[10px] md:text-xs font-bold uppercase tracking-widest text-gray-300 bg-white/10 backdrop-blur-md transform-gpu px-3 py-2.5 md:px-4 md:py-2 rounded-full border border-white/10">
+                          <Clock className="w-3.5 h-3.5 text-primary" />
+                          <span className="hidden sm:inline">{article.reading_time_minutes || 5} {__('min read')}</span>
+                          <span className="sm:hidden">{article.reading_time_minutes || 5}m</span>
+                        </span>
+                        
+                        <span className="hidden md:inline-flex text-xs font-bold uppercase tracking-widest text-gray-300 opacity-70 bg-black/40 backdrop-blur-md transform-gpu px-4 py-2 rounded-full border border-white/5">
+                            {dayjs(article.updated_at).fromNow()}
+                        </span>
                       </div>
                     </div>
               </div>

@@ -1,0 +1,481 @@
+import React, { useState, useEffect, useRef, Suspense } from 'react';
+import { Head, Link } from '@inertiajs/react';
+import axios from 'axios';
+import { toast } from 'sonner';
+import {
+  motion, useScroll, useTransform, useMotionTemplate,
+  useMotionValue, useSpring, AnimatePresence
+} from 'framer-motion';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import CommandPalette from '@/Components/CommandPalette';
+import Navbar from '@/Components/Navbar';
+import PublicFooter from '@/Components/PublicFooter';
+import AdsterraAd from '@/Components/AdsterraAd';
+const RagCopilot = React.lazy(() => import('@/Components/RagCopilot'));
+import { ArrowRight, Zap, BookOpen, Clock } from 'lucide-react';
+import useLanguage from '@/Hooks/useLanguage';
+import { getFinalImage } from '@/utils';
+import NewsletterBlock from '@/Components/NewsletterBlock';
+
+dayjs.extend(relativeTime);
+
+export default function Welcome({ articles, editorsChoice, dailyBrief, trendingArticles }) {
+  const { __ } = useLanguage();
+  const { scrollYProgress } = useScroll();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const smoothX = useSpring(mouseX, { damping: 50, stiffness: 400 });
+  const smoothY = useSpring(mouseY, { damping: 50, stiffness: 400 });
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [mouseX, mouseY]);
+
+  const backgroundGlow = useMotionTemplate`radial-gradient(900px circle at ${smoothX}px ${smoothY}px, rgba(43, 124, 238, 0.06), transparent 80%)`;
+
+  const [showCopilot, setShowCopilot] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowCopilot(true), 3500);
+    const handleInteraction = () => setShowCopilot(true);
+    
+    window.addEventListener('scroll', handleInteraction, { once: true, passive: true });
+    window.addEventListener('mousemove', handleInteraction, { once: true, passive: true });
+    window.addEventListener('touchstart', handleInteraction, { once: true, passive: true });
+    
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('scroll', handleInteraction);
+      window.removeEventListener('mousemove', handleInteraction);
+      window.removeEventListener('touchstart', handleInteraction);
+    };
+  }, []);
+
+
+  // Featured article is the latest one
+  const featured = articles?.[0];
+
+  // Grid articles: skip the featured one and any that are in Editors Choice
+  const gridArticles = articles?.slice(1).filter(a => 
+    !editorsChoice?.some(ec => ec.id === a.id)
+  ).slice(0, 6) || [];
+  const tickerItems = articles?.slice(0, 8) || [];
+
+  return (
+    <div className="min-h-screen bg-[#f8f6f6] dark:bg-[#02040a] text-black dark:text-white font-sans selection:bg-primary/30 overflow-x-hidden transition-colors duration-500">
+      <Head>
+        <title>{`${__('Home')} | TechyNews`}</title>
+        <meta name="description" content="TechyNews: Plataforma líder en periodismo tecnológico impulsado por Inteligencia Artificial. Descubre noticias sobre IA, startups, ciberseguridad y el futuro de la tecnología." />
+        <link rel="canonical" href="https://techynews.lat" />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: `
+                {
+                    "@context": "https://schema.org",
+                    "@type": "WebSite",
+                    "name": "TechyNews",
+                    "url": "https://techynews.lat/",
+                    "description": "TechyNews: Inteligencia Artificial y Periodismo Tecnológico",
+                    "publisher": {
+                        "@type": "Organization",
+                        "name": "TechyNews"
+                    }
+                }
+            `}} />
+        <meta property="og:title" content="Techy News — AI-Powered Tech Intelligence" />
+        <meta property="og:description" content="A cutting-edge, AI-powered journalism platform delivering deep technical research and automated synthesis of global tech news." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://techynews.lat" />
+        <meta property="og:image" content="https://techynews.lat/img/logo_wbc.webp" />
+        <meta property="og:site_name" content="Techy News" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@TechyNewsLat" />
+        <meta name="twitter:title" content="Techy News — AI-Powered Tech Intelligence" />
+        <meta name="twitter:description" content="AI-powered journalism platform delivering deep technical research and automated synthesis of global tech news." />
+      </Head>
+      <CommandPalette />
+
+      {/* Interactive Cursor Spotlight */}
+      <motion.div
+        className="pointer-events-none fixed inset-0 z-0 transition-opacity duration-300"
+        style={{ background: backgroundGlow }}
+      />
+
+      {/* Ambient Glows */}
+      <div className="fixed top-[-20%] right-[-10%] w-[60vw] h-[60vw] bg-primary/8 rounded-full blur-[200px] pointer-events-none mix-blend-screen z-0"></div>
+      <div className="fixed bottom-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-purple-600/8 rounded-full blur-[150px] pointer-events-none mix-blend-screen z-0"></div>
+
+      {/* ===== NAVBAR ===== */}
+      <Navbar />
+
+      <main className="relative z-10">
+        {/* ===== MASTER HERO SECTION ===== */}
+        <section className="relative flex flex-col justify-center overflow-hidden mb-12 z-20 min-h-[90vh]">
+          {/* Global Hero Background (tied to Featured Story) */}
+          {featured && (
+            <motion.div
+              className="absolute inset-0"
+              style={{ scale: useTransform(scrollYProgress, [0, 0.3], [1.05, 1]) }}
+            >
+              <img
+                src={getFinalImage(featured, 1600)}
+                fetchpriority="high"
+                loading="eager"
+                width="1600"
+                height="900"
+                alt={featured.title}
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-[10s] group-hover:scale-110"
+              />
+              {/* Multi-layer gradient overlay to fade into page background smoothly */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#f8f6f6] dark:from-[#02040a] via-[#f8f6f6]/80 dark:via-[#02040a]/80 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#f8f6f6]/95 dark:from-[#02040a]/95 via-[#f8f6f6]/70 dark:via-[#02040a]/70 to-transparent" />
+            </motion.div>
+          )}
+
+          {/* Master Content Wrapper wrapper */}
+          <div className="relative z-30 max-w-7xl mx-auto px-6 pt-32 pb-20 w-full flex flex-col min-h-[85vh] justify-center">
+            
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+              
+              {/* LEFT COLUMN: FEATURED STORY */}
+              <div className="lg:col-span-7 order-2 lg:order-1">
+                {featured && (
+                  <motion.div
+                    initial={{ opacity: 0, x: -40 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+                  >
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.8, delay: 0.1 }}
+                      className="inline-flex items-center gap-3 bg-primary/10 border border-primary/20 rounded-full px-5 py-2 mb-8 backdrop-blur-md"
+                    >
+                      <span className="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_10px_rgba(43,124,238,0.8)]"></span>
+                      <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">{__('Featured Story')}</span>
+                    </motion.div>
+
+                    <Link href={`/article/${featured.slug}`} aria-label={featured.title}>
+                      <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-black tracking-tighter leading-[0.95] mb-6 text-black dark:text-white hover:text-primary transition-colors duration-500 cursor-pointer drop-shadow-md">
+                        {featured.title}
+                      </h1>
+                    </Link>
+
+                    <p className="text-lg md:text-xl lg:text-2xl text-gray-800 dark:text-gray-200 font-light leading-relaxed mb-10 max-w-2xl drop-shadow-sm">
+                      {featured.ai_summary}
+                    </p>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-8">
+                      <Link
+                        href={`/article/${featured.slug}`}
+                        className="inline-flex items-center justify-center gap-3 bg-primary text-gray-900 font-black px-8 py-4 rounded-full hover:scale-105 hover:bg-primary/90 transition-all shadow-[0_0_30px_rgba(43,124,238,0.4)] uppercase tracking-wider text-sm group"
+                      >
+                        {__('Read Story')}
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      </Link>
+                      <div className="flex items-center gap-3 text-gray-700 dark:text-gray-300 text-xs font-bold uppercase tracking-widest bg-white/40 dark:bg-black/40 backdrop-blur-md px-5 py-3.5 rounded-full border border-black/5 dark:border-white/10 shadow-sm">
+                        <Clock className="w-4 h-4 text-primary" />
+                        {featured.reading_time_minutes || '5'} {__('min read')}
+                        <span className="mx-1 opacity-50">|</span>
+                        {dayjs(featured.updated_at).fromNow()}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+
+              {/* RIGHT COLUMN: DAILY BRIEFING */}
+              <div className="lg:col-span-5 order-1 lg:order-2">
+                {dailyBrief && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.8, delay: 0.3 }}
+                    className="relative group h-full"
+                  >
+                    {/* Outer Glow */}
+                    <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 to-purple-600/30 rounded-[2.5rem] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                    
+                    <div className="relative bg-white/70 dark:bg-[#0a0f1c]/80 backdrop-blur-3xl border border-white/40 dark:border-white/10 rounded-[2.5rem] p-8 md:p-10 shadow-2xl overflow-hidden h-full">
+                      {/* Terminal Scanline Effect */}
+                      <div className="absolute inset-0 pointer-events-none opacity-[0.03] dark:opacity-[0.07] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]" />
+                      
+                      <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-8 border-b border-black/5 dark:border-white/10 pb-6">
+                          <div className="flex items-center gap-4">
+                            <div className="relative">
+                              <div className="w-12 h-12 rounded-xl bg-black dark:bg-white/5 flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform duration-500">
+                                <Zap className="w-6 h-6 text-primary" />
+                              </div>
+                              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-[#0a0f1c] animate-pulse"></div>
+                            </div>
+                            <div>
+                              <h2 className="text-xs font-black uppercase tracking-[0.3em] text-gray-600 dark:text-gray-400">{__('Intelligence Feed')}</h2>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="text-sm font-black text-black dark:text-white tracking-tighter uppercase">{__('Daily Briefing')}</span>
+                                <span className="inline-block w-1.5 h-4 bg-primary/40 animate-[blink_1s_infinite]"></span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="hidden sm:flex items-center gap-2 bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-full border border-black/5 dark:border-white/5">
+                            <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-ping"></span>
+                            <span className="text-[9px] font-black uppercase tracking-widest text-gray-500">Live AI Output</span>
+                          </div>
+                        </div>
+
+                        {/* SIGNAL CONTENT */}
+                        <div className="prose prose-sm dark:prose-invert max-w-none 
+                          prose-p:text-gray-600 dark:prose-p:text-gray-400 prose-p:font-light prose-p:leading-relaxed
+                          prose-strong:text-black dark:prose-strong:text-white prose-strong:font-black prose-strong:uppercase prose-strong:tracking-widest prose-strong:text-[10px]
+                          prose-ul:list-none prose-ul:p-0 prose-li:p-0 prose-li:mb-4
+                          prose-a:no-underline prose-a:text-primary prose-a:font-bold hover:prose-a:text-primary/80 transition-colors
+                          [&_li]:relative [&_li]:pl-6 [&_li]:before:content-['>'] [&_li]:before:absolute [&_li]:before:left-0 [&_li]:before:text-primary/60 [&_li]:before:font-black [&_li]:before:text-[10px]
+                        ">
+                          <div dangerouslySetInnerHTML={{ __html: dailyBrief }} />
+                        </div>
+
+                        <div className="mt-8 pt-6 border-t border-black/5 dark:border-white/5 flex items-center justify-between">
+                           <div className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest italic font-mono">
+                             ST-ID: {Math.random().toString(36).substring(7).toUpperCase()}
+                           </div>
+                           <div className="text-[10px] font-black text-primary/60 uppercase tracking-widest">
+                             {dayjs().format('HH:mm:ss')} UTC
+                           </div>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+                
+                {/* TRENDING MINI SECTION */}
+                {trendingArticles?.length > 0 && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8, delay: 0.2 }}
+                    className="mt-8 pt-8 border-t border-black/5 dark:border-white/5"
+                  >
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-primary mb-6 flex items-center gap-2">
+                       <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
+                       {__('Trending Now')}
+                    </h3>
+                    <div className="space-y-6">
+                      {trendingArticles.map((article, index) => (
+                        <Link 
+                          key={article.id} 
+                          href={`/article/${article.slug}`}
+                          className="flex gap-4 group/item"
+                        >
+                          <span className="text-2xl font-black text-black/10 dark:text-white/10 group-hover/item:text-primary/40 transition-colors leading-none font-mono">
+                            0{index + 1}
+                          </span>
+                          <div>
+                            <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100 group-hover/item:text-primary transition-colors line-clamp-2 leading-snug">
+                              {article.title}
+                            </h4>
+                            <div className="flex items-center gap-2 mt-1 text-[9px] font-black uppercase tracking-widest text-gray-500">
+                              {article.reading_time_minutes || 5} MIN READ
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* ===== EDITORS CHOICE ===== */}
+        {editorsChoice && editorsChoice.length > 0 && (
+          <section className="py-24 px-6 max-w-7xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="grid grid-cols-1 md:grid-cols-3 gap-8"
+            >
+              {editorsChoice.map((article, index) => (
+                <motion.div
+                  key={article.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Link href={`/article/${article.slug}`} className="group block" aria-label={article.title}>
+                    <div className="relative rounded-[2rem] overflow-hidden bg-white/[0.6] dark:bg-white/[0.03] border border-black/5 dark:border-white/5 group-hover:border-amber-400/30 transition-all duration-500 shadow-sm dark:shadow-none">
+                      <div className="h-52 bg-gradient-to-br from-white/10 to-black/50 relative overflow-hidden">
+                        <img 
+                          src={getFinalImage(article, 600)} 
+                          alt={article.title}
+                          width="600"
+                          height="400"
+                          loading={index === 0 ? "eager" : "lazy"} 
+                          fetchpriority={index === 0 ? "high" : "auto"}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#02040a] to-transparent opacity-60" />
+                        <div className="absolute inset-0 group-hover:bg-amber-400/5 transition-colors duration-500" />
+                        <span className="absolute top-4 right-4 text-[10px] font-black uppercase tracking-widest bg-amber-400/20 text-amber-300 border border-amber-400/30 px-3 py-1.5 rounded-full backdrop-blur-md">
+                          ★ {__('Editors Pick')}
+                        </span>
+                      </div>
+                      <div className="p-8">
+                        <h3 className="text-xl font-black tracking-tight mb-3 text-black dark:text-white group-hover:text-amber-400 transition-colors leading-tight line-clamp-2">
+                          {article.title}
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-500 font-light line-clamp-2 leading-relaxed">
+                          {article.ai_summary}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </motion.div>
+          </section>
+        )}
+
+        {/* ===== BENTO ARTICLE GRID ===== */}
+        {(articles?.length > 0 && gridArticles.length > 0) ? (
+          <section className="py-20 px-6 max-w-7xl mx-auto border-t border-black/5 dark:border-white/5">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-12 gap-6">
+              <div className="flex items-center gap-4">
+                <div className="w-1 h-8 bg-primary rounded-full"></div>
+                <div>
+                  <span className="text-[10px] font-black text-primary uppercase tracking-[0.25em] block mb-1">{__('Latest Discoveries')}</span>
+                  <h2 className="text-4xl font-black tracking-tighter text-black dark:text-white">{__('Now Reading')}</h2>
+                </div>
+              </div>
+
+              {/* Category Pills */}
+              <div className="flex overflow-x-auto gap-2 pb-2 w-full md:w-auto scrollbar-hide">
+                {['Artificial Intelligence', 'Gadgets & Hardware', 'Software & Apps', 'Business Tech', 'Gaming', 'Cybersecurity & Privacy'].map(cat => (
+                  <Link 
+                    key={cat}
+                    href={`/archive?tag=${encodeURIComponent(cat)}`}
+                    className="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all bg-black/5 dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:bg-primary/10 hover:text-primary border border-transparent hover:border-primary/20"
+                  >
+                    {__(cat)}
+                  </Link>
+                ))}
+              </div>
+
+              <Link href="/archive" className="hidden md:flex text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-black dark:hover:text-white transition-colors items-center gap-2 group flex-shrink-0">
+                {__('Full Archive')} <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {gridArticles.map((article, index) => {
+                const isLarge = index === 0;
+                return (
+                  <motion.div
+                    key={article.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: '-60px' }}
+                    transition={{ duration: 0.7, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
+                    className={isLarge ? 'lg:col-span-2 lg:row-span-2' : ''}
+                  >
+                    <Link href={`/article/${article.slug}`} className="group block h-full" aria-label={article.title}>
+                      <div className={`h-full bg-white/[0.6] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 group-hover:border-primary/30 rounded-[2rem] overflow-hidden transition-all duration-500 flex flex-col shadow-sm dark:shadow-none ${isLarge ? 'min-h-[500px]' : 'min-h-[280px]'}`}>
+                        <div className={`w-full flex-shrink-0 relative overflow-hidden bg-gray-100 dark:bg-gray-900 ${isLarge ? 'h-72' : 'h-40'}`}>
+                          <img 
+                            src={getFinalImage(article, isLarge ? 1200 : 600)} 
+                            alt={article.title}
+                            width={isLarge ? "1200" : "600"}
+                            height={isLarge ? "800" : "400"}
+                            loading="lazy" 
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#02040a] via-transparent to-transparent" />
+                          <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-colors duration-700 mix-blend-overlay" />
+                        </div>
+                        <div className="p-7 flex flex-col flex-1 justify-between">
+                          <div>
+                            <div className="flex items-center justify-between mb-4">
+                              <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">
+                                {dayjs(article.updated_at).fromNow()}
+                              </span>
+                              {article.tags?.[0] && (
+                                <span className="text-[10px] font-black bg-white/5 text-gray-500 px-2.5 py-1 rounded-full">
+                                  #{article.tags[0]}
+                                </span>
+                              )}
+                            </div>
+                             <h3 className={`font-black tracking-tight text-black dark:text-white group-hover:text-primary transition-colors duration-300 leading-tight line-clamp-3 ${isLarge ? 'text-3xl md:text-4xl' : 'text-xl'}`}>
+                              {article.title}
+                            </h3>
+                          </div>
+                          {(isLarge) && (
+                            <p className="text-sm text-gray-600 font-light line-clamp-2 leading-relaxed mt-4">
+                              {article.ai_summary}
+                            </p>
+                          )}
+                          <div className="mt-5 flex items-center gap-2 text-gray-700 text-[10px] font-black uppercase tracking-widest">
+                            <Clock className="w-3 h-3" />
+                            {article.reading_time_minutes || '5'} min
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            <div className="mt-10 text-center">
+              <Link
+                href="/archive"
+                className="inline-flex items-center gap-3 border border-black/10 dark:border-white/10 text-gray-400 hover:text-black dark:hover:text-white px-8 py-4 rounded-xl font-black text-xs uppercase tracking-widest transition-all hover:bg-black/5 dark:hover:bg-white/5 group"
+              >
+                {__('Load All Articles')}
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+          </section>
+        ) : articles?.length === 0 && (
+          <section className="py-20 px-6 max-w-7xl mx-auto border-t border-black/5 dark:border-white/5">
+            <div className="py-32 text-center text-gray-500 dark:text-gray-700 font-light text-xl border border-black/5 dark:border-white/5 rounded-[2rem] transition-colors duration-500">
+              {__('The intelligence pipeline is warming up. Check back shortly.')}
+            </div>
+          </section>
+        )}
+
+        <section className="px-6 max-w-7xl mx-auto py-12">
+            <div className="my-8 hidden md:block">
+              <AdsterraAd type="728x90" />
+            </div>
+            <div className="my-8 md:hidden">
+              <AdsterraAd type="320x50" />
+            </div>
+        </section>
+
+        {/* ===== NEWSLETTER ===== */}
+        <NewsletterBlock />
+
+        {/* ===== NEWSLETTER ===== */}
+        {/* ... */}
+        {/* ===== FOOTER ===== */}
+        <PublicFooter />
+        {showCopilot && (
+          <Suspense fallback={null}>
+            <RagCopilot />
+          </Suspense>
+        )}
+
+      </main>
+    </div>
+  );
+}

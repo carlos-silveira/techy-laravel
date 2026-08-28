@@ -1,0 +1,358 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers;
+
+use App\Models\Article;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\App;
+use App\Services\GeminiService;
+use App\Services\NewsService;
+
+class PublicController extends Controller
+{
+    private GeminiService $geminiService;
+    private NewsService $newsService;
+
+    public function __construct(GeminiService $geminiService, NewsService $newsService)
+    {
+        $this->geminiService = $geminiService;
+        $this->newsService = $newsService;
+    }
+
+    /**
+     * Display the public homepage.
+     */
+    public function index()
+    {
+        $locale = App::getLocale();
+
+        // --- Cache helpers with smart TTL ---
+        // When locale != 'en' and translations aren't ready yet, translateIfNecessary()
+        // falls back to English and dispatches a background job for future requests.
+        // We detect whether any article is still untranslated and use a short TTL (30s)
+        // so the page retries soon after the background job completes.
+        // Once all articles are translated, the full 3600s TTL is used.
+
+        $editorsChoice = $this->rememberLocaleAware(
+            "homepage_editors_choice_{$locale}",
+            $locale,
+            function () use ($locale) {
+                return Article::where('status', 'published')
+                    ->where('is_editors_choice', true)
+                    ->orderBy('created_at', 'desc')
+                    ->select('id', 'title', 'slug', 'ai_summary', 'updated_at', 'cover_image_path', 'language', 'translations', 'reading_time_minutes', 'tags')
+                    ->take(3)
+                    ->get();
+            }
+        );
+
+        $articles = $this->rememberLocaleAware(
+            "homepage_articles_{$locale}",
+            $locale,
+            function () use ($locale) {
+                return Article::where('status', 'published')
+                    ->orderBy('created_at', 'desc')
+                    ->select('id', 'title', 'slug', 'ai_summary', 'updated_at', 'cover_image_path', 'language', 'translations', 'reading_time_minutes', 'tags')
+                    ->take(10)
+                    ->get();
+            }
+        );
+
+        $trendingArticles = $this->rememberLocaleAware(
+            "homepage_trending_{$locale}",
+            $locale,
+            function () use ($locale) {
+                $ids = \Illuminate\Support\Facades\DB::table('page_views')
+                    ->where('created_at', '>=', now()->subDays(7))
+                    ->whereNotNull('article_id')
+                    ->select('article_id', \Illuminate\Support\Facades\DB::raw('count(*) as total_views'))
+                    ->groupBy('article_id')
+                    ->orderByDesc('total_views')
+                    ->limit(5)
+                    ->pluck('article_id');
+
+                $selectCols = ['id', 'title', 'slug', 'ai_summary', 'updated_at', 'cover_image_path', 'language', 'translations', 'reading_time_minutes', 'tags'];
+
+                if ($ids->isEmpty()) {
+                    $articles = Article::where('status', 'published')->orderByDesc('created_at')->limit(5)->select($selectCols)->get();
+                } else {
+                    $articles = Article::whereIn('id', $ids)
+                        ->where('status', 'published')
+                        ->select($selectCols)
+                        ->get()
+                        ->sortBy(fn($a) => array_search($a->id, $ids->toArray()));
+                }
+
+                if ($articles->isEmpty()) {
+                    $articles = Article::where('status', 'published')->latest()->limit(5)->select($selectCols)->get();
+                }
+
+                return $articles;
+            }
+        );
+
+        $editorsChoice->each->makeHidden(['translations', 'content', 'embedding']);
+        $articles->each->makeHidden(['translations', 'content', 'embedding']);
+        $trendingArticles->each->makeHidden(['translations', 'content', 'embedding']);
+
+        return Inertia::render('Welcome', [
+            'editorsChoice' => $editorsChoice,
+            'articles' => $articles,
+            'trendingArticles' => $trendingArticles,
+            'dailyBrief' => $this->getDailyBrief($locale),
+        ]);
+    }
+
+    /**
+     * Cache article collections with locale-aware TTL.
+     *
+     * If any article needs translation and doesn't have one stored yet,
+     * cache only for 30 seconds so the user gets translated content quickly
+     * after the TranslateArticle background job finishes.
+     * Once all articles are translated, the full 3600s TTL kicks in.
+     */
+    private function rememberLocaleAware(string $key, string $locale, callable $query): \Illuminate\Support\Collection
+    {
+        // Check if cache already has content
+        if (Cache::has($key)) {
+            return Cache::get($key);
+        }
+
+        // Fetch raw articles and apply translation
+        $rawArticles = $query();
+        $allTranslated = true;
+        $translated = $rawArticles->map(function ($article) use ($locale, &$allTranslated) {
+            $articleLang = $article->language ?? 'en';
+            $trans = $article->translations[$locale] ?? null;
+            if ($articleLang !== $locale && Article::isInvalidTranslation($trans, $article->content)) {
+                $allTranslated = false;
+            }
+            return $this->translateIfNecessary($article, $locale);
+        })->filter(function($article) use ($locale) {
+            $articleLang = $article->language ?? 'en';
+            $trans = $article->translations[$locale] ?? null;
+            // Only show articles that match the current locale OR have a valid translation
+            return $articleLang === $locale || !Article::isInvalidTranslation($trans, $article->content);
+        })->values();
+
+        // Use a short TTL if any article still needs translation
+        $ttl = $allTranslated ? 3600 : 30;
+        Cache::put($key, $translated, $ttl);
+
+        return $translated;
+    }
+
+    /**
+     * Reusable logic to get the cached daily briefing or generate a dynamic fallback.
+     */
+    public function getDailyBrief(string $locale): string
+    {
+        $restingMessage = "The intelligence pipeline is resting. Check back later for the latest tech signals.";
+        $brief = Cache::get("homepage_daily_brief_{$locale}");
+
+        if (empty($brief) || $brief === $restingMessage) {
+            $latest = Article::where('status', 'published')->latest()->take(3)->get();
+            if ($latest->count() > 0) {
+                $signalLabel = $locale === 'es' ? 'Señales de Última Hora' : ($locale === 'pt' ? 'Sinais de Última Hora' : 'Breaking Signals');
+                $brief = "<p><strong>⚡ {$signalLabel}:</strong></p><ul>";
+                foreach ($latest as $a) {
+                    $translated = $this->translateIfNecessary($a, $locale);
+                    $brief .= "<li><a href='/article/{$translated->slug}' class='text-primary-400 hover:text-primary-300 transition-colors'>{$translated->title}</a></li>";
+                }
+                $brief .= "</ul>";
+            } else {
+                $brief = $restingMessage;
+            }
+        }
+
+        return $brief;
+    }
+
+
+    /**
+     * Display a specific published article.
+     */
+    public function show(string $slug)
+    {
+        $locale = App::getLocale();
+
+        $article = Article::where('slug', $slug)
+            ->where('status', 'published')
+            ->firstOrFail();
+
+        $article = Cache::remember("article_{$slug}_{$locale}", 3600, function () use ($article, $locale) {
+            return $this->translateIfNecessary($article, $locale);
+        });
+
+        // Increment views_count for analytics (bypassing cache for this write)
+        Article::where('id', $article->id)->increment('views_count');
+
+        $relatedArticles = Cache::remember("article_{$slug}_related_{$locale}", 3600, function () use ($article, $locale) {
+            $related = Article::where('status', 'published')
+                ->where('id', '!=', $article->id)
+                ->orderBy('created_at', 'desc')
+                ->take(3)
+                ->select('id', 'title', 'slug', 'updated_at', 'cover_image_path', 'ai_summary', 'language', 'translations')
+                ->get();
+
+            return $related->map(fn($a) => $this->translateIfNecessary($a, $locale));
+        });
+
+        $article->content = $this->recursivelyUnwrap($article->content);
+        $article->content = $this->sanitizeHtml($article->content);
+
+        // ALWAYS SPANISH for Social Media Previews (Open Graph)
+        // We force translation to 'es' just for the meta tags so Facebook/Twitter scrapers see Spanish
+        $metaArticle = $this->translateIfNecessary((clone $article), 'es');
+
+        return Inertia::render('ArticleShow', [
+            'article' => $article,
+            'relatedArticles' => $relatedArticles
+        ])->withViewData([
+            'meta' => [
+                'title' => $metaArticle->title,
+                'description' => $metaArticle->ai_summary,
+                'image' => $metaArticle->cover_image_path ? (str_starts_with($metaArticle->cover_image_path, 'http') ? $metaArticle->cover_image_path : asset('storage/' . $metaArticle->cover_image_path)) : null,
+                'url' => url()->current(),
+            ]
+        ]);
+    }
+
+    /**
+     * Server-side HTML sanitization to prevent XSS.
+     * Allows only safe tags and removes dangerous attributes like onclick/onerror.
+     */
+    private function sanitizeHtml(mixed $content): mixed
+    {
+        if (!is_string($content)) return $content;
+
+        // Whitelist of safe HTML tags
+        $allowedTags = '<div><p><a><br><h1><h2><h3><h4><h5><h6><ul><li><ol><strong><em><code><pre><img><section><article><blockquote>';
+        
+        // Strip unknown tags
+        $content = strip_tags($content, $allowedTags);
+
+        // Remove dangerous attributes (on*, javascript:, etc) using regex
+        $content = preg_replace('/on\w+="[^"]*"/i', '', $content);
+        $content = preg_replace('/on\w+=\'[^\']*\'/i', '', $content);
+        $content = preg_replace('/javascript:[^"]*/i', '', $content);
+
+        return $content;
+    }
+
+    /**
+     * Helper to translate an article if the requested locale differs from source.
+     * Falls back to the original content and dispatches a background
+     * translation job if the requested locale's translation is not yet available.
+     */
+    public function translateIfNecessary(Article $article, string $locale): Article
+    {
+        // If the article is already in the target locale, return as-is.
+        $articleLang = $article->language ?? 'en';
+        if ($articleLang === $locale) {
+            return $article;
+        }
+
+        $translations = $article->translations ?? [];
+
+        // If a valid translation exists, apply it.
+        if (isset($translations[$locale]) && !Article::isInvalidTranslation($translations[$locale], $article->content)) {
+            $article->title      = $this->recursivelyUnwrap($translations[$locale]['title']);
+            $article->content    = $this->recursivelyUnwrap($translations[$locale]['content']);
+            
+            // If we have a translated summary, use it. 
+            // If not, clear the summary if it was originally in a different language 
+            // to avoid "mixed language" artifacts (English summary with Spanish content).
+            if (!empty($translations[$locale]['summary'])) {
+                $article->ai_summary = $this->recursivelyUnwrap($translations[$locale]['summary']);
+            } else {
+                $article->ai_summary = null;
+            }
+            
+            return $article;
+        }
+
+        // If an invalid placeholder translation exists in the array, clean it up without triggering recursive saved events
+        if (isset($translations[$locale])) {
+            unset($translations[$locale]);
+            Article::withoutEvents(function () use ($article, $translations) {
+                if (!empty($article->id)) {
+                    Article::where('id', $article->id)->update(['translations' => $translations]);
+                }
+            });
+        }
+
+        // No translation available yet (or invalid and cleared) — dispatch background job and return original.
+        // The rememberLocaleAware() method will cache this with a 30s TTL so it retries soon.
+        \App\Jobs\TranslateArticle::dispatch($article, $locale);
+
+        return $article;
+    }
+
+    /**
+     * Recursively JSON-decode a string to handle double-encoding from AI models.
+     */
+    private function recursivelyUnwrap(mixed $value): mixed
+    {
+        if (!is_string($value)) {
+            return $value;
+        }
+
+        $trimmed = trim($value);
+        if (empty($trimmed)) {
+            return $value;
+        }
+
+        if (($trimmed[0] === '"' && $trimmed[strlen($trimmed)-1] === '"') || 
+            ($trimmed[0] === '{' && $trimmed[strlen($trimmed)-1] === '}') ||
+            ($trimmed[0] === '[' && $trimmed[strlen($trimmed)-1] === ']')) {
+            
+            $decoded = json_decode($value, true);
+            if (json_last_error() === JSON_ERROR_NONE && (is_array($decoded) || is_string($decoded))) {
+                return $this->recursivelyUnwrap($decoded);
+            }
+        }
+
+        // Clean up escaped slashes and wrapping quotes that might remain
+        $value = stripslashes($value);
+        $value = str_replace(['\n', '\r', '\t'], ["\n", "\r", "\t"], $value);
+        
+        // Decode HTML entities that Gemini might have mistakenly escaped
+        $value = html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        return trim($value, '"');
+    }
+
+    /**
+     * Search API for Cmd+K floating palette.
+     */
+    public function search(Request $request)
+    {
+        $query = $request->input('q');
+
+        if (!$query || strlen($query) < 2) {
+            return response()->json([]);
+        }
+
+        $locale = App::getLocale();
+
+        $results = Article::where('status', 'published')
+            ->where(function ($q) use ($query) {
+                $q->where('title', 'like', "%{$query}%")
+                    ->orWhere('ai_summary', 'like', "%{$query}%")
+                    ->orWhere('tags', 'like', "%{$query}%");
+            })
+            ->select('id', 'title', 'slug', 'ai_summary', 'updated_at', 'cover_image_path', 'language', 'translations')
+            ->orderBy('updated_at', 'desc')
+            ->limit(8)
+            ->get()
+            ->map(fn($a) => $this->translateIfNecessary($a, $locale));
+
+        return response()->json($results);
+    }
+}
