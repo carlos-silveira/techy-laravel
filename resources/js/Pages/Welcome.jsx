@@ -45,6 +45,8 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
   const [activeCommentArticleId, setActiveCommentArticleId] = useState(null);
   const [likedArticles, setLikedArticles] = useState([]);
   const containerRef = useRef(null);
+  const trackedViews = useRef(new Set());
+
 
   const handleLike = async (articleId) => {
     // Optimistic UI update
@@ -101,8 +103,20 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
     feedItems.push({ type: 'footer', id: 'footer-slide' });
   }
 
+  useEffect(() => {
+    const currentItem = feedItems[activeIndex];
+    if (currentItem && currentItem.type === 'article') {
+      const articleId = currentItem.data.id;
+      if (!trackedViews.current.has(articleId)) {
+        trackedViews.current.add(articleId);
+        axios.post(`/api/articles/${articleId}/soft-view`).catch(console.error);
+      }
+    }
+  }, [activeIndex, feedItems]);
+
+
   return (
-    <main className="bg-black text-white h-screen w-screen overflow-hidden font-sans selection:bg-primary/30 relative">
+    <main className="bg-black text-white h-[100dvh] w-screen overflow-hidden font-sans selection:bg-primary/30 relative">
       <Head title="TechyNews" />
       
       {/* Retain Global Navbar */}
@@ -129,7 +143,7 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
             return (
               <div 
                 key={item.id}
-                className="h-screen w-full snap-start snap-always relative flex flex-col items-center justify-center bg-[#02040a] border-y border-white/5"
+                className="h-[100dvh] w-full snap-start snap-always relative flex flex-col items-center justify-center bg-[#02040a] border-y border-white/5"
               >
                   <span className="text-[10px] text-gray-500 uppercase tracking-widest mb-4">{__('Advertisement')}</span>
                   <div className="w-full max-w-md bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-2 md:p-6 min-h-[400px] flex items-center justify-center mx-auto shadow-2xl overflow-hidden">
@@ -148,7 +162,7 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
           return (
             <div 
               key={article.id}
-              className="h-screen w-full snap-start snap-always relative flex items-center justify-center bg-[#02040a]"
+              className="h-[100dvh] w-full snap-start snap-always relative flex items-center justify-center bg-[#02040a]"
             >
               {/* Background Image / Media */}
               <div className="absolute inset-0 z-0">
@@ -180,14 +194,14 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
                         </span>
                       )}
                       
-                      <h1 className="text-2xl md:text-5xl font-black tracking-tighter leading-tight md:leading-[1.1] mb-4 md:mb-6 text-white drop-shadow-lg">
+                      <h1 className="text-2xl md:text-5xl font-black line-clamp-4 md:line-clamp-none tracking-tighter leading-tight md:leading-[1.1] mb-4 md:mb-6 text-white drop-shadow-lg">
                         <Link href={`/article/${article.slug}`} className="hover:text-primary transition-colors block">
                             {article.title}
                         </Link>
                       </h1>
                       
                       {/* TL;DR Section */}
-                      <div className="mb-4 md:mb-6 bg-white/10 backdrop-blur-xl border border-white/20 p-4 md:p-5 rounded-2xl shadow-xl">
+                      <div className="mb-4 md:mb-6 bg-white/10 backdrop-blur-xl border border-white/20 p-4 md:p-5 rounded-2xl shadow-xl max-h-[35vh] md:max-h-none overflow-y-auto overscroll-contain">
                          <div className="flex items-center gap-2 mb-2 md:mb-3">
                            <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
                            <h4 className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-amber-400">{__('TL;DR Summary')}</h4>
@@ -195,8 +209,8 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
                          <ul className="space-y-2 md:space-y-3">
                            {/* Split summary into bullet points for quick scanning */}
                            {(article.ai_summary || '').split('. ').slice(0,3).map((sentence, i) => sentence && (
-                             <li key={i} className="text-white text-lg md:text-xl font-medium leading-relaxed md:leading-loose flex items-start gap-3">
-                               <span className="text-primary mt-1 md:mt-1.5 text-xl md:text-2xl">•</span>
+                             <li key={i} className="text-white text-[15px] md:text-xl font-medium leading-snug md:leading-loose flex items-start gap-3">
+                               <span className="text-primary mt-0.5 md:mt-1.5 text-lg md:text-2xl">•</span>
                                {sentence}{!sentence.endsWith('.') ? '.' : ''}
                              </li>
                            ))}

@@ -1200,10 +1200,10 @@
     "/build/assets/dayjs.min-SSZgMhAK.mjs"
   ],
   "node_modules/dayjs/locale/en.js": [
-    "/build/assets/Welcome-dmzMqVop.mjs"
+    "/build/assets/Welcome-CaBGFZpi.mjs"
   ],
   "node_modules/dayjs/locale/es.js": [
-    "/build/assets/Welcome-dmzMqVop.mjs"
+    "/build/assets/Welcome-CaBGFZpi.mjs"
   ],
   "node_modules/dayjs/plugin/advancedFormat.js": [
     "/build/assets/ganttDiagram-EL5Y4UJY-DaNDSLuD.mjs"
@@ -3676,7 +3676,7 @@
     "/build/assets/menu-CoePYF51.mjs"
   ],
   "node_modules/lucide-react/dist/esm/icons/message-circle.js": [
-    "/build/assets/Welcome-dmzMqVop.mjs"
+    "/build/assets/Welcome-CaBGFZpi.mjs"
   ],
   "node_modules/lucide-react/dist/esm/icons/message-square.js": [
     "/build/assets/ThemeToggle-C9WSUpbk.mjs"
@@ -5779,7 +5779,7 @@
     "/build/assets/TopNav-DAkrkP7f.mjs"
   ],
   "resources/js/Pages/Welcome.jsx": [
-    "/build/assets/Welcome-dmzMqVop.mjs"
+    "/build/assets/Welcome-CaBGFZpi.mjs"
   ],
   "resources/js/ssr.jsx": [],
   "resources/js/utils.js": [

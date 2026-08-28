@@ -176,6 +176,24 @@ class ArticleController extends Controller
     }
 
     /**
+     * Track a soft view (e.g. from infinite scroll Reels).
+     */
+    public function trackSoftView(Request $request, $id)
+    {
+        $article = Article::findOrFail($id);
+        
+        // Use a session key so we only count once per session
+        $viewKey = "soft_viewed_article_{$id}";
+        
+        if (!$request->session()->has($viewKey)) {
+            $article->increment('soft_views_count');
+            $request->session()->put($viewKey, true);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
      * Trigger a manual fact check for an article.
      */
     public function triggerFactCheck($id, \App\Services\FactCheckService $factCheckService)

@@ -38,6 +38,9 @@ Route::get('/', [PublicController::class, 'index']);
 Route::get('/article/{slug}', [PublicController::class, 'show']);
 Route::post('/article/{id}/comment', [PublicController::class, 'storeComment']);
 Route::post('/api/articles/{id}/like', [ArticleController::class, 'like']); // Moved from api.php to handle sessions
+Route::post('/api/articles/{id}/soft-view', [ArticleController::class, 'trackSoftView']);
+
+
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap']);
 
 Route::get('/_debug/test-social', function () {
