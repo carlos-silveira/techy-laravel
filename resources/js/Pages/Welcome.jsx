@@ -89,10 +89,17 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
   let adCounter = 0;
   articles.forEach((article, idx) => {
     feedItems.push({ type: 'article', data: article });
-    if ((idx + 1) % 3 === 0) {
-      feedItems.push({ type: 'ad', id: `ad-${adCounter++}` });
+    // After every 3 articles, insert an ad slide (unless it's the very last article)
+    if ((idx + 1) % 3 === 0 && idx !== articles.length - 1) {
+      adCounter++;
+      feedItems.push({ type: 'ad', id: `ad-${adCounter}` });
     }
   });
+
+  // Render footer as the very last slide if there's no more content
+  if (!nextPageUrl) {
+    feedItems.push({ type: 'footer', id: 'footer-slide' });
+  }
 
   return (
     <div className="bg-black text-white h-screen w-screen overflow-hidden font-sans selection:bg-primary/30 relative">
@@ -110,6 +117,13 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
       >
         {feedItems.map((item, index) => {
           const isActive = index === activeIndex;
+          if (item.type === 'footer') {
+            return (
+              <div key={item.id} className="w-full snap-start snap-always bg-[#02040a]">
+                <PublicFooter />
+              </div>
+            );
+          }
 
           if (item.type === 'ad') {
             return (
