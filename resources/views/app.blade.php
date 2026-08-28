@@ -48,9 +48,39 @@
         <meta property="og:url" content="{{ $meta['url'] }}">
         <meta property="og:type" content="article">
         <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="{{ $meta['title'] }}">
+        <meta name="twitter:description" content="{{ $meta['description'] }}">
         @if(!empty($meta['image']))
             <meta property="og:image" content="{!! $meta['image'] !!}">
+            <meta name="twitter:image" content="{!! $meta['image'] !!}">
         @endif
+        {{-- Canonical URL (critical for SEO — prevents duplicate content penalties) --}}
+        <link rel="canonical" href="{{ $meta['url'] }}">
+        {{-- JSON-LD NewsArticle structured data (boosts Google News eligibility) --}}
+        @php
+            $jsonLd = [
+                '@context'     => 'https://schema.org',
+                '@type'        => 'NewsArticle',
+                'headline'     => $meta['title'],
+                'description'  => $meta['description'],
+                'url'          => $meta['url'],
+                'dateModified' => now()->toIso8601String(),
+                'publisher'    => [
+                    '@type' => 'Organization',
+                    'name'  => 'TechyNews',
+                    'url'   => 'https://techynews.lat',
+                    'logo'  => [
+                        '@type' => 'ImageObject',
+                        'url'   => 'https://techynews.lat/img/logo_wbc.webp',
+                    ],
+                ],
+            ];
+            if (!empty($meta['image'])) {
+                $jsonLd['image'] = $meta['image'];
+            }
+        @endphp
+        <script type="application/ld+json">{!! json_encode($jsonLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+
     @else
         <meta property="og:title" content="TechyNews — Noticias de Tecnología con IA">
         <meta property="og:description" content="Plataforma líder en periodismo tecnológico impulsado por Inteligencia Artificial. IA, startups, ciberseguridad y el futuro de la tecnología.">
@@ -61,7 +91,9 @@
         <meta name="twitter:site" content="@TechyNewsLat">
         <meta name="twitter:title" content="TechyNews — Noticias de Tecnología con IA">
         <meta name="twitter:description" content="Plataforma líder en periodismo tecnológico impulsado por Inteligencia Artificial.">
+        <link rel="canonical" href="{{ url()->current() }}">
     @endif
+
 
     <!-- Monetization & Analytics (Deferred for PageSpeed) -->
     <script>

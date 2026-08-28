@@ -14,3 +14,14 @@ The dynamic homepage of TechyNews.
 Handles pagination and historical searching.
 - Receives a paginated `articles` prop from Laravel.
 - Utilizes React state for client-side text filtering before falling back to backend search.
+
+## `ReelsDemo.jsx`
+The full-screen, vertical public news feed served at `/`.
+
+- Uses scroll snapping, article imagery, TL;DR highlights, inline actions, and
+  interspersed ad slides.
+- Keeps the editorial headline and TL;DR display scale on desktop (`md` and
+  above), while applying a compact type scale and spacing on mobile so the
+  content does not overwhelm the viewport.
+- Comment actions expose accessible button labels for reliable keyboard and E2E
+  interaction.

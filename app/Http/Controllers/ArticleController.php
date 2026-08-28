@@ -153,21 +153,26 @@ class ArticleController extends Controller
     public function like(Request $request, $id)
     {
         $article = Article::where('status', 'published')->findOrFail($id);
-
-        // Session-based rate limiting: 1 like per article per session
         $likeKey = "liked_article_{$id}";
+
         if ($request->session()->has($likeKey)) {
+            // Un-like if already liked
+            $article->decrement('likes_count');
+            $request->session()->forget($likeKey);
             return response()->json([
                 'likes_count' => $article->likes_count,
-                'already_liked' => true,
-                'message' => 'You already liked this article.'
+                'is_liked' => false
             ]);
         }
 
+        // Like
         $article->increment('likes_count');
         $request->session()->put($likeKey, true);
 
-        return response()->json(['likes_count' => $article->likes_count]);
+        return response()->json([
+            'likes_count' => $article->likes_count,
+            'is_liked' => true
+        ]);
     }
 
     /**

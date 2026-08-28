@@ -4,8 +4,28 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body, html { margin: 0; padding: 0; background: transparent; overflow-x: hidden; }
-        .ad-container { display: flex; justify-content: center; align-items: center; width: 100%; min-height: 100px; }
+        body, html { 
+            margin: 0; 
+            padding: 0; 
+            background: transparent; 
+            overflow-x: hidden; 
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        .ad-container { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            width: 100%; 
+            min-height: 100px; 
+        }
+        /* Force text colors to white for dark mode */
+        body, .ad-container, .ad-container * {
+            color: #ffffff !important;
+        }
+        /* Add a subtle drop shadow to text to ensure readability */
+        .ad-container a, .ad-container span, .ad-container p, .ad-container div {
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8) !important;
+        }
     </style>
 </head>
 <body>

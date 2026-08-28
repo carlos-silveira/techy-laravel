@@ -18,15 +18,15 @@ class EeatUpgradeController extends Controller
     {
         // Count published articles that are upgraded
         $totalUpgraded = Article::where('is_quality_upgraded', true)
-                                ->where('is_published', true)
+                                ->where('status', 'published')
                                 ->count();
         
         // Count published articles that are pending upgrade
         $totalPending = Article::where('is_quality_upgraded', false)
-                                ->where('is_published', true)
+                                ->where('status', 'published')
                                 ->count();
                                 
-        $totalArticles = Article::where('is_published', true)->count();
+        $totalArticles = Article::where('status', 'published')->count();
         
         return response()->json([
             'upgraded' => $totalUpgraded,

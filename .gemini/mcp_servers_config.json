@@ -21,7 +21,7 @@
         "UPSTASH_REDIS_REST_TOKEN": "YOUR_REDIS_TOKEN_HERE"
       }
     },
-        "task-master-ai": {
+    "task-master-ai": {
       "command": "npx",
       "args": [
         "-y",
@@ -30,6 +30,9 @@
     },
     "stitch": {
       "command": "mcp-server-stitch"
+    },
+    "microsoft-learn": {
+      "serverUrl": "https://learn.microsoft.com/api/mcp"
     }
   }
 }

@@ -78,6 +78,14 @@ class Article extends Model
     }
 
     /**
+     * Get the comments for the article.
+     */
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+
+    /**
      * Check if the article is published.
      */
     public function getIsPublishedAttribute(): bool
@@ -218,7 +226,7 @@ class Article extends Model
             // but for now, we'll trigger it here. 
             // Note: In production with many users, this should be queued.
             
-            $targetLocales = ['en', 'es'];
+            $targetLocales = ['en', 'es', 'pt'];
             
             foreach ($targetLocales as $locale) {
                 if ($article->language === $locale) {

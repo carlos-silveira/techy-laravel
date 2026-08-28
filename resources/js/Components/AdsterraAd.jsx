@@ -15,7 +15,7 @@ const AdsterraAd = ({ type, className = "" }) => {
         src = "/ads/320x50.html";
     } else if (type === "native") {
         width = "100%";
-        height = 300; // Native can be flexible
+        height = 500; // Increased to prevent clipping
         src = "/ads/native.html";
     }
 

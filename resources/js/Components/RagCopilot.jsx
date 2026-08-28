@@ -5,7 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import useLanguage from '@/Hooks/useLanguage';
 
-export default function RagCopilot() {
+export default function RagCopilot({ variant = "navbar" }) {
     const { __ } = useLanguage();
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([
@@ -127,7 +127,7 @@ export default function RagCopilot() {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.95 }}
                         transition={{ duration: 0.2 }}
-                        className="fixed bottom-[85px] sm:bottom-[90px] right-3 sm:right-6 left-3 sm:left-auto sm:w-[400px] h-[calc(100vh-100px)] sm:h-[600px] max-h-[calc(100vh-100px)] sm:max-h-[calc(100vh-120px)] flex flex-col bg-white dark:bg-[#0a0f1c] sm:bg-white/95 sm:dark:bg-[#0a0f1c]/95 sm:backdrop-blur-2xl border border-black/10 dark:border-white/10 rounded-[24px] sm:rounded-[28px] shadow-2xl overflow-hidden z-[110]"
+                        className="fixed top-[85px] sm:top-[90px] right-3 sm:right-6 left-3 sm:left-auto sm:w-[400px] h-[calc(100vh-100px)] sm:h-[600px] max-h-[calc(100vh-100px)] sm:max-h-[calc(100vh-120px)] flex flex-col bg-white dark:bg-[#0a0f1c] sm:bg-white/95 sm:dark:bg-[#0a0f1c]/95 sm:backdrop-blur-2xl border border-black/10 dark:border-white/10 rounded-[24px] sm:rounded-[28px] shadow-2xl overflow-hidden z-[110]"
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between p-4 border-b border-black/5 dark:border-white/5 bg-gray-50/80 dark:bg-white/[0.02] backdrop-blur-md">
@@ -233,19 +233,32 @@ export default function RagCopilot() {
             </AnimatePresence>
 
             {/* Toggle Button */}
-            <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setIsOpen(!isOpen)}
-                aria-label={isOpen ? "Cerrar asistente" : "Abrir asistente de IA"}
-                title={isOpen ? "Cerrar asistente" : "Abrir asistente de IA"}
-                className="fixed bottom-6 right-3 sm:right-6 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-primary via-blue-500 to-purple-600 text-white flex items-center justify-center shadow-2xl shadow-primary/40 z-[110]"
-            >
-                {isOpen ? <X className="w-6 h-6 sm:w-7 sm:h-7" /> : <MessageSquare className="w-6 h-6 sm:w-7 sm:h-7" />}
-                {!isOpen && (
-                    <span className="absolute top-0 right-0 sm:top-1 sm:right-1 w-3.5 h-3.5 sm:w-4 sm:h-4 bg-red-500 border-2 border-white dark:border-[#02040a] rounded-full animate-pulse blur-[0.5px]"></span>
-                )}
-            </motion.button>
+            {variant === 'floating' ? (
+                <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setIsOpen(!isOpen)}
+                    aria-label={isOpen ? "Cerrar asistente" : "Abrir asistente de IA"}
+                    title={isOpen ? "Cerrar asistente" : "Abrir asistente de IA"}
+                    className="fixed bottom-6 right-3 sm:right-6 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-primary via-blue-500 to-purple-600 text-white flex items-center justify-center shadow-2xl shadow-primary/40 z-[110]"
+                >
+                    {isOpen ? <X className="w-6 h-6 sm:w-7 sm:h-7" /> : <MessageSquare className="w-6 h-6 sm:w-7 sm:h-7" />}
+                    {!isOpen && (
+                        <span className="absolute top-0 right-0 sm:top-1 sm:right-1 w-3.5 h-3.5 sm:w-4 sm:h-4 bg-red-500 border-2 border-white dark:border-[#02040a] rounded-full animate-pulse blur-[0.5px]"></span>
+                    )}
+                </motion.button>
+            ) : (
+                <button
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="p-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors relative"
+                    title="AI Copilot"
+                >
+                    <Sparkles className="w-5 h-5" />
+                    {!isOpen && (
+                        <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 border border-white dark:border-[#02040a] rounded-full animate-pulse"></span>
+                    )}
+                </button>
+            )}
         </>
     );
 }

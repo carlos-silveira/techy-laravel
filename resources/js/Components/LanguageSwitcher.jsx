@@ -46,7 +46,7 @@ export default function LanguageSwitcher() {
             {isOpen && (
                 <>
                     <div className="fixed inset-0 z-[60]" onClick={() => setIsOpen(false)} />
-                    <div className="absolute right-0 mt-2 w-48 bg-[#0a0f1c] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[70] animate-in fade-in zoom-in duration-200">
+                    <div className="absolute left-0 md:left-auto md:right-0 mt-2 w-48 bg-[#0a0f1c] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[70] animate-in fade-in zoom-in duration-200">
                         <div className="p-2 border-b border-white/5 bg-white/[0.02]">
                             <span className="text-[9px] font-black uppercase tracking-widest text-gray-500 px-2">{__('Language')}</span>
                         </div>

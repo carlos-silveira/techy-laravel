@@ -1,3 +1,26 @@
+## [2026-08-27] - Reels Mobile Typography & Comments QA
+
+### Fixed
+- **Mobile Reels Readability:** Restored a compact mobile scale for the Reels
+  headline, TL;DR card, summary copy, and spacing while retaining the larger
+  editorial typography from the `md` breakpoint upward.
+- **Comments Drawer Crash:** Fixed the Reels comment form so it obtains its
+  translation helper locally, preventing a client-side `ReferenceError` when
+  the comments drawer opens.
+- **Accessible Reels Actions:** Made feed actions semantic buttons and added an
+  accessible name to the comments action.
+
+### Changed
+- **Reels Homepage Launch:** Promoted the vertical Reels feed from
+  `/demo-reels` to `/`, removed the demo route and CTA, and consolidated
+  comment submissions onto the standard article comment endpoint.
+
+### Verified
+- `npm run build` completed successfully.
+- `npx playwright test tests/e2e/reels.spec.js --reporter=line` passed.
+
+---
+
 ## [2026-08-24] - Spanish / Multilingual Translation Anti-Placeholder Fix & Validation Engine
 
 ### Fixed

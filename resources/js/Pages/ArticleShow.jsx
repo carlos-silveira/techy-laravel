@@ -2,7 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 import dayjs from 'dayjs';
-import { Heart, Twitter, Linkedin, Link as LinkIcon, ArrowRight, BookOpen } from 'lucide-react';
+import relativeTime from 'dayjs/plugin/relativeTime';
+dayjs.extend(relativeTime);
+import { useForm } from '@inertiajs/react';
+
+const generateRandomName = () => `CyberUser${Math.floor(Math.random() * 9000) + 1000}`;
+import { Heart, Twitter, Linkedin, Link as LinkIcon, ArrowRight, BookOpen, Send } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
 import CommandPalette from '@/Components/CommandPalette';
@@ -278,6 +283,39 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
 
 
 
+                
+                {/* Comments Section */}
+                <section className="mt-12 bg-gray-50 dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-6 md:p-10">
+                    <h3 className="text-2xl font-black tracking-tighter text-gray-900 dark:text-white mb-8">Comments ({article.comments?.length || 0})</h3>
+                    
+                    <div className="mb-10">
+                        <CommentForm articleId={article.id} />
+                    </div>
+
+                    <div className="space-y-6">
+                        {article.comments && article.comments.length > 0 ? (
+                            article.comments.map(c => (
+                                <div key={c.id} className="flex gap-4">
+                                    <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                                        <span className="font-black text-primary text-sm uppercase">{c.username.substring(0,2)}</span>
+                                    </div>
+                                    <div className="flex-1 bg-white dark:bg-[#0a0f1c] rounded-2xl p-5 border border-black/5 dark:border-white/5 shadow-sm">
+                                        <div className="flex items-center justify-between gap-2 mb-2">
+                                            <span className="font-bold text-sm text-black dark:text-white">{c.username}</span>
+                                            <span className="text-xs text-gray-500">{dayjs(c.created_at).fromNow()}</span>
+                                        </div>
+                                        <p className="text-sm text-gray-700 dark:text-gray-300 font-light whitespace-pre-wrap">{c.body}</p>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="text-center text-gray-500 text-sm py-10 font-light bg-white dark:bg-[#0a0f1c] rounded-2xl border border-black/5 dark:border-white/5">
+                                No comments yet. Be the first to share your thoughts!
+                            </div>
+                        )}
+                    </div>
+                </section>
+
                 {/* Article Footer Ad Slot */}
                 <div className="mt-20 mb-8 hidden md:block">
                   <AdsterraAd type="728x90" />
@@ -457,3 +495,44 @@ const TipTapRenderer = ({ content }) => {
 
     return <div className="tiptap-content">{content.content.map((node, i) => renderNode(node, i))}</div>;
 };
+
+
+function CommentForm({ articleId, username }) {
+  const { data, setData, post, processing, reset } = useForm({
+    username: username || generateRandomName(),
+    body: ''
+  });
+
+  const submit = (e) => {
+    e.preventDefault();
+    post(`/article/${articleId}/comment`, {
+      preserveScroll: true,
+      onSuccess: () => reset('body'),
+    });
+  };
+
+  return (
+    <form onSubmit={submit} className="flex items-end gap-2">
+      <div className="flex-1 bg-white dark:bg-[#1a1f2e] rounded-xl border border-black/10 dark:border-white/10 overflow-hidden focus-within:border-primary transition-colors">
+        <div className="px-3 py-2 border-b border-black/5 dark:border-white/5 bg-gray-50 dark:bg-white/5">
+           <span className="text-[10px] font-black uppercase text-gray-500">Posting as: {data.username}</span>
+        </div>
+        <textarea 
+          value={data.body}
+          onChange={e => setData('body', e.target.value)}
+          placeholder="Add a comment..."
+          className="w-full bg-transparent border-none focus:ring-0 text-sm p-3 resize-none text-black dark:text-white placeholder:text-gray-400"
+          rows="2"
+          required
+        />
+      </div>
+      <button 
+        type="submit" 
+        disabled={processing || !data.body.trim()}
+        className="p-3 bg-primary text-white rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50 flex-shrink-0"
+      >
+        <Send className="w-5 h-5" />
+      </button>
+    </form>
+  );
+}

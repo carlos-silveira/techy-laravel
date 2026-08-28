@@ -101,77 +101,21 @@ USER QUESTION:
 {$userQuery}
 PROMPT;
 
-        // 4. Stream the response using OpenRouter
+        // 4. Get response using Gemini API (since we have the keys)
         return response()->stream(function () use ($prompt) {
-            $apiKey = config('services.openrouter.api_key', '');
-            $model  = config('services.openrouter.model', 'google/gemma-4-31b-it:free');
-
-            if (empty($apiKey)) {
-                echo "I'm unable to connect to my knowledge engine right now. Please try again in a moment.";
-                flush();
-                return;
-            }
-
-            $payload = [
-                'model' => $model,
-                'messages' => [['role' => 'user', 'content' => $prompt]],
-                'temperature' => 0.3,
-                'max_tokens' => 1024,
-                'stream' => true
-            ];
-
-            $ch = curl_init("https://openrouter.ai/api/v1/chat/completions");
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
-            curl_setopt($ch, CURLOPT_POST, 1);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Content-Type: application/json',
-                'Authorization: Bearer ' . $apiKey,
-                'HTTP-Referer: ' . config('app.url'),
-                'X-Title: TechyNews'
-            ]);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 60);
-
-            $gotContent = false;
-            $rawErrorChunks = '';
-            
-            curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $chunk) use (&$gotContent, &$rawErrorChunks) {
-                $lines = explode("\n", $chunk);
-                foreach ($lines as $line) {
-                    $line = trim($line);
-                    if (empty($line)) continue;
-                    
-                    if (!str_starts_with($line, 'data: ')) {
-                        $rawErrorChunks .= $line;
-                        continue;
-                    }
-                    
-                    $jsonString = trim(substr($line, 5));
-                    if ($jsonString === '[DONE]') continue;
-
-                    $data = json_decode($jsonString, true);
-                    if (isset($data['choices'][0]['delta']['content'])) {
-                        $text = $data['choices'][0]['delta']['content'];
-                        echo $text;
-                        flush();
-                        $gotContent = true;
-                    }
+            try {
+                $response = $this->gemini->generateText($prompt);
+                
+                // Fake streaming for a better UI effect
+                $words = explode(' ', $response);
+                foreach ($words as $word) {
+                    echo $word . ' ';
+                    flush();
+                    usleep(15000); // 15ms per word
                 }
-                return strlen($chunk);
-            });
-
-            $curlResult = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            $curlError  = curl_error($ch);
-            curl_close($ch);
-
-            if ($curlError) {
-                Log::error("RAG cURL error: {$curlError}");
-            }
-            
-            if (!$gotContent) {
-                Log::error("RAG empty response. HTTP: {$httpCode}. Raw: {$rawErrorChunks}");
-                echo "I'm having trouble connecting to my knowledge engine right now (HTTP {$httpCode}). Please try again.";
+            } catch (Exception $e) {
+                Log::error("RAG Gemini Error: " . $e->getMessage());
+                echo "I'm having trouble connecting to my knowledge engine right now. Please try again.";
                 flush();
             }
         }, 200, [

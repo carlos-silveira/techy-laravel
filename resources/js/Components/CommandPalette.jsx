@@ -90,7 +90,7 @@ export default function CommandPalette() {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.97, y: -20 }}
                         transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                        className="fixed top-[8%] left-1/2 -translate-x-1/2 w-full max-w-2xl bg-[#02040a] border border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.8),0_0_0_1px_rgba(255,255,255,0.05)] rounded-3xl overflow-hidden z-[10000] flex flex-col"
+                        className="fixed top-[8%] left-1/2 -translate-x-1/2 w-[95vw] md:w-full max-w-2xl bg-[#02040a] border border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.8),0_0_0_1px_rgba(255,255,255,0.05)] rounded-3xl overflow-hidden z-[10000] flex flex-col"
                     >
                         {/* Search Input */}
                         <div className="flex items-center px-6 py-5 border-b border-white/5 gap-4">

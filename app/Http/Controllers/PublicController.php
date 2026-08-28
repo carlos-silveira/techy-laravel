@@ -27,84 +27,30 @@ class PublicController extends Controller
     /**
      * Display the public homepage.
      */
-    public function index()
+    public function index(Request $request)
     {
         $locale = App::getLocale();
+        
+        $paginator = Article::with(['comments' => function ($query) {
+            $query->orderBy('created_at', 'desc');
+        }])
+            ->where('status', 'published')
+            ->orderBy('created_at', 'desc')
+            ->select('id', 'title', 'slug', 'ai_summary', 'updated_at', 'cover_image_path', 'language', 'reading_time_minutes', 'tags', 'translations')
+            ->paginate(10);
 
-        // --- Cache helpers with smart TTL ---
-        // When locale != 'en' and translations aren't ready yet, translateIfNecessary()
-        // falls back to English and dispatches a background job for future requests.
-        // We detect whether any article is still untranslated and use a short TTL (30s)
-        // so the page retries soon after the background job completes.
-        // Once all articles are translated, the full 3600s TTL is used.
+        // Apply translations
+        $translated = $paginator->getCollection()->map(function ($article) use ($locale) {
+            return $this->translateIfNecessary($article, $locale);
+        });
+        $paginator->setCollection($translated);
 
-        $editorsChoice = $this->rememberLocaleAware(
-            "homepage_editors_choice_{$locale}",
-            $locale,
-            function () use ($locale) {
-                return Article::where('status', 'published')
-                    ->where('is_editors_choice', true)
-                    ->orderBy('created_at', 'desc')
-                    ->select('id', 'title', 'slug', 'ai_summary', 'updated_at', 'cover_image_path', 'language', 'translations', 'reading_time_minutes', 'tags')
-                    ->take(3)
-                    ->get();
-            }
-        );
-
-        $articles = $this->rememberLocaleAware(
-            "homepage_articles_{$locale}",
-            $locale,
-            function () use ($locale) {
-                return Article::where('status', 'published')
-                    ->orderBy('created_at', 'desc')
-                    ->select('id', 'title', 'slug', 'ai_summary', 'updated_at', 'cover_image_path', 'language', 'translations', 'reading_time_minutes', 'tags')
-                    ->take(10)
-                    ->get();
-            }
-        );
-
-        $trendingArticles = $this->rememberLocaleAware(
-            "homepage_trending_{$locale}",
-            $locale,
-            function () use ($locale) {
-                $ids = \Illuminate\Support\Facades\DB::table('page_views')
-                    ->where('created_at', '>=', now()->subDays(7))
-                    ->whereNotNull('article_id')
-                    ->select('article_id', \Illuminate\Support\Facades\DB::raw('count(*) as total_views'))
-                    ->groupBy('article_id')
-                    ->orderByDesc('total_views')
-                    ->limit(5)
-                    ->pluck('article_id');
-
-                $selectCols = ['id', 'title', 'slug', 'ai_summary', 'updated_at', 'cover_image_path', 'language', 'translations', 'reading_time_minutes', 'tags'];
-
-                if ($ids->isEmpty()) {
-                    $articles = Article::where('status', 'published')->orderByDesc('created_at')->limit(5)->select($selectCols)->get();
-                } else {
-                    $articles = Article::whereIn('id', $ids)
-                        ->where('status', 'published')
-                        ->select($selectCols)
-                        ->get()
-                        ->sortBy(fn($a) => array_search($a->id, $ids->toArray()));
-                }
-
-                if ($articles->isEmpty()) {
-                    $articles = Article::where('status', 'published')->latest()->limit(5)->select($selectCols)->get();
-                }
-
-                return $articles;
-            }
-        );
-
-        $editorsChoice->each->makeHidden(['translations', 'content', 'embedding']);
-        $articles->each->makeHidden(['translations', 'content', 'embedding']);
-        $trendingArticles->each->makeHidden(['translations', 'content', 'embedding']);
+        if ($request->wantsJson()) {
+            return response()->json($paginator);
+        }
 
         return Inertia::render('Welcome', [
-            'editorsChoice' => $editorsChoice,
-            'articles' => $articles,
-            'trendingArticles' => $trendingArticles,
-            'dailyBrief' => $this->getDailyBrief($locale),
+            'articles' => $paginator
         ]);
     }
 
@@ -205,6 +151,9 @@ class PublicController extends Controller
 
         $article->content = $this->recursivelyUnwrap($article->content);
         $article->content = $this->sanitizeHtml($article->content);
+
+        // Load comments dynamically outside cache
+        $article->load(['comments' => fn($q) => $q->orderBy('created_at', 'desc')]);
 
         // ALWAYS SPANISH for Social Media Previews (Open Graph)
         // We force translation to 'es' just for the meta tags so Facebook/Twitter scrapers see Spanish
@@ -354,5 +303,22 @@ class PublicController extends Controller
             ->map(fn($a) => $this->translateIfNecessary($a, $locale));
 
         return response()->json($results);
+    }
+
+    public function storeComment(Request $request, $id)
+    {
+        $request->validate([
+            'body' => 'required|string|max:1000',
+            'username' => 'required|string|max:255',
+        ]);
+
+        $article = Article::findOrFail($id);
+        
+        $article->comments()->create([
+            'username' => $request->username,
+            'body' => $request->body,
+        ]);
+
+        return back();
     }
 }
