@@ -162,7 +162,7 @@ class GenerateDailyNews extends Command
             'viral_score'           => $selectedIdea['viral_potential_score'] ?? 50,
             'content'               => $content, // Store raw HTML directly — NO json_encode
             'language'              => 'en',
-            'status'                => 'published',
+            'status'                => 'draft', // Create as draft initially
             'is_editors_choice'     => true,
             'views_count'           => 0,
             'likes_count'           => 0,
@@ -186,6 +186,7 @@ class GenerateDailyNews extends Command
         }
 
         $this->info("✅ Fact-Check passed! (Score: {$factCheck->overall_score})");
+        $article->update(['status' => 'published']);
 
         // Push notifications will be sent after translations are complete so we can send localized versions.
 

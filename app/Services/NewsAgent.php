@@ -215,7 +215,7 @@ class NewsAgent
                 'slug' => $slug,
                 'content' => $polishedHtml,
                 'language' => 'en',
-                'status' => 'published',
+                'status' => 'draft', // Create as draft initially to prevent race condition with social poster
                 'is_editors_choice' => true,
                 'reading_time_minutes' => max(1, (int) ceil($wordCount / 200)),
                 'ai_summary' => $meta['summary'] ?? Str::limit(strip_tags($polishedHtml), 250),
@@ -240,9 +240,12 @@ class NewsAgent
                 return ['status' => 'failed', 'reason' => 'Fact-check failed'];
             }
 
+            // Update to published only after fact check passes
+            $article->update(['status' => 'published']);
+            
             // 5. UPDATE QUEUE STATUS
             $scouted->update([
-                'status' => 'published',
+                'status' => 'draft', // Create as draft initially
                 'article_id' => $article->id,
                 'error_log' => null
             ]);
@@ -370,6 +373,8 @@ class NewsAgent
             
             return ['title' => $title, 'status' => 'failed', 'reason' => 'Fact-check failed'];
         }
+        
+        $article->update(['status' => 'published']);
 
         // --- SYNCHRONOUS TRANSLATIONS FOR YOLO MODE ---
         $languages = ['es', 'pt'];
