@@ -30,8 +30,15 @@ class GeminiService
     public function __construct()
     {
         // Use OpenRouter key as primary since we migrated to openrouter.ai
-        $this->apiKey = config('services.openrouter.api_key', env('OPEN_ROUTER_API_KEY', config('services.gemini.api_key', env('GEMINI_API_KEY', ''))));
-        $this->model = config('services.openrouter.models', env('OPEN_ROUTER_MODEL', config('services.gemini.model', env('GEMINI_MODEL', 'google/gemini-2.5-flash'))));
+        $openRouterKey = config('services.openrouter.api_key') ?: env('OPEN_ROUTER_API_KEY');
+        $geminiKey = config('services.gemini.api_key') ?: env('GEMINI_API_KEY');
+        
+        $this->apiKey = $openRouterKey ?: $geminiKey ?: '';
+        
+        $openRouterModel = config('services.openrouter.model') ?: env('OPEN_ROUTER_MODEL');
+        $geminiModel = config('services.gemini.model') ?: env('GEMINI_MODEL', 'google/gemini-2.5-flash');
+        
+        $this->model = $openRouterModel ?: $geminiModel;
     }
 
     /**
@@ -49,6 +56,15 @@ class GeminiService
     {
         Cache::forget(self::QUOTA_CACHE_KEY);
         Log::info("Gemini API quota manual reset confirmed.");
+    }
+
+    /**
+     * Generate plain text using the configured model.
+     * Often used for generic prompts or RAG workflows.
+     */
+    public function generateText(string $prompt): string
+    {
+        return $this->callGemini($prompt, false);
     }
 
     private function ensureQuotaNotExhausted(): void
