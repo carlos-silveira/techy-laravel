@@ -35,7 +35,7 @@ class NewsAgent
         }
 
         // 2. FETCH RECENT PUBLISHED TITLES (last 7 days) so the AI knows what already exists
-        $recentTitles = Article::where('status', 'published')
+        $recentTitles = Article::whereIn('status', ['published', 'draft', 'review'])
             ->where('created_at', '>', now()->subDays(7))
             ->pluck('title')
             ->toArray();
@@ -121,7 +121,7 @@ class NewsAgent
         }
 
         // 2. Fetch recent titles for AI context + local dedup
-        $recentTitles = Article::where('status', 'published')
+        $recentTitles = Article::whereIn('status', ['published', 'draft', 'review'])
             ->where('created_at', '>', now()->subDays(7))
             ->pluck('title')
             ->toArray();
