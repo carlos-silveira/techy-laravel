@@ -178,7 +178,7 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
               </div>
 
               {/* Main Content Overlay */}
-              <div className="absolute inset-0 z-10 flex flex-col justify-end p-5 md:p-12 lg:p-24 pb-10 md:pb-16 pt-28 md:pt-32 w-full max-w-5xl mx-auto">
+              <div className="absolute inset-0 z-10 flex flex-col justify-center md:justify-end p-4 md:p-10 lg:p-16 pb-6 md:pb-12 pt-20 md:pt-24 w-full max-w-6xl mx-auto">
                 <div className="max-w-3xl pr-16 md:pr-20">
                       {/* Tags */}
                       {article.tags?.[0] && (
@@ -188,14 +188,14 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
                         </span>
                       )}
                       
-                      <h1 className="text-2xl md:text-5xl font-black line-clamp-4 md:line-clamp-none tracking-tighter leading-tight md:leading-[1.1] mb-4 md:mb-6 text-white drop-shadow-lg">
+                      <h1 className="text-2xl md:text-4xl lg:text-5xl font-black line-clamp-4 md:line-clamp-3 tracking-tighter leading-tight md:leading-[1.15] mb-3 md:mb-5 text-white drop-shadow-lg">
                         <Link href={`/article/${article.slug}`} className="hover:text-primary transition-colors block">
                             {article.title}
                         </Link>
                       </h1>
                       
                       {/* TL;DR Section */}
-                      <div className="mb-4 md:mb-6 bg-white/10 backdrop-blur-xl transform-gpu border border-white/20 p-4 md:p-5 rounded-2xl shadow-xl max-h-[35vh] md:max-h-none overflow-y-auto overscroll-contain">
+                      <div className="mb-4 md:mb-6 bg-white/10 backdrop-blur-xl transform-gpu border border-white/20 p-3.5 md:p-6 rounded-2xl shadow-xl max-h-[40vh] lg:max-h-none overflow-y-auto overscroll-contain">
                          <div className="flex items-center gap-2 mb-2 md:mb-3">
                            <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
                            <h4 className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-amber-400">{__('TL;DR Summary')}</h4>
@@ -203,8 +203,8 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
                          <ul className="space-y-2 md:space-y-3">
                            {/* Split summary into bullet points for quick scanning */}
                            {(article.ai_summary || '').split('. ').slice(0,3).map((sentence, i) => sentence && (
-                             <li key={i} className="text-white text-[15px] md:text-xl font-medium leading-snug md:leading-loose flex items-start gap-3">
-                               <span className="text-primary mt-0.5 md:mt-1.5 text-lg md:text-2xl">•</span>
+                             <li key={i} className="text-white text-[14px] md:text-lg font-medium leading-snug md:leading-relaxed flex items-start gap-3">
+                               <span className="text-primary mt-0.5 md:mt-1 text-lg md:text-xl">•</span>
                                {sentence}{!sentence.endsWith('.') ? '.' : ''}
                              </li>
                            ))}
@@ -214,7 +214,7 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
                       <div className="flex flex-row items-center gap-2 md:gap-4 mt-1 md:mt-6">
                         <Link 
                           href={`/article/${article.slug}`}
-                          className="flex-1 md:flex-none justify-center inline-flex items-center gap-2 bg-white text-black px-4 py-2.5 md:px-8 md:py-4 rounded-full font-black uppercase tracking-widest text-[10px] md:text-sm hover:scale-105 transition-transform shadow-lg md:shadow-[0_0_30px_rgba(255,255,255,0.3)]"
+                          className="flex-1 md:flex-none justify-center inline-flex items-center gap-2 bg-white text-black px-4 py-2.5 md:px-6 md:py-3.5 rounded-full font-black uppercase tracking-widest text-[10px] md:text-[13px] hover:scale-105 transition-transform shadow-lg md:shadow-[0_0_30px_rgba(255,255,255,0.3)]"
                         >
                           <BookOpen className="w-4 h-4 md:w-5 md:h-5" />
                           <span className="truncate">{__('Read Full Story')}</span>
@@ -234,7 +234,7 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
               </div>
 
               {/* Right Side Action Buttons */}
-              <div className="absolute right-3 bottom-16 md:right-12 md:bottom-24 z-20 flex flex-col gap-4 md:gap-6 items-center">
+              <div className="absolute right-3 bottom-6 md:right-10 md:bottom-12 z-20 flex flex-col gap-4 md:gap-5 items-center">
                 <ActionIcon 
                   icon={Heart} 
                   label={__("Like")}  
