@@ -178,6 +178,7 @@ export default function AnalyticsChart({ analyticsData, analytics, period }) {
                     },
                     { icon: TrendingUp, label: "Engagement", value: `${stats.engagementRate || 0}%`, color: "amber" },
                     { icon: Eye, label: "Lifetime", value: stats.totalViewsAllTime || 0, color: "blue" },
+                    { icon: Eye, label: "Reels Views", value: stats.totalSoftViewsAllTime || 0, color: "purple" },
                 ].map((stat, i) => (
                     <motion.div key={i} variants={itemVariants}>
                         <StatCard {...stat} />

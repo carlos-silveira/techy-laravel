@@ -94,10 +94,10 @@ export default function Navbar({ transparent = false }) {
                             <RagCopilot variant="navbar" />
                             <LanguageSwitcher />
                             <Link 
-                                href="/dashboard" 
+                                href="/about" 
                                 className="text-sm font-bold bg-black dark:bg-white text-white dark:text-black hover:opacity-90 px-5 py-2.5 rounded-xl transition-all hover:scale-105 shadow-xl"
                             >
-                                {__('Studio')}
+                                {__('About')}
                             </Link>
                         </div>
                     </div>
@@ -167,8 +167,8 @@ export default function Navbar({ transparent = false }) {
                                             {link.label}
                                         </Link>
                                     ))}
-                                    <Link href="/dashboard" className="block text-xl font-black tracking-tighter text-primary transition-colors py-2">
-                                        {__('Studio')}
+                                    <Link href="/about" className="block text-xl font-black tracking-tighter text-primary transition-colors py-2">
+                                        {__('About')}
                                     </Link>
                                 </div>
 

@@ -91,6 +91,7 @@ class DashboardController extends Controller
         $totalArticles = \App\Models\Article::where('status', 'published')->count();
         $totalLikesAllTime = \App\Models\Article::sum('likes_count'); // Overall engagement metric
         $totalViewsAllTime = DB::table('page_views')->where($excludeBots)->count();
+        $totalSoftViewsAllTime = \App\Models\Article::sum('soft_views_count');
         
         $engagementRate = $totalViewsAllTime > 0
             ? round(($totalLikesAllTime / $totalViewsAllTime) * 100, 2)
@@ -414,6 +415,7 @@ class DashboardController extends Controller
                     'bounceRate' => $bounceRate,
                     'avgSessionDuration' => $avgSessionDuration,
                     'totalViewsAllTime' => $totalViewsAllTime,
+                    'totalSoftViewsAllTime' => $totalSoftViewsAllTime,
                     'totalGeminiTokens' => $totalGeminiTokens,
                     'totalGeminiCost' => round((float) $totalGeminiCost, 4),
                     'totalGeminiRequests' => $totalGeminiRequests,
