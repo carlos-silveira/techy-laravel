@@ -167,8 +167,8 @@ export default function Navbar({ transparent = false }) {
                                             {link.label}
                                         </Link>
                                     ))}
-                                    <Link href="/about" className="block text-xl font-black tracking-tighter text-primary transition-colors py-2">
-                                        {__('About')}
+                                    <Link href="/dashboard" className="block text-xl font-black tracking-tighter text-primary transition-colors py-2">
+                                        {__('Studio')}
                                     </Link>
                                 </div>
 
