@@ -1,3 +1,30 @@
+## [2026-09-03] - Sidebar Studio Link Restoration
+
+### Fixed
+- **Sidebar Studio Access:** Commit `6c9b162` ("redirect navbar studio button to
+  about page") unintentionally changed a second `Link` in `Navbar.jsx` — the
+  mobile sidebar's trailing link — from `/dashboard` ("Studio") to `/about`
+  ("About"), duplicating the existing "About" entry from the `navLinks` array
+  and removing Studio access from the sidebar entirely.
+- **Fix:** Restored the sidebar's trailing link to `href="/dashboard"` with the
+  `Studio` label. The intentional desktop navbar CTA (`/about`) was left
+  untouched, as was the `navLinks` array (Archive/Newsletter/About).
+
+### Verified
+- `npm run build` (vite build + vite build --ssr): built successfully, no
+  errors or warnings.
+- `php artisan test`: 59/60 passed (140 assertions). The one failing test
+  (`WizardApiTest::wizard_full_flow_creates_published_article`) was confirmed
+  pre-existing on `main` (same failure with and without this fix) and is
+  unrelated to `Navbar.jsx`.
+- `npx playwright test`: not run in this session (no browser/server available
+  in the execution environment); recommended as a manual visual check before
+  merge.
+- PR: [carlos-silveira/techy-laravel#23](https://github.com/carlos-silveira/techy-laravel/pull/23)
+  on branch `fix/sidebar-studio-link`.
+
+---
+
 ## [2026-08-27] - Reels Mobile Typography & Comments QA
 
 ### Fixed
