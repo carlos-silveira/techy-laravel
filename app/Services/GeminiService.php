@@ -19,12 +19,10 @@ class GeminiService
      * If the primary model fails (429/quota/error), we cascade to the next.
      */
     private array $modelFallbackChain = [
-        'gemini-2.5-pro',
         'gemini-2.5-flash',
-        'gemini-2.0-flash',
-        'gemini-2.0-flash-lite',
-        'gemini-1.5-flash',
-        'gemini-1.5-pro',
+        'gemini-3.6-flash',
+        'gemini-3.5-flash-lite',
+        'gemini-3.1-pro-preview',
     ];
 
     public function __construct()
@@ -724,7 +722,10 @@ Return ONLY a JSON object with the keys: \"title\" (you can keep the same or imp
         }
         
         try {
-            return $this->callOpenRouterFallback($prompt, $expectJson);
+            if (config('services.openrouter.api_key') || env('OPEN_ROUTER_API_KEY') || env('OPENROUTER_API_KEY')) {
+                return $this->callOpenRouterFallback($prompt, $expectJson);
+            }
+            throw new \Exception("OpenRouter API key is missing. Skipping to native fallback.");
         } catch (\Exception $e) {
             Log::warning("OpenRouter API failed: " . $e->getMessage() . " - Attempting Native Gemini Fallback");
             
@@ -880,7 +881,13 @@ Return ONLY a JSON object with the keys: \"title\" (you can keep the same or imp
             'contents' => $contents,
             'generationConfig' => [
                 'temperature' => 0.7,
-                'maxOutputTokens' => 4000,
+                'maxOutputTokens' => 8192,
+            ],
+            'safetySettings' => [
+                ['category' => 'HARM_CATEGORY_DANGEROUS_CONTENT', 'threshold' => 'BLOCK_NONE'],
+                ['category' => 'HARM_CATEGORY_HARASSMENT', 'threshold' => 'BLOCK_NONE'],
+                ['category' => 'HARM_CATEGORY_HATE_SPEECH', 'threshold' => 'BLOCK_NONE'],
+                ['category' => 'HARM_CATEGORY_SEXUALLY_EXPLICIT', 'threshold' => 'BLOCK_NONE'],
             ]
         ];
 
