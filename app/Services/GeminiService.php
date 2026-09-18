@@ -207,8 +207,16 @@ CRITICAL RECENCY RULE: Today is {$date}. ONLY focus on confirmed tech events fro
 CRITICAL TOPIC RULE: ABSOLUTELY DO NOT write meta-commentary about AI generating articles. Focus on actual tech industry news.
 CRITICAL DEDUP RULE: If you already see a topic in the 'ALREADY PUBLISHED' list above, skip it entirely — even if the angle is slightly different.
 
-Return ONLY a JSON array, no markdown fences:
-[{\"title\": \"...\", \"prompt\": \"A simple 2-sentence explanation of the news.\", \"angle\": \"product_launch\", \"source_url\": \"https://...\", \"viral_potential_score\": 85}]";
+Return ONLY a valid JSON array of objects. No markdown fences. Example format:
+[
+  {
+    "title": "Example Title",
+    "prompt": "A simple 2-sentence explanation of the news.",
+    "angle": "product_launch",
+    "source_url": "https://...",
+    "viral_potential_score": 85
+  }
+]";
 
         $result = $this->callGemini($prompt, true);
         \Illuminate\Support\Facades\Log::info("RAW AI RESULT JSON PARSED: ", (array)$result);
