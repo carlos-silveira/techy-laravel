@@ -210,11 +210,11 @@ CRITICAL DEDUP RULE: If you already see a topic in the 'ALREADY PUBLISHED' list 
 Return ONLY a valid JSON array of objects. No markdown fences. Example format:
 [
   {
-    "title": "Example Title",
-    "prompt": "A simple 2-sentence explanation of the news.",
-    "angle": "product_launch",
-    "source_url": "https://...",
-    "viral_potential_score": 85
+    \"title\": \"Example Title\",
+    \"prompt\": \"A simple 2-sentence explanation of the news.\",
+    \"angle\": \"product_launch\",
+    \"source_url\": \"https://...\",
+    \"viral_potential_score\": 85
   }
 ]";
 
