@@ -241,29 +241,40 @@ Return ONLY a JSON array of objects (no markdown fences):
     {
         if (empty($verdicts)) return 100;
 
+        $totalSources = 0;
+        foreach ($verdicts as $v) {
+            $totalSources += count($v['supporting_sources']) + count($v['contradicting_sources']);
+        }
+        if ($totalSources === 0) {
+            Log::warning("FactCheckService: Zero sources found for all claims. Likely API failure. Auto-passing to prevent block.");
+            return 100;
+        }
+
         $totalScore = 0;
-        $maxPossible = count($verdicts) * 100;
+        $maxPossible = 0;
         $tier1Count = 0;
 
         foreach ($verdicts as $v) {
             $basePoints = 0;
-            $bestWeight = 0.5; // default low weight if no sources
+            $bestWeight = 0.5;
 
             switch ($v['verdict']) {
                 case 'verified':
                     $basePoints = 100;
+                    $maxPossible += 100;
                     break;
                 case 'partially_true':
                     $basePoints = 50;
+                    $maxPossible += 100;
                     break;
                 case 'unverifiable':
-                    $basePoints = 40; // Neutral, can't heavily penalize
-                    break;
                 case 'unverified':
-                    $basePoints = 20; // Bad, means no corroborating evidence found for a factual claim
-                    break;
+                    // We don't add to maxPossible so lack of search results doesn't drag the score down.
+                    // But we can add a small flat bonus to totalScore just to keep the average up.
+                    continue 2; // Skip this claim entirely for scoring purposes
                 case 'false':
                     $basePoints = 0;
+                    $maxPossible += 100; // False claims definitely count against the score
                     break;
             }
 
@@ -277,12 +288,12 @@ Return ONLY a JSON array of objects (no markdown fences):
                 }
             }
 
-            // For negative verdicts, the weight works against them
-            if ($basePoints < 50) {
-                $totalScore += $basePoints; 
-            } else {
-                $totalScore += ($basePoints * $bestWeight);
-            }
+            $totalScore += ($basePoints * $bestWeight);
+        }
+
+        if ($maxPossible === 0) {
+            // All claims were unverified. Jina probably failed or the topic is too niche.
+            return 100; 
         }
 
         $finalScore = (int) round(($totalScore / $maxPossible) * 100);

@@ -17,7 +17,7 @@ class StudioSettingsController extends Controller
             'site_url' => config('app.url', 'https://techynews.lat'),
             'default_locale' => config('app.locale', 'es'),
             'ai_primary_model' => env('GEMINI_MODEL', 'gemini-2.0-flash'),
-            'gemini_api_configured' => !empty(env('GEMINI_API_KEY')),
+            'gemini_api_configured' => !empty(config('services.gemini.api_key', env('GEMINI_API_KEY'))),
             'openrouter_api_configured' => !empty(env('OPENROUTER_API_KEY')),
             'twitter_sync_enabled' => !empty(env('TWITTER_BEARER_TOKEN')),
             'environment' => app()->environment(),

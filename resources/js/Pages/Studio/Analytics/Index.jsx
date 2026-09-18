@@ -16,7 +16,7 @@ export default function AnalyticsIndex(props) {
     <StudioLayout>
       <Head title="Analytics — Studio" />
 
-      <div className="p-8 md:p-16 max-w-7xl mx-auto space-y-12">
+      <div className="p-4 sm:p-8 md:p-16 max-w-7xl mx-auto space-y-8 md:space-y-12 overflow-x-hidden">
         {/* Header & Period Toggles */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
           <div>
@@ -53,12 +53,12 @@ export default function AnalyticsIndex(props) {
         </div>
 
         {/* Traffic Analytics Suite */}
-        <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-8 space-y-8">
+        <div className="bg-white/[0.02] border border-white/5 rounded-2xl md:rounded-3xl p-4 sm:p-8 space-y-8 overflow-hidden">
           <AnalyticsChart {...props} />
         </div>
 
         {/* Gemini Token Usage */}
-        <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-8 space-y-8">
+        <div className="bg-white/[0.02] border border-white/5 rounded-2xl md:rounded-3xl p-4 sm:p-8 space-y-8 overflow-hidden">
           <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">
             AI Token Consumption Logs
           </h3>

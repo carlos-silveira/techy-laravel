@@ -188,7 +188,7 @@ export default function AnalyticsChart({ analyticsData, analytics, period }) {
 
             {/* ═══ MAIN CHART: VIEWS + VISITORS ═══ */}
             {viewsPerDay && viewsPerDay.length > 0 && (
-                <motion.div variants={itemVariants} className="bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-6 relative overflow-hidden group hover:border-primary/20 transition-colors backdrop-blur-md">
+                <motion.div variants={itemVariants} className="bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-5 md:p-6 relative overflow-hidden group hover:border-primary/20 transition-colors backdrop-blur-md">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[100px] rounded-full pointer-events-none opacity-30 group-hover:opacity-60 transition-opacity duration-1000" />
                     <div className="flex justify-between items-center mb-6 relative z-10">
                         <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest">Traffic Overview</h3>
@@ -214,8 +214,8 @@ export default function AnalyticsChart({ analyticsData, analytics, period }) {
                                 <XAxis dataKey="date" stroke="rgba(128,128,128,0.5)" fontSize={10} tickMargin={10} />
                                 <YAxis stroke="rgba(128,128,128,0.5)" fontSize={10} axisLine={false} tickLine={false} domain={[0, dataMax => Math.ceil(dataMax * 1.2)]} padding={{ top: 20 }} />
                                 <Tooltip content={<CustomTooltip />} />
-                                <Area type="monotone" dataKey="views" stroke="rgb(var(--color-primary))" strokeWidth={3} fillOpacity={1} fill="url(#colorViews)" animationDuration={1500} />
-                                <Area type="monotone" dataKey="visitors" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorVisitors)" animationDuration={1500} />
+                                <Area type="linear" dataKey="views" stroke="rgb(var(--color-primary))" strokeWidth={3} fillOpacity={1} fill="url(#colorViews)" animationDuration={1500} />
+                                <Area type="linear" dataKey="visitors" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorVisitors)" animationDuration={1500} />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
@@ -225,7 +225,7 @@ export default function AnalyticsChart({ analyticsData, analytics, period }) {
             {/* ═══ SECOND ROW: DEVICES + HOURLY ═══ */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {deviceData.length > 0 && (
-                    <motion.div variants={itemVariants} className="bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-6 backdrop-blur-md">
+                    <motion.div variants={itemVariants} className="bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-5 md:p-6 backdrop-blur-md">
                         <div className="flex items-center justify-between mb-8">
                             <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest">Device Breakdown</h3>
                             <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest bg-black/5 dark:bg-white/5 px-2 py-1 rounded-md">
@@ -271,7 +271,7 @@ export default function AnalyticsChart({ analyticsData, analytics, period }) {
                 )}
 
                 {hourlyTraffic && hourlyTraffic.length > 0 && (
-                    <motion.div variants={itemVariants} className="bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-6 backdrop-blur-md">
+                    <motion.div variants={itemVariants} className="bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-5 md:p-6 backdrop-blur-md">
                         <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest mb-6">Traffic by Hour (24h)</h3>
                         <div className="h-44">
                             <ResponsiveContainer width="100%" height="100%">
@@ -290,7 +290,7 @@ export default function AnalyticsChart({ analyticsData, analytics, period }) {
 
             {/* ═══ CRAWLER INTEL ═══ */}
             {crawlerDetails && crawlerDetails.length > 0 && (
-                <motion.div variants={itemVariants} className="bg-orange-500/5 border border-orange-500/20 rounded-3xl p-8 relative overflow-hidden backdrop-blur-md">
+                <motion.div variants={itemVariants} className="bg-orange-500/5 border border-orange-500/20 rounded-3xl p-5 md:p-8 relative overflow-hidden backdrop-blur-md">
                     <div className="absolute top-0 right-0 w-40 h-40 bg-orange-500/10 blur-[80px] rounded-full animate-pulse" />
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                         <div className="flex items-center gap-4">
@@ -323,7 +323,7 @@ export default function AnalyticsChart({ analyticsData, analytics, period }) {
 
             {/* ═══ GEOGRAPHIC DATA (MAP) ═══ */}
             {countriesData && countriesData.length > 0 && (
-                <motion.div variants={itemVariants} className="bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-6 backdrop-blur-md">
+                <motion.div variants={itemVariants} className="bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-5 md:p-6 backdrop-blur-md">
                     <div className="flex justify-between items-center mb-6">
                         <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest flex items-center gap-2">
                             <Map className="w-4 h-4 text-primary" /> Global Audience
@@ -363,7 +363,7 @@ export default function AnalyticsChart({ analyticsData, analytics, period }) {
             {/* ═══ TOP SOURCES & TOP PAGES ═══ */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {topReferrers && topReferrers.length > 0 && (
-                    <motion.div variants={itemVariants} className="bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-8 backdrop-blur-md">
+                    <motion.div variants={itemVariants} className="bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-5 md:p-8 backdrop-blur-md">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-8">
                             <h3 className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-[0.3em]">Traffic Sources</h3>
                             <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-lg w-fit">Selected Period</div>
@@ -406,7 +406,7 @@ export default function AnalyticsChart({ analyticsData, analytics, period }) {
                 )}
 
                 {topPages && topPages.length > 0 && (
-                    <motion.div variants={itemVariants} className="bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-8 backdrop-blur-md overflow-hidden">
+                    <motion.div variants={itemVariants} className="bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-5 md:p-8 backdrop-blur-md overflow-hidden">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-8">
                             <h3 className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-[0.3em]">Top Entry Pages</h3>
                             <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-lg w-fit">Selected Period</div>
@@ -414,9 +414,9 @@ export default function AnalyticsChart({ analyticsData, analytics, period }) {
                         <div className="space-y-4">
                             {topPages.map((page, i) => (
                                 <div key={i} className="flex items-center justify-between group hover:bg-black/5 dark:hover:bg-white/5 -mx-4 px-4 py-2 rounded-xl transition-colors cursor-pointer">
-                                    <div className="flex items-center gap-4 min-w-0">
-                                        <span className="text-xs font-black text-gray-300 dark:text-white/20 w-4 font-mono">{i + 1}</span>
-                                        <a href={page.path} target="_blank" rel="noreferrer" className="text-sm font-bold text-gray-600 dark:text-gray-300 truncate hover:text-primary transition-colors">
+                                    <div className="flex items-center gap-4 min-w-0 flex-1">
+                                        <span className="text-xs font-black text-gray-300 dark:text-white/20 w-4 font-mono shrink-0">{i + 1}</span>
+                                        <a href={page.path} target="_blank" rel="noreferrer" className="text-sm font-bold text-gray-600 dark:text-gray-300 truncate hover:text-primary transition-colors block">
                                             {page.path === '/' ? '/ (Home)' : page.path}
                                         </a>
                                     </div>
@@ -429,7 +429,7 @@ export default function AnalyticsChart({ analyticsData, analytics, period }) {
             </div>
 
             {/* ═══ TOP ARTICLES ═══ */}
-            <motion.div variants={itemVariants} className="bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-8 backdrop-blur-md overflow-hidden">
+            <motion.div variants={itemVariants} className="bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-3xl p-5 md:p-8 backdrop-blur-md overflow-hidden">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-8">
                     <h3 className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-[0.3em]">Viral Content</h3>
                     <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-lg w-fit">By Total Hits</div>
@@ -465,7 +465,7 @@ export default function AnalyticsChart({ analyticsData, analytics, period }) {
 
             {/* ═══ MOST LIKED CONTENT ═══ */}
             {stats.topLikedArticles && stats.topLikedArticles.length > 0 && (
-                <motion.div variants={itemVariants} className="bg-gradient-to-br from-pink-500/5 to-rose-500/5 border border-pink-500/20 dark:border-pink-500/30 rounded-3xl p-8 backdrop-blur-xl relative overflow-hidden group">
+                <motion.div variants={itemVariants} className="bg-gradient-to-br from-pink-500/5 to-rose-500/5 border border-pink-500/20 dark:border-pink-500/30 rounded-3xl p-5 md:p-8 backdrop-blur-xl relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,rgba(236,72,153,0.15),transparent_50%)] pointer-events-none transition-opacity duration-700 group-hover:opacity-100 opacity-50" />
                     
                     <div className="flex items-center justify-between mb-8 relative z-10">
@@ -503,7 +503,7 @@ export default function AnalyticsChart({ analyticsData, analytics, period }) {
 
             {/* ═══ MONETIZATION PROJECTIONS ═══ */}
             {stats.adsenseProjection && (
-                <motion.div variants={itemVariants} className="bg-gradient-to-br from-emerald-500/5 to-teal-500/5 border border-emerald-500/20 dark:border-emerald-500/30 rounded-3xl p-8 backdrop-blur-xl mt-6 relative overflow-hidden group/monetization">
+                <motion.div variants={itemVariants} className="bg-gradient-to-br from-emerald-500/5 to-teal-500/5 border border-emerald-500/20 dark:border-emerald-500/30 rounded-3xl p-5 md:p-8 backdrop-blur-xl mt-6 relative overflow-hidden group/monetization">
                     <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,rgba(16,185,129,0.15),transparent_50%)] pointer-events-none transition-opacity duration-700 group-hover/monetization:opacity-100 opacity-50" />
                     
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 relative z-10">

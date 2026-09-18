@@ -103,8 +103,8 @@ class StudioController extends Controller
 
         // System Health Status
         $systemStatus = [
-            'gemini_api' => !empty(config('services.gemini.key', env('GEMINI_API_KEY'))),
-            'openrouter_fallback' => !empty(env('OPENROUTER_API_KEY')),
+            'gemini_api' => !empty(config('services.gemini.api_key', env('GEMINI_API_KEY'))),
+            'openrouter_fallback' => !empty(config('services.openrouter.api_key', env('OPENROUTER_API_KEY'))),
             'queue_health' => 'ok',
             'scout_pending' => ScoutedArticle::where('status', 'pending')->count(),
         ];
