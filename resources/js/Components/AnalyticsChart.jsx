@@ -199,7 +199,7 @@ export default function AnalyticsChart({ analyticsData, analytics, period }) {
                     </div>
                     <div className="h-64 w-full relative z-10">
                         <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={viewsPerDay} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                            <AreaChart data={viewsPerDay} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
                                 <defs>
                                     <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="5%" stopColor="rgb(var(--color-primary))" stopOpacity={0.6} />
@@ -329,7 +329,7 @@ export default function AnalyticsChart({ analyticsData, analytics, period }) {
                             <Map className="w-4 h-4 text-primary" /> Global Audience
                         </h3>
                     </div>
-                    <div className="w-full h-96 bg-transparent rounded-2xl overflow-hidden relative">
+                    <div className="w-full h-64 sm:h-96 bg-transparent rounded-2xl overflow-hidden relative flex items-center justify-center">
                         <ResponsiveContainer width="100%" height="100%">
                             <ComposableMap projection="geoMercator" projectionConfig={{ scale: 120 }}>
                                 <Geographies geography={geoUrl}>
@@ -386,14 +386,14 @@ export default function AnalyticsChart({ analyticsData, analytics, period }) {
                                     const Icon = REFERRER_ICONS[ref.type] || Globe;
                                     const color = REFERRER_COLORS[ref.type] || '#6b7280';
                                     return (
-                                        <div key={i} className="flex items-center justify-between group">
-                                            <div className="flex items-center gap-4 min-w-0">
+                                        <div key={i} className="flex items-center justify-between group gap-2">
+                                            <div className="flex items-center gap-4 flex-1 min-w-0">
                                                 <div className="w-8 h-8 rounded-xl flex items-center justify-center transition-colors shrink-0" style={{ backgroundColor: `${color}15` }}>
                                                     <Icon className="w-4 h-4" style={{ color }} />
                                                 </div>
-                                                <span className="text-sm font-bold text-gray-800 dark:text-gray-200 truncate">{formatSource(ref.source)}</span>
+                                                <span className="text-sm font-bold text-gray-800 dark:text-gray-200 truncate pr-2">{formatSource(ref.source)}</span>
                                             </div>
-                                            <div className="flex items-center gap-4">
+                                            <div className="flex items-center gap-2 sm:gap-4 shrink-0">
                                                 <span className="text-xs font-black text-gray-500 bg-black/5 dark:bg-white/5 px-2 py-1 rounded-md">{ref.type}</span>
                                                 <div className="w-12 text-right text-sm font-black text-gray-900 dark:text-white">{ref.views.toLocaleString()}</div>
                                             </div>
@@ -436,20 +436,20 @@ export default function AnalyticsChart({ analyticsData, analytics, period }) {
                 </div>
                 <div className="space-y-2">
                     {topArticles && topArticles.length > 0 ? topArticles.map((article, i) => (
-                        <motion.div whileHover={{ scale: 1.01, x: 5 }} key={article.id} className="flex items-center gap-6 group/row hover:bg-black/5 dark:hover:bg-white/5 -mx-4 px-4 py-4 rounded-2xl transition-all cursor-pointer">
-                            <span className="text-xl font-black text-gray-300 dark:text-white/10 w-8 text-center font-mono group-hover/row:text-primary transition-colors">{String(i + 1).padStart(2, '0')}</span>
+                        <motion.div whileHover={{ scale: 1.01, x: 5 }} key={article.id} className="flex items-center gap-3 sm:gap-6 group/row hover:bg-black/5 dark:hover:bg-white/5 -mx-4 px-4 py-4 rounded-2xl transition-all cursor-pointer">
+                            <span className="text-xl font-black text-gray-300 dark:text-white/10 w-6 sm:w-8 text-center font-mono group-hover/row:text-primary transition-colors">{String(i + 1).padStart(2, '0')}</span>
                             <div className="flex-1 min-w-0">
-                                <a href={`/article/${article.slug}`} target="_blank" rel="noreferrer" className="block text-sm font-black text-gray-900 dark:text-white group-hover/row:text-primary transition-colors truncate tracking-tight mb-1">
+                                <a href={`/article/${article.slug}`} target="_blank" rel="noreferrer" className="block text-sm font-black text-gray-900 dark:text-white group-hover/row:text-primary transition-colors truncate tracking-tight mb-1 pr-2">
                                     {article.title}
                                 </a>
                                 <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">{article.unique_views} unique views</span>
                             </div>
-                            <div className="flex items-center gap-5 flex-shrink-0">
+                            <div className="flex items-center gap-3 sm:gap-5 flex-shrink-0">
                                 <div className="text-right">
                                     <div className="text-sm font-black text-gray-900 dark:text-white">{article.views?.toLocaleString()}</div>
                                     <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-0.5">Hits</div>
                                 </div>
-                                <div className="w-10 h-10 rounded-xl bg-black/5 dark:bg-white/5 flex items-center justify-center border border-transparent group-hover/row:border-primary/20 group-hover/row:bg-primary/10 transition-colors">
+                                <div className="hidden sm:flex w-10 h-10 rounded-xl bg-black/5 dark:bg-white/5 items-center justify-center border border-transparent group-hover/row:border-primary/20 group-hover/row:bg-primary/10 transition-colors">
                                     <TrendingUp className="w-4 h-4 text-gray-400 group-hover/row:text-primary transition-colors" />
                                 </div>
                             </div>

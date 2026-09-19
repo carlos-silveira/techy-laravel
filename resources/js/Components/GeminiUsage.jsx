@@ -70,26 +70,27 @@ export default function GeminiUsage({ usageData, modelDistribution }) {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Model Distribution Chart */}
-                <div className="lg:col-span-2 bg-white/[0.02] border border-white/5 rounded-3xl p-8 relative overflow-hidden group hover:border-orange-500/20 transition-colors">
+                <div className="lg:col-span-2 bg-white/[0.02] border border-white/5 rounded-3xl p-5 md:p-8 relative overflow-hidden group hover:border-orange-500/20 transition-colors">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 blur-[100px] rounded-full pointer-events-none opacity-20" />
                     <h4 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-8">Token Distribution by Model</h4>
                     {chartData.length > 0 ? (
                         <div className="h-64 w-full">
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={chartData} layout="vertical" margin={{ left: 80, right: 40 }}>
+                                <BarChart data={chartData} layout="vertical" margin={{ left: 0, right: 20 }}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" horizontal={false} />
                                     <XAxis type="number" hide />
                                     <YAxis
                                         dataKey="model"
                                         type="category"
                                         stroke="rgba(255,255,255,0.4)"
-                                        fontSize={10}
+                                        fontSize={9}
                                         axisLine={false}
                                         tickLine={false}
-                                        width={140}
+                                        width={100}
                                         tickFormatter={(tick) => {
                                             const parts = tick.split('/');
-                                            return parts.length > 1 ? parts[1] : tick;
+                                            let name = parts.length > 1 ? parts[1] : tick;
+                                            return name.replace(/:free$/, '').replace(/:online$/, '');
                                         }}
                                     />
                                     <Tooltip
@@ -118,11 +119,17 @@ export default function GeminiUsage({ usageData, modelDistribution }) {
                                 <div key={i} className="flex items-center justify-between bg-white/[0.02] rounded-xl px-4 py-2 border border-white/5">
                                     <div className="flex items-center gap-2 min-w-0 pr-2">
                                         <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: colors[i % colors.length] }} />
-                                        <span className="text-[10px] font-bold text-gray-400 truncate">{m.model}</span>
+                                        <span className="text-[10px] font-bold text-gray-400 truncate">
+                                            {(() => {
+                                                const parts = m.model.split('/');
+                                                let name = parts.length > 1 ? parts[1] : m.model;
+                                                return name.replace(/:free$/, '').replace(/:online$/, '');
+                                            })()}
+                                        </span>
                                     </div>
-                                    <div className="flex items-center gap-3 text-[9px] font-black">
-                                        <span className="text-gray-500">{m.requests} req</span>
-                                        <span className="text-orange-400">{m.percentage}%</span>
+                                    <div className="flex items-center gap-2 sm:gap-3 text-[9px] font-black shrink-0">
+                                        <span className="text-gray-500 whitespace-nowrap">{m.requests} req</span>
+                                        <span className="text-orange-400 w-8 text-right">{m.percentage}%</span>
                                     </div>
                                 </div>
                                 );
@@ -132,7 +139,7 @@ export default function GeminiUsage({ usageData, modelDistribution }) {
                 </div>
 
                 {/* Recent Operations — shows real action labels and model names */}
-                <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-8">
+                <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-5 md:p-8">
                     <h4 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-6">Recent Operations</h4>
                     <div className="space-y-3">
                         {usageData.slice(0, 8).map((log, i) => {
