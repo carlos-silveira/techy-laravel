@@ -129,13 +129,13 @@ class PublicController extends Controller
      */
     public function classicIndex()
     {
-        $locale = IlluminateSupportFacadesApp::getLocale();
+        $locale = \Illuminate\Support\Facades\App::getLocale();
 
         $editorsChoice = $this->rememberLocaleAware(
             "homepage_editors_choice_{$locale}",
             $locale,
             function () use ($locale) {
-                return AppModelsArticle::where('status', 'published')
+                return \App\Models\Article::where('status', 'published')
                     ->where('is_editors_choice', true)
                     ->orderBy('created_at', 'desc')
                     ->select('id', 'title', 'slug', 'ai_summary', 'updated_at', 'cover_image_path', 'language', 'translations', 'reading_time_minutes', 'tags')
@@ -148,7 +148,7 @@ class PublicController extends Controller
             "homepage_articles_{$locale}",
             $locale,
             function () use ($locale) {
-                return AppModelsArticle::where('status', 'published')
+                return \App\Models\Article::where('status', 'published')
                     ->orderBy('created_at', 'desc')
                     ->select('id', 'title', 'slug', 'ai_summary', 'updated_at', 'cover_image_path', 'language', 'translations', 'reading_time_minutes', 'tags')
                     ->take(10)
@@ -160,10 +160,10 @@ class PublicController extends Controller
             "homepage_trending_{$locale}",
             $locale,
             function () use ($locale) {
-                $ids = IlluminateSupportFacadesDB::table('page_views')
+                $ids = \Illuminate\Support\Facades\DB::table('page_views')
                     ->where('created_at', '>=', now()->subDays(7))
                     ->whereNotNull('article_id')
-                    ->select('article_id', IlluminateSupportFacadesDB::raw('count(*) as total_views'))
+                    ->select('article_id', \Illuminate\Support\Facades\DB::raw('count(*) as total_views'))
                     ->groupBy('article_id')
                     ->orderByDesc('total_views')
                     ->limit(5)
@@ -172,9 +172,9 @@ class PublicController extends Controller
                 $selectCols = ['id', 'title', 'slug', 'ai_summary', 'updated_at', 'cover_image_path', 'language', 'translations', 'reading_time_minutes', 'tags'];
 
                 if ($ids->isEmpty()) {
-                    $articles = AppModelsArticle::where('status', 'published')->orderByDesc('created_at')->limit(5)->select($selectCols)->get();
+                    $articles = \App\Models\Article::where('status', 'published')->orderByDesc('created_at')->limit(5)->select($selectCols)->get();
                 } else {
-                    $articles = AppModelsArticle::whereIn('id', $ids)
+                    $articles = \App\Models\Article::whereIn('id', $ids)
                         ->where('status', 'published')
                         ->select($selectCols)
                         ->get()
@@ -182,7 +182,7 @@ class PublicController extends Controller
                 }
 
                 if ($articles->isEmpty()) {
-                    $articles = AppModelsArticle::where('status', 'published')->latest()->limit(5)->select($selectCols)->get();
+                    $articles = \App\Models\Article::where('status', 'published')->latest()->limit(5)->select($selectCols)->get();
                 }
 
                 return $articles;
@@ -193,7 +193,7 @@ class PublicController extends Controller
         $articles->each->makeHidden(['translations', 'content', 'embedding']);
         $trendingArticles->each->makeHidden(['translations', 'content', 'embedding']);
 
-        return InertiaInertia::render('Classic', [
+        return \Inertia\Inertia::render('Classic', [
             'editorsChoice' => $editorsChoice,
             'articles' => $articles,
             'trendingArticles' => $trendingArticles,
