@@ -200,15 +200,10 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
                            <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
                            <h4 className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-amber-400">{__('TL;DR Summary')}</h4>
                          </div>
-                         <ul className="space-y-2 md:space-y-3">
-                           {/* Split summary into bullet points for quick scanning */}
-                           {(article.ai_summary || '').split('. ').slice(0,3).map((sentence, i) => sentence && (
-                             <li key={i} className="text-white text-[14px] md:text-lg font-medium leading-snug md:leading-relaxed flex items-start gap-3">
-                               <span className="text-primary mt-0.5 md:mt-1 text-lg md:text-xl">•</span>
-                               {sentence}{!sentence.endsWith('.') ? '.' : ''}
-                             </li>
-                           ))}
-                         </ul>
+                         <div className="text-white text-[14px] md:text-lg font-medium leading-snug md:leading-relaxed">
+                           <span className="text-primary mr-2 text-lg md:text-xl">•</span>
+                           {article.ai_summary}
+                         </div>
                       </div>
                       
                       <div className="flex flex-row items-center gap-2 md:gap-4 mt-1 md:mt-6">

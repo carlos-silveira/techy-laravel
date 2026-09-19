@@ -207,7 +207,16 @@ class NewsAgent
             $imageQuery = $draft['suggested_image'] ?? ($meta['tags'][0] ?? $title);
             $coverImage = $this->fetchCoverImageFallback(Str::limit($imageQuery, 50));
             if (empty($coverImage)) {
-                $coverImage = 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=1200&q=80';
+                $fallbacks = [
+                    'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b',
+                    'https://images.unsplash.com/photo-1518770660439-4636190af475',
+                    'https://images.unsplash.com/photo-1550751827-4bd374c3f58b',
+                    'https://images.unsplash.com/photo-1451187580459-43490279c0fa',
+                    'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e',
+                    'https://images.unsplash.com/photo-1620712943543-bcc4688e7485',
+                    'https://images.unsplash.com/photo-1551288049-bebda4e38f71',
+                ];
+                $coverImage = $fallbacks[array_rand($fallbacks)] . '?auto=format&fit=crop&w=1200&q=80';
             }
 
             $article = Article::create([
@@ -345,7 +354,16 @@ class NewsAgent
         $cleanQuery = trim(Str::limit($imageQuery, 30)) . ' technology';
         $coverImage = $this->fetchCoverImageFallback($cleanQuery);
         if (empty($coverImage)) {
-            $coverImage = 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=1200&q=80';
+            $fallbacks = [
+                'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b',
+                'https://images.unsplash.com/photo-1518770660439-4636190af475',
+                'https://images.unsplash.com/photo-1550751827-4bd374c3f58b',
+                'https://images.unsplash.com/photo-1451187580459-43490279c0fa',
+                'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e',
+                'https://images.unsplash.com/photo-1620712943543-bcc4688e7485',
+                'https://images.unsplash.com/photo-1551288049-bebda4e38f71',
+            ];
+            $coverImage = $fallbacks[array_rand($fallbacks)] . '?auto=format&fit=crop&w=1200&q=80';
         }
 
         $article = Article::create([
@@ -393,6 +411,22 @@ class NewsAgent
             $article->update(['translations' => $translations]);
         }
 
+        // --- SEND PUSH NOTIFICATIONS ---
+        try {
+            $subscribers = \App\Models\PushSubscriber::all();
+            if ($subscribers->count() > 0) {
+                $groupedSubscribers = $subscribers->groupBy('locale');
+
+                foreach ($groupedSubscribers as $locale => $localeSubscribers) {
+                    $safeLocale = empty($locale) ? 'en' : $locale;
+                    \Illuminate\Support\Facades\Notification::send($localeSubscribers, new \App\Notifications\NewArticlePublished($article, $safeLocale));
+                }
+                Log::info("NewsAgent: Sent push notifications to {$subscribers->count()} subscribers for '{$title}'");
+            }
+        } catch (\Exception $e) {
+            Log::error("NewsAgent: Failed to send push notifications for '{$title}': " . $e->getMessage());
+        }
+
         return [
             'title' => $title,
             'status' => 'published',
@@ -419,7 +453,16 @@ class NewsAgent
             sleep(2); 
             
             $url = $this->fetchCoverImageFallback(Str::limit($alt, 50));
-            $fallbackUrl = 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=1200&q=80';
+            $fallbacks = [
+                'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b',
+                'https://images.unsplash.com/photo-1518770660439-4636190af475',
+                'https://images.unsplash.com/photo-1550751827-4bd374c3f58b',
+                'https://images.unsplash.com/photo-1451187580459-43490279c0fa',
+                'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e',
+                'https://images.unsplash.com/photo-1620712943543-bcc4688e7485',
+                'https://images.unsplash.com/photo-1551288049-bebda4e38f71',
+            ];
+            $fallbackUrl = $fallbacks[array_rand($fallbacks)] . '?auto=format&fit=crop&w=1200&q=80';
             
             return '<img src="' . ($url ?? $fallbackUrl) . '" alt="' . e($alt) . '" class="w-full h-auto rounded-xl my-6 shadow-md object-cover max-h-[450px]">';
         }, $content);
