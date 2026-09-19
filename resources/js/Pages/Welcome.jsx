@@ -188,8 +188,14 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
                         </span>
                       )}
                       
-                      <h1 className="text-2xl md:text-4xl lg:text-5xl font-black line-clamp-4 md:line-clamp-3 tracking-tighter leading-tight md:leading-[1.15] mb-3 md:mb-5 text-white drop-shadow-lg">
-                        <Link href={`/article/${article.slug}`} className="hover:text-primary transition-colors block">
+                      <h1 className={`font-black tracking-tighter leading-tight md:leading-[1.15] mb-3 md:mb-5 text-white drop-shadow-lg ${
+                          article.title.length > 90 
+                            ? 'text-xl md:text-3xl lg:text-4xl' 
+                            : article.title.length > 60 
+                                ? 'text-2xl md:text-4xl lg:text-5xl' 
+                                : 'text-3xl md:text-5xl lg:text-6xl'
+                      }`}>
+                        <Link href={`/article/${article.slug}`} className="hover:text-primary transition-colors block" style={{ textWrap: 'balance' }}>
                             {article.title}
                         </Link>
                       </h1>
