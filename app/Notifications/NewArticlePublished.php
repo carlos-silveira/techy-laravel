@@ -56,10 +56,17 @@ class NewArticlePublished extends Notification
             }
         }
 
+        // iOS Web Push truncates titles at ~40 characters and forces the "from [App]" subtitle.
+        // To ensure readability, if the title is long, we prepend the full title to the body.
+        $bodyText = $summary;
+        if (mb_strlen($title) > 40) {
+            $bodyText = $title . " — " . $summary;
+        }
+
         return (new WebPushMessage)
             ->title($title)
             ->icon('/img/logo_icon.png')
-            ->body(\Illuminate\Support\Str::limit($summary, 50))
+            ->body(\Illuminate\Support\Str::limit($bodyText, 150))
             ->data(['url' => '/article/' . $this->article->slug]);
     }
 }
