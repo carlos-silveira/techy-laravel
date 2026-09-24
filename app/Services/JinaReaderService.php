@@ -61,12 +61,13 @@ class JinaReaderService
                     }
                     if (filter_var($imgUrl, FILTER_VALIDATE_URL)) {
                         $lowerUrl = strtolower($imgUrl);
-                        // Filter out common logos, icons, and non-content tracking pixels
+                        // Filter out common logos, icons, ads, and non-content tracking pixels
                             $pathOnly = parse_url($lowerUrl, PHP_URL_PATH) ?? '';
                             if (
                                 !str_ends_with($pathOnly, '.svg') &&
                                 !str_ends_with($pathOnly, '.gif') &&
                                 !str_ends_with($pathOnly, '.webp') &&
+                                !str_ends_with($pathOnly, '.avif') &&
                                 !str_contains($lowerUrl, 'logo') &&
                                 !str_contains($lowerUrl, 'icon') &&
                                 !str_contains($lowerUrl, 'avatar') &&
@@ -83,6 +84,9 @@ class JinaReaderService
                                 !str_contains($lowerUrl, 'disrupt') &&
                                 !str_contains($lowerUrl, 'headshot') &&
                                 !str_contains($lowerUrl, 'tim.jpg') &&
+                                !str_contains($lowerUrl, 'ads') &&
+                                !str_contains($lowerUrl, 'bg_') &&
+                                !str_contains($lowerUrl, 'newsletter') &&
                                 !str_contains($lowerUrl, '723b22a81ff6a760c4520b963b43451e') &&
                                 !str_contains($lowerUrl, 'kirsten')
                             ) {
