@@ -35,7 +35,7 @@ class SyncSocialBacklog extends Command
         $this->info("Starting batch process. Limit cap: {$limit}");
 
         $articles = Article::where('status', 'published')
-            ->where('is_social_published', false)
+            ->whereNull('facebook_posted_at')
             ->latest()
             ->take($limit)
             ->get();

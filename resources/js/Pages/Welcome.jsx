@@ -176,66 +176,67 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
                 <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/95" />
                 <div className="absolute inset-0 bg-black/40" />
               </div>
-
-              {/* Main Content Overlay */}
-              <div className="absolute inset-0 z-10 flex flex-col justify-center md:justify-end p-4 md:p-10 lg:p-16 xl:p-24 pb-6 md:pb-12 xl:pb-24 pt-20 md:pt-24 w-full 2xl:max-w-[120rem] mx-auto">
-                <div className="max-w-3xl lg:max-w-4xl xl:max-w-5xl pr-16 md:pr-20">
-                      {/* Tags */}
-                      {article.tags?.[0] && (
-                        <span className="inline-flex items-center gap-2 px-3 py-1.5 mb-3 md:px-4 md:py-2 md:mb-4 xl:px-6 xl:py-3 xl:mb-6 xl:text-xs text-[10px] font-black uppercase tracking-widest bg-primary/80 backdrop-blur-md rounded-full text-white shadow-lg border border-white/20">
-                           <span className="w-1.5 h-1.5 xl:w-2 xl:h-2 bg-white rounded-full animate-pulse" />
-                          {article.tags[0]}
-                        </span>
-                      )}
-                      
-                      <h1 className={`font-black tracking-tighter leading-tight md:leading-[1.15] mb-3 md:mb-5 xl:mb-8 text-white drop-shadow-lg ${
-                          article.title.length > 90 
-                            ? 'text-xl md:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl' 
-                            : article.title.length > 60 
-                                ? 'text-2xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-[4.5rem]' 
-                                : 'text-3xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-[5.5rem]'
-                      }`}>
-                        <Link href={`/article/${article.slug}`} className="hover:text-primary transition-colors block" style={{ textWrap: 'balance' }}>
-                            {article.title}
-                        </Link>
-                      </h1>
-                      
-                      {/* TL;DR Section */}
-                      <div className="mb-4 md:mb-6 xl:mb-10 bg-white/10 backdrop-blur-xl transform-gpu border border-white/20 p-3.5 md:p-6 xl:p-8 2xl:p-10 rounded-2xl shadow-xl max-h-[40vh] lg:max-h-none overflow-y-auto overscroll-contain">
-                         <div className="flex items-center gap-2 mb-2 md:mb-3 xl:mb-4">
-                           <span className="w-2 h-2 xl:w-3 xl:h-3 bg-amber-400 rounded-full animate-pulse" />
-                           <h4 className="text-[10px] md:text-xs xl:text-sm font-black uppercase tracking-[0.2em] text-amber-400">{__('TL;DR Summary')}</h4>
-                         </div>
-                         <div className="text-white text-[14px] md:text-lg xl:text-xl 2xl:text-2xl font-medium leading-snug md:leading-relaxed">
-                           <span className="text-primary mr-2 text-lg md:text-xl xl:text-2xl">•</span>
-                           {article.ai_summary}
-                         </div>
-                      </div>
-                      
-                      <div className="flex flex-row items-center gap-2 md:gap-4 mt-1 md:mt-6 xl:mt-8">
-                        <Link 
-                          href={`/article/${article.slug}`}
-                          className="flex-1 md:flex-none justify-center inline-flex items-center gap-2 bg-white text-black px-4 py-2.5 md:px-6 md:py-3.5 xl:px-8 xl:py-4 rounded-full font-black uppercase tracking-widest text-[10px] md:text-[13px] xl:text-sm 2xl:text-base hover:scale-105 transition-transform shadow-lg md:shadow-[0_0_30px_rgba(255,255,255,0.3)]"
-                        >
-                          <BookOpen className="w-4 h-4 md:w-5 md:h-5 xl:w-6 xl:h-6" />
-                          <span className="truncate">{__('Read Full Story')}</span>
-                        </Link>
+              {/* Foreground Wrapper (Centers Content on Ultra-Wide Screens) */}
+              <div className="absolute inset-0 z-10 w-full max-w-[100rem] mx-auto">
+                {/* Main Content Overlay */}
+                <div className="absolute inset-0 flex flex-col justify-center md:justify-end p-4 md:p-10 lg:p-16 xl:p-24 pb-6 md:pb-12 xl:pb-24 pt-20 md:pt-24 w-full pointer-events-none">
+                  <div className="max-w-3xl lg:max-w-4xl xl:max-w-5xl pr-16 md:pr-20 pointer-events-auto">
+                        {/* Tags */}
+                        {article.tags?.[0] && (
+                          <span className="inline-flex items-center gap-2 px-3 py-1.5 mb-3 md:px-4 md:py-2 md:mb-4 xl:px-6 xl:py-3 xl:mb-6 xl:text-xs text-[10px] font-black uppercase tracking-widest bg-primary/80 backdrop-blur-md rounded-full text-white shadow-lg border border-white/20">
+                             <span className="w-1.5 h-1.5 xl:w-2 xl:h-2 bg-white rounded-full animate-pulse" />
+                            {article.tags[0]}
+                          </span>
+                        )}
                         
-                        <span className="flex-none inline-flex items-center gap-1.5 text-[10px] md:text-xs xl:text-sm 2xl:text-base font-bold uppercase tracking-widest text-gray-300 bg-white/10 backdrop-blur-md transform-gpu px-3 py-2.5 md:px-4 md:py-2 xl:px-6 xl:py-4 rounded-full border border-white/10">
-                          <Clock className="w-3.5 h-3.5 xl:w-5 xl:h-5 text-primary" />
-                          <span className="hidden sm:inline">{article.reading_time_minutes || 5} {__('min read')}</span>
-                          <span className="sm:hidden">{article.reading_time_minutes || 5}m</span>
-                        </span>
+                        <h1 className={`font-black tracking-tighter leading-tight md:leading-[1.15] mb-3 md:mb-5 xl:mb-8 text-white drop-shadow-lg ${
+                            article.title.length > 90 
+                              ? 'text-xl md:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl' 
+                              : article.title.length > 60 
+                                  ? 'text-2xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-[4.5rem]' 
+                                  : 'text-3xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-[5.5rem]'
+                        }`}>
+                          <Link href={`/article/${article.slug}`} className="hover:text-primary transition-colors block" style={{ textWrap: 'balance' }}>
+                              {article.title}
+                          </Link>
+                        </h1>
                         
-                        <span className="hidden md:inline-flex text-xs xl:text-sm 2xl:text-base font-bold uppercase tracking-widest text-gray-300 opacity-70 bg-black/40 backdrop-blur-md transform-gpu px-4 py-2 xl:px-6 xl:py-4 rounded-full border border-white/5">
-                            {dayjs(article.updated_at).fromNow()}
-                        </span>
+                        {/* TL;DR Section */}
+                        <div className="mb-4 md:mb-6 xl:mb-10 bg-white/10 backdrop-blur-xl transform-gpu border border-white/20 p-3.5 md:p-6 xl:p-8 2xl:p-10 rounded-2xl shadow-xl max-h-[40vh] lg:max-h-none overflow-y-auto overscroll-contain">
+                           <div className="flex items-center gap-2 mb-2 md:mb-3 xl:mb-4">
+                             <span className="w-2 h-2 xl:w-3 xl:h-3 bg-amber-400 rounded-full animate-pulse" />
+                             <h4 className="text-[10px] md:text-xs xl:text-sm font-black uppercase tracking-[0.2em] text-amber-400">{__('TL;DR Summary')}</h4>
+                           </div>
+                           <div className="text-white text-[14px] md:text-lg xl:text-xl 2xl:text-2xl font-medium leading-snug md:leading-relaxed">
+                             <span className="text-primary mr-2 text-lg md:text-xl xl:text-2xl">•</span>
+                             {article.ai_summary}
+                           </div>
+                        </div>
+                        
+                        <div className="flex flex-row items-center gap-2 md:gap-4 mt-1 md:mt-6 xl:mt-8">
+                          <Link 
+                            href={`/article/${article.slug}`}
+                            className="flex-1 md:flex-none justify-center inline-flex items-center gap-2 bg-white text-black px-4 py-2.5 md:px-6 md:py-3.5 xl:px-8 xl:py-4 rounded-full font-black uppercase tracking-widest text-[10px] md:text-[13px] xl:text-sm 2xl:text-base hover:scale-105 transition-transform shadow-lg md:shadow-[0_0_30px_rgba(255,255,255,0.3)]"
+                          >
+                            <BookOpen className="w-4 h-4 md:w-5 md:h-5 xl:w-6 xl:h-6" />
+                            <span className="truncate">{__('Read Full Story')}</span>
+                          </Link>
+                          
+                          <span className="flex-none inline-flex items-center gap-1.5 text-[10px] md:text-xs xl:text-sm 2xl:text-base font-bold uppercase tracking-widest text-gray-300 bg-white/10 backdrop-blur-md transform-gpu px-3 py-2.5 md:px-4 md:py-2 xl:px-6 xl:py-4 rounded-full border border-white/10">
+                            <Clock className="w-3.5 h-3.5 xl:w-5 xl:h-5 text-primary" />
+                            <span className="hidden sm:inline">{article.reading_time_minutes || 5} {__('min read')}</span>
+                            <span className="sm:hidden">{article.reading_time_minutes || 5}m</span>
+                          </span>
+                          
+                          <span className="hidden md:inline-flex text-xs xl:text-sm 2xl:text-base font-bold uppercase tracking-widest text-gray-300 opacity-70 bg-black/40 backdrop-blur-md transform-gpu px-4 py-2 xl:px-6 xl:py-4 rounded-full border border-white/5">
+                              {dayjs(article.updated_at).fromNow()}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-              </div>
+                </div>
 
-              {/* Right Side Action Buttons */}
-              <div className="absolute right-3 bottom-6 md:right-10 md:bottom-12 z-20 flex flex-col gap-4 md:gap-5 items-center">
+                {/* Right Side Action Buttons */}
+                <div className="absolute right-3 bottom-6 md:right-10 md:bottom-12 lg:right-16 xl:right-24 xl:bottom-24 z-20 flex flex-col gap-4 md:gap-5 items-center pointer-events-auto">
                 <ActionIcon 
                   icon={Heart} 
                   label={__("Like")}  
@@ -263,6 +264,7 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
                     }
                   }}
                 />
+              </div>
               </div>
               
               {/* Swipe Indicator (only on first slide) */}

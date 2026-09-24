@@ -33,16 +33,20 @@ class Article extends Model
         'embedding',
         'fact_check_score',
         'fact_check_status',
+        'facebook_posted_at',
+        'twitter_posted_at',
     ];
 
     protected $casts = [
-        'is_editors_choice' => 'boolean',
-        'tags' => 'array',
-        'likes_count' => 'integer',
-        'views_count' => 'integer',
-        'reading_time_minutes' => 'integer',
-        'translations' => 'array',
-        'embedding' => 'array',
+        'is_editors_choice'   => 'boolean',
+        'tags'                => 'array',
+        'likes_count'         => 'integer',
+        'views_count'         => 'integer',
+        'reading_time_minutes'=> 'integer',
+        'translations'        => 'array',
+        'embedding'           => 'array',
+        'facebook_posted_at'  => 'datetime',
+        'twitter_posted_at'   => 'datetime',
     ];
 
     /**

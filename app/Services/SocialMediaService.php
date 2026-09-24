@@ -16,6 +16,12 @@ class SocialMediaService
      */
     public function postToTwitter(Article $article)
     {
+        // Deduplication guard — never post the same article twice to Twitter
+        if ($article->twitter_posted_at !== null) {
+            Log::info("Twitter post skipped. Already posted on {$article->twitter_posted_at}: {$article->slug}");
+            return false;
+        }
+
         $consumerKey = config('services.twitter.consumer_key');
         $consumerSecret = config('services.twitter.consumer_secret');
         $accessToken = config('services.twitter.access_token');
@@ -41,6 +47,9 @@ class SocialMediaService
 
             if ($connection->getLastHttpCode() == 201) {
                 Log::info("Successfully posted to Twitter: {$article->slug}");
+                $article->twitter_posted_at = now();
+                $article->is_social_published = true;
+                $article->saveQuietly();
                 return true;
             } else {
                 Log::error("Failed to post to Twitter: " . json_encode($response));
@@ -57,6 +66,12 @@ class SocialMediaService
      */
     public function postToFacebook(Article $article)
     {
+        // Deduplication guard — never post the same article twice to Facebook
+        if ($article->facebook_posted_at !== null) {
+            Log::info("Facebook post skipped. Already posted on {$article->facebook_posted_at}: {$article->slug}");
+            return false;
+        }
+
         if (!config('services.facebook.page_id') || !config('services.facebook.page_access_token')) {
             Log::warning('Facebook post skipped. API Keys missing in config.');
             return false;
@@ -113,6 +128,9 @@ class SocialMediaService
 
             if ($response->successful()) {
                 Log::info("Successfully posted to Facebook Page: {$article->slug}");
+                $article->facebook_posted_at = now();
+                $article->is_social_published = true;
+                $article->saveQuietly();
                 return true;
             } else {
                 Log::error("Failed to post to Facebook: " . $response->body());
