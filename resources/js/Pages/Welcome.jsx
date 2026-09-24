@@ -146,8 +146,8 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
                 className="h-[100dvh] w-full snap-start snap-always relative flex flex-col items-center justify-center bg-[#02040a] border-y border-white/5"
               >
                   <span className="text-[10px] text-gray-500 uppercase tracking-widest mb-4">{__('Advertisement')}</span>
-                  <div className="w-full max-w-md bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-2 md:p-6 min-h-[400px] flex items-center justify-center mx-auto shadow-2xl overflow-hidden">
-                      <AdsterraAd type="native" />
+                  <div className="w-full max-w-md bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-2 md:p-6 min-h-[300px] flex items-center justify-center mx-auto shadow-2xl overflow-hidden">
+                      <AdsterraAd type="300x250" />
                   </div>
                   <div className="mt-12 flex flex-col items-center justify-center animate-bounce opacity-50">
                      <p className="text-xs text-gray-400 font-bold tracking-widest uppercase mb-2">{__('Keep Scrolling')}</p>

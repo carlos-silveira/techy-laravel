@@ -37,8 +37,13 @@ class GenerateDailyNews extends Command
 
         $this->info("📰 Found " . count($newsItems) . " news items.");
 
+        // Fetch recent titles to prevent AI from suggesting duplicates
+        $recentTitles = Article::where('created_at', '>', now()->subDays(7))
+            ->pluck('title')
+            ->toArray();
+
         $this->info('🧠 Asking Gemini for editorial angles...');
-        $ideas = $geminiService->generateIdeas($newsItems);
+        $ideas = $geminiService->generateIdeas($newsItems, $recentTitles);
 
         if (empty($ideas)) {
             $this->error('Gemini could not generate ideas.');
@@ -52,11 +57,38 @@ class GenerateDailyNews extends Command
             return $scoreB <=> $scoreA;
         });
 
+        $stopWords = ['the','a','an','in','of','to','for','and','or','is','are','was','that','with','on','at','by','as','it','its','amid','new','over','after','into','about','how','what','why','says','say','us','ai'];
+        $normalize = fn(string $title): array => array_values(array_diff(
+            array_filter(explode(' ', preg_replace('/[^a-z0-9 ]/', '', strtolower($title)))),
+            $stopWords
+        ));
+        $recentKeywordSets = array_map($normalize, $recentTitles);
+
         $selectedIdea = null;
         foreach ($ideas as $idea) {
             // Guard: Gemini sometimes returns strings instead of objects
             if (!is_array($idea) || !isset($idea['title'])) {
                 $this->warn('⚠️ Skipping malformed idea (not an associative array).');
+                continue;
+            }
+
+            // Keyword deduplication check
+            $ideaWords = $normalize($idea['title']);
+            $isDuplicate = false;
+            if (!empty($ideaWords)) {
+                foreach ($recentKeywordSets as $existingWords) {
+                    if (empty($existingWords)) continue;
+                    $overlap = count(array_intersect($ideaWords, $existingWords));
+                    $minLen  = min(count($ideaWords), count($existingWords));
+                    if ($minLen > 0 && ($overlap / $minLen) >= 0.55) { // 55% similarity threshold
+                        $isDuplicate = true;
+                        break;
+                    }
+                }
+            }
+
+            if ($isDuplicate) {
+                $this->warn("⚠️ Skipping idea '{$idea['title']}' (Keyword overlap with existing article)");
                 continue;
             }
 
