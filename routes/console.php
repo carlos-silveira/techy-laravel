@@ -21,7 +21,7 @@ Artisan::command('inspire', function () {
 use Illuminate\Support\Facades\Schedule;
 
 // Generate AI-powered news every 30 minutes to maximize free daily quota
-Schedule::job(new \App\Jobs\GenerateNewsJob)->everyThirtyMinutes()->withoutOverlapping();
+Schedule::job(new \App\Jobs\GenerateNewsJob)->everyThirtyMinutes()->withoutOverlapping(30);
 
 // Schedule weekly newsletter
 Schedule::command('newsletter:send-weekly')->weeklyOn(5, '09:00');
@@ -30,7 +30,7 @@ Schedule::command('newsletter:send-weekly')->weeklyOn(5, '09:00');
 // Schedule::command('news:update-images')->dailyAt('02:00')->withoutOverlapping();
 
 // Run queue worker via cron for cPanel shared hosting
-Schedule::command('queue:work --stop-when-empty --max-time=280 --tries=3')->everyMinute()->withoutOverlapping();
+Schedule::command('queue:work --stop-when-empty --max-time=280 --tries=3')->everyMinute()->withoutOverlapping(5);
 
 // Automatically publish missing articles to social media
-Schedule::command('social:sync-backlog')->everyThirtyMinutes()->withoutOverlapping();
+Schedule::command('social:sync-backlog')->everyThirtyMinutes()->withoutOverlapping(30);
