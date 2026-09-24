@@ -179,7 +179,7 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
               {/* Foreground Wrapper (Centers Content on Ultra-Wide Screens) */}
               <div className="absolute inset-0 z-10 w-full max-w-[100rem] mx-auto">
                 {/* Main Content Overlay */}
-                <div className="absolute inset-0 flex flex-col justify-center md:justify-end p-4 md:p-10 lg:p-16 xl:p-24 pb-6 md:pb-12 xl:pb-24 pt-20 md:pt-24 w-full pointer-events-none">
+                <div className="absolute inset-0 flex flex-col justify-center md:justify-end p-4 md:p-10 lg:p-16 xl:p-24 pb-10 md:pb-12 xl:pb-24 pt-20 md:pt-24 w-full pointer-events-none">
                   <div className="max-w-3xl lg:max-w-4xl xl:max-w-5xl pr-16 md:pr-20 pointer-events-auto">
                         {/* Tags */}
                         {article.tags?.[0] && (
@@ -236,7 +236,7 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
                 </div>
 
                 {/* Right Side Action Buttons */}
-                <div className="absolute right-3 bottom-6 md:right-10 md:bottom-12 lg:right-16 xl:right-24 xl:bottom-24 z-20 flex flex-col gap-4 md:gap-5 items-center pointer-events-auto">
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 md:top-auto md:translate-y-0 md:bottom-12 lg:right-16 xl:right-24 xl:bottom-24 z-20 flex flex-col gap-4 md:gap-5 items-center pointer-events-auto">
                 <ActionIcon 
                   icon={Heart} 
                   label={__("Like")}  
@@ -406,7 +406,7 @@ function ActionIcon({ icon: Icon, label, ariaLabel, delay, onClick, active }) {
       <div className={`w-10 h-10 md:w-14 md:h-14 xl:w-16 xl:h-16 2xl:w-20 2xl:h-20 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center border border-white/10 md:group-hover:bg-primary/80 md:group-hover:border-primary transition-colors shadow-lg ${active ? "bg-primary/90 border-primary" : ""}`}>
         <Icon className={`w-5 h-5 md:w-7 md:h-7 xl:w-8 xl:h-8 2xl:w-10 2xl:h-10 ${active ? "text-white fill-white" : "text-white"}`} />
       </div>
-      <span className="text-[8px] md:text-[10px] xl:text-xs 2xl:text-sm font-black text-white drop-shadow-md uppercase tracking-widest">{label}</span>
+      <span className="hidden md:block text-[8px] md:text-[10px] xl:text-xs 2xl:text-sm font-black text-white drop-shadow-md uppercase tracking-widest">{label}</span>
     </motion.button>
   );
 }

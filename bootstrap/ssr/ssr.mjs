@@ -59549,7 +59549,7 @@ server_default((page) => createInertiaApp({
 		"./Pages/Studio/Subscribers/Index.jsx": () => import("./assets/Index-B--TmPjr.mjs"),
 		"./Pages/Terms.jsx": () => import("./assets/Terms-DXQIeIzU.mjs"),
 		"./Pages/TopNav.jsx": () => import("./assets/TopNav-DAkrkP7f.mjs").then((n) => n.n),
-		"./Pages/Welcome.jsx": () => import("./assets/Welcome-wuVEJ6YN.mjs")
+		"./Pages/Welcome.jsx": () => import("./assets/Welcome-D4331Cal.mjs")
 	})),
 	setup({ App, props }) {
 		global.route = (name, params, absolute) => s(name, params, absolute, {
