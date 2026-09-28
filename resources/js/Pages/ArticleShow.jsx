@@ -190,11 +190,7 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
             {/* Removed Problematic Parallax Background for Clean Light Mode */}
 
             <main className="max-w-4xl mx-auto px-6 py-20 relative z-10">
-                <motion.article
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                >
+                <article>
                     <header className="mb-16">
                         <div className="flex flex-wrap items-center gap-3 text-primary font-black uppercase tracking-[0.2em] text-[10px] mb-8">
                             <BookOpen className="w-4 h-4" /> {__('Synthesized Discovery')}
@@ -274,7 +270,7 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
                             <TipTapRenderer content={parsedContent} />
                         )}
                     </div>
-                </motion.article>
+                </article>
 
                 {/* Native Ad inside article flow */}
                 <div className="mt-12 w-full">
