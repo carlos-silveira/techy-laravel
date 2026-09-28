@@ -712,3 +712,10 @@
   - `app/Services/GeminiService.php` (`generateCategoryDraft`): Added a specific rule to avoid pretending to have physically tested or reviewed a product.
   - `php artisan tinker`: Manually executed local database update on the "gaming-inputs-into-physical-ai-training-data" article to apply the new style to the live local instance.
 - **Verification**: Verified that the changes accurately target the generated prompt text without breaking the JSON output structure.
+
+## 2026-09-28: Multi-Source Context for Article Drafting
+- **Context**: The user wanted to eliminate "AI slop" and stretching a single source by feeding the AI multiple sources *upfront* before it drafts the article. They also requested the removal of the mandatory "TechyNews Take".
+- **Changes**:
+  - `app/Services/GeminiService.php`: Removed the mandatory "TechyNews Take" requirement from `generateDraft` and added it to the strictly forbidden headings list.
+  - `app/Console/Commands/GenerateDailyNews.php`: Refactored the context gathering logic. Instead of only fetching `source_url`, it now leverages `SourceSearchService::searchForClaim` to query the Jina Search API for the article topic, fetching up to 3 additional high-tier sources. It appends these excerpts into the `$richContext` passed to Gemini.
+- **Result**: The AI now drafts articles based on a synthesized pool of 3-5 different sources instead of stretching a single article, vastly improving fact density and removing the need for filler text.
