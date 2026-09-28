@@ -16,6 +16,6 @@ sleep 2
 
 # 2. Start the new process in the background using nohup
 echo "Starting SSR process..."
-nohup node bootstrap/ssr/ssr.mjs > storage/logs/ssr.log 2>&1 &
+nohup node --no-experimental-fetch bootstrap/ssr/ssr.mjs > storage/logs/ssr.log 2>&1 &
 
 echo "SSR process restarted!"
