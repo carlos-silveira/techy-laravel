@@ -15,10 +15,11 @@
         $pageProps = $pageData['props'] ?? [];
         $featured = $pageProps['featured'] ?? null;
         $editorsChoice = $pageProps['editorsChoice'] ?? [];
+        $article = $pageProps['article'] ?? null;
         
-        $getImageUrl = function($article) {
-            if (!$article) return null;
-            $url = $article['cover_image_path'] ?? null;
+        $getImageUrl = function($item) {
+            if (!$item) return null;
+            $url = is_array($item) ? ($item['cover_image_path'] ?? null) : ($item->cover_image_path ?? null);
             if ($url) {
                 if (!str_starts_with($url, 'http') && !str_starts_with($url, '/')) {
                     $url = '/storage/' . $url;
@@ -32,14 +33,19 @@
 
         $featuredUrl = $getImageUrl($featured);
         $mobileLcpUrl = count($editorsChoice) > 0 ? $getImageUrl($editorsChoice[0]) : null;
+        $articleCoverUrl = $getImageUrl($article);
     @endphp
 
-    @if($featuredUrl)
+    @if($featuredUrl && !$articleCoverUrl)
         <link rel="preload" as="image" href="{{ $featuredUrl }}" media="(min-width: 769px)" fetchpriority="high">
     @endif
     
-    @if($mobileLcpUrl)
+    @if($mobileLcpUrl && !$articleCoverUrl)
         <link rel="preload" as="image" href="{{ $mobileLcpUrl }}" media="(max-width: 768px)" fetchpriority="high">
+    @endif
+
+    @if($articleCoverUrl)
+        <link rel="preload" as="image" href="{{ $articleCoverUrl }}" fetchpriority="high">
     @endif
 
     @if(isset($meta))
