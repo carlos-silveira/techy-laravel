@@ -17,13 +17,19 @@
         $editorsChoice = $pageProps['editorsChoice'] ?? [];
         $article = $pageProps['article'] ?? null;
         
-        $getImageUrl = function($item) {
+        $getImageUrl = function($item, $width = 1200) {
             if (!$item) return null;
             $url = is_array($item) ? ($item['cover_image_path'] ?? null) : ($item->cover_image_path ?? null);
             if ($url) {
                 if (!str_starts_with($url, 'http') && !str_starts_with($url, '/')) {
                     $url = '/storage/' . $url;
                 }
+                
+                if (str_contains($url, 'unsplash.com')) {
+                    $separator = str_contains($url, '?') ? '&' : '?';
+                    $url = "{$url}{$separator}auto=format&fit=crop&q=80&w={$width}";
+                }
+                
                 if (!str_starts_with($url, 'http')) {
                     $url = 'https://techynews.lat' . $url;
                 }
