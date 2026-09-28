@@ -8,11 +8,9 @@ echo "Killing existing SSR process..."
 pkill -f "inertia:start-ssr" || true
 pkill -f "ssr.mjs" || true
 
-# Add Node.js to PATH. Use Node 18 or 20 to avoid Undici Wasm memory crashes on cPanel
-if [ -d "/opt/alt/alt-nodejs18/root/usr/bin" ]; then
-    export PATH=/opt/alt/alt-nodejs18/root/usr/bin:$PATH
-elif [ -d "/opt/alt/alt-nodejs20/root/usr/bin" ]; then
-    export PATH=/opt/alt/alt-nodejs20/root/usr/bin:$PATH
+# Add Node.js to PATH. Use Node 16 to avoid Undici Wasm memory crashes on cPanel
+if [ -d "/opt/alt/alt-nodejs16/root/usr/bin" ]; then
+    export PATH=/opt/alt/alt-nodejs16/root/usr/bin:$PATH
 else
     export PATH=/opt/alt/alt-nodejs22/root/usr/bin:$PATH
 fi
