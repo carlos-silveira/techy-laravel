@@ -8,18 +8,14 @@ echo "Killing existing SSR process..."
 pkill -f "inertia:start-ssr" || true
 pkill -f "ssr.mjs" || true
 
-# Add Node.js to PATH. Use Node 16 to avoid Undici Wasm memory crashes on cPanel
-if [ -d "/opt/alt/alt-nodejs16/root/usr/bin" ]; then
-    export PATH=/opt/alt/alt-nodejs16/root/usr/bin:$PATH
-else
-    export PATH=/opt/alt/alt-nodejs22/root/usr/bin:$PATH
-fi
+# Add Node.js to PATH. Use Node 22 with Wasm trap handler disabled
+export PATH=/opt/alt/alt-nodejs22/root/usr/bin:$PATH
 
 # Give it a second to clean up
 sleep 2
 
 # 2. Start the new process in the background using nohup
-echo "Starting SSR process using PHP: $PHP_BIN"
-nohup $PHP_BIN artisan inertia:start-ssr > storage/logs/ssr.log 2>&1 &
+echo "Starting SSR process..."
+nohup node --no-wasm-trap-handler bootstrap/ssr/ssr.mjs > storage/logs/ssr.log 2>&1 &
 
 echo "SSR process restarted!"
