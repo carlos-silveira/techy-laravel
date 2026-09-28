@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="overflow-x-hidden w-full">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="overflow-x-hidden w-full overscroll-x-none">
 
 <head>
     <meta charset="utf-8">
@@ -186,8 +186,8 @@
     @inertiaHead
 </head>
 
-<body class="font-sans antialiased overflow-x-hidden w-full">
-    <div class="overflow-x-hidden w-full max-w-full flex flex-col min-h-screen">
+<body class="font-sans antialiased overflow-x-hidden w-full overscroll-x-none">
+    <div class="overflow-x-hidden w-full max-w-full flex flex-col min-h-screen overscroll-x-none">
         @inertia
     </div>
 </body>
