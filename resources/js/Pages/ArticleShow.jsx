@@ -39,7 +39,7 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
             const totalScroll = document.documentElement.scrollTop;
             const windowHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
             const scroll = windowHeight === 0 ? 0 : totalScroll / windowHeight;
-            setScrollProgress(scroll * 100);
+            setScrollProgress(Math.min(100, Math.max(0, scroll * 100)));
         };
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
@@ -189,7 +189,7 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
 
             {/* Removed Problematic Parallax Background for Clean Light Mode */}
 
-            <main className="max-w-4xl mx-auto px-6 py-20 relative z-10">
+            <main className="max-w-4xl mx-auto px-6 py-20 relative z-10 break-words">
                 <article>
                     <header className="mb-16">
                         <div className="flex flex-wrap items-center gap-3 text-primary font-black uppercase tracking-[0.2em] text-[10px] mb-8">
