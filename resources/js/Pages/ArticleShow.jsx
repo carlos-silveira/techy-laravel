@@ -211,7 +211,7 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
                             {article.title}
                         </h1>
                         <div className="flex flex-wrap items-center gap-4 md:gap-6 text-xs font-black uppercase tracking-widest text-gray-600 dark:text-gray-500">
-                            <span>{dayjs(article.updated_at).format('MMMM D, YYYY')}</span>
+                            <span suppressHydrationWarning>{dayjs(article.updated_at).format('MMMM D, YYYY')}</span>
                             <span className="hidden md:inline-block w-1 h-1 bg-gray-300 dark:bg-gray-800 rounded-full"></span>
                             <span>{estimatedReadTime} {__('min read')}</span>
                             <span className="hidden md:inline-block w-1 h-1 bg-gray-300 dark:bg-gray-800 rounded-full"></span>
@@ -298,7 +298,7 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
                                     <div className="flex-1 bg-white dark:bg-[#0a0f1c] rounded-2xl p-5 border border-black/5 dark:border-white/5 shadow-sm">
                                         <div className="flex items-center justify-between gap-2 mb-2">
                                             <span className="font-bold text-sm text-black dark:text-white">{c.username}</span>
-                                            <span className="text-xs text-gray-500">{dayjs(c.created_at).fromNow()}</span>
+                                            <span className="text-xs text-gray-500" suppressHydrationWarning>{dayjs(c.created_at).fromNow()}</span>
                                         </div>
                                         <p className="text-sm text-gray-700 dark:text-gray-300 font-light whitespace-pre-wrap">{c.body}</p>
                                     </div>
@@ -335,7 +335,7 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
                                     <div className="bg-white dark:bg-white/[0.03] rounded-[2rem] overflow-hidden border border-black/5 dark:border-white/10 group-hover:border-primary/30 transition-all p-6 h-full flex flex-col shadow-sm dark:shadow-none">
                                         <div className="h-40 rounded-2xl bg-cover bg-center mb-6 shadow-xl" style={{ backgroundImage: `url(${getFinalImage(related, 800)})` }} />
                                         <div className="flex flex-col flex-1">
-                                            <div className="text-[10px] font-black text-primary uppercase tracking-widest mb-3">
+                                            <div className="text-[10px] font-black text-primary uppercase tracking-widest mb-3" suppressHydrationWarning>
                                                 {dayjs(related.updated_at).format('MMM D, YYYY')}
                                             </div>
                                             <h3 className="text-xl font-black text-gray-900 dark:text-white group-hover:text-primary transition-colors line-clamp-2 mb-3 leading-tight tracking-tight">
@@ -511,7 +511,7 @@ function CommentForm({ articleId, username }) {
     <form onSubmit={submit} className="flex items-end gap-2">
       <div className="flex-1 bg-white dark:bg-[#1a1f2e] rounded-xl border border-black/10 dark:border-white/10 overflow-hidden focus-within:border-primary transition-colors">
         <div className="px-3 py-2 border-b border-black/5 dark:border-white/5 bg-gray-50 dark:bg-white/5">
-           <span className="text-[10px] font-black uppercase text-gray-500">Posting as: {data.username}</span>
+           <span className="text-[10px] font-black uppercase text-gray-500" suppressHydrationWarning>Posting as: {data.username}</span>
         </div>
         <textarea 
           value={data.body}
