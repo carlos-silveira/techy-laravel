@@ -291,7 +291,6 @@ Generate an article as a JSON object. The 'article_body' field MUST contain vali
 CRITICAL WRITING RULES (FOR ADSENSE APPROVAL & AUTHORITY):
 - CRITICAL LANGUAGE RULE: The output MUST be entirely in English.
 - ADDED VALUE & OPINION: You MUST include your own expert analysis. Why does this matter? How does it affect the market, consumers, or the competition? What is the historical context? 
-- MANDATORY SECTION: You MUST include at least one `<h2>` heading titled \"The TechyNews Take\" or \"Why It Matters\" where you deliver a strong, well-reasoned opinion or market analysis.
 - FACTUAL BUT OPINIONATED: Be factual about the news event, but provide a professional analyst's perspective. DO NOT pretend you physically tested or reviewed a product (e.g., no \"we tested\", \"our hands-on review\").
 - NO CODE BLOCKS: DO NOT include any code snippets, python code, or programming examples.
 - CRITICAL LEGAL RULE: You MUST completely remove any author names, 'IMAGE CREDITS:', 'contributed reporting from', 'TechCrunch', or promotional text from the article. Do not include watermarks or credits.
@@ -300,7 +299,7 @@ CRITICAL WRITING RULES (FOR ADSENSE APPROVAL & AUTHORITY):
 - MINIMUM LENGTH: Write a comprehensive, deep-dive article. Target between 450 and 600 words for complete coverage.
 
 ARTICLE STRUCTURE (HTML):
-- BANNED HEADINGS: You are strictly FORBIDDEN from using generic filler subheadings such as 'Deeper Analysis', 'Deep Dive', 'Conclusion', or their exact translations. Use highly specific headings or \"The TechyNews Take\".
+- BANNED HEADINGS: You are strictly FORBIDDEN from using generic filler subheadings such as 'Deeper Analysis', 'Deep Dive', 'Conclusion', 'The TechyNews Take', 'Why It Matters', or their exact translations. Use highly specific, descriptive headings related directly to the news content.
 - Write a natural, flowing journalistic article. Use 4 to 6 well-structured paragraphs.
 - You may use a short bulleted list ONLY if you need to list specific specs, prices, or a timeline.
 - IMAGE QUERY: For 'suggested_image', generate a BROAD, 1-2 word conceptual TECH search term for Unsplash. EXTREMELY IMPORTANT: Do NOT use brand names that have literal meanings in English (e.g., NEVER use 'apple' for Apple Inc, use 'smartphone' or 'tablet'; NEVER use 'steam' or 'valve' for gaming, use 'gaming', 'esports' or 'controller'; NEVER use 'jean' or 'jeans' for a person named Jean, use 'developer' or 'robotics'). Avoid specific company names, people, or obscure products. Use generic tech concepts like 'robotics', 'server', 'coding', 'cybersecurity', 'processor'.

@@ -128,11 +128,29 @@ class GenerateDailyNews extends Command
         $sourceUrl = $selectedIdea['source_url'] ?? '';
 
         if (!empty($sourceUrl)) {
-            $this->info("🕸️  Scraping rich context from source URL: {$sourceUrl}");
+            $this->info("🕸️  Scraping primary source URL: {$sourceUrl}");
             $jinaData = $jinaReader->fetchArticleContext($sourceUrl);
-            $richContext = $jinaData['markdown'];
+            $richContext = "Primary Source Context ({$sourceUrl}):\n" . $jinaData['markdown'] . "\n\n";
             $extractedImages = $jinaData['images'];
-            $this->info("✅ Scraped " . strlen($richContext) . " bytes of markdown and found " . count($extractedImages) . " images.");
+            $this->info("✅ Scraped " . strlen($jinaData['markdown']) . " bytes of primary markdown and found " . count($extractedImages) . " images.");
+        }
+
+        $this->info("🔍 Searching for additional corroborating sources to enrich the article...");
+        try {
+            $sourceSearcher = app(\App\Services\SourceSearchService::class);
+            $additionalSources = $sourceSearcher->searchForClaim($selectedIdea['title']);
+            
+            $addedCount = 0;
+            foreach ($additionalSources as $src) {
+                if ($src['url'] !== $sourceUrl) {
+                    $this->info("➕ Adding context from: {$src['url']}");
+                    $richContext .= "Additional Source ({$src['url']}):\n" . $src['content_excerpt'] . "\n\n";
+                    $addedCount++;
+                }
+            }
+            $this->info("✅ Added {$addedCount} additional sources. Total context size: " . strlen($richContext) . " bytes.");
+        } catch (\Exception $e) {
+            $this->warn("⚠️ Could not fetch additional sources: " . $e->getMessage());
         }
 
         $this->info('✍️  Generating long-form article...');
