@@ -332,7 +332,8 @@ require __DIR__ . '/auth.php';
 
 Route::get('/temp-ssr-log', function () {
     $log = storage_path('logs/ssr.log');
-    $nodes = shell_exec("ls -d /opt/alt/alt-nodejs* 2>&1");
-    $content = file_exists($log) ? file_get_contents($log) : "No log";
-    return "<pre>Node versions:\n$nodes\n\nLog:\n$content</pre>";
+    if (file_exists($log)) {
+        return "<pre>" . file_get_contents($log) . "</pre>";
+    }
+    return "No SSR log found";
 });
