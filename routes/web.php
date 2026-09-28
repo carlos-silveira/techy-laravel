@@ -312,8 +312,6 @@ Route::middleware(['auth'])->group(function () {
         return "Fix command executed. Result: <pre>" . \Illuminate\Support\Facades\Artisan::output() . "</pre>";
     })->name('maintenance.fix-encoding');
 
-
-
     // Media Uploads
     Route::post('/upload-image', [ImageUploadController::class, 'store'])->name('image.upload');
 
@@ -329,3 +327,8 @@ Route::middleware(['auth'])->group(function () {
 });
 
 require __DIR__ . '/auth.php';
+
+Route::get('/temp-regenerate', function () {
+    \Illuminate\Support\Facades\Artisan::call('news:regenerate-latest', ['--limit' => 5]);
+    return "Done";
+});
