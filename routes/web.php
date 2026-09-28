@@ -329,11 +329,3 @@ Route::middleware(['auth'])->group(function () {
 });
 
 require __DIR__ . '/auth.php';
-
-Route::get('/temp-ssr-log', function () {
-    $log = storage_path('logs/ssr.log');
-    if (file_exists($log)) {
-        return "<pre>" . file_get_contents($log) . "</pre>";
-    }
-    return "No SSR log found";
-});
