@@ -197,7 +197,7 @@ Your job is to select the 5 to 10 MOST IMPORTANT, exciting, and concrete individ
 
 Generate between 5 and 10 article ideas. Each MUST:
 1. Focus on ONE specific news event. DO NOT try to connect unrelated headlines or invent 'cultural trends'.
-2. Have a clear, catchy, and factual title.
+2. Have a clear, catchy, and factual title. NEVER include source names (e.g., 'TechCrunch', 'TechCrunch Mobility', 'The Verge') in the title.
 3. Include a 'prompt' field: a 2-sentence brief explaining exactly what the article should be about in plain, simple English. What happened and why is it important?
 4. Include an 'angle' field, which should be a simple category like 'product_launch', 'business', or 'ai_breakthrough'.
 5. Include a 'source_url' field: the exact URL of the news item you based this on from the context provided above.
@@ -205,6 +205,7 @@ Generate between 5 and 10 article ideas. Each MUST:
 
 CRITICAL RECENCY RULE: Today is {$date}. ONLY focus on confirmed tech events from the EXACT last 24 to 48 hours. DO NOT output legacy news or events from previous years (e.g. do not act like it is 2021). If the news is not from today or yesterday, discard it.
 CRITICAL TOPIC RULE: ABSOLUTELY DO NOT write meta-commentary about AI generating articles. Focus on actual tech industry news.
+CRITICAL EDITORIAL RULE: DO NOT use first-person phrases like 'probamos' (we tested), 'reseña' (review), or imply that we have physical access to the product. We are news analysts, not hands-on reviewers.
 CRITICAL DEDUP RULE: If you already see a topic in the 'ALREADY PUBLISHED' list above, skip it entirely — even if the angle is slightly different.
 
 Return ONLY a valid JSON array of objects. No markdown fences. Example format:
@@ -291,10 +292,11 @@ CRITICAL WRITING RULES (FOR ADSENSE APPROVAL & AUTHORITY):
 - CRITICAL LANGUAGE RULE: The output MUST be entirely in English.
 - ADDED VALUE & OPINION: You MUST include your own expert analysis. Why does this matter? How does it affect the market, consumers, or the competition? What is the historical context? 
 - MANDATORY SECTION: You MUST include at least one `<h2>` heading titled \"The TechyNews Take\" or \"Why It Matters\" where you deliver a strong, well-reasoned opinion or market analysis.
-- FACTUAL BUT OPINIONATED: Be factual about the news event, but provide a professional analyst's perspective. 
+- FACTUAL BUT OPINIONATED: Be factual about the news event, but provide a professional analyst's perspective. DO NOT pretend you physically tested or reviewed a product (e.g., no \"we tested\", \"our hands-on review\").
 - NO CODE BLOCKS: DO NOT include any code snippets, python code, or programming examples.
 - CRITICAL LEGAL RULE: You MUST completely remove any author names, 'IMAGE CREDITS:', 'contributed reporting from', 'TechCrunch', or promotional text from the article. Do not include watermarks or credits.
-- NO AI CLICHES: NEVER use words like 'delve', 'complexities', 'nuanced', 'testament', 'tapestry', 'landscape', 'revolutionary', 'transformative'.
+- TONE & STYLE: Write with a conversational, punchy, engaging style. Avoid sounding like a high school essay or academic paper. Use simple, direct language that provides real value.
+- NO AI CLICHES: NEVER use words like 'delve', 'complexities', 'nuanced', 'testament', 'tapestry', 'landscape', 'revolutionary', 'transformative', 'paradigm shift', 'synergy'.
 - MINIMUM LENGTH: Write a comprehensive, deep-dive article. Target between 450 and 600 words for complete coverage.
 
 ARTICLE STRUCTURE (HTML):
@@ -397,7 +399,7 @@ CRITICAL EDITORIAL RULE: You MUST strictly write about {$category} topics. UNLES
 
 CRITICAL WRITING RULES:
 - SIMPLE WORDS ONLY: Write at an 8th-grade reading level. Use everyday vocabulary.
-- FACTUAL AND DIRECT: No 'fluff', no 'insider' voice. Just report the facts clearly like a bulleted summary.
+- FACTUAL AND DIRECT: No 'fluff', no 'insider' voice. Just report the facts clearly like a bulleted summary. DO NOT pretend you physically tested or reviewed a product (e.g., no 'we tested', 'our hands-on review').
 - NO CODE BLOCKS: DO NOT include any code snippets or programming examples.
 - NO AI CLICHES: NEVER use words like 'delve', 'complexities', 'nuanced', 'testament', 'tapestry', 'landscape', 'revolutionary', 'transformative', 'realm'.
 - CRITICAL LEGAL RULE: You MUST completely remove any author names, 'IMAGE CREDITS:', 'contributed reporting from', 'TechCrunch', or promotional text from the article. Do not include watermarks or credits.

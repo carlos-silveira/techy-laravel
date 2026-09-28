@@ -703,3 +703,12 @@
   - `delete_fb_duplicates.php` (Script): Wrote and executed an artisan bootstrap script outside the sandbox to query the Facebook Graph API, identify duplicate posts by message content, and issue `DELETE` requests.
 - **Verification**: 
   - Verified FB script successfully found and deleted 27 duplicate entries.
+
+## 2026-09-28: Fixed News Generation Prompts and Tone
+- **Context**: The user reported that the generated articles were copying source names (e.g. "TechCrunch Mobility"), using "probamos" (implying false hands-on reviews), and writing with an inflated, buzzword-heavy "high school essay" tone.
+- **Changes**:
+  - `app/Services/GeminiService.php` (`generateIdeas`): Added strict rules to completely exclude source names from article titles, and to forbid first-person phrasing like "probamos" or "our review".
+  - `app/Services/GeminiService.php` (`generateDraft`): Added instructions to avoid first-person review phrasing, and updated `TONE & STYLE` to enforce a conversational, punchy, and engaging style while explicitly banning AI clichés like "paradigm shift" and "synergy", and avoiding the "high school essay" tone.
+  - `app/Services/GeminiService.php` (`generateCategoryDraft`): Added a specific rule to avoid pretending to have physically tested or reviewed a product.
+  - `php artisan tinker`: Manually executed local database update on the "gaming-inputs-into-physical-ai-training-data" article to apply the new style to the live local instance.
+- **Verification**: Verified that the changes accurately target the generated prompt text without breaking the JSON output structure.
