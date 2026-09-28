@@ -18,6 +18,9 @@ sleep 2
 sed -i 's/import { availableParallelism } from "node:os";/const availableParallelism = () => 1;/g' bootstrap/ssr/ssr.mjs
 sed -i 's/import { availableParallelism as .* } from "node:os";/const availableParallelism = () => 1;/g' bootstrap/ssr/ssr.mjs
 
+# Stub out FormData which is missing in Node 16 but expected by Axios/Inertia during SSR
+sed -i '1s/^/globalThis.FormData = class FormData {};\n/' bootstrap/ssr/ssr.mjs
+
 # 2. Start the new process in the background using nohup
 echo "Starting SSR process..."
 nohup node bootstrap/ssr/ssr.mjs > storage/logs/ssr.log 2>&1 &
