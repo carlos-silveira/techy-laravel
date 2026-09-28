@@ -187,7 +187,9 @@
 </head>
 
 <body class="font-sans antialiased overflow-x-hidden w-full">
-    @inertia
+    <div class="overflow-x-hidden w-full max-w-full flex flex-col min-h-screen">
+        @inertia
+    </div>
 </body>
 
 </html>
