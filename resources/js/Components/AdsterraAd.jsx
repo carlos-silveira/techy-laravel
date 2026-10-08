@@ -3,20 +3,20 @@ import React from 'react';
 const AdsterraAd = ({ type, className = "" }) => {
     let width = 300;
     let height = 250;
-    let src = "/ads/300x250.html";
+    let src = "/sponsors/300x250.html";
 
     if (type === "728x90") {
         width = 728;
         height = 90;
-        src = "/ads/728x90.html";
+        src = "/sponsors/728x90.html";
     } else if (type === "320x50") {
         width = 320;
         height = 50;
-        src = "/ads/320x50.html";
+        src = "/sponsors/320x50.html";
     } else if (type === "native") {
         width = "100%";
         height = 500; // Increased to prevent clipping
-        src = "/ads/native.html";
+        src = "/sponsors/native.html";
     }
 
     return (
@@ -27,7 +27,7 @@ const AdsterraAd = ({ type, className = "" }) => {
                 height={height} 
                 frameBorder="0" 
                 scrolling="no"
-                sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-same-origin"
+                sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-forms allow-top-navigation-by-user-activation"
                 className="max-w-full"
                 title={`Adsterra Ad ${type}`}
             />

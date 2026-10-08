@@ -719,3 +719,12 @@
   - `app/Services/GeminiService.php`: Removed the mandatory "TechyNews Take" requirement from `generateDraft` and added it to the strictly forbidden headings list.
   - `app/Console/Commands/GenerateDailyNews.php`: Refactored the context gathering logic. Instead of only fetching `source_url`, it now leverages `SourceSearchService::searchForClaim` to query the Jina Search API for the article topic, fetching up to 3 additional high-tier sources. It appends these excerpts into the `$richContext` passed to Gemini.
 - **Result**: The AI now drafts articles based on a synthesized pool of 3-5 different sources instead of stretching a single article, vastly improving fact density and removing the need for filler text.
+
+## 2026-10-08: Fixed Adsterra Ad Component Not Loading
+- **Context**: The user reported that the Adsterra ad slot ("PUBLICIDAD") was rendering as an empty box on the frontend.
+- **Root Cause**: The URL path `/ads/*` for the ad iframes was being blocked by standard ad blockers (EasyList rule), preventing the iframe from loading entirely. In addition, the iframe sandbox was too restrictive for Adsterra's required behaviors (like tracking clicks and navigating).
+- **Changes**: 
+  - Renamed `public/ads` directory to `public/sponsors` to bypass basic generic ad blocker substring rules.
+  - Updated the iframe `src` paths in `AdsterraAd.jsx` to point to `/sponsors/`.
+  - Added `allow-forms allow-top-navigation-by-user-activation` to the `sandbox` attribute in `AdsterraAd.jsx` so that user interactions and ad clickthroughs work correctly.
+- **Verification**: Built the frontend successfully.

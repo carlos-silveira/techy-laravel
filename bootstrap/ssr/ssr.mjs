@@ -59517,14 +59517,14 @@ server_default((page) => createInertiaApp({
 		"./Pages/About.jsx": () => import("./assets/About-CxHfRrKi.mjs"),
 		"./Pages/AboutUs.jsx": () => import("./assets/AboutUs-DK84Gk_b.mjs"),
 		"./Pages/Archive.jsx": () => import("./assets/Archive-Dq1C6Dhk.mjs"),
-		"./Pages/ArticleShow.jsx": () => import("./assets/ArticleShow-DoIuX2hZ.mjs").then((n) => n.t),
+		"./Pages/ArticleShow.jsx": () => import("./assets/ArticleShow-C8XVig0k.mjs").then((n) => n.t),
 		"./Pages/Auth/ConfirmPassword.jsx": () => import("./assets/ConfirmPassword-DhM-Iv5w.mjs"),
 		"./Pages/Auth/ForgotPassword.jsx": () => import("./assets/ForgotPassword-BR3Ac6tr.mjs"),
 		"./Pages/Auth/Login.jsx": () => import("./assets/Login-CUWXH7lJ.mjs"),
 		"./Pages/Auth/Register.jsx": () => import("./assets/Register-DoG-w9D2.mjs"),
 		"./Pages/Auth/ResetPassword.jsx": () => import("./assets/ResetPassword-BG-7UOc3.mjs"),
 		"./Pages/Auth/VerifyEmail.jsx": () => import("./assets/VerifyEmail-Dw5s2MXB.mjs"),
-		"./Pages/Classic.jsx": () => import("./assets/Classic-Drs5RLvH.mjs"),
+		"./Pages/Classic.jsx": () => import("./assets/Classic-Cv3SxD6Z.mjs"),
 		"./Pages/Contact.jsx": () => import("./assets/Contact-D_nm9TA3.mjs"),
 		"./Pages/Dashboard.jsx": () => import("./assets/Dashboard-D-vLkSne.mjs"),
 		"./Pages/Error.jsx": () => import("./assets/Error-CqbScpod.mjs"),
@@ -59549,7 +59549,7 @@ server_default((page) => createInertiaApp({
 		"./Pages/Studio/Subscribers/Index.jsx": () => import("./assets/Index-B--TmPjr.mjs"),
 		"./Pages/Terms.jsx": () => import("./assets/Terms-DXQIeIzU.mjs"),
 		"./Pages/TopNav.jsx": () => import("./assets/TopNav-DAkrkP7f.mjs").then((n) => n.n),
-		"./Pages/Welcome.jsx": () => import("./assets/Welcome-B1f0zuhf.mjs")
+		"./Pages/Welcome.jsx": () => import("./assets/Welcome-BT6our2z.mjs")
 	})),
 	setup({ App, props }) {
 		global.route = (name, params, absolute) => s(name, params, absolute, {
