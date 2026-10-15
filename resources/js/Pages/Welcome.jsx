@@ -172,36 +172,16 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
                      <span className="text-[9px] md:text-[10px] text-gray-400 font-mono uppercase tracking-[0.25em]">{__('Sponsored Space')}</span>
                   </div>
 
-                  {/* Ad Container: Responsive Full Space utilization on Desktop */}
-                  <div className="relative z-10 w-full max-w-5xl my-auto flex flex-col items-center justify-center">
-                      {/* Desktop Full Layout: Symmetrical 3-Banner Grid (Leaderboard + Duo Rectangle) */}
-                      <div className="hidden lg:flex flex-col items-center justify-center gap-5">
-                          {/* 728x90 Leaderboard on Top */}
-                          <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-3 shadow-2xl backdrop-blur-xl overflow-hidden flex items-center justify-center">
+                  {/* Ad Container: Widescreen Leaderboard on Desktop, Compact on Mobile */}
+                  <div className="relative z-10 w-full max-w-4xl my-auto flex flex-col items-center justify-center px-4">
+                      {/* Desktop & Tablet Layout (>= 768px): Verified 728x90 Leaderboard */}
+                      <div className="hidden md:flex flex-col items-center justify-center w-full">
+                          <div className="bg-white/[0.03] border border-white/10 rounded-3xl p-5 shadow-2xl backdrop-blur-xl overflow-hidden flex items-center justify-center">
                               <AdsterraAd type="728x90" className="my-0" />
-                          </div>
-                          {/* Duo 300x250 Side-by-Side (Fills space, guaranteed high fill-rate) */}
-                          <div className="flex flex-row items-center justify-center gap-5">
-                              <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-3 shadow-2xl backdrop-blur-xl overflow-hidden flex items-center justify-center">
-                                  <AdsterraAd type="300x250" className="my-0" />
-                              </div>
-                              <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-3 shadow-2xl backdrop-blur-xl overflow-hidden flex items-center justify-center">
-                                  <AdsterraAd type="300x250" className="my-0" />
-                              </div>
                           </div>
                       </div>
 
-                      {/* Tablet / Medium Devices (768px - 1023px) */}
-                      <div className="hidden md:flex lg:hidden flex-col items-center justify-center gap-4">
-                          <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-3 shadow-2xl backdrop-blur-xl overflow-hidden flex items-center justify-center">
-                              <AdsterraAd type="728x90" className="my-0" />
-                          </div>
-                          <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-3 shadow-lg backdrop-blur-md overflow-hidden flex items-center justify-center">
-                              <AdsterraAd type="300x250" className="my-0" />
-                          </div>
-                      </div>
-
-                      {/* Mobile Devices (< 768px): Clean, elegant 300x250 box */}
+                      {/* Mobile Devices (< 768px): Compact 300x250 Card */}
                       <div className="flex md:hidden flex-col items-center justify-center w-full max-w-sm">
                           <div className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-4 min-h-[290px] flex items-center justify-center shadow-2xl overflow-hidden">
                               <AdsterraAd type="300x250" className="my-0" />
