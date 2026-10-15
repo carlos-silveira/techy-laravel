@@ -162,6 +162,7 @@ class PublicController extends Controller
             function () use ($locale) {
                 $ids = \Illuminate\Support\Facades\DB::table('page_views')
                     ->where('created_at', '>=', now()->subDays(7))
+                    ->where('is_bot', false)
                     ->whereNotNull('article_id')
                     ->select('article_id', \Illuminate\Support\Facades\DB::raw('count(*) as total_views'))
                     ->groupBy('article_id')

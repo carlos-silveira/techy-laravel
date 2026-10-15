@@ -76,4 +76,7 @@ return [
         'page_access_token' => env('FACEBOOK_PAGE_ACCESS_TOKEN'),
     ],
 
+    'adsterra' => [
+        'token' => env('ADSTERRA_TOKEN', ''),
+    ],
 ];

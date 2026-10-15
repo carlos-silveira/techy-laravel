@@ -13,8 +13,8 @@ class StudioAnalyticsController extends Controller
 {
     public function index(Request $request)
     {
-        $dashboardController = new DashboardController();
-        $response = $dashboardController->index($request);
+        $dashboardController = app(DashboardController::class);
+        $response = app()->call([$dashboardController, 'index'], ['request' => $request]);
 
         if ($response instanceof \Inertia\Response) {
             // Inertia Response exposes props via reflection or property access

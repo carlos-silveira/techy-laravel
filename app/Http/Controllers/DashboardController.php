@@ -9,10 +9,12 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
+use App\Services\BotDetector;
+use App\Services\AdsterraStatsService;
 
 class DashboardController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, BotDetector $botDetector, AdsterraStatsService $adsterraService)
     {
         $articles = \App\Models\Article::latest()->get();
         $isMysql = config('database.default') === 'mysql';
@@ -44,19 +46,7 @@ class DashboardController extends Controller
         };
 
         $excludeBots = function ($q) {
-            $q->where('user_agent', 'not like', '%bot%')
-              ->where('user_agent', 'not like', '%Bot%')
-              ->where('user_agent', 'not like', '%spider%')
-              ->where('user_agent', 'not like', '%crawl%')
-              ->where('user_agent', 'not like', '%Crawl%')
-              ->where('user_agent', 'not like', '%Googlebot%')
-              ->where('user_agent', 'not like', '%bingbot%')
-              ->where('user_agent', 'not like', '%GPTBot%')
-              ->where('user_agent', 'not like', '%Applebot%')
-              ->where('user_agent', 'not like', '%facebookexternalhit%')
-              ->where('user_agent', 'not like', '%Twitterbot%')
-              ->where('user_agent', 'not like', '%LinkedInBot%')
-              ->where('user_agent', 'not like', '%WhatsApp%');
+            $q->where('is_bot', false);
         };
 
         // ─── TRAFFIC: Views + Unique Visitors (Human Only) ───
@@ -138,16 +128,7 @@ class DashboardController extends Controller
         $deviceBreakdown = DB::table('page_views')
             ->selectRaw("
                 CASE
-                    WHEN user_agent LIKE '%Googlebot%' OR user_agent LIKE '%bingbot%' OR user_agent LIKE '%Baiduspider%'
-                         OR user_agent LIKE '%YandexBot%' OR user_agent LIKE '%DuckDuckBot%' OR user_agent LIKE '%Slurp%'
-                         OR user_agent LIKE '%facebookexternalhit%' OR user_agent LIKE '%Twitterbot%'
-                         OR user_agent LIKE '%LinkedInBot%' OR user_agent LIKE '%WhatsApp%'
-                         OR user_agent LIKE '%bot%' OR user_agent LIKE '%Bot%'
-                         OR user_agent LIKE '%spider%' OR user_agent LIKE '%crawl%' OR user_agent LIKE '%Crawl%'
-                         OR user_agent LIKE '%Applebot%' OR user_agent LIKE '%AhrefsBot%'
-                         OR user_agent LIKE '%SemrushBot%' OR user_agent LIKE '%MJ12bot%'
-                         OR user_agent LIKE '%PetalBot%' OR user_agent LIKE '%GPTBot%'
-                    THEN 'Bot / Crawler'
+                    WHEN is_bot = 1 THEN 'Bot / Crawler'
                     WHEN user_agent LIKE '%Mobile%' OR user_agent LIKE '%Android%' OR user_agent LIKE '%iPhone%' THEN 'Mobile'
                     WHEN user_agent LIKE '%iPad%' OR user_agent LIKE '%Tablet%' THEN 'Tablet'
                     ELSE 'Desktop'
@@ -167,9 +148,10 @@ class DashboardController extends Controller
         $crawlerDetails = DB::table('page_views')
             ->selectRaw("
                 CASE
-                    WHEN user_agent LIKE '%Googlebot%' THEN 'Googlebot'
+                    WHEN user_agent LIKE '%Googlebot%' OR user_agent LIKE '%Google-InspectionTool%' THEN 'Googlebot'
+                    WHEN user_agent LIKE '%Mediapartners-Google%' THEN 'Google AdSense'
                     WHEN user_agent LIKE '%bingbot%' THEN 'Bingbot'
-                    WHEN user_agent LIKE '%GPTBot%' THEN 'GPTBot (OpenAI)'
+                    WHEN user_agent LIKE '%GPTBot%' OR user_agent LIKE '%ChatGPT%' THEN 'GPTBot (OpenAI)'
                     WHEN user_agent LIKE '%Applebot%' THEN 'Applebot'
                     WHEN user_agent LIKE '%facebookexternalhit%' THEN 'Facebook'
                     WHEN user_agent LIKE '%Twitterbot%' THEN 'Twitter/X'
@@ -182,26 +164,14 @@ class DashboardController extends Controller
                     WHEN user_agent LIKE '%PetalBot%' THEN 'PetalBot (Huawei)'
                     WHEN user_agent LIKE '%MJ12bot%' THEN 'Majestic'
                     WHEN user_agent LIKE '%Baiduspider%' THEN 'Baidu'
+                    WHEN user_agent LIKE '%ClaudeBot%' OR user_agent LIKE '%anthropic%' THEN 'Claude / Anthropic'
+                    WHEN user_agent LIKE '%curl%' OR user_agent LIKE '%python%' OR user_agent LIKE '%wget%' THEN 'Scripts (curl/python)'
                     ELSE 'Other Bot'
                 END as crawler,
                 COUNT(*) as hits
             ")
             ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
-            ->where(function ($q) {
-                $q->where('user_agent', 'like', '%bot%')
-                  ->orWhere('user_agent', 'like', '%Bot%')
-                  ->orWhere('user_agent', 'like', '%spider%')
-                  ->orWhere('user_agent', 'like', '%crawl%')
-                  ->orWhere('user_agent', 'like', '%Crawl%')
-                  ->orWhere('user_agent', 'like', '%Googlebot%')
-                  ->orWhere('user_agent', 'like', '%bingbot%')
-                  ->orWhere('user_agent', 'like', '%GPTBot%')
-                  ->orWhere('user_agent', 'like', '%Applebot%')
-                  ->orWhere('user_agent', 'like', '%facebookexternalhit%')
-                  ->orWhere('user_agent', 'like', '%Twitterbot%')
-                  ->orWhere('user_agent', 'like', '%LinkedInBot%')
-                  ->orWhere('user_agent', 'like', '%WhatsApp%');
-            })
+            ->where('is_bot', true)
             ->groupBy('crawler')
             ->orderByDesc('hits')
             ->limit(15)
@@ -342,17 +312,42 @@ class DashboardController extends Controller
         $totalGeminiRequests = Schema::hasTable('gemini_logs') ?
             DB::table('gemini_logs')->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))->count() : 0;
 
-        // ─── ADSENSE REVENUE PROJECTION (Dynamic based on Period) ───
-        $rpmLow = 1.50;
-        $rpmHigh = 4.00;
-        $projLow = ($totalViews / 1000) * $rpmLow;
-        $projHigh = ($totalViews / 1000) * $rpmHigh;
-        
-        $adsenseProjection = [
-            'views' => $totalViews,
-            'low' => round($projLow, 2),
-            'high' => round($projHigh, 2),
-            'rpmAverage' => 2.75, // Just for display
+        // ─── VERIFIED READERS & ENGAGEMENT EVENTS ───
+        $verifiedReaders = DB::table('page_views')
+            ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
+            ->where('is_bot', false)
+            ->whereNotNull('engaged_at')
+            ->count();
+
+        $reelViewsPeriod = Schema::hasTable('engagement_events') ?
+            DB::table('engagement_events')
+                ->where('type', 'reel_view')
+                ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
+                ->count() : 0;
+
+        $adViewsPeriod = Schema::hasTable('engagement_events') ?
+            DB::table('engagement_events')
+                ->where('type', 'ad_view')
+                ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
+                ->count() : 0;
+
+        // ─── ADSTERRA REAL STATS & REVENUE ───
+        $adsterraStartDate = $startDate ? $startDate->format('Y-m-d') : now()->subDays(30)->format('Y-m-d');
+        $adsterraEndDate = now()->format('Y-m-d');
+        $adsterraStats = $adsterraService->stats($adsterraStartDate, $adsterraEndDate);
+
+        // ─── MONETIZATION (Adsterra Real Revenue & Estimates) ───
+        $monetization = [
+            'adsterraConfigured' => $adsterraStats['configured'],
+            'realRevenue' => $adsterraStats['totals']['revenue'] ?? 0.0,
+            'realImpressions' => $adsterraStats['totals']['impressions'] ?? 0,
+            'realClicks' => $adsterraStats['totals']['clicks'] ?? 0,
+            'realCtr' => $adsterraStats['totals']['ctr'] ?? 0.0,
+            'realCpm' => $adsterraStats['totals']['cpm'] ?? 0.0,
+            'adsterraPerDay' => $adsterraStats['perDay'] ?? [],
+            'adViewsPeriod' => $adViewsPeriod,
+            'reelViewsPeriod' => $reelViewsPeriod,
+            'verifiedReaders' => $verifiedReaders,
         ];
 
         // Raw Gemini logs
@@ -419,7 +414,10 @@ class DashboardController extends Controller
                     'totalGeminiTokens' => $totalGeminiTokens,
                     'totalGeminiCost' => round((float) $totalGeminiCost, 4),
                     'totalGeminiRequests' => $totalGeminiRequests,
-                    'adsenseProjection' => $adsenseProjection,
+                    'monetization' => $monetization,
+                    'verifiedReaders' => $verifiedReaders,
+                    'reelViewsPeriod' => $reelViewsPeriod,
+                    'adViewsPeriod' => $adViewsPeriod,
                 ],
             ]
         ]);

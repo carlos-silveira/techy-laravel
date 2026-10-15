@@ -16,15 +16,7 @@ class StudioController extends Controller
     public function index(Request $request)
     {
         $excludeBots = function ($q) {
-            $q->where('user_agent', 'not like', '%bot%')
-              ->where('user_agent', 'not like', '%Bot%')
-              ->where('user_agent', 'not like', '%spider%')
-              ->where('user_agent', 'not like', '%crawl%')
-              ->where('user_agent', 'not like', '%Crawl%')
-              ->where('user_agent', 'not like', '%Googlebot%')
-              ->where('user_agent', 'not like', '%bingbot%')
-              ->where('user_agent', 'not like', '%GPTBot%')
-              ->where('user_agent', 'not like', '%Applebot%');
+            $q->where('is_bot', false);
         };
 
         // Stats

@@ -1,3 +1,26 @@
+## [2026-10-15] - Honest Analytics, Bot Filtering & Adsterra Monetization Engine
+
+### Added
+- **`BotDetector` Service**: Centralized, robust bot detection service that catches search crawlers (Googlebot, Bing, GPTBot, Applebot, Facebook, Twitter, LinkedIn, WhatsApp, Baidu, Yandex, etc.), scraping tools/libraries (curl, wget, python, okhttp, java, axios, etc.), and headless/spoofed browser signatures.
+- **Migration & Historical Backfill (`analytics:reclassify-bots`)**: Added indexed `is_bot` boolean and `engaged_at` timestamp to `page_views`. Backfilled all 17,961 historical hits, correctly identifying 11,158 bot requests vs 6,803 genuine human hits.
+- **`EngagementController` & `engagement_events` Table**: Real, time-gated interaction tracking (`reel_view` requiring >= 2.5s active dwell and `ad_view` impressions).
+- **Client Engagement Hook (`useEngagementBeacon`)**: Automatically transmits an engagement confirmation beacon once a visitor spends active dwell time (>= 4s) and performs natural interactions (scroll, click, touch, keydown), distinguishing verified readers from drive-by ping bots.
+- **`AdsterraStatsService`**: Direct connection with Adsterra Publisher API (using `ADSTERRA_TOKEN`) displaying real revenue, impressions, clicks, CTR, and eCPM directly in the Analytics Dashboard instead of fictitious AdSense projections.
+- **Full-Space Desktop Ad Layout in Reels (`Welcome.jsx`)**: Responsive ad slide utilizing the screen space on desktop screens (728x90 leaderboard + wide native ad block) while maintaining an elegant, non-intrusive 300x250 card on mobile.
+- **Test Suite**: Added unit tests for `BotDetector` (`BotDetectorTest.php`) and feature tests for engagement tracking (`EngagementTrackingTest.php`).
+
+### Changed
+- **`DashboardController` & `StudioController`**: Excluded bots globally using the indexed `is_bot = 0` column. Updated device & crawler breakdowns to use the unified classification.
+- **`Welcome.jsx`**: Tuned ad frequency to every 2 article reels and added dwell verification before registering reel views.
+- **`AnalyticsChart.jsx`**: Replaced the hypothetical AdSense projection with the Real Monetization card connected to the live Adsterra API. Added "Verified Readers" card.
+
+### Verified
+- `npm run build`: Success (0 errors).
+- `php artisan test`: 8/8 tests passed for analytics and bot detection suites (31 assertions).
+- Worktree branch: `feat/honest-analytics`.
+
+---
+
 ## [2026-09-03] - Sidebar Studio Link Restoration
 
 ### Fixed

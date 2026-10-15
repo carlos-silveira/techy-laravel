@@ -13,6 +13,7 @@ import Navbar from '@/Components/Navbar';
 import CommandPalette from '@/Components/CommandPalette';
 import PublicFooter from '@/Components/PublicFooter';
 import useLanguage from '@/Hooks/useLanguage';
+import useEngagementBeacon from '@/Hooks/useEngagementBeacon';
 import AdsterraAd from '@/Components/AdsterraAd';
 
 dayjs.extend(relativeTime);
@@ -39,6 +40,7 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
     }
   };
   const { __, locale } = useLanguage();
+  useEngagementBeacon({ minTimeMs: 4000 });
   dayjs.locale(locale);
   
   const [activeIndex, setActiveIndex] = useState(0);
@@ -92,7 +94,7 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
   articles.forEach((article, idx) => {
     feedItems.push({ type: 'article', data: article });
     // After every 3 articles, insert an ad slide (unless it's the very last article)
-    if ((idx + 1) % 3 === 0 && idx !== articles.length - 1) {
+    if ((idx + 1) % 2 === 0 && idx !== articles.length - 1) {
       adCounter++;
       feedItems.push({ type: 'ad', id: `ad-${adCounter}` });
     }
@@ -105,13 +107,29 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
 
   useEffect(() => {
     const currentItem = feedItems[activeIndex];
-    if (currentItem && currentItem.type === 'article') {
-      const articleId = currentItem.data.id;
-      if (!trackedViews.current.has(articleId)) {
-        trackedViews.current.add(articleId);
-        axios.post(`/api/articles/${articleId}/soft-view`).catch(console.error);
+    if (!currentItem) return;
+
+    // Track active dwell time (>= 2500ms) before counting a verified reel view or ad view
+    const dwellTimer = setTimeout(() => {
+      if (currentItem.type === 'article') {
+        const articleId = currentItem.data.id;
+        if (!trackedViews.current.has(articleId)) {
+          trackedViews.current.add(articleId);
+          axios.post(`/api/articles/${articleId}/soft-view`).catch(() => {});
+          axios.post('/api/events', {
+            type: 'reel_view',
+            article_id: articleId,
+          }).catch(() => {});
+        }
+      } else if (currentItem.type === 'ad') {
+        axios.post('/api/events', {
+          type: 'ad_view',
+          slot: currentItem.id,
+        }).catch(() => {});
       }
-    }
+    }, 2500);
+
+    return () => clearTimeout(dwellTimer);
   }, [activeIndex, feedItems]);
 
 
@@ -143,15 +161,53 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
             return (
               <div 
                 key={item.id}
-                className="h-[100dvh] w-full snap-start snap-always relative flex flex-col items-center justify-center bg-[#02040a] border-y border-white/5"
+                className="h-[100dvh] w-full snap-start snap-always relative flex flex-col items-center justify-between py-16 px-4 md:px-12 bg-[#02040a] border-y border-white/5 overflow-hidden"
               >
-                  <span className="text-[10px] text-gray-500 uppercase tracking-widest mb-4">{__('Advertisement')}</span>
-                  <div className="w-full max-w-md bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-2 md:p-6 min-h-[300px] flex items-center justify-center mx-auto shadow-2xl overflow-hidden">
-                      <AdsterraAd type="300x250" />
+                  {/* Subtle Background Glow */}
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,180,255,0.06)_0%,transparent_70%)] pointer-events-none" />
+
+                  {/* Header Badge */}
+                  <div className="relative z-10 flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full backdrop-blur-md">
+                     <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                     <span className="text-[9px] md:text-[10px] text-gray-400 font-mono uppercase tracking-[0.25em]">{__('Sponsored Space')}</span>
                   </div>
-                  <div className="mt-12 flex flex-col items-center justify-center animate-bounce opacity-50">
-                     <p className="text-xs text-gray-400 font-bold tracking-widest uppercase mb-2">{__('Keep Scrolling')}</p>
-                     <ChevronDown className="w-6 h-6 text-gray-400" />
+
+                  {/* Ad Container: Responsive Full Space utilization on Desktop */}
+                  <div className="relative z-10 w-full max-w-5xl my-auto flex flex-col items-center justify-center">
+                      {/* Desktop Full Layout (Hidden on Mobile) */}
+                      <div className="hidden lg:flex flex-col items-center justify-center w-full gap-6">
+                          {/* 728x90 Leaderboard on Top */}
+                          <div className="w-full flex justify-center bg-white/[0.02] border border-white/10 rounded-2xl p-3 shadow-xl backdrop-blur-md overflow-hidden">
+                              <AdsterraAd type="728x90" className="my-0" />
+                          </div>
+                          {/* Native Ad filling the wide canvas */}
+                          <div className="w-full bg-white/[0.03] border border-white/10 rounded-3xl p-4 shadow-2xl backdrop-blur-xl overflow-hidden max-h-[380px]">
+                              <AdsterraAd type="native" className="my-0" />
+                          </div>
+                      </div>
+
+                      {/* Tablet / Medium Devices (768px - 1023px) */}
+                      <div className="hidden md:flex lg:hidden flex-col items-center justify-center w-full max-w-xl gap-4">
+                          <div className="w-full flex justify-center bg-white/[0.03] border border-white/10 rounded-2xl p-4 shadow-2xl backdrop-blur-xl overflow-hidden">
+                              <AdsterraAd type="728x90" className="my-0" />
+                          </div>
+                          <div className="w-full flex justify-center bg-white/[0.02] border border-white/10 rounded-2xl p-2 shadow-lg backdrop-blur-md overflow-hidden">
+                              <AdsterraAd type="300x250" className="my-0" />
+                          </div>
+                      </div>
+
+                      {/* Mobile Devices (< 768px): Clean, elegant 300x250 box */}
+                      <div className="flex md:hidden flex-col items-center justify-center w-full max-w-sm">
+                          <div className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-4 min-h-[290px] flex items-center justify-center shadow-2xl overflow-hidden">
+                              <AdsterraAd type="300x250" className="my-0" />
+                          </div>
+                      </div>
+                  </div>
+
+                  {/* Footer Scroll Prompt */}
+                  <div className="relative z-10 flex flex-col items-center justify-center animate-bounce opacity-50">
+                     <p className="text-[10px] text-gray-400 font-mono tracking-widest uppercase mb-1">{__('Keep Scrolling')}</p>
+                     <ChevronDown className="w-5 h-5 text-gray-400" />
                   </div>
               </div>
             );

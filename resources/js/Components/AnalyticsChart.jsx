@@ -1,7 +1,7 @@
 import React from 'react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import Skeleton from './Skeleton';
-import { Eye, Users, Newspaper, Heart, TrendingUp, TrendingDown, Monitor, Smartphone, Tablet, Bot, Zap, Globe, Search, Share2, Link2, ArrowUpRight, Shield, DollarSign, Activity, Map, Clock, MousePointerClick } from 'lucide-react';
+import { Eye, Users, CheckCircle2, Newspaper, Heart, TrendingUp, TrendingDown, Monitor, Smartphone, Tablet, Bot, Zap, Globe, Search, Share2, Link2, ArrowUpRight, Shield, DollarSign, Activity, Map, Clock, MousePointerClick } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ComposableMap, Geographies, Geography } from "react-simple-maps";
 import { scaleLinear } from "d3-scale";
@@ -177,8 +177,8 @@ export default function AnalyticsChart({ analyticsData, analytics, period }) {
                         ) : "No likes yet"
                     },
                     { icon: TrendingUp, label: "Engagement", value: `${stats.engagementRate || 0}%`, color: "amber" },
-                    { icon: Eye, label: "Lifetime", value: stats.totalViewsAllTime || 0, color: "blue" },
-                    { icon: Eye, label: "Reels Views", value: stats.totalSoftViewsAllTime || 0, color: "purple" },
+                    { icon: CheckCircle2, label: "Verified Readers", value: stats.verifiedReaders || 0, subValue: `${stats.totalViews > 0 ? Math.round(((stats.verifiedReaders || 0) / stats.totalViews) * 100) : 0}% of views`, color: "emerald" },
+                    { icon: Eye, label: "Reels Views", value: stats.reelViewsPeriod ?? (stats.totalSoftViewsAllTime || 0), subValue: `${stats.totalSoftViewsAllTime || 0} total`, color: "purple" },
                 ].map((stat, i) => (
                     <motion.div key={i} variants={itemVariants}>
                         <StatCard {...stat} />
@@ -501,9 +501,9 @@ export default function AnalyticsChart({ analyticsData, analytics, period }) {
                 </motion.div>
             )}
 
-            {/* ═══ MONETIZATION PROJECTIONS ═══ */}
-            {stats.adsenseProjection && (
-                <motion.div variants={itemVariants} className="bg-gradient-to-br from-emerald-500/5 to-teal-500/5 border border-emerald-500/20 dark:border-emerald-500/30 rounded-3xl p-5 md:p-8 backdrop-blur-xl mt-6 relative overflow-hidden group/monetization">
+            {/* ═══ HONEST MONETIZATION & ADSTERRA REVENUE ═══ */}
+            {stats.monetization && (
+                <motion.div variants={itemVariants} className="bg-gradient-to-br from-emerald-500/5 via-teal-500/5 to-cyan-500/5 border border-emerald-500/20 dark:border-emerald-500/30 rounded-3xl p-5 md:p-8 backdrop-blur-xl mt-6 relative overflow-hidden group/monetization">
                     <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,rgba(16,185,129,0.15),transparent_50%)] pointer-events-none transition-opacity duration-700 group-hover/monetization:opacity-100 opacity-50" />
                     
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 relative z-10">
@@ -512,46 +512,75 @@ export default function AnalyticsChart({ analyticsData, analytics, period }) {
                                 <DollarSign className="w-6 h-6 text-white drop-shadow-md" />
                             </div>
                             <div>
-                                <h3 className="text-[13px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.3em]">Revenue Forecast</h3>
-                                <p className="text-[10px] font-bold text-emerald-500/70 uppercase tracking-widest mt-1">Google AdSense (30 Days)</p>
+                                <div className="flex items-center gap-2">
+                                    <h3 className="text-[13px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.3em]">Real Monetization</h3>
+                                    <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                        Adsterra API {stats.monetization.adsterraConfigured ? 'Connected' : 'Offline'}
+                                    </span>
+                                </div>
+                                <p className="text-[10px] font-bold text-emerald-500/70 uppercase tracking-widest mt-1">Verified Real Earnings & Ad Fill</p>
                             </div>
                         </div>
-                        <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-xl text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">
-                            <Activity className="w-3.5 h-3.5" />
-                            Volume: {stats.adsenseProjection.views.toLocaleString()}
+                        <div className="flex items-center gap-3">
+                            <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-xl text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">
+                                <Activity className="w-3.5 h-3.5" />
+                                Ad Views: {(stats.monetization.adViewsPeriod || 0).toLocaleString()}
+                            </div>
                         </div>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
-                        <div className="bg-white/60 dark:bg-black/40 border border-emerald-500/10 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-emerald-500/30 transition-all">
-                            <div className="flex items-center gap-2 mb-3">
-                                <div className="w-2 h-2 rounded-full bg-gray-400" />
-                                <div className="text-[10px] font-black text-emerald-600/70 dark:text-emerald-500/60 uppercase tracking-widest">Pessimistic</div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 relative z-10">
+                        {/* Real Earned Revenue */}
+                        <div className="bg-gradient-to-b from-emerald-500/15 to-emerald-500/5 border border-emerald-500/30 rounded-2xl p-6 shadow-md relative overflow-hidden">
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Real Revenue</div>
+                                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                             </div>
-                            <div className="text-3xl font-black text-gray-800 dark:text-gray-200">${stats.adsenseProjection.low.toFixed(2)}</div>
-                            <div className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-2">RPM $1.50</div>
+                            <div className="text-3xl lg:text-4xl font-black text-emerald-700 dark:text-emerald-300">
+                                ${Number(stats.monetization.realRevenue || 0).toFixed(2)}
+                            </div>
+                            <div className="text-[9px] font-bold text-emerald-600/70 dark:text-emerald-400/70 uppercase tracking-widest mt-2">
+                                Adsterra Balance
+                            </div>
                         </div>
 
-                        <div className="bg-gradient-to-b from-emerald-500/10 to-teal-500/5 border border-emerald-500/30 rounded-2xl p-6 relative overflow-hidden shadow-[0_8px_30px_rgba(16,185,129,0.1)] transform md:-translate-y-2 hover:-translate-y-3 transition-transform duration-300">
-                            <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/20 blur-[50px] rounded-full pointer-events-none -mr-16 -mt-16" />
-                            <div className="flex items-center justify-between mb-3 relative z-10">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                    <div className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Expected</div>
-                                </div>
-                                <Zap className="w-4 h-4 text-emerald-500" />
+                        {/* Real Adsterra Impressions */}
+                        <div className="bg-white/60 dark:bg-black/40 border border-emerald-500/10 rounded-2xl p-6 shadow-sm hover:border-emerald-500/30 transition-all">
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Adsterra Impr.</div>
                             </div>
-                            <div className="text-4xl font-black text-emerald-700 dark:text-emerald-300 relative z-10">${((stats.adsenseProjection.low + stats.adsenseProjection.high) / 2).toFixed(2)}</div>
-                            <div className="text-[9px] font-bold text-emerald-600/60 dark:text-emerald-400/60 uppercase tracking-widest mt-2 relative z-10">Avg RPM $2.75</div>
+                            <div className="text-3xl font-black text-gray-800 dark:text-gray-200">
+                                {(stats.monetization.realImpressions || 0).toLocaleString()}
+                            </div>
+                            <div className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-2">
+                                Confirmed by Network
+                            </div>
                         </div>
 
-                        <div className="bg-white/60 dark:bg-black/40 border border-emerald-500/10 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-emerald-500/30 transition-all">
-                            <div className="flex items-center gap-2 mb-3">
-                                <div className="w-2 h-2 rounded-full bg-teal-400" />
-                                <div className="text-[10px] font-black text-emerald-600/70 dark:text-emerald-500/60 uppercase tracking-widest">Optimistic</div>
+                        {/* Network Clicks & CTR */}
+                        <div className="bg-white/60 dark:bg-black/40 border border-emerald-500/10 rounded-2xl p-6 shadow-sm hover:border-emerald-500/30 transition-all">
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Clicks & CTR</div>
                             </div>
-                            <div className="text-3xl font-black text-gray-800 dark:text-gray-200">${stats.adsenseProjection.high.toFixed(2)}</div>
-                            <div className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-2">RPM $4.00</div>
+                            <div className="text-3xl font-black text-gray-800 dark:text-gray-200">
+                                {stats.monetization.realClicks || 0} <span className="text-sm font-bold text-gray-400 font-mono">({stats.monetization.realCtr || 0}%)</span>
+                            </div>
+                            <div className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-2">
+                                Non-intrusive banners
+                            </div>
+                        </div>
+
+                        {/* Real CPM */}
+                        <div className="bg-white/60 dark:bg-black/40 border border-emerald-500/10 rounded-2xl p-6 shadow-sm hover:border-emerald-500/30 transition-all">
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Current eCPM</div>
+                            </div>
+                            <div className="text-3xl font-black text-gray-800 dark:text-gray-200">
+                                ${Number(stats.monetization.realCpm || 0).toFixed(3)}
+                            </div>
+                            <div className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-2">
+                                Tier 1 / Global Blend
+                            </div>
                         </div>
                     </div>
                 </motion.div>

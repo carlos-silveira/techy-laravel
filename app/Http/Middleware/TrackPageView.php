@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\DB;
 use Stevebauman\Location\Facades\Location;
+use App\Services\BotDetector;
 
 class TrackPageView
 {
@@ -19,7 +20,7 @@ class TrackPageView
     {
         $response = $next($request);
 
-        // Terminate early if it's a known bot, a static asset, an internal API call, or from an admin
+        // Terminate early for non-navigations (POST/XHR), internal tools, API calls and admins
         if ($this->shouldIgnore($request)) {
             return $response;
         }
@@ -28,6 +29,7 @@ class TrackPageView
             // Anonymize IP address (e.g. hash of IP + UserAgent to separate unique devices uniquely without storing the raw IP)
             $ipRaw = $request->ip();
             $userAgent = $request->userAgent();
+            $isBot = app(BotDetector::class)->isBot($userAgent);
             $ipHash = hash('sha256', $ipRaw . $userAgent . env('APP_KEY'));
 
             // Check if it's an article page
@@ -61,7 +63,8 @@ class TrackPageView
                 'session_id' => $request->session()->getId(),
                 'ip_address' => $ipHash,
                 'country' => $country,
-                'user_agent' => substr($userAgent, 0, 500),
+                'user_agent' => substr((string) $userAgent, 0, 500),
+                'is_bot' => $isBot,
                 'article_id' => $articleId,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -76,6 +79,16 @@ class TrackPageView
 
     private function shouldIgnore(Request $request): bool
     {
+        // Only count page navigations. POSTs (likes, comments, beacons) are never page views.
+        if (! $request->isMethod('GET')) {
+            return true;
+        }
+
+        // Prefetch requests are not real visits
+        if ($request->headers->get('Purpose') === 'prefetch' || $request->headers->get('Sec-Purpose') === 'prefetch') {
+            return true;
+        }
+
         // Ignore Admin IP addresses
         $adminIps = array_filter(array_map('trim', explode(',', env('ADMIN_IPS', ''))));
         if (!empty($adminIps) && in_array($request->ip(), $adminIps)) {
@@ -106,8 +119,8 @@ class TrackPageView
             }
         }
 
-        // NOTE: We do NOT filter out search engine bots (Googlebot, bingbot, etc.)
-        // because we want to track crawler activity in the analytics dashboard.
+        // NOTE: Bots are still stored (flagged with is_bot = true) so the dashboard can
+        // show crawler activity, but they are excluded from every human metric.
 
         return false;
     }

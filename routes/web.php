@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\EngagementController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\AboutController;
@@ -337,3 +338,7 @@ Route::get('/temp-ssr-log', function () {
     }
     return "No SSR log found";
 });
+
+// Engagement and honest analytics beacons
+Route::post('/api/pv/engaged', [EngagementController::class, 'engaged']);
+Route::post('/api/events', [EngagementController::class, 'event']);

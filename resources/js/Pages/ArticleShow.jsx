@@ -17,9 +17,11 @@ import { getFinalImage } from '@/utils';
 import AdsterraAd from '@/Components/AdsterraAd';
 const RagCopilot = React.lazy(() => import('@/Components/RagCopilot'));
 import useLanguage from '@/Hooks/useLanguage';
+import useEngagementBeacon from '@/Hooks/useEngagementBeacon';
 
 export default function ArticleShow({ article, relatedArticles, auth }) {
     const { __ } = useLanguage();
+    useEngagementBeacon({ minTimeMs: 4000 });
     const [scrollProgress, setScrollProgress] = useState(0);
     const [likes, setLikes] = useState(article.likes_count || 0);
     const [isLiking, setIsLiking] = useState(false);

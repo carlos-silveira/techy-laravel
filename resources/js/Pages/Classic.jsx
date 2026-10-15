@@ -15,6 +15,7 @@ import AdsterraAd from '@/Components/AdsterraAd';
 const RagCopilot = React.lazy(() => import('@/Components/RagCopilot'));
 import { ArrowRight, Zap, BookOpen, Clock } from 'lucide-react';
 import useLanguage from '@/Hooks/useLanguage';
+import useEngagementBeacon from '@/Hooks/useEngagementBeacon';
 import { getFinalImage } from '@/utils';
 import NewsletterBlock from '@/Components/NewsletterBlock';
 
@@ -22,6 +23,7 @@ dayjs.extend(relativeTime);
 
 export default function Welcome({ articles, editorsChoice, dailyBrief, trendingArticles }) {
   const { __ } = useLanguage();
+  useEngagementBeacon({ minTimeMs: 4000 });
   const { scrollYProgress } = useScroll();
   const [isScrolled, setIsScrolled] = useState(false);
   const mouseX = useMotionValue(0);

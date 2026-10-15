@@ -14,3 +14,9 @@ These components consume JSON data from the backend representing API call logs a
 
 ## `FactCheckDashboard.jsx`
 Visualizes the results of `FactCheck` model runs. Displays confidence scores via color-coded progress bars (Green = High Confidence, Red = Hallucination detected).
+
+## `Honest Analytics & Monetization System`
+- **Bot Filtering**: Employs `App\Services\BotDetector` to filter crawlers, scrapers (curl, python, spoofed UAs), and automated pings into a dedicated crawler breakdown, isolating genuine human traffic in `page_views` via `is_bot = 0`.
+- **Verified Readers**: Marked asynchronously by `useEngagementBeacon.js` when a user interacts and dwells on an article for >= 4 seconds.
+- **Engagement Events**: Recorded in `engagement_events` table for `reel_view` (requiring >= 2.5s dwell) and `ad_view`.
+- **Adsterra Real Revenue**: Integrates with Adsterra API (`App\Services\AdsterraStatsService`) to display actual publisher revenue, impressions, clicks, and eCPM instead of speculative projections.
