@@ -14,9 +14,9 @@ const AdsterraAd = ({ type, className = "" }) => {
         height = 50;
         src = "/sponsors/320x50.html";
     } else if (type === "native") {
-        width = "100%";
-        height = 500; // Increased to prevent clipping
-        src = "/sponsors/native.html";
+        width = 728;
+        height = 90;
+        src = "/sponsors/728x90.html";
     }
 
     return (

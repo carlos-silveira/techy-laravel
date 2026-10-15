@@ -13,6 +13,7 @@
 - **`DashboardController` & `StudioController`**: Excluded bots globally using the indexed `is_bot = 0` column. Updated device & crawler breakdowns to use the unified classification.
 - **`Welcome.jsx`**: Tuned ad frequency to every 2 article reels and added dwell verification before registering reel views.
 - **`AnalyticsChart.jsx`**: Replaced the hypothetical AdSense projection with the Real Monetization card connected to the live Adsterra API. Added "Verified Readers" card.
+- **Desktop Reels Ad Slide & `ArticleShow` Banner Optimization**: Fixed the issue where the lower container was completely blank (`"no sale nada abajo"`) due to Adsterra's inactive/zero-fill `native` placement. Replaced the empty box with a symmetrical, high-fill 3-banner composition on desktop (728x90 leaderboard on top + dual 300x250 cards side-by-side below) and responsive banners inside `ArticleShow.jsx`, while aliasing legacy `native` to `728x90` in `AdsterraAd.jsx` to prevent any empty container rendering.
 
 ### Verified
 - `npm run build`: Success (0 errors).

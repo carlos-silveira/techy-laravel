@@ -274,9 +274,14 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
                     </div>
                 </article>
 
-                {/* Native Ad inside article flow */}
-                <div className="mt-12 w-full">
-                    <AdsterraAd type="native" />
+                {/* Article In-Feed Ad Slot */}
+                <div className="mt-12 w-full flex justify-center">
+                    <div className="hidden md:block">
+                        <AdsterraAd type="728x90" />
+                    </div>
+                    <div className="md:hidden">
+                        <AdsterraAd type="300x250" />
+                    </div>
                 </div>
 
 

@@ -174,24 +174,29 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
 
                   {/* Ad Container: Responsive Full Space utilization on Desktop */}
                   <div className="relative z-10 w-full max-w-5xl my-auto flex flex-col items-center justify-center">
-                      {/* Desktop Full Layout (Hidden on Mobile) */}
-                      <div className="hidden lg:flex flex-col items-center justify-center w-full gap-6">
+                      {/* Desktop Full Layout: Symmetrical 3-Banner Grid (Leaderboard + Duo Rectangle) */}
+                      <div className="hidden lg:flex flex-col items-center justify-center gap-5">
                           {/* 728x90 Leaderboard on Top */}
-                          <div className="w-full flex justify-center bg-white/[0.02] border border-white/10 rounded-2xl p-3 shadow-xl backdrop-blur-md overflow-hidden">
+                          <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-3 shadow-2xl backdrop-blur-xl overflow-hidden flex items-center justify-center">
                               <AdsterraAd type="728x90" className="my-0" />
                           </div>
-                          {/* Native Ad filling the wide canvas */}
-                          <div className="w-full bg-white/[0.03] border border-white/10 rounded-3xl p-4 shadow-2xl backdrop-blur-xl overflow-hidden max-h-[380px]">
-                              <AdsterraAd type="native" className="my-0" />
+                          {/* Duo 300x250 Side-by-Side (Fills space, guaranteed high fill-rate) */}
+                          <div className="flex flex-row items-center justify-center gap-5">
+                              <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-3 shadow-2xl backdrop-blur-xl overflow-hidden flex items-center justify-center">
+                                  <AdsterraAd type="300x250" className="my-0" />
+                              </div>
+                              <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-3 shadow-2xl backdrop-blur-xl overflow-hidden flex items-center justify-center">
+                                  <AdsterraAd type="300x250" className="my-0" />
+                              </div>
                           </div>
                       </div>
 
                       {/* Tablet / Medium Devices (768px - 1023px) */}
-                      <div className="hidden md:flex lg:hidden flex-col items-center justify-center w-full max-w-xl gap-4">
-                          <div className="w-full flex justify-center bg-white/[0.03] border border-white/10 rounded-2xl p-4 shadow-2xl backdrop-blur-xl overflow-hidden">
+                      <div className="hidden md:flex lg:hidden flex-col items-center justify-center gap-4">
+                          <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-3 shadow-2xl backdrop-blur-xl overflow-hidden flex items-center justify-center">
                               <AdsterraAd type="728x90" className="my-0" />
                           </div>
-                          <div className="w-full flex justify-center bg-white/[0.02] border border-white/10 rounded-2xl p-2 shadow-lg backdrop-blur-md overflow-hidden">
+                          <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-3 shadow-lg backdrop-blur-md overflow-hidden flex items-center justify-center">
                               <AdsterraAd type="300x250" className="my-0" />
                           </div>
                       </div>
