@@ -214,8 +214,10 @@ class PublicController extends Controller
             return $this->translateIfNecessary($article, $locale);
         });
 
-        // Increment views_count for analytics (bypassing cache for this write)
-        Article::where('id', $article->id)->increment('views_count');
+        // Increment views_count for analytics: ONLY human visitors count as views
+        if (!app(\App\Services\BotDetector::class)->isBot(request()->userAgent())) {
+            Article::where('id', $article->id)->increment('views_count');
+        }
 
         $relatedArticles = Cache::remember("article_{$slug}_related_{$locale}", 3600, function () use ($article, $locale) {
             $related = Article::where('status', 'published')

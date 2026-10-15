@@ -180,6 +180,10 @@ class ArticleController extends Controller
      */
     public function trackSoftView(Request $request, $id)
     {
+        if (app(\App\Services\BotDetector::class)->isBot($request->userAgent())) {
+            return response()->json(['success' => false, 'message' => 'Bots excluded']);
+        }
+
         $article = Article::findOrFail($id);
         
         // Use a session key so we only count once per session

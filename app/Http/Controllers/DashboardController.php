@@ -144,34 +144,10 @@ class DashboardController extends Controller
                 'count' => (int) $item->count,
             ]);
 
-        // ─── CRAWLER DETAILS ───
-        $crawlerDetails = DB::table('page_views')
-            ->selectRaw("
-                CASE
-                    WHEN user_agent LIKE '%Googlebot%' OR user_agent LIKE '%Google-InspectionTool%' THEN 'Googlebot'
-                    WHEN user_agent LIKE '%Mediapartners-Google%' THEN 'Google AdSense'
-                    WHEN user_agent LIKE '%bingbot%' THEN 'Bingbot'
-                    WHEN user_agent LIKE '%GPTBot%' OR user_agent LIKE '%ChatGPT%' THEN 'GPTBot (OpenAI)'
-                    WHEN user_agent LIKE '%Applebot%' THEN 'Applebot'
-                    WHEN user_agent LIKE '%facebookexternalhit%' THEN 'Facebook'
-                    WHEN user_agent LIKE '%Twitterbot%' THEN 'Twitter/X'
-                    WHEN user_agent LIKE '%LinkedInBot%' THEN 'LinkedIn'
-                    WHEN user_agent LIKE '%WhatsApp%' THEN 'WhatsApp'
-                    WHEN user_agent LIKE '%AhrefsBot%' THEN 'Ahrefs'
-                    WHEN user_agent LIKE '%SemrushBot%' THEN 'Semrush'
-                    WHEN user_agent LIKE '%YandexBot%' THEN 'Yandex'
-                    WHEN user_agent LIKE '%DuckDuckBot%' THEN 'DuckDuckGo'
-                    WHEN user_agent LIKE '%PetalBot%' THEN 'PetalBot (Huawei)'
-                    WHEN user_agent LIKE '%MJ12bot%' THEN 'Majestic'
-                    WHEN user_agent LIKE '%Baiduspider%' THEN 'Baidu'
-                    WHEN user_agent LIKE '%ClaudeBot%' OR user_agent LIKE '%anthropic%' THEN 'Claude / Anthropic'
-                    WHEN user_agent LIKE '%curl%' OR user_agent LIKE '%python%' OR user_agent LIKE '%wget%' THEN 'Scripts (curl/python)'
-                    ELSE 'Other Bot'
-                END as crawler,
-                COUNT(*) as hits
-            ")
+        // ─── CRAWLER DETAILS (Separated in crawler_logs, never counted as views) ───
+        $crawlerDetails = DB::table('crawler_logs')
+            ->selectRaw("COALESCE(crawler_name, 'Other Bot') as crawler, COUNT(*) as hits")
             ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
-            ->where('is_bot', true)
             ->groupBy('crawler')
             ->orderByDesc('hits')
             ->limit(15)

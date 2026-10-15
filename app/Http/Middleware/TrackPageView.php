@@ -26,18 +26,14 @@ class TrackPageView
         }
 
         try {
-            // Anonymize IP address (e.g. hash of IP + UserAgent to separate unique devices uniquely without storing the raw IP)
             $ipRaw = $request->ip();
             $userAgent = $request->userAgent();
-            $isBot = app(BotDetector::class)->isBot($userAgent);
-            $ipHash = hash('sha256', $ipRaw . $userAgent . env('APP_KEY'));
+            $detector = app(BotDetector::class);
+            $isBot = $detector->isBot($userAgent);
 
             // Check if it's an article page
             $articleId = null;
             if ($request->routeIs('articles.show') || $request->is('article/*')) {
-                // If the route doesn't have model binding, we might need to parse.
-                // Assuming it's `/article/{slug}` and public controller doesn't use model binding natively in route,
-                // we'll find the article ID by slug.
                 $slug = $request->segment(2);
                 if ($slug) {
                     $article = DB::table('articles')->where('slug', $slug)->first(['id']);
@@ -45,7 +41,30 @@ class TrackPageView
                 }
             }
 
-            // Lookup location before hashing IP
+            // BOTS ARE NOT VIEWS: Never insert bot visits into page_views.
+            // Route crawler hits to dedicated crawler_logs table for search engine audit.
+            if ($isBot) {
+                try {
+                    DB::table('crawler_logs')->insert([
+                        'crawler_name' => $detector->crawlerName($userAgent) ?? 'Unknown Crawler',
+                        'url' => substr($request->fullUrl(), 0, 255),
+                        'referrer' => substr($request->headers->get('referer', ''), 0, 255),
+                        'ip_address' => hash('sha256', $ipRaw . env('APP_KEY')),
+                        'user_agent' => substr((string) $userAgent, 0, 500),
+                        'article_id' => $articleId,
+                        'created_at' => now(),
+                    ]);
+                } catch (\Throwable $e) {
+                    // Do not block response on crawler logging error
+                }
+
+                return $response;
+            }
+
+            // Anonymize IP address for human visitors
+            $ipHash = hash('sha256', $ipRaw . $userAgent . env('APP_KEY'));
+
+            // Lookup location for human visitors
             $country = null;
             try {
                 if ($position = Location::get($ipRaw)) {
@@ -55,6 +74,7 @@ class TrackPageView
                 // Ignore location errors
             }
 
+            // Real Human View
             DB::table('page_views')->insert([
                 'url' => substr($request->fullUrl(), 0, 255),
                 'referrer' => substr($request->headers->get('referer', ''), 0, 255),
@@ -64,7 +84,7 @@ class TrackPageView
                 'ip_address' => $ipHash,
                 'country' => $country,
                 'user_agent' => substr((string) $userAgent, 0, 500),
-                'is_bot' => $isBot,
+                'is_bot' => false,
                 'article_id' => $articleId,
                 'created_at' => now(),
                 'updated_at' => now(),

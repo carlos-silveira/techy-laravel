@@ -94,4 +94,42 @@ class EngagementTrackingTest extends TestCase
         $this->assertFalse($response->json('recorded'));
         $this->assertDatabaseCount('engagement_events', 0);
     }
+
+    public function test_bots_are_never_inserted_into_page_views_and_never_increment_views_count(): void
+    {
+        $articleId = DB::table('articles')->insertGetId([
+            'title' => 'Bot Test Article',
+            'slug' => 'bot-test-article',
+            'content' => json_encode([]),
+            'language' => 'en',
+            'status' => 'published',
+            'views_count' => 0,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // 1. Bot request (Googlebot)
+        $this->withServerVariables(['HTTP_USER_AGENT' => 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'])
+            ->get('/article/bot-test-article');
+
+        // Bot should NOT increment article views_count
+        $this->assertEquals(0, DB::table('articles')->where('id', $articleId)->value('views_count'));
+
+        // Bot should NOT be in page_views
+        $this->assertEquals(0, DB::table('page_views')->count());
+
+        // Bot SHOULD be logged in crawler_logs
+        $this->assertEquals(1, DB::table('crawler_logs')->count());
+        $this->assertEquals('Googlebot', DB::table('crawler_logs')->first()->crawler_name);
+
+        // 2. Real Human request
+        $this->withServerVariables(['HTTP_USER_AGENT' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'])
+            ->get('/article/bot-test-article');
+
+        // Human SHOULD increment article views_count
+        $this->assertEquals(1, DB::table('articles')->where('id', $articleId)->value('views_count'));
+
+        // Human SHOULD be in page_views
+        $this->assertEquals(1, DB::table('page_views')->count());
+    }
 }

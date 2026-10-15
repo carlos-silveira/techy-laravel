@@ -18,7 +18,7 @@ class GeminiServiceTest extends TestCase
         $service = new GeminiService();
 
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('GEMINI_API_KEY is not configured');
+        $this->expectExceptionMessage('AI API is currently resting or unavailable. Please try again later.');
 
         $service->generateDraft('Test Title', 'Test prompt', []);
     }

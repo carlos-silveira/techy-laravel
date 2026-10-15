@@ -1,3 +1,28 @@
+## [2026-10-15] - Absolute Bot Exclusion from Views & Dedicated Crawler Logs
+
+### Added
+- **`crawler_logs` Dedicated Table**: All bot, crawler, and scraper traffic (Googlebot, Bing, GPTBot, curl, python, scrapers) is segregated into a dedicated `crawler_logs` table for SEO audit, never touching user analytics or view metrics.
+- **Strict View Isolation**:
+  - `TrackPageView.php`: Diverts bot requests to `crawler_logs` and returns early. Bot traffic is NEVER inserted into `page_views`.
+  - `PublicController.php`: Guarded article detail view increments so bots hitting article URLs NEVER increment `articles.views_count`.
+  - `ArticleController.php`: Guarded `trackSoftView` so bots can never register soft views.
+- **Database Migration (`purge_bot_views_and_sync_article_counts`)**:
+  - Creates `crawler_logs` table.
+  - Moves all 11,158 bot rows from `page_views` into `crawler_logs`.
+  - Permanently purges all bot rows from `page_views`.
+  - Recalculates `articles.views_count` strictly from genuine human `page_views` (purging 6,524 bot views).
+  - Recalculates `articles.soft_views_count` strictly from verified human `engagement_events`.
+
+### Changed
+- **`DashboardController.php`**: Crawler analytics widget now queries `crawler_logs` directly.
+- **Reels Desktop Ad Slide (`Welcome.jsx`)**: Cleaned desktop slide to a single centered 728x90 leaderboard banner, eliminating empty bottom boxes caused by Adsterra desktop single-slot constraints.
+
+### Verified
+- `npm run build`: Success in 661ms (0 errors).
+- `php artisan test`: 100% pass on `EngagementTrackingTest`, `AnalyticsTest`, `BotDetectorTest`, `PublicFrontendTest`, and `GeminiServiceTest`.
+
+---
+
 ## [2026-10-15] - Honest Analytics, Bot Filtering & Adsterra Monetization Engine
 
 ### Added
