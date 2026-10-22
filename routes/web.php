@@ -143,6 +143,13 @@ Route::middleware([])->group(function () {
         return "<pre>Healing complete. " . \Illuminate\Support\Facades\Artisan::output() . "</pre>";
     });
 
+    Route::get('/admin/update-php-sample', function () use ($gate) {
+        $gate();
+        \Illuminate\Support\Facades\Artisan::call('article:update-php-sample');
+        \Illuminate\Support\Facades\Cache::flush();
+        return "<pre>Update complete:\n" . htmlspecialchars(\Illuminate\Support\Facades\Artisan::output()) . "</pre>";
+    });
+
     Route::get('/admin/force-news', function () use ($gate) {
         $gate();
         $output = "";
