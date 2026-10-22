@@ -1,3 +1,32 @@
+## [2026-10-22] - Article Quality v2: Multi-Source Dossier, Fact Sheet, Anti-Fluff Gate & Native Localization
+
+### Added
+- **`ArticleResearchService`**: Orchestrates multi-source gathering by combining primary source content with corroborating search evidence and contextual images with alts.
+- **`SourceSearchService` Fallbacks**: Added DuckDuckGo HTML organic search fallback and Wikipedia Search API fallback so evidence gathering and fact-checking never fail with empty results when external API keys are unavailable.
+- **`ArticleQualityGate`**: Deterministic service auditing generated HTML against 40+ banned corporate fluff clichés (e.g., "stark reminder", "recordatorio contundente", "enterprises must elevate security"), generic filler headings, and minimum informative word counts.
+- **`ArticleWriterPipeline`**: End-to-end editorial pipeline: Dossier -> Fact Sheet -> Explanatory Draft -> Quality Gate Audit -> Revision -> Cover Image -> Native Localization.
+- **`article:regenerate-quality` Command**: Artisan command allowing deep regeneration of any article with `--dry-run` inspection.
+- **`GeminiService` Quality Methods**:
+  - `buildFactSheet`: Extracts a structured JSON ledger of confirmed facts, exact metrics with survey scopes, who-did-what attribution, and real victims.
+  - `generateExploratoryArticle`: Writes in the engaging, explanatory style of Xataka, Ars Technica, and Wired, talking directly to the reader with narrative headings, figure images, and actionable steps.
+  - `reviewAndRefineArticle`: Automated AI editor pass stripping any residual moralizing sermons.
+- **Unit Tests**:
+  - `ArticleQualityGateTest`: Tests fluff detection, heading checks, and clean passing articles.
+  - `JinaReaderServiceTest`: Tests cookie preference and GDPR banner stripping.
+
+### Changed
+- **`JinaReaderService`**: Added `cleanMarkdown` to strip cookie banners, consent preferences, and footer noise; increased character limit from 10k to 25k chars; extracted image alts.
+- **`GeminiService::translateArticle`**: Redesigned translation prompt from literal translation to native, human-quality localization in the style of Xataka and Wired en Español, strictly forbidding literal calques.
+- **`TrustedSourceRegistry`**: Added Wiz, Wikipedia, PHP Foundation, Cloudflare, BleepingComputer, The Hacker News, and government CERT domains.
+- **Sample Article #1165 Upgraded**: Upgraded article 1165 ("PHP2Shell") from thin, preachy text with wrong attribution to a 867-word (EN) / 1,151-word (ES) deeply informative piece with accurate roles, exact 69.3% W3Techs statistics, real affected European government services, technical heap explanation, and practical commands.
+
+### Verified
+- `php artisan test`: 100% pass (74 tests, 197 assertions).
+- `npm run build`: Success in 520ms (0 errors).
+- Quality Gate audit: Passed with 0 fluff violations and 0 generic headings.
+
+---
+
 ## [2026-10-15] - Absolute Bot Exclusion from Views & Dedicated Crawler Logs
 
 ### Added

@@ -25,7 +25,6 @@ class SourceSearchService
         $cacheKey = "factcheck_search_{$hash}";
         
         return Cache::remember($cacheKey, now()->addHours(24), function () use ($claim) {
-            // First try Google CSE if configured
             $googleApiKey = config('services.google_cse.api_key');
             $googleCseId = config('services.google_cse.search_engine_id');
             
@@ -33,8 +32,18 @@ class SourceSearchService
 
             if ($googleApiKey && $googleCseId) {
                 $results = $this->searchGoogleCSE($claim, $googleApiKey, $googleCseId);
-            } else {
+            }
+            
+            if (empty($results)) {
                 $results = $this->searchJina($claim);
+            }
+
+            if (empty($results)) {
+                $results = $this->searchDuckDuckGo($claim);
+            }
+
+            if (empty($results)) {
+                $results = $this->searchWikipedia($claim);
             }
 
             // Fetch the actual content from the top 3 results using JinaReader
@@ -55,10 +64,10 @@ class SourceSearchService
                         'snippet' => $result['snippet'],
                         'tier' => TrustedSourceRegistry::getTier($result['domain']),
                         'weight' => TrustedSourceRegistry::getTierWeight($result['domain']),
-                        'content_excerpt' => Str::limit(strip_tags($contentResult['markdown']), 3000), // AI needs context, but not infinite
+                        'content_excerpt' => Str::limit(strip_tags($contentResult['markdown']), 4000),
                     ];
                     $count++;
-                    sleep(2); // Rate limit Jina calls
+                    sleep(1);
                 }
             }
 
@@ -149,6 +158,112 @@ class SourceSearchService
             return $results;
         } catch (\Exception $e) {
             Log::error("Jina Search Exception: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Fallback search using DuckDuckGo HTML parser.
+     */
+    private function searchDuckDuckGo(string $query): array
+    {
+        try {
+            $response = Http::withHeaders([
+                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept' => 'text/html,application/xhtml+xml',
+            ])->timeout(12)->get('https://html.duckduckgo.com/html/', [
+                'q' => $query,
+            ]);
+
+            if (!$response->successful()) {
+                Log::warning("DuckDuckGo Search failed status: " . $response->status());
+                return [];
+            }
+
+            $html = $response->body();
+            $results = [];
+
+            if (preg_match_all('/<a[^>]+class=[\x22\x27][^\x22\x27]*result__a[^\x22\x27]*[\x22\x27][^>]+href=[\x22\x27]([^\x22\x27]+)[\x22\x27][^>]*>(.*?)<\/a>/si', $html, $matches, PREG_SET_ORDER)) {
+                foreach ($matches as $match) {
+                    $rawHref = $match[1] ?? '';
+                    $rawTitle = strip_tags($match[2] ?? '');
+
+                    $cleanUrl = '';
+                    if (preg_match('/uddg=([^&]+)/', $rawHref, $urlMatch)) {
+                        $cleanUrl = urldecode($urlMatch[1]);
+                    } elseif (filter_var($rawHref, FILTER_VALIDATE_URL)) {
+                        $cleanUrl = $rawHref;
+                    }
+
+                    if (!empty($cleanUrl)) {
+                        $host = parse_url($cleanUrl, PHP_URL_HOST);
+                        if ($host && TrustedSourceRegistry::isTrusted($cleanUrl)) {
+                            $results[] = [
+                                'url' => $cleanUrl,
+                                'domain' => $host,
+                                'title' => trim($rawTitle),
+                                'snippet' => '',
+                            ];
+                        }
+                    }
+
+                    if (count($results) >= 5) {
+                        break;
+                    }
+                }
+            }
+
+            return $results;
+        } catch (\Exception $e) {
+            Log::warning("DuckDuckGo Search Exception: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Fallback lookup against Wikipedia API.
+     */
+    private function searchWikipedia(string $query): array
+    {
+        try {
+            // Clean up the query for Wikipedia search (e.g. remove verbs)
+            $cleanTerm = trim(preg_replace('/[^a-zA-Z0-9\s\-]/', '', $query));
+            $words = explode(' ', $cleanTerm);
+            $shortQuery = implode(' ', array_slice($words, 0, 4));
+
+            $response = Http::withHeaders([
+                'User-Agent' => 'TechyNews/2.0 (editorial@techynews.lat)',
+            ])->timeout(8)->get('https://en.wikipedia.org/w/api.php', [
+                'action' => 'query',
+                'list' => 'search',
+                'srsearch' => $shortQuery,
+                'format' => 'json',
+                'srlimit' => 3,
+            ]);
+
+            if (!$response->successful()) {
+                return [];
+            }
+
+            $searchItems = $response->json('query.search') ?? [];
+            $results = [];
+
+            foreach ($searchItems as $item) {
+                $title = $item['title'] ?? '';
+                if (!empty($title)) {
+                    $encodedTitle = urlencode(str_replace(' ', '_', $title));
+                    $results[] = [
+                        'url' => "https://en.wikipedia.org/wiki/{$encodedTitle}",
+                        'domain' => 'wikipedia.org',
+                        'title' => $title,
+                        'snippet' => strip_tags($item['snippet'] ?? ''),
+                    ];
+                }
+            }
+
+            return $results;
+        } catch (\Exception $e) {
+            Log::warning("Wikipedia search failed: " . $e->getMessage());
             return [];
         }
     }

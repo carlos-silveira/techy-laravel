@@ -13,19 +13,17 @@ class JinaReaderService
      * Fetch the rich markdown content and extract images from the source URL.
      *
      * @param string $url The source URL to scrape.
-     * @return array Returns an array with 'markdown' (string) and 'images' (array of urls).
+     * @return array Returns an array with 'markdown' (string), 'images' (array of urls), and 'image_details' (array of ['url' => ..., 'alt' => ...]).
      */
     public function fetchArticleContext(string $url): array
     {
         try {
-            // Jina Reader API URL
             $jinaUrl = "https://r.jina.ai/" . $url;
             
             $jinaApiKey = config('services.jina.api_key');
             $headers = [
                 'X-Return-Format' => 'markdown',
-                // Ask Jina to remove heavily repeated boilerplate to save tokens
-                'X-No-Boilerplate' => 'true'
+                'X-No-Boilerplate' => 'true',
             ];
             if (!empty($jinaApiKey)) {
                 $headers['Authorization'] = 'Bearer ' . $jinaApiKey;
@@ -37,76 +35,130 @@ class JinaReaderService
 
             if (!$response->successful()) {
                 Log::warning("JinaReaderService failed to fetch {$url}. Status: " . $response->status());
-                return ['markdown' => '', 'images' => []];
+                return ['markdown' => '', 'images' => [], 'image_details' => []];
             }
 
-            $markdown = $response->body();
+            $raw = $response->body();
+            $markdown = $this->cleanMarkdown($raw);
             
-            // Truncate to 10,000 characters to avoid hitting token limits on free tier AI models
-            if (strlen($markdown) > 10000) {
-                $markdown = substr($markdown, 0, 10000) . "\n\n...[Content Truncated]...";
+            // Allow up to 25,000 characters of clean content for in-depth analysis
+            if (strlen($markdown) > 25000) {
+                $markdown = substr($markdown, 0, 25000) . "\n\n...[Content Truncated]...";
             }
 
-            // Extract images using a regex for standard markdown images: ![alt](url)
+            // Extract images with alts
+            $imageDetails = [];
             $images = [];
-            if (preg_match_all('/!\[.*?\]\((.*?)\)/', $markdown, $matches)) {
-                // $matches[1] contains the URLs
-                foreach ($matches[1] as $imgUrl) {
-                    $imgUrl = trim($imgUrl);
-                    // Handle relative URLs if they happen to appear
+            if (preg_match_all('/!\[(.*?)\]\((.*?)\)/', $raw, $matches, PREG_SET_ORDER)) {
+                foreach ($matches as $match) {
+                    $alt = trim($match[1] ?? '');
+                    $imgUrl = trim($match[2] ?? '');
+
                     if (str_starts_with($imgUrl, '/')) {
                         $parsedUrl = parse_url($url);
                         $base = ($parsedUrl['scheme'] ?? 'https') . '://' . ($parsedUrl['host'] ?? '');
                         $imgUrl = $base . $imgUrl;
                     }
-                    if (filter_var($imgUrl, FILTER_VALIDATE_URL)) {
-                        $lowerUrl = strtolower($imgUrl);
-                        // Filter out common logos, icons, ads, and non-content tracking pixels
-                            $pathOnly = parse_url($lowerUrl, PHP_URL_PATH) ?? '';
-                            if (
-                                !str_ends_with($pathOnly, '.svg') &&
-                                !str_ends_with($pathOnly, '.gif') &&
-                                !str_ends_with($pathOnly, '.webp') &&
-                                !str_ends_with($pathOnly, '.avif') &&
-                                !str_contains($lowerUrl, 'logo') &&
-                                !str_contains($lowerUrl, 'icon') &&
-                                !str_contains($lowerUrl, 'avatar') &&
-                                !str_contains($lowerUrl, 'banner') &&
-                                !str_contains($lowerUrl, 'button') &&
-                                !str_contains($lowerUrl, 'tracker') &&
-                                !str_contains($lowerUrl, 'pixel') &&
-                                !str_contains($lowerUrl, 'wir_cutout') &&
-                                !str_contains($lowerUrl, 'author') &&
-                                !str_contains($lowerUrl, 'profile') &&
-                                !str_contains($lowerUrl, 'writer') &&
-                                !str_contains($lowerUrl, 'contributor') &&
-                                !str_contains($lowerUrl, 'tc-logo') &&
-                                !str_contains($lowerUrl, 'disrupt') &&
-                                !str_contains($lowerUrl, 'headshot') &&
-                                !str_contains($lowerUrl, 'tim.jpg') &&
-                                !str_contains($lowerUrl, 'ads') &&
-                                !str_contains($lowerUrl, 'bg_') &&
-                                !str_contains($lowerUrl, 'newsletter') &&
-                                !str_contains($lowerUrl, '723b22a81ff6a760c4520b963b43451e') &&
-                                !str_contains($lowerUrl, 'kirsten')
-                            ) {
-                                $images[] = $imgUrl;
-                            }
+
+                    if (filter_var($imgUrl, FILTER_VALIDATE_URL) && $this->isValidArticleImage($imgUrl, $alt)) {
+                        $images[] = $imgUrl;
+                        $imageDetails[] = [
+                            'url' => $imgUrl,
+                            'alt' => $alt ?: 'Article illustration',
+                        ];
                     }
                 }
             }
 
-            // Remove duplicates
+            // Deduplicate
             $images = array_values(array_unique($images));
+            $uniqueDetails = [];
+            $seen = [];
+            foreach ($imageDetails as $detail) {
+                if (!isset($seen[$detail['url']])) {
+                    $seen[$detail['url']] = true;
+                    $uniqueDetails[] = $detail;
+                }
+            }
 
             return [
                 'markdown' => $markdown,
                 'images' => $images,
+                'image_details' => $uniqueDetails,
             ];
 
         } catch (\Exception $e) {
             Log::error("JinaReaderService exception for {$url}: " . $e->getMessage());
-            return ['markdown' => '', 'images' => []];
+            return ['markdown' => '', 'images' => [], 'image_details' => []];
         }
     }
+
+    /**
+     * Clean markdown to strip cookie consent banners, navigation headers, and footer comments.
+     */
+    public function cleanMarkdown(string $text): string
+    {
+        // 1. Remove common cookie preference and GDPR blocks
+        $text = preg_replace('/Manage your consent preferences.*?(?=Skip to main content|# |\n## )/si', '', $text);
+        $text = preg_replace('/Select your cookie preferences.*?(?=\n# |\n## |\[Skip)/si', '', $text);
+        $text = preg_replace('/This website uses cookies.*?Confirm My Choices/si', '', $text);
+
+        // 2. Cut off trailing junk (Comments, Most popular, Sign up for newsletter, etc.)
+        $cutOffPatterns = [
+            '/\n## Comments\b.*/si',
+            '/\n## Most Popular\b.*/si',
+            '/\nMost Popular\n\*/si',
+            '/\nJoin the discussion\b.*/si',
+            '/\n## 4 comentarios\b.*/si',
+            '/\n## Comentarios\b.*/si',
+            '/\nAlready a subscriber\?.*See offers/si',
+            '/\nTe puede interesar\b.*/si',
+        ];
+        foreach ($cutOffPatterns as $pattern) {
+            $text = preg_replace($pattern, '', $text);
+        }
+
+        // 3. Remove lines with checkboxes for cookie categories (e.g. "- [x] On", "- [ ] Off")
+        $text = preg_replace('/^-\s*\[[x ]\]\s*(On|Off|Allowed).*$/mi', '', $text);
+
+        // 4. Remove lines that are just navigation links repeated
+        $text = preg_replace('/^\[(Skip to main content|Sign In|Create account|Newsletters|Podcasts|Video|Store|Search|Facebook|Twitter|Flipboard|E-mail)\]\(.*?\)$/mi', '', $text);
+
+        // 5. Clean excessive newlines
+        $text = preg_replace('/\n{3,}/', "\n\n", $text);
+
+        return trim($text);
+    }
+
+    /**
+     * Filter out logos, avatars, tracking pixels, and ads.
+     */
+    private function isValidArticleImage(string $url, string $alt): bool
+    {
+        $lowerUrl = strtolower($url);
+        $lowerAlt = strtolower($alt);
+        $pathOnly = parse_url($lowerUrl, PHP_URL_PATH) ?? '';
+
+        $forbiddenExtensions = ['.svg', '.gif'];
+        foreach ($forbiddenExtensions as $ext) {
+            if (str_ends_with($pathOnly, $ext) && !str_contains($lowerUrl, 'diagram')) {
+                return false;
+            }
+        }
+
+        $forbiddenKeywords = [
+            'logo', 'icon', 'avatar', 'banner', 'button', 'tracker', 'pixel',
+            'author', 'profile', 'writer', 'contributor', 'headshot', 'ads',
+            'newsletter', 'user_avatar', 'favicon', 'badge'
+        ];
+
+        foreach ($forbiddenKeywords as $word) {
+            if (str_contains($lowerUrl, $word) || str_contains($lowerAlt, $word)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
+

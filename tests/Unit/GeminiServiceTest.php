@@ -250,4 +250,65 @@ class GeminiServiceTest extends TestCase
         $service = new GeminiService();
         $service->translateArticle('Test Title', 'Test Summary', '<p>' . str_repeat('English article content here. ', 5) . '</p>', 'es');
     }
+
+    /** @test */
+    public function it_builds_a_structured_fact_sheet(): void
+    {
+        config(['services.gemini.api_key' => 'test-key']);
+
+        Http::fake([
+            'openrouter.ai/*' => Http::response([
+                'choices' => [['message' => ['content' => json_encode([
+                    'core_event' => 'PHP2Shell vulnerabilities patched in PHP 8.2-8.5',
+                    'actors_and_roles' => [
+                        ['entity' => 'Calif & Wiz', 'role' => 'discovered', 'details' => 'Found using AI tools'],
+                        ['entity' => 'AWS', 'role' => 'detected in wild', 'details' => 'Observed on MadPot honeypots']
+                    ],
+                    'key_numbers' => [
+                        ['number' => '69.3%', 'scope' => 'servers using PHP per W3Techs', 'context' => 'large blast radius']
+                    ],
+                    'affected_systems_and_versions' => '5.4 through 8.5',
+                    'technical_cause' => 'Out of memory handling',
+                    'real_world_impact' => ['Overheid.nl taken offline'],
+                    'actionable_steps' => ['Upgrade to 8.2.25 or 8.3.13'],
+                    'unverified_or_investigating' => 'Identity of October 17 attackers'
+                ])]]]
+            ], 200)
+        ]);
+
+        $service = new GeminiService();
+        $sheet = $service->buildFactSheet('PHP Vulnerability', 'Sample research dossier text');
+
+        $this->assertIsArray($sheet);
+        $this->assertEquals('PHP2Shell vulnerabilities patched in PHP 8.2-8.5', $sheet['core_event']);
+        $this->assertCount(2, $sheet['actors_and_roles']);
+        $this->assertEquals('69.3%', $sheet['key_numbers'][0]['number']);
+    }
+
+    /** @test */
+    public function it_generates_an_exploratory_article(): void
+    {
+        config(['services.gemini.api_key' => 'test-key']);
+
+        Http::fake([
+            'openrouter.ai/*' => Http::response([
+                'choices' => [['message' => ['content' => json_encode([
+                    'title' => 'Critical PHP Flaws Exploited in the Wild',
+                    'twitter_tldr' => 'Fallas críticas en PHP explotadas antes del parche.',
+                    'article_body' => '<h2>Honeypots detect exploitation</h2><p>Article narrative text with concrete facts.</p>',
+                    'suggested_image' => 'server',
+                    'main_category' => 'Cybersecurity'
+                ])]]]
+            ], 200)
+        ]);
+
+        $service = new GeminiService();
+        $article = $service->generateExploratoryArticle('PHP Vulnerability', [
+            'core_event' => 'Patches released'
+        ]);
+
+        $this->assertIsArray($article);
+        $this->assertEquals('Critical PHP Flaws Exploited in the Wild', $article['title']);
+        $this->assertStringContainsString('<h2>Honeypots detect exploitation</h2>', $article['article_body']);
+    }
 }

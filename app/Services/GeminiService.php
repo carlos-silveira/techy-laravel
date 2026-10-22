@@ -279,33 +279,35 @@ Return ONLY a valid JSON array of objects. No markdown fences. Example format:
             : "Ensure the 'article_body' includes an unsplash image placeholder like <img src=\"PLACEHOLDER_IMAGE\" alt=\"description\">.";
 
         $date = now()->format('l, F j, Y');
-        $prompt = "You are a Senior Tech Analyst and Editor for techynews.lat. Today is {$date}. Your absolute priority is to provide DEEP EXPERTISE, UNIQUE ANALYSIS, and ADDED VALUE (E-E-A-T) beyond just reporting the raw facts. You must write articles that are authoritative, engaging, and insightful. DO NOT just summarize the source text. DO NOT report on events from previous years as if they were new today.
+        $prompt = "You are a Senior Tech Journalist and Investigative Editor for techynews.lat. Today is {$date}.
+Your mission is to write an engaging, deeply informative tech article in the style of Xataka, Ars Technica, and Wired.
 
-ARTICLE TOPIC: {$title}
-EDITORIAL BRIEF: {$ideaPrompt}
+TOPIC: {$title}
+BRIEF: {$ideaPrompt}
 
 {$officialContext}
 
 Generate an article as a JSON object. The 'article_body' field MUST contain valid HTML.
 
-CRITICAL WRITING RULES (FOR ADSENSE APPROVAL & AUTHORITY):
-- CRITICAL LANGUAGE RULE: The output MUST be entirely in English.
-- ADDED VALUE & OPINION: You MUST include your own expert analysis. Why does this matter? How does it affect the market, consumers, or the competition? What is the historical context? 
-- FACTUAL BUT OPINIONATED: Be factual about the news event, but provide a professional analyst's perspective. DO NOT pretend you physically tested or reviewed a product (e.g., no \"we tested\", \"our hands-on review\").
-- NO CODE BLOCKS: DO NOT include any code snippets, python code, or programming examples.
-- CRITICAL LEGAL RULE: You MUST completely remove any author names, 'IMAGE CREDITS:', 'contributed reporting from', 'TechCrunch', or promotional text from the article. Do not include watermarks or credits.
-- TONE & STYLE: Write with a conversational, punchy, engaging style. Avoid sounding like a high school essay or academic paper. Use simple, direct language that provides real value.
-- NO AI CLICHES: NEVER use words like 'delve', 'complexities', 'nuanced', 'testament', 'tapestry', 'landscape', 'revolutionary', 'transformative', 'paradigm shift', 'synergy'.
-- MINIMUM LENGTH: Write a comprehensive, deep-dive article. Target between 450 and 600 words for complete coverage.
-
-ARTICLE STRUCTURE (HTML):
-- BANNED HEADINGS: You are strictly FORBIDDEN from using generic filler subheadings such as 'Deeper Analysis', 'Deep Dive', 'Conclusion', 'The TechyNews Take', 'Why It Matters', or their exact translations. Use highly specific, descriptive headings related directly to the news content.
-- Write a natural, flowing journalistic article. Use 4 to 6 well-structured paragraphs.
-- You may use a short bulleted list ONLY if you need to list specific specs, prices, or a timeline.
-- IMAGE QUERY: For 'suggested_image', generate a BROAD, 1-2 word conceptual TECH search term for Unsplash. EXTREMELY IMPORTANT: Do NOT use brand names that have literal meanings in English (e.g., NEVER use 'apple' for Apple Inc, use 'smartphone' or 'tablet'; NEVER use 'steam' or 'valve' for gaming, use 'gaming', 'esports' or 'controller'; NEVER use 'jean' or 'jeans' for a person named Jean, use 'developer' or 'robotics'). Avoid specific company names, people, or obscure products. Use generic tech concepts like 'robotics', 'server', 'coding', 'cybersecurity', 'processor'.
+CRITICAL EDITORIAL GUIDELINES (INFORM, ENGAGE, TALK TO THE READER):
+- LANGUAGE: The output MUST be entirely in English.
+- TALK TO THE READER: Start with an engaging narrative hook that explains the real-world consequence. Make the reader understand why this matters to their daily life, work, or servers without dry corporate jargon.
+- FACTUAL ACCURACY & EXACT ATTRIBUTION:
+  * Clearly distinguish WHO discovered the issue vs. WHO detected in-the-wild exploitation vs. WHO issued patches. Never misattribute discoveries.
+  * When mentioning statistics (e.g. market share, affected users), state the exact scope (e.g. 'according to W3Techs' or 'among surveyed servers'). Do not fabricate round numbers like '75% of all websites'.
+  * Name specific affected versions, CVEs, companies, and government services whenever present in the context.
+- STRICTLY BANNED MORALIZING & FLUFF:
+  * NEVER write preachy corporate advice telling companies what they should or must do (e.g., 'enterprises cannot afford to treat patching as routine', 'must elevate security to a critical business function', 'stark reminder that zero-days are reality').
+  * NEVER use AI clichés: 'delve', 'complexities', 'nuanced', 'testament', 'tapestry', 'landscape', 'revolutionary', 'transformative', 'paradigm shift', 'synergy', 'wake-up call'.
+  * Conclude with practical next steps, patched versions, or what remains unknown—NOT a corporate sermon.
+- ARTICLE STRUCTURE (HTML):
+  * Length: 600 to 900 words of substantive, informative journalism.
+  * Use 3 to 4 specific, narrative `<h2>` subheadings (e.g. `<h2>Honeypots catch active attacks days before disclosure</h2>`, `<h2>The technical flaw: a 2024 memory leak that went unpatched</h2>`).
+  * FORBIDDEN HEADINGS: Never use generic headings like 'Why It Matters', 'Deeper Analysis', 'Conclusion', or 'The TechyNews Take'.
+  * If the context contains official images or screenshots, embed them with contextual `<p class=\"text-sm text-gray-500 italic mt-1\">` captions.
 
 Return ONLY a valid JSON object with these exact keys: \"title\", \"twitter_tldr\", \"article_body\", \"suggested_image\", \"main_category\".
-CRITICAL RULE FOR X (TWITTER): The 'twitter_tldr' field MUST be written entirely in SPANISH (Español). All other fields MUST remain in English. 
+CRITICAL RULE FOR X (TWITTER): The 'twitter_tldr' field MUST be written in punchy, informative SPANISH (Español). All other fields MUST remain in English.
 
 {$imageInstruction}
 ";
@@ -332,6 +334,162 @@ CRITICAL RULE FOR X (TWITTER): The 'twitter_tldr' field MUST be written entirely
             'suggested_image' => $result['suggested_image'] ?? '',
             'main_category' => $result['main_category'] ?? 'Business Tech',
         ];
+    }
+
+    /**
+     * Step 1 of Quality Pipeline: Distill research dossier into a structured fact sheet.
+     */
+    public function buildFactSheet(string $title, string $dossierText): array
+    {
+        $this->ensureQuotaNotExhausted();
+
+        $prompt = "You are a Chief Fact-Checking Editor for an elite tech publication.
+Analyze this raw research dossier and extract a structured FACT SHEET.
+Distinguish confirmed facts from claims. Separate who discovered what from who detected exploitation or who reported it.
+
+STORY TOPIC: {$title}
+
+RESEARCH DOSSIER:
+{$dossierText}
+
+Extract and return a JSON object with these EXACT keys:
+{
+  \"core_event\": \"1-2 sentence summary of the exact concrete event that happened, with dates and CVEs if applicable\",
+  \"actors_and_roles\": [
+    {\"entity\": \"Name of entity\", \"role\": \"discovered / detected in wild / reported / issued patch\", \"details\": \"Exact contribution and tools used if known\"}
+  ],
+  \"key_numbers\": [
+    {\"number\": \"e.g. 69.3%\", \"scope\": \"e.g. of websites with known server-side language according to W3Techs\", \"context\": \"why this matters\"}
+  ],
+  \"affected_systems_and_versions\": \"Specific version ranges affected and specific versions patched\",
+  \"technical_cause\": \"What the vulnerability or technical change actually is in clear, simple terms (e.g. memory safety, out-of-memory error handling)\",
+  \"real_world_impact\": [
+    \"Specific websites, services, or governments that reacted (e.g., specific Dutch or Finnish ministries, bunq, 4chan, etc.)\"
+  ],
+  \"actionable_steps\": [
+    \"What developers, sysadmins, or consumers must specifically check or run (e.g., command, package update, WAF rule)\"
+  ],
+  \"unverified_or_investigating\": \"What remains unconfirmed, actively under investigation, or speculative\"
+}
+
+Return ONLY valid JSON.";
+
+        $result = $this->callGemini($prompt, true);
+        return is_array($result) ? $result : [];
+    }
+
+    /**
+     * Step 2 of Quality Pipeline: Draft long-form narrative article from Fact Sheet & Evidence.
+     */
+    public function generateExploratoryArticle(string $title, array $factSheet, array $sources = [], array $images = []): array
+    {
+        $this->ensureQuotaNotExhausted();
+
+        $factSheetJson = json_encode($factSheet, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        
+        $sourcesContext = "";
+        if (!empty($sources)) {
+            $sourcesContext = "AVAILABLE SOURCE REFERENCES TO CITE & HYPERLINK IN TEXT:\n";
+            foreach ($sources as $s) {
+                $sourcesContext .= "- {$s['label']}: {$s['title']} ({$s['url']})\n";
+            }
+        }
+
+        $imagesInstruction = "";
+        if (!empty($images)) {
+            $imagesInstruction = "EMBED THESE RELEVANT CONTEXTUAL IMAGES/SCREENSHOTS IN THE HTML BODY (use `<figure class=\"my-6\"><img src=\"...\" alt=\"...\" class=\"w-full rounded-xl shadow\"><figcaption class=\"text-sm text-gray-500 mt-2 text-center\">Caption</figcaption></figure>`):\n";
+            foreach ($images as $img) {
+                $imagesInstruction .= "- Image: {$img['url']} (Description: {$img['alt']})\n";
+            }
+        }
+
+        $date = now()->format('l, F j, Y');
+
+        $prompt = "You are an investigative tech journalist writing for techynews.lat. Today is {$date}.
+Write an engaging, authoritative, and deeply readable feature article based on this verified Fact Sheet.
+Model your style after the best tech reporting (like Xataka, Ars Technica, and Wired): informative, conversational, technical yet accessible, with zero corporate filler.
+
+TOPIC: {$title}
+
+FACT SHEET:
+{$factSheetJson}
+
+{$sourcesContext}
+{$imagesInstruction}
+
+EDITORIAL INSTRUCTIONS (HOW TO WRITE A 10/10 ARTICLE):
+1. ENGAGING NARRATIVE HOOK:
+   - Talk to the reader. Start with the visible reality or impact on the web rather than boring corporate boilerplate.
+   - Example hook style: Explain how seamless the web usually feels until multiple major services suddenly display maintenance errors simultaneously.
+2. ACCURATE ATTRIBUTION & NUMBERS:
+   - Accurately attribute roles based on the Fact Sheet. NEVER confuse the party who detected in-the-wild exploitation (e.g., AWS honeypots) with the researchers who discovered the flaw (e.g., Calif/OpenAI, Wiz).
+   - State statistics with their exact scope (e.g., 'PHP powers 69.3% of sites with an identified server language, according to W3Techs'). Do not round or exaggerate.
+3. CONCRETE DETAILS & REAL EXAMPLES:
+   - Mention the specific services, public portals, or organizations that had to react or disconnect (e.g., European public administration portals, financial apps, platforms).
+   - Explain the technical mechanics simply: explain the out-of-memory bug, how an unauthenticated remote code execution exploit works, and why this differs from a routine bug.
+4. ACTIONABLE TAKEAWAY FOR READERS:
+   - Give developers and sysadmins practical guidance: which versions are patched, how to verify versions, temporary mitigations (WAF rules), and what hosting panel administrators must do.
+5. STRICTLY BANNED MORALIZING & FLUFF:
+   - FORBIDDEN: Preachy corporate advice ('enterprises must elevate security to a core business function', 'enterprises cannot afford to treat patching as routine', 'stark reminder that zero-days are realities').
+   - FORBIDDEN WORDS: 'delve', 'tapestry', 'testament', 'landscape', 'revolutionary', 'transformative', 'paradigm shift', 'wake-up call'.
+   - FORBIDDEN HEADINGS: 'Why It Matters', 'Deeper Analysis', 'Conclusion', 'The TechyNews Take'. Use narrative, descriptive subheadings.
+   - End on an informative note (the ongoing challenge of hosting fragmentation or open questions), NOT a sermon.
+6. TARGET LENGTH: 700 to 1,000 words.
+7. CITATIONS: Include inline hyperlinks `<a href=\"...\" target=\"_blank\" rel=\"noopener\" class=\"text-primary hover:underline\">source name</a>` when citing findings from the sources list.
+
+Return ONLY a valid JSON object:
+{
+  \"title\": \"Engaging, factual headline. No clickbait, but gripping.\",
+  \"twitter_tldr\": \"A punchy 2-sentence summary in SPANISH for social media.\",
+  \"article_body\": \"<p>HTML formatted article...</p>\",
+  \"suggested_image\": \"1-2 word tech term for cover photo search\",
+  \"main_category\": \"Cybersecurity / Infrastructure / AI\"
+}";
+
+        $result = $this->callGemini($prompt, true);
+
+        $content = $result['article_body'] ?? '';
+        $this->validateGeneratedContent([
+            'title' => $result['title'] ?? '',
+            'article_body' => $content,
+        ], $title);
+
+        return [
+            'title' => $result['title'] ?? $title,
+            'twitter_tldr' => $result['twitter_tldr'] ?? '',
+            'article_body' => $content,
+            'suggested_image' => $result['suggested_image'] ?? 'server',
+            'main_category' => $result['main_category'] ?? 'Cybersecurity',
+        ];
+    }
+
+    /**
+     * Step 3 of Quality Pipeline: AI Editor pass to eliminate any detected fluff or generic prose.
+     */
+    public function reviewAndRefineArticle(string $html, array $factSheet, array $auditIssues = []): string
+    {
+        $this->ensureQuotaNotExhausted();
+
+        $issuesStr = !empty($auditIssues) ? implode("\n- ", $auditIssues) : "Ensure zero corporate fluff, punchy prose, and concrete facts.";
+
+        $prompt = "You are the Senior Editor-in-Chief at techynews.lat.
+Review this draft article HTML. Your job is to make it read like top-tier journalism and remove any AI slop or corporate moralizing.
+
+AUDIT ISSUES DETECTED:
+- {$issuesStr}
+
+EDITORIAL RULES:
+1. Strip out any preachy corporate sermons ('companies must change', 'serves as a stark reminder', 'enterprises cannot afford'). Replace with concrete technical facts or real-world details.
+2. Replace any generic subheadings ('Why It Matters', 'Conclusion', 'Deeper Analysis') with narrative, specific headlines.
+3. Preserve all existing inline links `<a>` and figures `<figure>`.
+4. Ensure the writing talks naturally to tech-literate readers.
+5. Return ONLY the polished HTML string without markdown fences.
+
+DRAFT HTML:
+{$html}";
+
+        $result = $this->callGemini($prompt, false);
+        return trim((string) $result);
     }
 
     /**
@@ -573,16 +731,20 @@ Output ONLY the HTML content.";
 
         $targetLanguage = $languages[$targetLocale] ?? 'English';
 
-        $prompt = "You are a senior tech journalist and professional translator.
-Translate the following tech article details into {$targetLanguage}.
+        $prompt = "You are a senior tech journalist and localization editor for an elite publication like Xataka or Wired.
+Translate and adapt the following tech article into natural, native, engaging {$targetLanguage}.
 
-TRANSLATION INSTRUCTIONS:
-- Translate the article title into a natural, engaging {$targetLanguage} headline.
-- Translate the executive summary into {$targetLanguage}.
-- Translate the article HTML content into {$targetLanguage}, preserving all HTML tags (`<h2>`, `<p>`, `<ul>`, `<li>`, `<strong>`, `<em>`, `<a>`, `<img>`, `<blockquote>`, etc.) exactly intact.
-- Translate only the human-readable text, never translate HTML tag names or attributes.
-- Keep the journalistic tone bold, insightful, and authoritative.
-- CRITICAL ANTI-PLACEHOLDER RULE: You MUST translate the actual text provided below. DO NOT return placeholder text like 'título traducido', 'translated title', 'resumen traducido', or 'contenido HTML traducido'. Every field must contain the full, accurate translation of the input text.
+EDITORIAL LOCALIZATION GUIDELINES:
+- WRITE LIKE A NATIVE JOURNALIST: Adapt the phrasing so it sounds like an original article written from scratch in {$targetLanguage} by a seasoned tech journalist. Talk directly to the reader with clarity, rhythm, and authority.
+- BANNED TRANSLATION CLICHES & LITERAL CALQUES:
+  * NEVER translate 'in a troubling development' to 'en un desarrollo inquietante'. Use natural journalism ('El problema es especialmente serio porque...', 'La situación ha generado alarma en la comunidad de...').
+  * NEVER translate 'stark reminder' to 'recordatorio contundente' or uppercase 'RECORDatorio'.
+  * NEVER use corporate preachiness ('las empresas no pueden permitirse...', 'las organizaciones deben elevar la seguridad a una función crítica').
+  * Ensure smooth sentence transitions, rich tech terminology in natural Spanish/Portuguese, and flawless grammar.
+- PRESERVE HTML & STRUCTURE:
+  * Preserve all HTML tags (`<h2>`, `<h3>`, `<p>`, `<ul>`, `<li>`, `<strong>`, `<em>`, `<a>`, `<img>`, `<figure>`, `<figcaption>`, `<blockquote>`) exactly intact.
+  * Translate all body text, figure captions, and link anchor text, but keep tag names and attributes (`href`, `src`, `class`, `alt`) intact.
+- CRITICAL ANTI-PLACEHOLDER RULE: Translate the actual full text provided below. Never return placeholder strings.
 
 INPUT ARTICLE TO TRANSLATE:
 <input_title>
@@ -600,9 +762,9 @@ INPUT ARTICLE TO TRANSLATE:
 OUTPUT FORMAT:
 Return ONLY a valid JSON object with the exact keys \"title\", \"summary\", \"content\" (no markdown fences, no explanation):
 {
-  \"title\": \"[Full {$targetLanguage} translated headline]\",
-  \"summary\": \"[Full {$targetLanguage} translated summary]\",
-  \"content\": \"[Full {$targetLanguage} translated HTML content]\"
+  \"title\": \"[Natural {$targetLanguage} translated headline]\",
+  \"summary\": \"[Engaging {$targetLanguage} translated summary]\",
+  \"content\": \"[Full, natural {$targetLanguage} translated HTML content]\"
 }";
 
         $result = $this->callGemini($prompt, true);

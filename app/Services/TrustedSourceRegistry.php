@@ -34,6 +34,11 @@ class TrustedSourceRegistry
         'genbeta.com' => ['name' => 'Genbeta', 'tier' => 3, 'weight' => 0.8],
         'hipertextual.com' => ['name' => 'Hipertextual', 'tier' => 3, 'weight' => 0.8],
         'theinformation.com' => ['name' => 'The Information', 'tier' => 3, 'weight' => 0.8],
+        'bleepingcomputer.com' => ['name' => 'BleepingComputer', 'tier' => 3, 'weight' => 0.85],
+        'thehackernews.com' => ['name' => 'The Hacker News', 'tier' => 3, 'weight' => 0.85],
+        'securityweek.com' => ['name' => 'SecurityWeek', 'tier' => 3, 'weight' => 0.85],
+        'wiz.io' => ['name' => 'Wiz Research', 'tier' => 3, 'weight' => 0.85],
+        'wikipedia.org' => ['name' => 'Wikipedia', 'tier' => 3, 'weight' => 0.9],
 
         // Tier 4 - Official Sources (Weight: 0.95)
         'apple.com' => ['name' => 'Apple', 'tier' => 4, 'weight' => 0.95],
@@ -44,6 +49,10 @@ class TrustedSourceRegistry
         'amazon.com' => ['name' => 'Amazon', 'tier' => 4, 'weight' => 0.95],
         'nvidia.com' => ['name' => 'NVIDIA', 'tier' => 4, 'weight' => 0.95],
         'github.com' => ['name' => 'GitHub', 'tier' => 4, 'weight' => 0.95],
+        'php.net' => ['name' => 'PHP Foundation', 'tier' => 4, 'weight' => 0.95],
+        'cloudflare.com' => ['name' => 'Cloudflare', 'tier' => 4, 'weight' => 0.95],
+        'ncsc.gov.uk' => ['name' => 'UK NCSC', 'tier' => 4, 'weight' => 0.95],
+        'cisa.gov' => ['name' => 'US CISA', 'tier' => 4, 'weight' => 0.95],
     ];
 
     public static function all(): array
