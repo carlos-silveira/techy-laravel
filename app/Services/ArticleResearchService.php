@@ -92,14 +92,23 @@ class ArticleResearchService
             Log::warning("ArticleResearchService: Failed to gather additional sources: " . $e->getMessage());
         }
 
-        // Deduplicate extracted images
+        // Deduplicate and sanitize extracted images
         $uniqueImages = [];
         $seenUrls = [];
+        $imageService = app(ImageService::class);
         foreach ($extractedImages as $img) {
             $u = $img['url'] ?? '';
-            if (!empty($u) && !isset($seenUrls[$u])) {
-                $seenUrls[$u] = true;
-                $uniqueImages[] = $img;
+            $alt = $img['alt'] ?? '';
+            if (empty($u) || $imageService->isForbiddenLogoOrBadge($u, $alt)) {
+                continue;
+            }
+            $upgraded = $imageService->upgradeImageUrl($u);
+            if (!isset($seenUrls[$upgraded])) {
+                $seenUrls[$upgraded] = true;
+                $uniqueImages[] = [
+                    'url' => $upgraded,
+                    'alt' => $alt ?: 'Article illustration',
+                ];
             }
         }
 

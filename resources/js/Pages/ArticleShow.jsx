@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 import CommandPalette from '@/Components/CommandPalette';
 import Navbar from '@/Components/Navbar';
 import PublicFooter from '@/Components/PublicFooter';
-import { getFinalImage } from '@/utils';
+import { getFinalImage, isForbiddenImage, upgradeImageUrl } from '@/utils';
 import AdsterraAd from '@/Components/AdsterraAd';
 const RagCopilot = React.lazy(() => import('@/Components/RagCopilot'));
 import useLanguage from '@/Hooks/useLanguage';
@@ -108,6 +108,18 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
         
         // Remove literal "\n" or "\r" strings that some AI models return
         content = content.replace(/\\n/g, '').replace(/\\r/g, '');
+
+        // Strip publisher logo badge containers (e.g. 60px TechCrunch logos from Google News)
+        content = content.replace(/<(?:div|figure)[^>]*>\s*<img[^>]+src=["'][^"']*(?:googleusercontent\.com[^"']*=(?:h|w|s)\d+|tc-logo|techcrunch-logo|\/undefined)[^"']*["'][^>]*>[\s\S]*?<\/(?:div|figure)>/gi, '');
+
+        // Strip standalone forbidden images
+        content = content.replace(/<img[^>]+src=["'][^"']*(?:googleusercontent\.com[^"']*=(?:h|w|s)\d+|tc-logo|techcrunch-logo|\/undefined)[^"']*["'][^>]*>/gi, '');
+
+        // Upgrade thumbnail URLs (Substack, Wired, WordPress) to high-resolution
+        content = content.replace(/<img([^>]+src=["'])(https?:\/\/[^"']+)(["'][^>]*)>/gi, (match, prefix, url, suffix) => {
+            const upgraded = upgradeImageUrl(url);
+            return `${prefix}${upgraded}${suffix}`;
+        });
         
         return content;
     };
@@ -265,7 +277,7 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
                         </div>
                     )}
 
-                    <div className="prose dark:prose-invert prose-primary max-w-none prose-lg prose-headings:font-black prose-headings:tracking-tighter prose-headings:text-black dark:prose-headings:text-white prose-p:text-gray-600 dark:prose-p:text-gray-400 prose-p:font-light prose-p:leading-relaxed prose-strong:text-black dark:prose-strong:text-white prose-a:text-primary hover:prose-a:text-black dark:hover:prose-a:text-white prose-code:text-emerald-600 dark:prose-code:text-emerald-400 prose-pre:bg-gray-100 dark:prose-pre:bg-white/[0.03] prose-pre:border prose-pre:border-black/10 dark:prose-pre:border-white/10 prose-pre:rounded-2xl transition-colors">
+                    <div className="prose dark:prose-invert prose-primary max-w-none prose-lg prose-headings:font-black prose-headings:tracking-tighter prose-headings:text-black dark:prose-headings:text-white prose-p:text-gray-600 dark:prose-p:text-gray-400 prose-p:font-light prose-p:leading-relaxed prose-strong:text-black dark:prose-strong:text-white prose-a:text-primary hover:prose-a:text-black dark:hover:prose-a:text-white prose-code:text-emerald-600 dark:prose-code:text-emerald-400 prose-pre:bg-gray-100 dark:prose-pre:bg-white/[0.03] prose-pre:border prose-pre:border-black/10 dark:prose-pre:border-white/10 prose-pre:rounded-2xl prose-img:rounded-2xl prose-img:mx-auto prose-img:shadow-lg prose-figure:mx-auto prose-figure:my-8 prose-figcaption:text-center prose-figcaption:text-sm prose-figcaption:text-gray-500 dark:prose-figcaption:text-gray-400 prose-figcaption:italic transition-colors">
                         {cleanHtml ? (
                             <div dangerouslySetInnerHTML={{ __html: cleanHtml }} />
                         ) : (

@@ -14,17 +14,20 @@ class ArticleWriterPipeline
     private GeminiService $gemini;
     private ArticleQualityGate $qualityGate;
     private NewsAgent $newsAgent;
+    private ImageService $imageService;
 
     public function __construct(
         ArticleResearchService $researchService,
         GeminiService $gemini,
         ArticleQualityGate $qualityGate,
-        NewsAgent $newsAgent
+        NewsAgent $newsAgent,
+        ?ImageService $imageService = null
     ) {
         $this->researchService = $researchService;
         $this->gemini = $gemini;
         $this->qualityGate = $qualityGate;
         $this->newsAgent = $newsAgent;
+        $this->imageService = $imageService ?? app(ImageService::class);
     }
 
     /**
@@ -64,30 +67,27 @@ class ArticleWriterPipeline
 
         $htmlContent = $draft['article_body'];
 
+        // Clean and sanitize any inline images
+        $htmlContent = $this->imageService->cleanContentImages($htmlContent);
+
         // 4. Quality Audit & Automated Revision
         $audit = $this->qualityGate->audit($htmlContent);
         if (!$audit['passed']) {
             Log::info("ArticleWriterPipeline: Quality Gate flagged issues, performing editorial revision: " . implode('; ', $audit['issues']));
             $htmlContent = $this->gemini->reviewAndRefineArticle($htmlContent, $factSheet, $audit['issues']);
+            $htmlContent = $this->imageService->cleanContentImages($htmlContent);
             $audit = $this->qualityGate->audit($htmlContent);
         }
 
         // 5. Generate Metadata
         $meta = $this->gemini->generateArticleMeta($draft['title'], $htmlContent);
 
-        // 6. Cover image selection
-        $coverImage = null;
-        if (!empty($dossier['images'])) {
-            $coverImage = $dossier['images'][0]['url'];
-        }
-        if (empty($coverImage)) {
-            $coverImage = $this->newsAgent->fetchCoverImageFallback(
-                $draft['suggested_image'] ?? 'cybersecurity'
-            );
-        }
-        if (empty($coverImage)) {
-            $coverImage = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=80';
-        }
+        // 6. Brand-Safe, High-Resolution Cover Image Selection
+        $coverImage = $this->imageService->resolveCoverImage(
+            $draft['title'],
+            $draft['suggested_image'] ?? null,
+            $dossier['images'] ?? []
+        );
 
         // 7. Localize into ES and PT
         $translations = [];
@@ -98,12 +98,16 @@ class ArticleWriterPipeline
             try {
                 // Sleep briefly to respect RPM
                 sleep(2);
-                $translations[$lang] = $this->gemini->translateArticle(
+                $translated = $this->gemini->translateArticle(
                     $draft['title'],
                     $summary,
                     $htmlContent,
                     $lang
                 );
+                if (isset($translated['content'])) {
+                    $translated['content'] = $this->imageService->cleanContentImages($translated['content']);
+                }
+                $translations[$lang] = $translated;
             } catch (\Exception $e) {
                 Log::warning("ArticleWriterPipeline: Localization to {$lang} failed: " . $e->getMessage());
             }

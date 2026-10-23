@@ -150,6 +150,13 @@ Route::middleware([])->group(function () {
         return "<pre>Update complete:\n" . htmlspecialchars(\Illuminate\Support\Facades\Artisan::output()) . "</pre>";
     });
 
+    Route::get('/admin/fix-images', function () use ($gate) {
+        $gate();
+        \Illuminate\Support\Facades\Artisan::call('articles:fix-images', ['--all' => true]);
+        \Illuminate\Support\Facades\Cache::flush();
+        return "<pre>Image healing complete:\n" . htmlspecialchars(\Illuminate\Support\Facades\Artisan::output()) . "</pre>";
+    });
+
     Route::get('/admin/force-news', function () use ($gate) {
         $gate();
         $output = "";

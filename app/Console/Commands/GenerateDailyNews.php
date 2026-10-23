@@ -193,14 +193,14 @@ class GenerateDailyNews extends Command
         // Resolve image placeholders in the content
         $content = $this->resolveImagePlaceholders($content);
 
-        // Fetch a cover image from Unsplash if not already set (fallback)
-        // If we extracted images from the official source, use the first one instead of Unsplash.
-        if (!empty($extractedImages) && count($extractedImages) > 0) {
-            $coverImageUrl = $extractedImages[0];
-            $this->info("📸 Using official extracted cover image: {$coverImageUrl}");
-        } else {
-            $coverImageUrl = $this->fetchCoverImage($idea['title'], $meta['tags'] ?? []);
-        }
+        // Resolve a brand-safe, high-resolution cover image using ImageService
+        $imageService = app(ImageService::class);
+        $dossierImages = array_map(fn($u) => ['url' => $u], $extractedImages ?? []);
+        $coverImageUrl = $imageService->resolveCoverImage($idea['title'], $meta['tags'][0] ?? null, $dossierImages);
+        $this->info("📸 Selected brand-safe cover image: {$coverImageUrl}");
+
+        // Clean and format any inline images in content
+        $content = $imageService->cleanContentImages($content);
 
         $slug = Str::slug($idea['title']) . '-' . Str::random(6);
         $wordCount = str_word_count(strip_tags($content));

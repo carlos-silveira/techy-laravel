@@ -469,56 +469,11 @@ class NewsAgent
     }
 
     /**
-     * Fetch a copyright-free cover image from Unsplash or Wikimedia Commons fallback.
+     * Fetch a copyright-free, brand-safe cover image from Unsplash or curated editorial fallbacks.
      */
     public function fetchCoverImageFallback(string $query): ?string
     {
-        $accessKey = config('services.unsplash.access_key');
-        if (!empty($accessKey)) {
-            try {
-                $response = \Illuminate\Support\Facades\Http::withHeaders([
-                    'Authorization' => "Client-ID {$accessKey}",
-                ])->get('https://api.unsplash.com/photos/random', [
-                    'query' => $query,
-                    'orientation' => 'landscape',
-                ]);
-
-                if ($response->successful()) {
-                    $result = $response->json();
-                    if (!empty($result['urls']['regular'])) {
-                        return $result['urls']['regular'];
-                    }
-                }
-            } catch (\Exception $e) {
-                Log::warning('Unsplash API error in NewsAgent: ' . $e->getMessage());
-            }
-        }
-
-        // Wikimedia fallback
-        try {
-            $response = \Illuminate\Support\Facades\Http::get('https://commons.wikimedia.org/w/api.php', [
-                'action' => 'query',
-                'generator' => 'search',
-                'gsrsearch' => "filetype:bitmap " . $query,
-                'gsrnamespace' => 6,
-                'gsrlimit' => 1,
-                'prop' => 'imageinfo',
-                'iiprop' => 'url',
-                'format' => 'json'
-            ]);
-
-            if ($response->successful()) {
-                $pages = $response->json()['query']['pages'] ?? [];
-                if (!empty($pages)) {
-                    $firstPage = reset($pages);
-                    return $firstPage['imageinfo'][0]['url'] ?? null;
-                }
-            }
-        } catch (\Exception $e) {
-             Log::warning('Wikimedia API error in NewsAgent: ' . $e->getMessage());
-        }
-
-        return null;
+        return app(ImageService::class)->resolveCoverImage($query, $query);
     }
 }
 

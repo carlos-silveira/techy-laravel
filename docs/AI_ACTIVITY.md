@@ -1,3 +1,33 @@
+## [2026-10-23] - High-Resolution Editorial Imagery & Brand-Safe Cover Pipeline
+
+### Added
+- **`ImageService`**: Centralized image intelligence service that:
+  - Validates and filters publisher logos, mastheads, watermarks, and micro-icons (Google News `lh3.googleusercontent.com/...=h60`, `tc-logo`, `techcrunch`, author avatars, tracking pixels).
+  - Automatically upgrades CDN thumbnail URLs to full high-resolution (decoding Substack S3 URLs, expanding Wired `w_120` to `w_1600`, stripping WordPress `-150x150` suffixes, upgrading Wikimedia `320px` to `1200px`).
+  - Implements brand-safe cover search with negative keyword conflict mapping (e.g. Disney articles strictly reject HBO Max / Netflix photos; Apple strictly rejects Android / Samsung).
+  - Provides a rich, curated landscape editorial photo catalog organized across 8 tech domains (AI, Security, Hardware, Fusion, Streaming, Mobile, Cloud, General).
+  - Sanitizes article HTML content by removing logo badge containers, upgrading inline image URLs, and wrapping images in semantic responsive `<figure class="my-8 mx-auto max-w-3xl">` containers with centered italic captions.
+- **`articles:fix-images` Artisan Command**: Scans and heals all articles in database with `--id`, `--all`, and `--dry-run` options, using `Article::withoutEvents()` to safely prevent unwanted re-translation or queue cascades.
+- **Admin Maintenance Route `/admin/fix-images`**: Added behind `X-Deploy-Token` to trigger mass database healing in production.
+- **Unit Tests**:
+  - `ImageServiceTest`: Tests logo detection, thumbnail URL upgrading, HTML cleaning, figure formatting, and brand-safe cover fallbacks.
+
+### Changed
+- **`JinaReaderService`**: Integrates `ImageService::upgradeImageUrl` and `ImageService::isForbiddenLogoOrBadge`; automatically strips forbidden logo markdown images from scraped text before feeding to Gemini.
+- **`ArticleResearchService`**: Deduplicates and sanitizes extracted images so only genuine, high-res photos and diagrams enter the research dossier.
+- **`ArticleWriterPipeline`**: Cleans HTML content images before quality gate audit; resolves brand-safe cover images; cleans localized translated content.
+- **`GenerateDailyNews` & `NewsAgent`**: Updated cover image selection to use `ImageService::resolveCoverImage` and `cleanContentImages`.
+- **`ArticleQualityGate`**: Added image audit checks flagging any residual publisher logo images.
+- **`resources/js/utils.js`**: `getFinalImage()` discards Google News `=h60` logos and author avatars; upgrades Substack thumbnails to high-res; provides domain-aware fallbacks.
+- **`resources/js/Pages/ArticleShow.jsx`**: `sanitizeContent()` removes publisher logos and upgrades thumbnails on the fly; prose container applies `prose-img:rounded-2xl prose-img:mx-auto prose-img:shadow-lg prose-figure:mx-auto prose-figure:my-8 prose-figcaption:text-center prose-figcaption:text-sm prose-figcaption:italic`.
+
+### Verified
+- `php artisan test`: 100% pass (78 passed, 221 assertions).
+- `npm run build`: Success in 454ms (0 errors).
+- Local healing run: Successfully cured 172 articles in local DB.
+
+---
+
 ## [2026-10-22] - Article Quality v2: Multi-Source Dossier, Fact Sheet, Anti-Fluff Gate & Native Localization
 
 ### Added

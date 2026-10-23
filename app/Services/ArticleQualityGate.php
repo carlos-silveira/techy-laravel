@@ -120,6 +120,17 @@ class ArticleQualityGate
             $issues[] = "Article is too short ({$wordCount} words). Needs at least 450 words of concrete coverage.";
         }
 
+        // 4. Check for forbidden publisher logos / badges in <img> tags
+        $imageViolations = [];
+        $imageService = app(ImageService::class);
+        if (preg_match_all('/<img[^>]+src=["\']([^"\']+)["\'][^>]*>/i', $html, $imgMatches)) {
+            foreach ($imgMatches[1] as $imgSrc) {
+                if ($imageService->isForbiddenLogoOrBadge($imgSrc)) {
+                    $imageViolations[] = $imgSrc;
+                }
+            }
+        }
+
         if (!empty($fluffViolations)) {
             $issues[] = "Contains " . count($fluffViolations) . " banned corporate fluff cliché(s): " . implode(', ', array_slice($fluffViolations, 0, 4));
         }
@@ -128,12 +139,17 @@ class ArticleQualityGate
             $issues[] = "Contains generic heading(s): " . implode(', ', $headingViolations);
         }
 
-        $passed = empty($fluffViolations) && empty($headingViolations) && $wordCount >= 400;
+        if (!empty($imageViolations)) {
+            $issues[] = "Contains forbidden publisher logo/badge image(s): " . implode(', ', $imageViolations);
+        }
+
+        $passed = empty($fluffViolations) && empty($headingViolations) && empty($imageViolations) && $wordCount >= 400;
 
         return [
             'passed' => $passed,
             'fluff_violations' => $fluffViolations,
             'heading_violations' => $headingViolations,
+            'image_violations' => $imageViolations,
             'word_count' => $wordCount,
             'issues' => $issues,
         ];

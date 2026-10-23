@@ -9,6 +9,12 @@ use Illuminate\Support\Facades\Log;
 
 class JinaReaderService
 {
+    private ImageService $imageService;
+
+    public function __construct(?ImageService $imageService = null)
+    {
+        $this->imageService = $imageService ?? app(ImageService::class);
+    }
     /**
      * Fetch the rich markdown content and extract images from the source URL.
      *
@@ -60,12 +66,15 @@ class JinaReaderService
                         $imgUrl = $base . $imgUrl;
                     }
 
-                    if (filter_var($imgUrl, FILTER_VALIDATE_URL) && $this->isValidArticleImage($imgUrl, $alt)) {
-                        $images[] = $imgUrl;
-                        $imageDetails[] = [
-                            'url' => $imgUrl,
-                            'alt' => $alt ?: 'Article illustration',
-                        ];
+                    if (filter_var($imgUrl, FILTER_VALIDATE_URL)) {
+                        $upgradedUrl = $this->imageService->upgradeImageUrl($imgUrl);
+                        if ($this->isValidArticleImage($upgradedUrl, $alt)) {
+                            $images[] = $upgradedUrl;
+                            $imageDetails[] = [
+                                'url' => $upgradedUrl,
+                                'alt' => $alt ?: 'Article illustration',
+                            ];
+                        }
                     }
                 }
             }
@@ -124,7 +133,17 @@ class JinaReaderService
         // 4. Remove lines that are just navigation links repeated
         $text = preg_replace('/^\[(Skip to main content|Sign In|Create account|Newsletters|Podcasts|Video|Store|Search|Facebook|Twitter|Flipboard|E-mail)\]\(.*?\)$/mi', '', $text);
 
-        // 5. Clean excessive newlines
+        // 5. Strip forbidden markdown logos, badges, and avatars from content
+        $text = preg_replace_callback('/!\[(.*?)\]\((.*?)\)/i', function ($matches) {
+            $alt = $matches[1] ?? '';
+            $url = $matches[2] ?? '';
+            if ($this->imageService->isForbiddenLogoOrBadge($url, $alt)) {
+                return ''; // Drop from markdown
+            }
+            return $matches[0];
+        }, $text);
+
+        // 6. Clean excessive newlines
         $text = preg_replace('/\n{3,}/', "\n\n", $text);
 
         return trim($text);
@@ -133,32 +152,9 @@ class JinaReaderService
     /**
      * Filter out logos, avatars, tracking pixels, and ads.
      */
-    private function isValidArticleImage(string $url, string $alt): bool
+    public function isValidArticleImage(string $url, string $alt): bool
     {
-        $lowerUrl = strtolower($url);
-        $lowerAlt = strtolower($alt);
-        $pathOnly = parse_url($lowerUrl, PHP_URL_PATH) ?? '';
-
-        $forbiddenExtensions = ['.svg', '.gif'];
-        foreach ($forbiddenExtensions as $ext) {
-            if (str_ends_with($pathOnly, $ext) && !str_contains($lowerUrl, 'diagram')) {
-                return false;
-            }
-        }
-
-        $forbiddenKeywords = [
-            'logo', 'icon', 'avatar', 'banner', 'button', 'tracker', 'pixel',
-            'author', 'profile', 'writer', 'contributor', 'headshot', 'ads',
-            'newsletter', 'user_avatar', 'favicon', 'badge'
-        ];
-
-        foreach ($forbiddenKeywords as $word) {
-            if (str_contains($lowerUrl, $word) || str_contains($lowerAlt, $word)) {
-                return false;
-            }
-        }
-
-        return true;
+        return !$this->imageService->isForbiddenLogoOrBadge($url, $alt);
     }
 }
 
