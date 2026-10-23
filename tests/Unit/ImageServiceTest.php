@@ -83,6 +83,15 @@ class ImageServiceTest extends TestCase
         $this->assertStringContainsString('<figure class="my-8 mx-auto max-w-3xl">', $formatted);
         $this->assertStringContainsString('reactor.jpg', $formatted);
         $this->assertStringContainsString('<figcaption class="text-sm text-gray-500 mt-3 text-center italic">Fusion reactor core</figcaption>', $formatted);
+
+        // 3. Formats <div class="text-center"><img ...><p class="italic">caption</p></div> into semantic <figure>
+        $divHtml = '<div class="text-center"><img src="https://substackcdn.com/image/fetch/$s_!TJW7!,w_320,h_213,c_fill,f_auto,q_auto:good,fl_progressive:steep,g_center/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fphoto_2048x1536.jpeg" alt="Kernel Exploit"><p class="text-sm text-gray-500 italic mt-1">Exploit architecture diagram</p></div>';
+        $divFormatted = $this->service->cleanContentImages($divHtml);
+
+        $this->assertStringContainsString('<figure class="my-8 mx-auto max-w-3xl">', $divFormatted);
+        $this->assertStringContainsString('https://substack-post-media.s3.amazonaws.com/public/images/photo_2048x1536.jpeg', $divFormatted);
+        $this->assertStringNotContainsString('w_320,h_213', $divFormatted);
+        $this->assertStringContainsString('<figcaption class="text-sm text-gray-500 mt-3 text-center italic">Exploit architecture diagram</figcaption>', $divFormatted);
     }
 
     /** @test */

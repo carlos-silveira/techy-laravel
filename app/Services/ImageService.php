@@ -172,7 +172,31 @@ class ImageService
             return '';
         }
 
-        // 1. Remove publisher logo containers: <div class="..."><img src="...googleusercontent...=h60...">...</div>
+        // 1. Process <div ...> containers containing an <img> (and optional caption) -> convert to <figure> or strip
+        $html = preg_replace_callback('/<div[^>]*>\s*(<img[^>]+>)\s*(?:<p[^>]*>(.*?)<\/p>)?\s*<\/div>/si', function ($matches) {
+            $rawImg = $matches[1];
+            $caption = trim($matches[2] ?? '');
+
+            if (preg_match('/src=["\']([^"\']+)["\']/i', $rawImg, $srcMatch)) {
+                $src = $srcMatch[1];
+                preg_match('/alt=["\']([^"\']*)["\']/i', $rawImg, $altMatch);
+                $alt = $altMatch[1] ?? '';
+
+                if ($this->isForbiddenLogoOrBadge($src, $alt)) {
+                    return ''; // Strip forbidden container
+                }
+
+                $upgradedSrc = $this->upgradeImageUrl($src);
+                $cleanCaption = strip_tags($caption ?: ($alt && $alt !== 'Article illustration' ? $alt : ''));
+                $captionHtml = $cleanCaption ? '<figcaption class="text-sm text-gray-500 mt-3 text-center italic">' . htmlspecialchars($cleanCaption, ENT_QUOTES) . '</figcaption>' : '';
+
+                return '<figure class="my-8 mx-auto max-w-3xl"><img src="' . htmlspecialchars($upgradedSrc, ENT_QUOTES) . '" alt="' . htmlspecialchars($alt, ENT_QUOTES) . '" class="w-full h-auto rounded-2xl shadow-lg border border-black/10 dark:border-white/10 object-contain max-h-[550px] mx-auto block" loading="lazy" />' . $captionHtml . '</figure>';
+            }
+
+            return $matches[0];
+        }, $html);
+
+        // 2. Remove any remaining publisher logo containers: <div class="..."><img src="...googleusercontent...=h60...">...</div>
         $html = preg_replace_callback('/<(?:div|figure)[^>]*>(.*?)<\/(?:div|figure)>/si', function ($matches) {
             $inner = $matches[1];
             if (preg_match('/<img[^>]+src=["\']([^"\']+)["\']/i', $inner, $imgMatch)) {
@@ -184,28 +208,23 @@ class ImageService
             return $matches[0];
         }, $html);
 
-        // 2. Convert <p><img ...></p> into semantic <figure> with upgraded URL (or strip if forbidden)
-        $html = preg_replace_callback('/<p>\s*<img([^>]+src=["\']([^"\']+)["\'][^>]*alt=["\']([^"\']*)["\'][^>]*)>\s*<\/p>/si', function ($matches) {
+        // 3. Convert <p><img ...></p> into semantic <figure> with upgraded URL (or strip if forbidden)
+        $html = preg_replace_callback('/<p[^>]*>\s*(<img[^>]+>)\s*<\/p>/si', function ($matches) {
             $rawImgTag = $matches[1];
-            $src = $matches[2];
-            $alt = trim($matches[3] ?? '');
+            if (preg_match('/src=["\']([^"\']+)["\']/i', $rawImgTag, $srcMatch)) {
+                $src = $srcMatch[1];
+                preg_match('/alt=["\']([^"\']*)["\']/i', $rawImgTag, $altMatch);
+                $alt = trim($altMatch[1] ?? '');
 
-            if ($this->isForbiddenLogoOrBadge($src, $alt)) {
-                return '';
-            }
+                if ($this->isForbiddenLogoOrBadge($src, $alt)) {
+                    return '';
+                }
 
-            $upgradedSrc = $this->upgradeImageUrl($src);
-            $caption = $alt && $alt !== 'Article illustration' ? htmlspecialchars($alt, ENT_QUOTES) : '';
-            $captionHtml = $caption ? '<figcaption class="text-sm text-gray-500 mt-3 text-center italic">' . $caption . '</figcaption>' : '';
+                $upgradedSrc = $this->upgradeImageUrl($src);
+                $caption = $alt && $alt !== 'Article illustration' ? htmlspecialchars($alt, ENT_QUOTES) : '';
+                $captionHtml = $caption ? '<figcaption class="text-sm text-gray-500 mt-3 text-center italic">' . $caption . '</figcaption>' : '';
 
-            return '<figure class="my-8 mx-auto max-w-3xl"><img src="' . htmlspecialchars($upgradedSrc, ENT_QUOTES) . '" alt="' . htmlspecialchars($alt, ENT_QUOTES) . '" class="w-full h-auto rounded-2xl shadow-lg border border-black/10 dark:border-white/10 object-contain max-h-[550px] mx-auto block" loading="lazy" />' . $captionHtml . '</figure>';
-        }, $html);
-
-        // 3. Strip standalone naked forbidden images
-        $html = preg_replace_callback('/<img[^>]+src=["\']([^"\']+)["\'][^>]*>/i', function ($matches) {
-            $src = $matches[1];
-            if ($this->isForbiddenLogoOrBadge($src)) {
-                return '';
+                return '<figure class="my-8 mx-auto max-w-3xl"><img src="' . htmlspecialchars($upgradedSrc, ENT_QUOTES) . '" alt="' . htmlspecialchars($alt, ENT_QUOTES) . '" class="w-full h-auto rounded-2xl shadow-lg border border-black/10 dark:border-white/10 object-contain max-h-[550px] mx-auto block" loading="lazy" />' . $captionHtml . '</figure>';
             }
             return $matches[0];
         }, $html);
@@ -215,6 +234,10 @@ class ImageService
             $rawImgTag = $matches[1];
             $src = $matches[2];
             $caption = trim($matches[3] ?? '');
+
+            if ($this->isForbiddenLogoOrBadge($src)) {
+                return '';
+            }
 
             $upgradedSrc = $this->upgradeImageUrl($src);
             $cleanImgTag = preg_replace('/src=["\'][^"\']+["\']/i', 'src="' . htmlspecialchars($upgradedSrc, ENT_QUOTES) . '"', $rawImgTag);
@@ -228,11 +251,27 @@ class ImageService
 
             $captionHtml = $caption ? '<figcaption class="text-sm text-gray-500 mt-3 text-center italic">' . $caption . '</figcaption>' : '';
 
-            return '<figure class="my-8 mx-auto max-w-3xl">' . '<img' . $cleanImgTag . '>' . $captionHtml . '</figure>';
+            return '<figure class="my-8 mx-auto max-w-3xl"><img' . $cleanImgTag . '>' . $captionHtml . '</figure>';
         }, $html);
 
-        // 5. Clean empty containers
-        $html = preg_replace('/<div class="my-6">\s*<\/div>/i', '', $html);
+        // 5. Sweep ANY remaining naked <img ...>
+        $html = preg_replace_callback('/<img([^>]+src=["\']([^"\']+)["\'][^>]*)>/i', function ($matches) {
+            $rawImgTag = $matches[0];
+            $src = $matches[2];
+
+            if ($this->isForbiddenLogoOrBadge($src)) {
+                return '';
+            }
+
+            $upgradedSrc = $this->upgradeImageUrl($src);
+            if ($src !== $upgradedSrc) {
+                return preg_replace('/src=["\'][^"\']+["\']/i', 'src="' . htmlspecialchars($upgradedSrc, ENT_QUOTES) . '"', $rawImgTag);
+            }
+            return $rawImgTag;
+        }, $html);
+
+        // 6. Clean empty containers
+        $html = preg_replace('/<div[^>]*>\s*<\/div>/i', '', $html);
         $html = preg_replace('/<figure[^>]*>\s*<\/figure>/i', '', $html);
         $html = preg_replace('/<p class="text-sm text-gray-500 italic mt-1">\s*<\/p>/i', '', $html);
 

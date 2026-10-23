@@ -6,11 +6,11 @@
   - Automatically upgrades CDN thumbnail URLs to full high-resolution (decoding Substack S3 URLs, expanding Wired `w_120` to `w_1600`, stripping WordPress `-150x150` suffixes, upgrading Wikimedia `320px` to `1200px`).
   - Implements brand-safe cover search with negative keyword conflict mapping (e.g. Disney articles strictly reject HBO Max / Netflix photos; Apple strictly rejects Android / Samsung).
   - Provides a rich, curated landscape editorial photo catalog organized across 8 tech domains (AI, Security, Hardware, Fusion, Streaming, Mobile, Cloud, General).
-  - Sanitizes article HTML content by removing logo badge containers, upgrading inline image URLs, and wrapping images in semantic responsive `<figure class="my-8 mx-auto max-w-3xl">` containers with centered italic captions.
+  - Sanitizes article HTML content by removing logo badge containers, upgrading inline image URLs, converting `div.text-center` containers to semantic responsive `<figure class="my-8 mx-auto max-w-3xl">` containers with centered italic captions, and sweeping all naked images to guarantee high-resolution sources.
 - **`articles:fix-images` Artisan Command**: Scans and heals all articles in database with `--id`, `--all`, and `--dry-run` options, using `Article::withoutEvents()` to safely prevent unwanted re-translation or queue cascades.
 - **Admin Maintenance Route `/admin/fix-images`**: Added behind `X-Deploy-Token` to trigger mass database healing in production.
 - **Unit Tests**:
-  - `ImageServiceTest`: Tests logo detection, thumbnail URL upgrading, HTML cleaning, figure formatting, and brand-safe cover fallbacks.
+  - `ImageServiceTest`: Tests logo detection, thumbnail URL upgrading, HTML cleaning, `div` and `p` figure formatting, and brand-safe cover fallbacks.
 
 ### Changed
 - **`JinaReaderService`**: Integrates `ImageService::upgradeImageUrl` and `ImageService::isForbiddenLogoOrBadge`; automatically strips forbidden logo markdown images from scraped text before feeding to Gemini.
