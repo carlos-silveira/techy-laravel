@@ -1,5 +1,18 @@
 User-agent: *
 Disallow: /admin
+Disallow: /admin/
+Disallow: /studio
+Disallow: /studio/
 Disallow: /api/
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /preview-newsletter
+Disallow: /_debug/
+Disallow: /set-locale
+Disallow: /public/
+Allow: /storage/
 Allow: /
+
 Sitemap: https://techynews.lat/sitemap.xml

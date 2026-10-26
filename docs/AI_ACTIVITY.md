@@ -1,3 +1,55 @@
+## [2026-10-26] - Fix Google Search Console Indexation Collapse, Duplicate Head Tags, and Trailing Slash Redirect Leaks
+
+### Context & Root Cause Analysis
+- **Problem**: Google Search Console reported a severe drop in indexed pages (from ~180 down to 15) and a surge in unindexed pages (226 non-indexed, of which 183 were marked "Rastreada: actualmente sin indexar" / Crawled - currently not indexed). Additionally, GSC issued a critical email alert: *"Nuevo motivo que impide la indexación: Página con redirección"* and flagged 2 pages as *"Página alternativa con etiqueta canónica adecuada"*. The user accidentally clicked "Validar corrección" (Validate Fix) in GSC, triggering immediate crawl verification by Googlebot.
+- **Root Causes**:
+  1. **Duplicate `<title>` and Dual `<link rel="canonical">` Tags**:
+     - `resources/views/app.blade.php` hardcoded `<title inertia>{{ config('app.name', 'TechyNews') }}</title>` and static `@if(isset($meta))` canonical/description/OG tags in Blade.
+     - Simultaneously, `ArticleShow.jsx` rendered `<Head>` with another `<title>`, another `<link rel="canonical">`, and full OpenGraph/Twitter/JSON-LD tags.
+     - With Inertia SSR active, `@inertiaHead` echoed the React head on top of the Blade head, resulting in duplicate `<title>` tags (first title was always generic "TechyNews") and two conflicting `<link rel="canonical">` tags on every single article page. Per Google's official canonicalization guidelines: *"If you specify multiple rel=canonical tags, Google will ignore all rel=canonical tags"*, causing Googlebot to treat templated CMS articles as low-signal duplicates and demote them to "Rastreada: actualmente sin indexar".
+  2. **Contradictory Multilingual Metadata**:
+     - `PublicController.php` previously forced `$metaArticle = $this->translateIfNecessary((clone $article), 'es')` for OpenGraph previews, while default `App::getLocale()` is `'en'`.
+     - In the initial SSR HTML sent to Googlebot, `<html lang="en">` contained Spanish OpenGraph & Spanish JSON-LD, followed by English `<title>`, English `h1`, English body content, and English second OpenGraph. This language mismatch triggered Google quality filters.
+  3. **Trailing Slash Redirect Leak to `/public/`**:
+     - In `public/.htaccess`, the trailing slash rewrite rule used `%{REQUEST_URI}`. Because the root `.htaccess` internally rewrites into `public/`, `REQUEST_URI` was `/public/article/slug/`.
+     - Requesting `https://techynews.lat/article/slug/` resulted in an HTTP 301 redirect to `https://techynews.lat/public/article/slug`.
+     - When Googlebot crawled the redirected `/public/...` URL, it found a 200 OK page with a canonical pointing to `https://techynews.lat/article/slug`, triggering the GSC warnings *"Página con redirección"* and *"Página alternativa con etiqueta canónica adecuada"*.
+  4. **Crawl Budget Leaks on Auth & Utility Pages**:
+     - `/forgot-password`, `/login`, `/register`, `/reset-password`, and `/studio/*` were not disallowed in `robots.txt` and lacked `noindex` directives, causing Googlebot to crawl empty utility forms and mark `/forgot-password` as thin content ("Crawled - currently not indexed").
+
+### Added & Changed
+- **`resources/views/app.blade.php`**:
+  - Removed duplicate `<title inertia>` and static `<meta name="description">` tags from the top of `<head>`.
+  - Moved `@inertiaHead` near the top of `<head>` and removed the redundant second `@inertiaHead` at the bottom.
+  - Wrapped fallback title, meta description, canonical, and OpenGraph tags in `@if(empty($__inertiaSsrResponse))`, ensuring that when SSR is active, exactly ONE single set of tags is rendered with ZERO duplication.
+- **`resources/js/Pages/ArticleShow.jsx`**:
+  - Added explicit `head-key` attributes (`description`, `canonical`, `og:*`, `twitter:*`) to all dynamic `<Head>` tags.
+- **`resources/js/Pages/Welcome.jsx`, `Archive.jsx`, `About.jsx`, `Terms.jsx`, `Privacy.jsx`**:
+  - Enhanced `<Head>` on all public pages with canonical URLs, rich meta descriptions, and OpenGraph metadata.
+- **`resources/js/Pages/Auth/*` (`ForgotPassword.jsx`, `Login.jsx`, `Register.jsx`, `ResetPassword.jsx`, `ConfirmPassword.jsx`, `VerifyEmail.jsx`)**:
+  - Added `<meta name="robots" content="noindex, nofollow" head-key="robots" />` inside `<Head>` to prevent crawl budget waste.
+- **`.htaccess` (Root)**:
+  - Added rules to intercept direct `/public/` requests and redirect them via 301 to clean root URLs.
+  - Added trailing slash normalization at the root level before rewriting to `public/`, completely preventing `/public/` from leaking into redirect headers.
+- **`public/.htaccess`**:
+  - Removed the broken `REQUEST_URI` trailing slash rule that was appending `/public/`.
+- **`public/robots.txt`**:
+  - Added `Disallow` rules for `/studio`, `/studio/`, `/admin/`, `/login`, `/register`, `/forgot-password`, `/reset-password`, `/_debug/`, `/preview-newsletter`, `/set-locale`, and `/public/`.
+- **`app/Http/Controllers/PublicController.php`**:
+  - Aligned `$meta` with current article locale instead of forcing Spanish translation, and pointed `$meta['url']` to clean canonical `url('/article/' . $article->slug)`.
+- **`app/Http/Controllers/SeoController.php`**:
+  - Enhanced `/sitemap.xml` with Google Image extension schema (`xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"`), outputting `<image:image>` tags with clean image locations and titles for Google Images & Discover eligibility.
+  - Sanitized XML attributes with `htmlspecialchars()` to guarantee well-formed XML.
+- **`tests/Feature/SeoIndexingTest.php`**:
+  - Added feature tests verifying valid sitemap XML structure with Google Image schemas, robots.txt disallow rules, and clean article page metadata without `/public/` leaks.
+
+### Verified
+- `php artisan test --filter SeoIndexingTest`: 100% pass (3 tests passed, 19 assertions).
+- `npm run build`: Zero errors; client bundle and SSR bundle (`bootstrap/ssr/ssr.mjs`) generated successfully.
+- `git diff`: Reviewed all modified files to ensure strict adherence to senior engineering guidelines and no accidental edits.
+
+---
+
 ## [2026-10-26] - Elimination of Publisher Event Banners, Sponsor Ads & Artifacts (Wired World Fair / Sapphire Reserve / TC Disrupt)
 
 ### Context & Root Cause Analysis

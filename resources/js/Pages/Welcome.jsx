@@ -135,7 +135,22 @@ export default function ReelsDemo({ articles: initialArticlesData }) {
 
   return (
     <main className="bg-black text-white h-[100dvh] w-screen overflow-hidden font-sans selection:bg-primary/30 relative">
-      <Head title="TechyNews" />
+      <Head>
+          <title>TechyNews — Noticias de Tecnología con IA | Tech News & Intelligence</title>
+          <meta name="description" content="Plataforma líder en periodismo tecnológico impulsado por Inteligencia Artificial. IA, startups, ciberseguridad y el futuro de la tecnología." head-key="description" />
+          <link rel="canonical" href="https://techynews.lat" head-key="canonical" />
+          <meta property="og:title" content="TechyNews — Noticias de Tecnología con IA" head-key="og:title" />
+          <meta property="og:description" content="Plataforma líder en periodismo tecnológico impulsado por Inteligencia Artificial. IA, startups, ciberseguridad y el futuro de la tecnología." head-key="og:description" />
+          <meta property="og:type" content="website" head-key="og:type" />
+          <meta property="og:url" content="https://techynews.lat" head-key="og:url" />
+          <meta property="og:image" content="https://techynews.lat/img/logo_wbc.webp" head-key="og:image" />
+          <meta property="og:site_name" content="TechyNews" head-key="og:site_name" />
+          <meta name="twitter:card" content="summary_large_image" head-key="twitter:card" />
+          <meta name="twitter:title" content="TechyNews — Noticias de Tecnología con IA" head-key="twitter:title" />
+          <meta name="twitter:description" content="Plataforma líder en periodismo tecnológico impulsado por Inteligencia Artificial." head-key="twitter:description" />
+          <meta name="twitter:image" content="https://techynews.lat/img/logo_wbc.webp" head-key="twitter:image" />
+          <meta name="twitter:site" content="@TechyNewsLat" head-key="twitter:site" />
+      </Head>
       
       {/* Retain Global Navbar */}
       <div className="fixed top-0 left-0 w-full z-50">

@@ -32,7 +32,10 @@ export default function Register() {
 
     return (
         <Guest>
-            <Head title="Register" />
+            <Head>
+                <title>Register | TechyNews</title>
+                <meta name="robots" content="noindex, nofollow" head-key="robots" />
+            </Head>
 
             <ValidationErrors errors={errors} />
 

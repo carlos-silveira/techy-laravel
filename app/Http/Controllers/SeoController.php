@@ -11,21 +11,25 @@ use Illuminate\Support\Facades\Cache;
 class SeoController extends Controller
 {
     /**
-     * Generate sitemap.xml dynamically.
+     * Generate sitemap.xml dynamically with Google News and Image extensions.
      */
     public function sitemap(): Response
     {
         $xml = Cache::remember('sitemap_xml', 3600, function () {
             $articles = Article::where('status', 'published')
+                ->whereNotNull('slug')
+                ->where('slug', '!=', '')
                 ->orderBy('updated_at', 'desc')
                 ->get();
 
+            $baseUrl = rtrim((string) config('app.url', 'https://techynews.lat'), '/');
+
             $content = '<?xml version="1.0" encoding="UTF-8"?>';
-            $content .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+            $content .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">';
             
             // Homepage
             $content .= '<url>';
-            $content .= '<loc>' . url('/') . '</loc>';
+            $content .= '<loc>' . htmlspecialchars($baseUrl) . '</loc>';
             $content .= '<lastmod>' . now()->toAtomString() . '</lastmod>';
             $content .= '<changefreq>daily</changefreq>';
             $content .= '<priority>1.0</priority>';
@@ -34,7 +38,7 @@ class SeoController extends Controller
             // About, Archives, etc.
             foreach (['about', 'archive', 'terms', 'privacy'] as $page) {
                 $content .= '<url>';
-                $content .= '<loc>' . url($page) . '</loc>';
+                $content .= '<loc>' . htmlspecialchars($baseUrl . '/' . $page) . '</loc>';
                 $content .= '<lastmod>' . now()->subDays(1)->toAtomString() . '</lastmod>';
                 $content .= '<changefreq>monthly</changefreq>';
                 $content .= '<priority>0.5</priority>';
@@ -44,10 +48,19 @@ class SeoController extends Controller
             // Articles
             foreach ($articles as $article) {
                 $content .= '<url>';
-                $content .= '<loc>' . url('/article/' . $article->slug) . '</loc>';
+                $content .= '<loc>' . htmlspecialchars($baseUrl . '/article/' . $article->slug) . '</loc>';
                 $content .= '<lastmod>' . ($article->updated_at ?? $article->created_at)->toAtomString() . '</lastmod>';
                 $content .= '<changefreq>weekly</changefreq>';
                 $content .= '<priority>0.8</priority>';
+
+                $imageUrl = $article->final_image_url;
+                if (!empty($imageUrl) && filter_var($imageUrl, FILTER_VALIDATE_URL)) {
+                    $content .= '<image:image>';
+                    $content .= '<image:loc>' . htmlspecialchars($imageUrl) . '</image:loc>';
+                    $content .= '<image:title>' . htmlspecialchars($article->title) . '</image:title>';
+                    $content .= '</image:image>';
+                }
+
                 $content .= '</url>';
             }
 

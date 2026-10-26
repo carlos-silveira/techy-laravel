@@ -14,7 +14,10 @@ export default function VerifyEmail({ status }) {
 
     return (
         <Guest>
-            <Head title="Email Verification" />
+            <Head>
+                <title>Email Verification | TechyNews</title>
+                <meta name="robots" content="noindex, nofollow" head-key="robots" />
+            </Head>
 
             <div className="mb-4 text-sm text-gray-600">
                 Thanks for signing up! Before getting started, could you verify your email address by clicking on the

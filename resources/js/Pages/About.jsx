@@ -115,7 +115,17 @@ export default function About() {
 
     return (
         <div ref={containerRef} className="min-h-screen bg-[#f8f6f6] dark:bg-[#02040a] text-black dark:text-white font-sans selection:bg-[#00b4ff]/30 selection:text-black dark:selection:text-white transition-colors duration-500 overflow-x-hidden relative">
-            <Head title={`${__('About')} | Carlos Silveira`} />
+            <Head>
+                <title>{`${__('About')} | Carlos Silveira — TechyNews`}</title>
+                <meta name="description" content="About Carlos Silveira and TechyNews: Leading AI-driven tech journalism, platform engineering, and autonomous news synthesis." head-key="description" />
+                <link rel="canonical" href="https://techynews.lat/about" head-key="canonical" />
+                <meta property="og:title" content="About | Carlos Silveira — TechyNews" head-key="og:title" />
+                <meta property="og:description" content="About Carlos Silveira and TechyNews: Leading AI-driven tech journalism and platform engineering." head-key="og:description" />
+                <meta property="og:url" content="https://techynews.lat/about" head-key="og:url" />
+                <meta property="og:type" content="profile" head-key="og:type" />
+                <meta name="twitter:card" content="summary" head-key="twitter:card" />
+                <meta name="twitter:site" content="@TechyNewsLat" head-key="twitter:site" />
+            </Head>
             
             <CommandPalette />
             

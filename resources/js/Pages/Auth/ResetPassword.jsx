@@ -32,7 +32,10 @@ export default function ResetPassword({ token, email }) {
 
     return (
         <Guest>
-            <Head title="Reset Password" />
+            <Head>
+                <title>Reset Password | TechyNews</title>
+                <meta name="robots" content="noindex, nofollow" head-key="robots" />
+            </Head>
 
             <ValidationErrors errors={errors} />
 

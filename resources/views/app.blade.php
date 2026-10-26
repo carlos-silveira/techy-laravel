@@ -5,10 +5,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title inertia>{{ config('app.name', 'TechyNews') }}</title>
-    <meta name="description" content="Plataforma líder en periodismo tecnológico impulsado por Inteligencia Artificial. IA, startups, ciberseguridad y el futuro de la tecnología." />
-    <meta name="description" inertia content="TechyNews: Inteligencia Artificial y Periodismo Tecnológico" />
     <meta name="google-site-verification" content="COpjFK5aGPvLfkTW5lZCSaAtmjDfxJMEsLS3XcwMYw8" />
+
+    {{-- Inertia Head: Generates dynamic <title>, <meta>, <link rel="canonical"> and JSON-LD from React SSR --}}
+    @inertiaHead
 
     @php
         $pageData = $page ?? [];
@@ -61,56 +61,60 @@
         <link rel="preload" as="image" href="{{ $articleCoverUrl }}" fetchpriority="high">
     @endif
 
-    @if(isset($meta))
-        <meta property="og:title" content="{{ $meta['title'] }}">
-        <meta property="og:description" content="{{ $meta['description'] }}">
-        <meta property="og:url" content="{{ $meta['url'] }}">
-        <meta property="og:type" content="article">
-        <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:title" content="{{ $meta['title'] }}">
-        <meta name="twitter:description" content="{{ $meta['description'] }}">
-        @if(!empty($meta['image']))
-            <meta property="og:image" content="{!! $meta['image'] !!}">
-            <meta name="twitter:image" content="{!! $meta['image'] !!}">
-        @endif
-        {{-- Canonical URL (critical for SEO — prevents duplicate content penalties) --}}
-        <link rel="canonical" href="{{ $meta['url'] }}">
-        {{-- JSON-LD NewsArticle structured data (boosts Google News eligibility) --}}
-        @php
-            $jsonLd = [
-                '@context'     => 'https://schema.org',
-                '@type'        => 'NewsArticle',
-                'headline'     => $meta['title'],
-                'description'  => $meta['description'],
-                'url'          => $meta['url'],
-                'dateModified' => now()->toIso8601String(),
-                'publisher'    => [
-                    '@type' => 'Organization',
-                    'name'  => 'TechyNews',
-                    'url'   => 'https://techynews.lat',
-                    'logo'  => [
-                        '@type' => 'ImageObject',
-                        'url'   => 'https://techynews.lat/img/logo_wbc.webp',
+    {{-- Fallback metadata ONLY if SSR is disabled or did not provide head --}}
+    @if(empty($__inertiaSsrResponse))
+        @if(isset($meta))
+            <title>{{ $meta['title'] }} | TechyNews</title>
+            <meta name="description" content="{{ $meta['description'] }}">
+            <link rel="canonical" href="{{ $meta['url'] }}">
+            <meta property="og:title" content="{{ $meta['title'] }}">
+            <meta property="og:description" content="{{ $meta['description'] }}">
+            <meta property="og:url" content="{{ $meta['url'] }}">
+            <meta property="og:type" content="article">
+            <meta name="twitter:card" content="summary_large_image">
+            <meta name="twitter:title" content="{{ $meta['title'] }}">
+            <meta name="twitter:description" content="{{ $meta['description'] }}">
+            @if(!empty($meta['image']))
+                <meta property="og:image" content="{!! $meta['image'] !!}">
+                <meta name="twitter:image" content="{!! $meta['image'] !!}">
+            @endif
+            @php
+                $jsonLd = [
+                    '@context'     => 'https://schema.org',
+                    '@type'        => 'NewsArticle',
+                    'headline'     => $meta['title'],
+                    'description'  => $meta['description'],
+                    'url'          => $meta['url'],
+                    'dateModified' => now()->toIso8601String(),
+                    'publisher'    => [
+                        '@type' => 'Organization',
+                        'name'  => 'TechyNews',
+                        'url'   => 'https://techynews.lat',
+                        'logo'  => [
+                            '@type' => 'ImageObject',
+                            'url'   => 'https://techynews.lat/img/logo_wbc.webp',
+                        ],
                     ],
-                ],
-            ];
-            if (!empty($meta['image'])) {
-                $jsonLd['image'] = $meta['image'];
-            }
-        @endphp
-        <script type="application/ld+json">{!! json_encode($jsonLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
-
-    @else
-        <meta property="og:title" content="TechyNews — Noticias de Tecnología con IA">
-        <meta property="og:description" content="Plataforma líder en periodismo tecnológico impulsado por Inteligencia Artificial. IA, startups, ciberseguridad y el futuro de la tecnología.">
-        <meta property="og:type" content="website">
-        <meta property="og:image" content="https://techynews.lat/img/logo_wbc.webp">
-        <meta property="og:site_name" content="TechyNews">
-        <meta name="twitter:card" content="summary">
-        <meta name="twitter:site" content="@TechyNewsLat">
-        <meta name="twitter:title" content="TechyNews — Noticias de Tecnología con IA">
-        <meta name="twitter:description" content="Plataforma líder en periodismo tecnológico impulsado por Inteligencia Artificial.">
-        <link rel="canonical" href="{{ url()->current() }}">
+                ];
+                if (!empty($meta['image'])) {
+                    $jsonLd['image'] = $meta['image'];
+                }
+            @endphp
+            <script type="application/ld+json">{!! json_encode($jsonLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+        @else
+            <title>TechyNews — Noticias de Tecnología con IA | Tech News & Intelligence</title>
+            <meta name="description" content="Plataforma líder en periodismo tecnológico impulsado por Inteligencia Artificial. IA, startups, ciberseguridad y el futuro de la tecnología." />
+            <link rel="canonical" href="{{ url()->current() }}">
+            <meta property="og:title" content="TechyNews — Noticias de Tecnología con IA">
+            <meta property="og:description" content="Plataforma líder en periodismo tecnológico impulsado por Inteligencia Artificial. IA, startups, ciberseguridad y el futuro de la tecnología.">
+            <meta property="og:type" content="website">
+            <meta property="og:image" content="https://techynews.lat/img/logo_wbc.webp">
+            <meta property="og:site_name" content="TechyNews">
+            <meta name="twitter:card" content="summary_large_image">
+            <meta name="twitter:site" content="@TechyNewsLat">
+            <meta name="twitter:title" content="TechyNews — Noticias de Tecnología con IA">
+            <meta name="twitter:description" content="Plataforma líder en periodismo tecnológico impulsado por Inteligencia Artificial.">
+        @endif
     @endif
 
 
@@ -190,7 +194,6 @@
     @routes
     @viteReactRefresh
     @vite(['resources/js/app.jsx'])
-    @inertiaHead
 </head>
 
 <body class="font-sans antialiased overflow-x-hidden w-full overscroll-x-none">

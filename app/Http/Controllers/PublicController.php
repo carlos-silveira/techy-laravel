@@ -236,19 +236,15 @@ class PublicController extends Controller
         // Load comments dynamically outside cache
         $article->load(['comments' => fn($q) => $q->orderBy('created_at', 'desc')]);
 
-        // ALWAYS SPANISH for Social Media Previews (Open Graph)
-        // We force translation to 'es' just for the meta tags so Facebook/Twitter scrapers see Spanish
-        $metaArticle = $this->translateIfNecessary((clone $article), 'es');
-
         return Inertia::render('ArticleShow', [
             'article' => $article,
             'relatedArticles' => $relatedArticles
         ])->withViewData([
             'meta' => [
-                'title' => $metaArticle->title,
-                'description' => $metaArticle->ai_summary,
-                'image' => $metaArticle->final_image_url,
-                'url' => url()->current(),
+                'title' => $article->title,
+                'description' => $article->meta_description ?: $article->ai_summary,
+                'image' => $article->final_image_url,
+                'url' => url('/article/' . $article->slug),
             ]
         ]);
     }

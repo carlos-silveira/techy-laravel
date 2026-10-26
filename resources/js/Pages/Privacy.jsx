@@ -9,7 +9,11 @@ export default function Privacy() {
 
     return (
         <div className="min-h-screen bg-[#f8f6f6] dark:bg-[#02040a] text-gray-900 dark:text-white font-sans selection:bg-primary/30 overflow-x-hidden relative transition-colors duration-500">
-            <Head title={`${__('Privacy Policy')} | Techy News`} />
+            <Head>
+                <title>{`${__('Privacy Policy')} | TechyNews`}</title>
+                <meta name="description" content="Privacy Policy and Data Protection guidelines for TechyNews." head-key="description" />
+                <link rel="canonical" href="https://techynews.lat/privacy" head-key="canonical" />
+            </Head>
 
             {/* Glowing Background */}
             <div className="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-primary/8 rounded-full blur-[120px] pointer-events-none mix-blend-screen overflow-hidden"></div>

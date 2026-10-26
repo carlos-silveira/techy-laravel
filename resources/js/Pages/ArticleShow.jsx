@@ -149,23 +149,23 @@ export default function ArticleShow({ article, relatedArticles, auth }) {
 
             <Head>
                 <title>{`${article.title} | TechyNews`}</title>
-                <meta name="description" content={article.meta_description || article.ai_summary || `${__('Read')} ${article.title} ${__('on Techy News')}.`} />
-                <link rel="canonical" href={`https://techynews.lat/article/${article.slug}`} />
+                <meta name="description" content={article.meta_description || article.ai_summary || `${__('Read')} ${article.title} ${__('on Techy News')}.`} head-key="description" />
+                <link rel="canonical" href={`https://techynews.lat/article/${article.slug}`} head-key="canonical" />
                 
                 {/* Open Graph */}
-                <meta property="og:title" content={article.title} />
-                <meta property="og:type" content="article" />
-                <meta property="og:image" content={finalCoverImage} />
-                <meta property="og:url" content={`https://techynews.lat/article/${article.slug}`} />
-                <meta property="og:description" content={article.ai_summary || article.meta_description || ''} />
-                <meta property="og:site_name" content="TechyNews" />
+                <meta property="og:title" content={article.title} head-key="og:title" />
+                <meta property="og:type" content="article" head-key="og:type" />
+                <meta property="og:image" content={finalCoverImage} head-key="og:image" />
+                <meta property="og:url" content={`https://techynews.lat/article/${article.slug}`} head-key="og:url" />
+                <meta property="og:description" content={article.ai_summary || article.meta_description || ''} head-key="og:description" />
+                <meta property="og:site_name" content="TechyNews" head-key="og:site_name" />
                 
                 {/* Twitter Card */}
-                <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content={article.title} />
-                <meta name="twitter:description" content={article.ai_summary || article.meta_description || ''} />
-                <meta name="twitter:image" content={finalCoverImage} />
-                <meta name="twitter:site" content="@TechyNewsLat" />
+                <meta name="twitter:card" content="summary_large_image" head-key="twitter:card" />
+                <meta name="twitter:title" content={article.title} head-key="twitter:title" />
+                <meta name="twitter:description" content={article.ai_summary || article.meta_description || ''} head-key="twitter:description" />
+                <meta name="twitter:image" content={finalCoverImage} head-key="twitter:image" />
+                <meta name="twitter:site" content="@TechyNewsLat" head-key="twitter:site" />
                 
                 {/* JSON-LD Structured Data for NewsArticle */}
                 <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({

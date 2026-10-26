@@ -15,7 +15,10 @@ export default function ForgotPassword({ status }) {
 
     return (
         <div className="min-h-screen bg-[#02040a] text-white font-sans flex items-center justify-center relative overflow-hidden">
-            <Head title="Forgot Password" />
+            <Head>
+                <title>Forgot Password | TechyNews</title>
+                <meta name="robots" content="noindex, nofollow" head-key="robots" />
+            </Head>
 
             {/* Ambient Glows */}
             <div className="fixed top-[-20%] right-[-10%] w-[60vw] h-[60vw] bg-primary/8 rounded-full blur-[200px] pointer-events-none"></div>

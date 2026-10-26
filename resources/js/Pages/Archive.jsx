@@ -63,13 +63,16 @@ export default function Archive({ articles: originalArticles, currentTag, popula
 
     return (
         <div onMouseMove={handleMouseMove} className="min-h-screen bg-[#f8f6f6] dark:bg-[#02040a] text-black dark:text-white font-sans selection:bg-primary/30 relative overflow-hidden transition-colors duration-500">
-            <Head title={`Archive - Techy News`}>
-                <meta name="description" content="Browse all articles from Techy News — AI-powered tech journalism covering AI, cybersecurity, gaming, business tech, and more." />
-                <meta property="og:title" content="Archive - Techy News" />
-                <meta property="og:description" content="Browse all articles from Techy News — AI-powered tech journalism." />
-                <meta property="og:url" content="https://techynews.lat/archive" />
-                <meta name="twitter:card" content="summary" />
-                <meta name="twitter:site" content="@TechyNewsLat" />
+            <Head>
+                <title>Archive | TechyNews</title>
+                <meta name="description" content="Browse all articles from Techy News — AI-powered tech journalism covering AI, cybersecurity, gaming, business tech, and more." head-key="description" />
+                <link rel="canonical" href="https://techynews.lat/archive" head-key="canonical" />
+                <meta property="og:title" content="Archive | TechyNews" head-key="og:title" />
+                <meta property="og:description" content="Browse all articles from Techy News — AI-powered tech journalism." head-key="og:description" />
+                <meta property="og:url" content="https://techynews.lat/archive" head-key="og:url" />
+                <meta property="og:type" content="website" head-key="og:type" />
+                <meta name="twitter:card" content="summary" head-key="twitter:card" />
+                <meta name="twitter:site" content="@TechyNewsLat" head-key="twitter:site" />
             </Head>
             <CommandPalette />
 
