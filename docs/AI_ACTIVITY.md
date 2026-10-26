@@ -40,6 +40,7 @@
 - `php artisan migrate`: Ran `purge_forbidden_sponsor_and_event_images` successfully in 21s, healing 57 existing articles in the database.
 - `npm run build`: Success in 467ms with zero errors.
 - `npm run docs:build`: Verified documentation compilation.
+- CI/CD Deployments: Run #40357373438 and #40358837152 passed with 200 HTTP status across all health checks. Production SSR and client DOM render topic-curated Unsplash landscape covers for previously affected Wired event ads.
 
 ---
 
