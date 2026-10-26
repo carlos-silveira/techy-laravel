@@ -4,6 +4,14 @@ The `app/Services/` directory encapsulates all the core business logic of TechyN
 
 ## Key Services
 
+### `ImageService`
+This service is the single source of truth for all article image resolution, thumbnail upgrades, and publisher ad/logo sanitization.
+- **Responsibilities:**
+  - Filtering forbidden logos, publisher badges (e.g. Google News, TechCrunch), tracking pixels, author avatars, and sponsor/event ad banners (e.g. Wired World Fair Sapphire Reserve banner, TechCrunch Disrupt ads).
+  - Upgrading low-resolution CDN thumbnails (Substack, Wired, TechCrunch, WordPress, Wikimedia) into crisp high-resolution images.
+  - Converting raw inline images into semantic responsive `<figure>` tags and stripping forbidden ads.
+  - Resolving brand-safe, topic-curated editorial covers when genuine source photos are absent or forbidden.
+
 ### `NewsService`
 This service handles the aggregation and preprocessing of external data.
 - **Responsibilities:** 

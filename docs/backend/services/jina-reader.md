@@ -9,4 +9,6 @@ Uses the Google Programmable Search Engine API (or similar) to take a text query
 ## `JinaReaderService.php`
 Integrates with the `r.jina.ai` and `s.jina.ai` APIs.
 - Takes a raw URL and returns a clean, markdown-formatted string containing only the core content of the page, stripping navigation, ads, and footers.
+- **Image Pipeline:** Extracts images exclusively from cleaned markdown (`$markdown`) instead of raw HTML/boilerplate, ensuring stripped header ads, acquisition popups, and sidebar widgets are never extracted as article imagery.
+- **Sanitization:** Integrates with `ImageService` to discard tracking pixels, publisher event banners (e.g. Wired World Fair, TC Disrupt), author avatars, and promotional links.
 - **Security:** Requires an `Authorization: Bearer <JINA_API_KEY>` header to prevent 401 Unauthorized errors on the Jina backend.

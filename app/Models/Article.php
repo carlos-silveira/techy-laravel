@@ -103,17 +103,21 @@ class Article extends Model
     public function getFinalImageUrlAttribute(): string
     {
         $url = $this->cover_image_path;
+        $imageService = app(\App\Services\ImageService::class);
 
-        if (!$url) {
-            if (preg_match('/<img[^>]+src=["\']([^"\']+)["\']/i', $this->content ?? '', $matches)) {
-                $url = $matches[1];
-            } elseif (preg_match('/"src"\s*:\s*"([^"]+)"/i', $this->content ?? '', $matches)) {
-                $url = $matches[1];
+        if (!$url || $imageService->isForbiddenLogoOrBadge($url)) {
+            $candidateUrl = null;
+            $rawContent = is_string($this->content) ? $this->content : (is_array($this->content) ? json_encode($this->content) : '');
+            if (preg_match('/<img[^>]+src=["\']([^"\']+)["\']/i', $rawContent, $matches)) {
+                $candidateUrl = $matches[1];
+            } elseif (preg_match('/"src"\s*:\s*"([^"]+)"/i', $rawContent, $matches)) {
+                $candidateUrl = $matches[1];
+            }
+
+            if ($candidateUrl && !$imageService->isForbiddenLogoOrBadge($candidateUrl)) {
+                $url = $candidateUrl;
             } else {
-                if (str_contains($this->slug ?? '', 'not-paid-to-write-code')) {
-                    return 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=1200';
-                }
-                return 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=1200';
+                return $imageService->getCuratedFallback($this->title ?? 'Tech News');
             }
         }
 

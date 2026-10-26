@@ -1,4 +1,46 @@
-## [2026-10-23] - High-Resolution Editorial Imagery & Brand-Safe Cover Pipeline
+## [2026-10-26] - Elimination of Publisher Event Banners, Sponsor Ads & Artifacts (Wired World Fair / Sapphire Reserve / TC Disrupt)
+
+### Context & Root Cause Analysis
+- **Issue**: Several recent articles (e.g. Elon Musk midterm campaigns `N2xJ0H`, Upward dating app, Mars cloud, Shamonda virus, Google Home Wi-Fi bug) all displayed the exact same hero image: a black-and-white promotional event banner reading "WIRED WORLD FAIR TED BY SAPPHIRE RESERVE for BUSINESS" (`https://media.wired.com/photos/6ada3b21d1bc30ab6431b9be/original/pass/download%2520(4`).
+- **Root Cause**:
+  1. `JinaReaderService::fetchArticleContext` parsed images from the raw HTTP response body (`$raw`) rather than the cleaned content (`$markdown`). Consequently, publisher header ad banners, acquisition overlays, and recommendation widgets were extracted into `$dossierImages`.
+  2. `ImageService::isForbiddenLogoOrBadge` and frontend `resources/js/utils.js:isForbiddenImage` only checked for simple logo keywords (e.g. `tc-logo`), omitting publisher event banners (`world-fair`, `sapphire reserve`, `conference`, `summit`), ad hashes (`6ada3b21d1bc30ab6431b9be`, `6aaa98648e983d8bad151ad7`), `.svg` and `.gif` formats, tiny icons (e.g. `w=32&h=32`), and generic ad upload filenames (`download%2520(4`, `pass/download`).
+  3. `ImageService::resolveCoverImage` grabbed the first source image that bypassed the loose filter, assigning the promotional sponsor banner as the cover for all articles scraped from Wired during the campaign.
+
+### Added & Changed
+- **`ImageService.php`**:
+  - Expanded `isForbiddenLogoOrBadge()` with strict checks for:
+    - Known publisher ad and event hashes (`6ada3b21d1bc30ab6431b9be`, `6aaa98648e983d8bad151ad7`, `6aaa989bb9f3b2223fc0f627`, `723b22a81ff6a760c4520b963b43451e`).
+    - Event and sponsor keywords (`world-fair`, `worldfair`, `world fair`, `sapphire`, `sapphire reserve`, `sponsor`, `sponsored`, `partner`, `promo`, `promotion`, `acquisition`, `rollover`, `newsletter`, `signup`, `subscribe`, `subscription`, `conference`, `summit`, `festival`, `disrupt`).
+    - SVG and GIF formats (strictly blocked from cover and main editorial photos).
+    - Generic ad / download filenames (`pass/download`, `download%2520`, `download%20`, `/download.`, `download(\d+)`, `spacer`, `pixel`).
+    - Low-resolution query parameters (`w=32`, `h=32`, `resize=50`, etc., <= 200px) unless upgradable.
+    - Tracking / ad domains (`googleusercontent.com` badges, `githubassets.com` emoji badges, `bat.bing.com`, `trx-hub.com`, `analytics.twitter.com`, `sp.analytics.yahoo.com`, `t.co`).
+  - Added TechCrunch WordPress uploads upgrade to `upgradeImageUrl()` (upgrading `?w=\d+` and `?resize=\d+,\d+` to crisp `?w=1200`).
+  - Expanded `CURATED_COVERS` and `getCuratedFallback()` with new topic domains: `space` (Mars/planets), `politics` (Musk/campaigns/elections), `science` (virology/pathogens/health), and `gadgets` (smart home/speakers/IoT).
+- **`JinaReaderService.php`**:
+  - Fixed image extraction to run strictly on sanitized `$markdown` (never `$raw`).
+  - In `cleanMarkdown()`: Stripped linked promotional/subscription/offer banner markdown (`[![alt](imgUrl)](linkUrl)` pointing to `/offers/`, `/subscribe/`, `/author/`, etc.), sidebar recommendation lists (`* [![...`), and tracking pixels.
+- **`resources/js/utils.js`**:
+  - Updated frontend `isForbiddenImage()` and `getFinalImage()` to immediately reject all forbidden hashes, ads, gifs, and SVGs, ensuring instant client-side protection and routing to domain-curated fallbacks.
+- **`Article.php` Model**:
+  - Updated `getFinalImageUrlAttribute` to filter through `ImageService::isForbiddenLogoOrBadge()` and fall back to curated editorial imagery.
+- **`resources/views/app.blade.php` & `PublicController.php`**:
+  - Updated server-side image preloads and OpenGraph meta tags to use clean, validated URLs.
+- **Database Migration**:
+  - Created `database/migrations/2026_10_26_160000_purge_forbidden_sponsor_and_event_images.php` to automatically heal all existing articles on production upon deployment.
+- **Unit Tests**:
+  - Expanded `tests/Unit/ImageServiceTest.php` and `tests/Unit/JinaReaderServiceTest.php` covering all new rejection criteria, thumbnail upgrades, and fallback selections.
+
+### Verified
+- `php artisan test tests/Unit/`: 100% pass (32 passed, 132 assertions).
+- `php artisan migrate`: Ran `purge_forbidden_sponsor_and_event_images` successfully in 21s, healing 57 existing articles in the database.
+- `npm run build`: Success in 467ms with zero errors.
+- `npm run docs:build`: Verified documentation compilation.
+
+---
+
+
 
 ### Added
 - **`ImageService`**: Centralized image intelligence service that:

@@ -20,6 +20,13 @@
         $getImageUrl = function($item, $width = 1200) {
             if (!$item) return null;
             $url = is_array($item) ? ($item['cover_image_path'] ?? null) : ($item->cover_image_path ?? null);
+            $title = is_array($item) ? ($item['title'] ?? '') : ($item->title ?? '');
+            $imageService = app(\App\Services\ImageService::class);
+
+            if (!$url || $imageService->isForbiddenLogoOrBadge((string) $url)) {
+                $url = $imageService->getCuratedFallback($title ?: 'Tech News');
+            }
+
             if ($url) {
                 if (!str_starts_with($url, 'http') && !str_starts_with($url, '/')) {
                     $url = '/storage/' . $url;

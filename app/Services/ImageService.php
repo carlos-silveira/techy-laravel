@@ -50,6 +50,26 @@ class ImageService
             'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=1600&q=85', // High-density server rack
             'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1600&q=85', // Enterprise tech visualization
         ],
+        'space' => [
+            'https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?auto=format&fit=crop&w=1600&q=85', // Mars red planet atmosphere
+            'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1600&q=85', // High orbit planetary science
+            'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1600&q=85', // Deep space observatory
+        ],
+        'politics' => [
+            'https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1600&q=85', // Capitol dome governmental
+            'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=1600&q=85', // Tech policy & campaign finance
+            'https://images.unsplash.com/photo-1555848962-6e79363ec58f?auto=format&fit=crop&w=1600&q=85', // Corporate governance & elections
+        ],
+        'science' => [
+            'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=1600&q=85', // Laboratory microbiology research
+            'https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=1600&q=85', // Virology genetics pathogen research
+            'https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&w=1600&q=85', // Scientific investigation discovery
+        ],
+        'gadgets' => [
+            'https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&w=1600&q=85', // Smart home speaker & assistant
+            'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?auto=format&fit=crop&w=1600&q=85', // Wireless IoT connected device
+            'https://images.unsplash.com/photo-1546054454-aa26e2b734c7?auto=format&fit=crop&w=1600&q=85', // Connected hardware consumer tech
+        ],
         'general' => [
             'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1600&q=85', // Global network
             'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=1600&q=85', // Clean workspace
@@ -80,10 +100,14 @@ class ImageService
     ];
 
     /**
-     * Detect if a URL or alt text represents an unwanted publisher logo, badge, avatar, or tracker.
+     * Detect if a URL or alt text represents an unwanted publisher logo, badge, avatar, ad, or tracker.
      */
     public function isForbiddenLogoOrBadge(string $url, string $alt = ''): bool
     {
+        if (empty(trim($url))) {
+            return true;
+        }
+
         // First test with upgraded URL to allow upgradable thumbnails (e.g. -150x150 -> original)
         $upgraded = $this->upgradeImageUrl($url);
         $lowerUrl = strtolower($upgraded);
@@ -91,24 +115,79 @@ class ImageService
         $pathOnly = parse_url($lowerUrl, PHP_URL_PATH) ?? '';
         $host = parse_url($lowerUrl, PHP_URL_HOST) ?? '';
 
-        // 1. Google News / Google publisher logo badges (e.g. lh3.googleusercontent.com/...=h60)
-        if (str_contains($host, 'googleusercontent.com')) {
-            if (preg_match('/=(h|w|s)\d+/i', $lowerUrl) || str_contains($lowerUrl, '=h60') || str_contains($lowerUrl, '=s60')) {
+        // 1. Must be a valid HTTP(S) URL
+        if (!str_starts_with($lowerUrl, 'http://') && !str_starts_with($lowerUrl, 'https://')) {
+            return true;
+        }
+
+        // 2. Specific known promotional/event banners and ad asset hashes
+        $knownAdHashes = [
+            '6ada3b21d1bc30ab6431b9be', // Wired World Fair / Sapphire Reserve ad banner
+            '6aaa98648e983d8bad151ad7', // Wired App Rollover acquisition gif
+            '6aaa989bb9f3b2223fc0f627', // Wired App Desktop acquisition gif
+            '723b22a81ff6a760c4520b963b43451e', // TechCrunch author artifact
+        ];
+        foreach ($knownAdHashes as $hash) {
+            if (str_contains($lowerUrl, $hash)) {
                 return true;
             }
         }
 
-        // 2. Broken/undefined endings
-        if (str_ends_with($lowerUrl, '/undefined') || str_ends_with($lowerUrl, 'undefined')) {
+        // 3. SVG and GIF extensions/formats are never suitable for article cover/editorial photos
+        $ext = pathinfo($pathOnly, PATHINFO_EXTENSION);
+        if (in_array($ext, ['svg', 'gif', 'ico'])) {
+            return true;
+        }
+        if (preg_match('/[?&]format=(?:svg|gif|ico)\b/i', $lowerUrl) || str_contains($lowerUrl, '.svg?') || str_contains($lowerUrl, '.gif?')) {
             return true;
         }
 
-        // 3. Known publisher logos and watermark assets
+        // 4. Tracking pixel, ad networks, and badge CDNs
+        if (str_contains($host, 'googleusercontent.com')) {
+            if (preg_match('/=(h|w|s)\d+/i', $lowerUrl) || str_contains($lowerUrl, '=h60') || str_contains($lowerUrl, '=s60') || str_contains($lowerUrl, '=w100')) {
+                return true;
+            }
+        }
+        if (str_contains($host, 'githubassets.com')) {
+            return true; // GitHub emoji badges and UI assets
+        }
+        $trackingDomains = [
+            'bat.bing.com', 'trx-hub.com', 'analytics.twitter.com',
+            'sp.analytics.yahoo.com', 't.co', 'doubleclick.net', 'adnxs.com'
+        ];
+        foreach ($trackingDomains as $domain) {
+            if (str_contains($host, $domain)) {
+                return true;
+            }
+        }
+
+        // 5. Generic ad/download filenames and broken endings
+        if (str_ends_with($lowerUrl, '/undefined') || str_ends_with($lowerUrl, 'undefined')) {
+            return true;
+        }
+        if (str_contains($lowerUrl, 'pass/download') ||
+            str_contains($lowerUrl, 'download%2520') ||
+            str_contains($lowerUrl, 'download%20') ||
+            str_contains($lowerUrl, '/download.') ||
+            preg_match('/download\s*\(\d+\)/i', $lowerUrl)) {
+            return true;
+        }
+
+        // 6. Known publisher logos, promotional events, sponsor assets, and author avatars
         $forbiddenKeywords = [
             'tc-logo', 'techcrunch-logo', 'techcrunch', 'wired-logo', 'theverge-logo',
             'verge-logo', 'reuters-logo', 'bloomberg-logo', 'author', 'avatar',
             'headshot', 'profile', 'contributor', 'badge', 'tracker', 'pixel',
-            'button', 'favicon', 'disrupt', 'gettyimages'
+            'button', 'favicon', 'disrupt', 'gettyimages', 'reporter', 'writer',
+            'world-fair', 'world fair', 'worldfair', 'sapphire', 'sapphire reserve',
+            'sponsor', 'sponsored', 'partner', 'partnership',
+            'promo', 'promotion', 'promotional',
+            'acquisition', 'rollover',
+            'newsletter', 'signup', 'subscribe', 'subscription',
+            'conference', 'summit', 'festival',
+            'tc-disrupt', 'techcrunch-event', 'techcrunch-summit',
+            'wired-festival', 'wired-event', 'wired_app', 'wired-world',
+            'emoji', 'banner', 'header-ad', 'footer-ad',
         ];
 
         foreach ($forbiddenKeywords as $word) {
@@ -117,10 +196,13 @@ class ImageService
             }
         }
 
-        // 4. Low-resolution dimension parameters in URL that indicate tiny icons (if not upgradable)
-        if (preg_match('/[_-](?:60|80|100|120|150|200)x\d+/i', $lowerUrl) ||
-            preg_match('/w_(?:60|80|100|120|150|200)/i', $lowerUrl) ||
-            preg_match('/h_(?:60|80|100|120|150|200)/i', $lowerUrl)) {
+        // 7. Low-resolution dimension parameters that indicate tiny icons/avatars (<= 200px)
+        if (preg_match('/[?&](?:w|width|h|height|resize)=(?:[1-9]|[1-9]\d|1\d\d|200)\b/i', $lowerUrl)) {
+            return true;
+        }
+        if (preg_match('/[_-](?:16|24|32|48|60|64|80|96|100|120|150|200)x\d+/i', $lowerUrl) ||
+            preg_match('/w_(?:16|24|32|48|60|64|80|96|100|120|150|200)\b/i', $lowerUrl) ||
+            preg_match('/h_(?:16|24|32|48|60|64|80|96|100|120|150|200)\b/i', $lowerUrl)) {
             return true;
         }
 
@@ -150,12 +232,19 @@ class ImageService
             return preg_replace('/1:1/i', '16:9', $url);
         }
 
-        // 3. WordPress thumbnail sizes: photo-150x150.jpg or photo-300x200.png -> photo.jpg
+        // 3. TechCrunch WordPress uploads: upgrade thumbnail parameters to high resolution (1200px)
+        if (str_contains($url, 'techcrunch.com/wp-content/uploads/')) {
+            if (preg_match('/[?&](?:w=\d+|resize=\d+,\d+)/i', $url)) {
+                return preg_replace('/[?&](?:w=\d+|resize=\d+,\d+)[^&]*/i', '?w=1200', $url);
+            }
+        }
+
+        // 4. WordPress thumbnail sizes: photo-150x150.jpg or photo-300x200.png -> photo.jpg
         if (preg_match('/^(.+)-\d{2,4}x\d{2,4}(\.(?:jpe?g|png|webp))$/i', $url, $matches)) {
             return $matches[1] . $matches[2];
         }
 
-        // 4. Wikimedia Commons thumbnail: .../thumb/.../320px-File.jpg -> .../thumb/.../1200px-File.jpg
+        // 5. Wikimedia Commons thumbnail: .../thumb/.../320px-File.jpg -> .../thumb/.../1200px-File.jpg
         if (str_contains($url, 'wikimedia.org/wikipedia/commons/thumb/')) {
             return preg_replace('#/\d{2,4}px-([^/]+)$#i', '/1200px-$1', $url);
         }
@@ -370,17 +459,25 @@ class ImageService
         $category = 'general';
         if (str_contains($lower, 'fusion') || str_contains($lower, 'reactor') || str_contains($lower, 'plasma') || str_contains($lower, 'quantum')) {
             $category = 'fusion';
+        } elseif (str_contains($lower, 'space') || str_contains($lower, 'mars') || str_contains($lower, 'planet') || str_contains($lower, 'orbit') || str_contains($lower, 'nasa') || str_contains($lower, 'astronomy') || str_contains($lower, 'cloud on mars')) {
+            $category = 'space';
+        } elseif (str_contains($lower, 'musk') || str_contains($lower, 'election') || str_contains($lower, 'campaign') || str_contains($lower, 'republican') || str_contains($lower, 'democrat') || str_contains($lower, 'congress') || str_contains($lower, 'senate') || str_contains($lower, 'capitol') || str_contains($lower, 'politics') || str_contains($lower, 'pac') || str_contains($lower, 'billionaire tax') || str_contains($lower, 'voter')) {
+            $category = 'politics';
+        } elseif (str_contains($lower, 'virus') || str_contains($lower, 'infection') || str_contains($lower, 'pathogen') || str_contains($lower, 'shamonda') || str_contains($lower, 'disease') || str_contains($lower, 'vaccine') || str_contains($lower, 'cancer') || str_contains($lower, 'biology') || str_contains($lower, 'medical')) {
+            $category = 'science';
+        } elseif (str_contains($lower, 'speaker') || str_contains($lower, 'google home') || str_contains($lower, 'wi-fi') || str_contains($lower, 'smart home') || str_contains($lower, 'gadget') || str_contains($lower, 'wearable') || str_contains($lower, 'headphone') || str_contains($lower, 'earbud') || str_contains($lower, 'smart ring') || str_contains($lower, 'watch') || str_contains($lower, 'audio')) {
+            $category = 'gadgets';
         } elseif (str_contains($lower, 'disney') || str_contains($lower, 'streaming') || str_contains($lower, 'hulu') || str_contains($lower, 'movie') || str_contains($lower, 'cinema') || str_contains($lower, 'subscrip')) {
             $category = 'streaming';
-        } elseif (str_contains($lower, 'security') || str_contains($lower, 'exploit') || str_contains($lower, 'hacker') || str_contains($lower, 'vulnerab') || str_contains($lower, 'patch') || str_contains($lower, 'breach')) {
+        } elseif (str_contains($lower, 'security') || str_contains($lower, 'exploit') || str_contains($lower, 'hacker') || str_contains($lower, 'vulnerab') || str_contains($lower, 'patch') || str_contains($lower, 'breach') || str_contains($lower, 'openssl') || str_contains($lower, 'crypto') || str_contains($lower, 'malware') || str_contains($lower, 'spy')) {
             $category = 'security';
-        } elseif (str_contains($lower, 'iphone') || str_contains($lower, 'smartphone') || str_contains($lower, 'apple') || str_contains($lower, 'mobile') || str_contains($lower, 'android')) {
+        } elseif (str_contains($lower, 'iphone') || str_contains($lower, 'smartphone') || str_contains($lower, 'apple') || str_contains($lower, 'mobile') || str_contains($lower, 'android') || str_contains($lower, 'dating') || str_contains($lower, 'app ') || str_contains($lower, 'apps')) {
             $category = 'mobile';
         } elseif (str_contains($lower, 'semiconductor') || str_contains($lower, 'chip') || str_contains($lower, 'gpu') || str_contains($lower, 'hardware') || str_contains($lower, 'silicon') || str_contains($lower, 'cfs')) {
             $category = 'hardware';
-        } elseif (str_contains($lower, 'ai') || str_contains($lower, 'model') || str_contains($lower, 'llm') || str_contains($lower, 'gpt') || str_contains($lower, 'gemini') || str_contains($lower, 'claude')) {
+        } elseif (str_contains($lower, 'ai') || str_contains($lower, 'model') || str_contains($lower, 'llm') || str_contains($lower, 'gpt') || str_contains($lower, 'gemini') || str_contains($lower, 'claude') || str_contains($lower, 'chatgpt') || str_contains($lower, 'anthropic') || str_contains($lower, 'deepseek')) {
             $category = 'ai';
-        } elseif (str_contains($lower, 'cloud') || str_contains($lower, 'aws') || str_contains($lower, 'server') || str_contains($lower, 'datacenter') || str_contains($lower, 'meta') || str_contains($lower, 'stock')) {
+        } elseif (str_contains($lower, 'cloud') || str_contains($lower, 'aws') || str_contains($lower, 'server') || str_contains($lower, 'datacenter') || str_contains($lower, 'meta') || str_contains($lower, 'stock') || str_contains($lower, 'zuckerberg')) {
             $category = 'cloud';
         }
 

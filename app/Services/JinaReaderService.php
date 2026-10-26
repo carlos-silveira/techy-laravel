@@ -52,10 +52,10 @@ class JinaReaderService
                 $markdown = substr($markdown, 0, 25000) . "\n\n...[Content Truncated]...";
             }
 
-            // Extract images with alts
+            // Extract images with alts from CLEAN markdown (never raw boilerplate)
             $imageDetails = [];
             $images = [];
-            if (preg_match_all('/!\[(.*?)\]\((.*?)\)/', $raw, $matches, PREG_SET_ORDER)) {
+            if (preg_match_all('/!\[(.*?)\]\((.*?)\)/', $markdown, $matches, PREG_SET_ORDER)) {
                 foreach ($matches as $match) {
                     $alt = trim($match[1] ?? '');
                     $imgUrl = trim($match[2] ?? '');
@@ -127,13 +127,38 @@ class JinaReaderService
             $text = preg_replace($pattern, '', $text);
         }
 
-        // 3. Remove lines with checkboxes for cookie categories (e.g. "- [x] On", "- [ ] Off")
+        // 3. Strip bullet list sidebar recommendations containing linked thumbnail images: * [![...](...)] ...
+        $text = preg_replace('/^\s*[\*\-]\s*\[\!\[.*?\]\(.*?\)\].*$/mi', '', $text);
+
+        // 4. Strip linked promotional/subscription/offer banners and author link cards: [![alt](imgUrl)](linkUrl)
+        $text = preg_replace_callback('/\[\!\[(.*?)\]\((.*?)\)\]\((.*?)\)/si', function ($matches) {
+            $alt = $matches[1] ?? '';
+            $imgUrl = $matches[2] ?? '';
+            $linkUrl = strtolower($matches[3] ?? '');
+
+            if ($this->imageService->isForbiddenLogoOrBadge($imgUrl, $alt)) {
+                return '';
+            }
+            if (str_contains($linkUrl, 'offers') ||
+                str_contains($linkUrl, 'subscribe') ||
+                str_contains($linkUrl, 'acquisition') ||
+                str_contains($linkUrl, '/author/') ||
+                str_contains($linkUrl, 'newsletter')) {
+                return '';
+            }
+            return $matches[0];
+        }, $text);
+
+        // 5. Strip tracking pixel tags
+        $text = preg_replace('/\!\[.*?\]\(https?:\/\/(?:bat\.bing\.com|t\.co|analytics\.twitter\.com|sp\.analytics\.yahoo\.com|trx-hub\.com)[^\)]*\)/i', '', $text);
+
+        // 6. Remove lines with checkboxes for cookie categories (e.g. "- [x] On", "- [ ] Off")
         $text = preg_replace('/^-\s*\[[x ]\]\s*(On|Off|Allowed).*$/mi', '', $text);
 
-        // 4. Remove lines that are just navigation links repeated
+        // 7. Remove lines that are just navigation links repeated
         $text = preg_replace('/^\[(Skip to main content|Sign In|Create account|Newsletters|Podcasts|Video|Store|Search|Facebook|Twitter|Flipboard|E-mail)\]\(.*?\)$/mi', '', $text);
 
-        // 5. Strip forbidden markdown logos, badges, and avatars from content
+        // 8. Strip forbidden markdown logos, badges, ads, and avatars from content
         $text = preg_replace_callback('/!\[(.*?)\]\((.*?)\)/i', function ($matches) {
             $alt = $matches[1] ?? '';
             $url = $matches[2] ?? '';
@@ -143,7 +168,7 @@ class JinaReaderService
             return $matches[0];
         }, $text);
 
-        // 6. Clean excessive newlines
+        // 9. Clean excessive newlines
         $text = preg_replace('/\n{3,}/', "\n\n", $text);
 
         return trim($text);

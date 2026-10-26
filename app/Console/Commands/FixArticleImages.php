@@ -44,10 +44,10 @@ class FixArticleImages extends Command
             $oldCover = $article->cover_image_path;
             $newCover = $oldCover;
 
-            // 1a. Check for forbidden publisher logos
-            if (!empty($newCover) && $this->imageService->isForbiddenLogoOrBadge($newCover)) {
+            // 1a. Check for empty or forbidden publisher logos/event ads
+            if (empty($newCover) || $newCover === 'None' || $newCover === 'null' || $this->imageService->isForbiddenLogoOrBadge($newCover)) {
                 $newCover = $this->imageService->resolveCoverImage($article->title);
-                $reasons[] = "Replaced forbidden logo cover with curated topic cover";
+                $reasons[] = "Replaced empty or forbidden logo/ad cover with curated topic cover";
             }
 
             // 1b. Check for brand conflicts (e.g. Disney title with HBO Max cover)

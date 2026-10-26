@@ -34,9 +34,27 @@ class ImageServiceTest extends TestCase
         // Author avatars
         $this->assertTrue($this->service->isForbiddenLogoOrBadge('https://example.com/wp-content/uploads/author-avatar.jpg'));
 
+        // Wired World Fair and Sapphire Reserve sponsor/event ad banners
+        $this->assertTrue($this->service->isForbiddenLogoOrBadge('https://media.wired.com/photos/6ada3b21d1bc30ab6431b9be/original/pass/download%2520(4'));
+        $this->assertTrue($this->service->isForbiddenLogoOrBadge('https://media.wired.com/photos/6ada3b21d1bc30ab6431b9be/master/w_1600/world-fair-banner.jpg'));
+        $this->assertTrue($this->service->isForbiddenLogoOrBadge('https://example.com/promo.jpg', 'WIRED World Fair Sapphire Reserve'));
+
+        // Acquisition/Rollover gifs and SVGs
+        $this->assertTrue($this->service->isForbiddenLogoOrBadge('https://media.wired.com/photos/6aaa98648e983d8bad151ad7/original/pass/Wired_App_Rollover_Acquisition_01b.gif?format=original'));
+        $this->assertTrue($this->service->isForbiddenLogoOrBadge('https://media.wired.com/verso/static/wired-us/assets/logo-reverse.svg'));
+
+        // GitHub emoji and icon assets
+        $this->assertTrue($this->service->isForbiddenLogoOrBadge('https://github.githubassets.com/assets/1f389-36899a2cb781.png'));
+
+        // Tracking pixels and tiny icons (<= 200px)
+        $this->assertTrue($this->service->isForbiddenLogoOrBadge('https://bat.bing.com/action/0?ti=4015762'));
+        $this->assertTrue($this->service->isForbiddenLogoOrBadge('https://image-api.sr.se/v1/static/AA/83/f715feca.jpg?w=32&h=32&q=75'));
+        $this->assertTrue($this->service->isForbiddenLogoOrBadge('https://example.com/image.png?resize=50,50'));
+
         // Valid article photos should pass
         $this->assertFalse($this->service->isForbiddenLogoOrBadge('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=80'));
         $this->assertFalse($this->service->isForbiddenLogoOrBadge('https://substack-post-media.s3.amazonaws.com/public/images/2c731d5e-68ca-4054-894f-659601de6a66_2048x1536.jpeg', 'Calif exploit architecture'));
+        $this->assertFalse($this->service->isForbiddenLogoOrBadge('https://media.wired.com/photos/6adbe0039bde53c96a68d73b/master/w_2560%2Cc_limit/Security_Trump_Court_Ruling_v1.jpg', 'Security court ruling'));
     }
 
     /** @test */
@@ -52,6 +70,11 @@ class ImageServiceTest extends TestCase
         $upgradedWired = $this->service->upgradeImageUrl($wiredUrl);
         $this->assertStringContainsString('w_1600', $upgradedWired);
         $this->assertStringContainsString('16:9', $upgradedWired);
+
+        // TechCrunch thumbnail
+        $tcUrl = 'https://techcrunch.com/wp-content/uploads/2026/10/photo.png?w=150';
+        $upgradedTc = $this->service->upgradeImageUrl($tcUrl);
+        $this->assertEquals('https://techcrunch.com/wp-content/uploads/2026/10/photo.png?w=1200', $upgradedTc);
 
         // WordPress thumbnail
         $wpUrl = 'https://example.com/wp-content/uploads/2026/10/circuit-board-300x200.jpg';
@@ -106,5 +129,22 @@ class ImageServiceTest extends TestCase
         $fusionCover = $this->service->getCuratedFallback('Commonwealth Fusion Systems Lands $85 Million for Semiconductors');
         $this->assertNotEmpty($fusionCover);
         $this->assertStringNotContainsString('googleusercontent', $fusionCover);
+
+        // Musk politics title -> politics category
+        $muskCover = $this->service->getCuratedFallback('Elon Musk Pledges Additional $76 Million to Support Republican Midterm Campaigns');
+        $this->assertNotEmpty($muskCover);
+        $this->assertStringNotContainsString('wired', $muskCover);
+
+        // Mars space title -> space category
+        $marsCover = $this->service->getCuratedFallback('New Study Explains Mysterious 1,000-Mile Cloud on Mars');
+        $this->assertNotEmpty($marsCover);
+
+        // Pathogen/Virus title -> science category
+        $virusCover = $this->service->getCuratedFallback('First Human Infection of Shamonda Virus Confirmed as Investigators Scrutinize Pathogen');
+        $this->assertNotEmpty($virusCover);
+
+        // Smart home/Google Home title -> gadgets category
+        $gadgetCover = $this->service->getCuratedFallback('Google Home Bug Discovered Consuming Massive Amounts of Wi-Fi Data');
+        $this->assertNotEmpty($gadgetCover);
     }
 }
