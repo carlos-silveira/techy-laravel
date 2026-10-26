@@ -37,6 +37,10 @@ class Article extends Model
         'twitter_posted_at',
     ];
 
+    protected $appends = [
+        'final_image_url',
+    ];
+
     protected $casts = [
         'is_editors_choice'   => 'boolean',
         'tags'                => 'array',

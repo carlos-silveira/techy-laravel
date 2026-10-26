@@ -240,6 +240,9 @@ Route::middleware([])->group(function () {
             exec("$php $artisan config:clear 2>&1", $clearOut);
             $output[] = "Config Clear: " . implode("\n", $clearOut);
 
+            exec("$php $artisan cache:clear 2>&1", $cacheOut);
+            $output[] = "Cache Clear: " . implode("\n", $cacheOut);
+
             exec("$php $artisan migrate --force 2>&1", $migOut);
             $output[] = "Migrate: " . implode("\n", $migOut);
             
@@ -248,6 +251,9 @@ Route::middleware([])->group(function () {
 
             exec("$php $artisan articles:heal-summaries 2>&1", $healOut);
             $output[] = "Heal Summaries: " . implode("\n", $healOut);
+
+            exec("$php $artisan articles:fix-images --all 2>&1", $fixImgOut);
+            $output[] = "Fix Images: " . implode("\n", $fixImgOut);
 
             exec("$php $artisan optimize 2>&1", $optOut);
             $output[] = "Optimize: " . implode("\n", $optOut);

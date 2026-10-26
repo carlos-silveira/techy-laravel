@@ -25,6 +25,9 @@
   - Updated frontend `isForbiddenImage()` and `getFinalImage()` to immediately reject all forbidden hashes, ads, gifs, and SVGs, ensuring instant client-side protection and routing to domain-curated fallbacks.
 - **`Article.php` Model**:
   - Updated `getFinalImageUrlAttribute` to filter through `ImageService::isForbiddenLogoOrBadge()` and fall back to curated editorial imagery.
+  - Added `'final_image_url'` to `$appends` so that the computed URL is always automatically serialized in Inertia and API responses.
+- **`routes/web.php` & CI/CD Pipeline**:
+  - Added automated `php artisan cache:clear` and `php artisan articles:fix-images --all` to `/_m/ci-cd` deployment hook, guaranteeing cache invalidation and article image healing on each release.
 - **`resources/views/app.blade.php` & `PublicController.php`**:
   - Updated server-side image preloads and OpenGraph meta tags to use clean, validated URLs.
 - **Database Migration**:
