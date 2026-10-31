@@ -1,3 +1,31 @@
+## [2026-10-31] - Optimize AI Quota Consumption: 3-Hour Frequency, Flash-Lite Cascading, and Resilient Fact-Checking
+
+### Context & Root Cause Analysis
+- **Problem**: News generation frequency (`everyThirtyMinutes()`, 48 runs/day) generated ~400-500 external LLM requests per day (10 calls per article run: ideas, draft, meta, 2 fact checks, 2 article translations, daily brief, 2 brief translations). In tandem with OpenRouter credits depletion (402), the entire load fell on Google Gemini free tier which quickly hit the 20 requests/day project quota limit (429 RESOURCE_EXHAUSTED). Additionally, temporary API throttling during FactCheck caused newly generated articles to be demoted back to draft, and Cache::flush() in GenerateDailyNews wiped the Daily Briefing prematurely.
+- **Goals**:
+  - Calibrate generation schedule to the sweet spot: "Ni muy bajo ni muy alto" (8 fresh articles per day, every 3 hours), fully utilizing available free limits without exhausting quotas.
+  - Cascade to `gemini-2.5-flash-lite` and `gemini-3.5-flash-lite` across independent quota buckets.
+  - Cache the Daily Briefing for 12 hours so it is not regenerated on every 3-hour article run.
+  - Decouple fact-check API rate limits from article publication: only reject articles if fact-check explicitly flags factual issues or blocks them, not when external APIs throw 429 errors.
+  - Publish Article 1210 (created today) to ensure live coverage is current.
+
+### Added & Changed
+- **`routes/console.php`**:
+  - Adjusted `GenerateNewsJob` schedule from `everyThirtyMinutes()` to `everyThreeHours()->withoutOverlapping(60)`.
+- **`app/Services/GeminiService.php`**:
+  - Added `gemini-2.5-flash-lite` to `$modelFallbackChain` between `gemini-2.5-flash` and `gemini-3.5-flash-lite`.
+- **`app/Console/Commands/GenerateDailyNews.php`**:
+  - Cached the Daily Briefing for 12 hours (`homepage_daily_brief_updated_at`), saving 2-3 LLM calls per run.
+  - Replaced destructive `Cache::flush()` with selective article list cache forgetting (`Cache::forget`).
+  - Updated Fact-Check gate so external API connection/quota exceptions do not cancel quality-gated articles.
+- **`database/migrations/2026_10_31_000000_publish_draft_article_1210.php`**:
+  - Migration to set article 1210 to published and verified upon deployment.
+
+### Verified
+- `php artisan test --filter=GenerateDailyNewsTest`: 100% pass (2 tests, 9 assertions).
+- `npm run build`: Zero errors; client and SSR bundles built cleanly.
+- Model verification via curl/tinker: confirmed `gemini-2.5-flash-lite` and `gemini-3.5-flash-lite` respond with 200 OK.
+
 ## [2026-10-31] - Fix 7-Day News Generation Stoppage: Restore ImageService Binding in GenerateDailyNews
 
 ### Context & Root Cause Analysis

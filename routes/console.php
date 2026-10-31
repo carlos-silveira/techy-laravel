@@ -20,8 +20,8 @@ Artisan::command('inspire', function () {
 
 use Illuminate\Support\Facades\Schedule;
 
-// Generate AI-powered news every 30 minutes to maximize free daily quota
-Schedule::job(new \App\Jobs\GenerateNewsJob)->everyThirtyMinutes()->withoutOverlapping(30);
+// Generate AI-powered news every 3 hours (8 articles/day) to balance fresh coverage with API quota efficiency
+Schedule::job(new \App\Jobs\GenerateNewsJob)->everyThreeHours()->withoutOverlapping(60);
 
 // Schedule weekly newsletter
 Schedule::command('newsletter:send-weekly')->weeklyOn(5, '09:00');
