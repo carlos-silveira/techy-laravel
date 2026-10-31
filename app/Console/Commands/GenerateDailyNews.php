@@ -9,6 +9,7 @@ use App\Services\NewsService;
 use App\Services\JinaReaderService;
 use App\Services\GeminiService;
 use App\Services\FactCheckService;
+use App\Services\ImageService;
 use App\Models\Article;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;

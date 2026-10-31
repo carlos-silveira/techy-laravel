@@ -1,3 +1,24 @@
+## [2026-10-31] - Fix 7-Day News Generation Stoppage: Restore ImageService Binding in GenerateDailyNews
+
+### Context & Root Cause Analysis
+- **Problem**: News generation stopped completely for 7 days (last article created on 2026-10-23T19:02:33Z, ID 1209). Scheduled cron jobs and manual triggers failed to save any new articles to the database.
+- **Root Cause**:
+  - In commit `f6abc37` (2026-10-23), `ImageService` was integrated into `app/Console/Commands/GenerateDailyNews.php` to provide brand-safe cover image selection, high-res upgrades, and logo/badge purging.
+  - Line 197 invoked `$imageService = app(ImageService::class);`, but the file was missing `use App\Services\ImageService;` at the top of the file.
+  - Since `GenerateDailyNews` belongs to namespace `App\Console\Commands`, PHP and Laravel's Service Container attempted to resolve `App\Console\Commands\ImageService`.
+  - When the scheduler or queue job executed `news:generate-daily`, the command completed signal ingestion, AI drafting, and metadata generation, but immediately threw `BindingResolutionException: Target class [App\Console\Commands\ImageService] does not exist.` at line 197.
+  - Because this exception occurred right before `Article::create(...)` (line 208), the drafted article was discarded and never committed to the database.
+
+### Added & Changed
+- **`app/Console/Commands/GenerateDailyNews.php`**:
+  - Added `use App\Services\ImageService;` to imports.
+- **`tests/Unit/GenerateDailyNewsTest.php`**:
+  - Added unit test suite verifying container dependency resolution for all services (`ImageService`, `FactCheckService`, `SourceSearchService`, `GeminiService`, `NewsService`, `JinaReaderService`) and asserting strict class namespace integrity.
+
+### Verified
+- `php artisan test --filter=GenerateDailyNewsTest`: 100% pass (2 tests, 9 assertions).
+- `npm run build`: Zero errors; client and SSR bundles built cleanly.
+
 ## [2026-10-26] - Fix Google Search Console Indexation Collapse, Duplicate Head Tags, and Trailing Slash Redirect Leaks
 
 ### Context & Root Cause Analysis
